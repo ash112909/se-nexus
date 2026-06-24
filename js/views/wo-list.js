@@ -35,6 +35,7 @@ function render_wo_list(el) {
 .wol-priority-med { display: inline-flex; font-size: 11px; font-weight: 700; color: #854F0B; }
 .wol-priority-low { display: inline-flex; font-size: 11px; font-weight: 700; color: #3B6D11; }
 .wol-arrow { color: #C0BAB3; font-size: 14px; }
+.wol-empty { padding: 48px 24px; text-align: center; color: #9CA3AF; font-size: 13px; }
 .wol-summary-bar { display: flex; gap: 12px; margin-bottom: 20px; }
 .wol-summary-card { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 10px; padding: 14px 18px; flex: 1; }
 .wol-summary-val { font-size: 22px; font-weight: 700; color: #111318; letter-spacing: -0.5px; }
