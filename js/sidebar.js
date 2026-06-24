@@ -14,7 +14,7 @@ function buildSidebar(activeItem) {
       <div class="sb-section-label">My work</div>
       <div class="sb-item ${activeItem==='dashboard'?'active':''}" onclick="sendPrompt('Go back to dashboard')"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
       <div class="sb-item ${activeItem==='wo'?'active':''}" onclick="sendPrompt('Show me the Work Order detail view for WO #100094')"><i class="ti ti-clipboard-list"></i> Work orders <span class="sb-badge">2</span></div>
-      <div class="sb-item"><i class="ti ti-history"></i> Order history</div>
+      <div class="sb-item ${activeItem==='order-history'?'active':''}" onclick="sendPrompt('Open order history')"><i class="ti ti-history"></i> Order history</div>
       <div class="sb-section-label">Parts</div>
       <div class="sb-item ${activeItem==='parts'?'active':''}" onclick="sendPrompt('Open Parts Search scoped to WO #100094, Skyjack SJIII 3219 — diagram view, hydraulic lift cylinder')"><i class="ti ti-search"></i> Search parts</div>
       <div class="sb-item"><i class="ti ti-truck-delivery"></i> Tracking</div>
@@ -26,7 +26,7 @@ function buildSidebar(activeItem) {
     <div class="sb-footer">
       <div class="sb-avatar">JW</div>
       <div><div class="sb-user-name">James W.</div><div class="sb-user-role">Fleet Mechanic</div></div>
-      <i class="ti ti-logout sb-logout"></i>
+      <i class="ti ti-logout sb-logout" onclick="sendPrompt('show login')" style="cursor:pointer;"></i>
     </div>
   </div>`;
 }
