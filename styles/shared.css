@@ -1,5 +1,5 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
-.shell { display: flex; min-height: 100vh; background: #F5F2EE; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; }
+.shell { display: flex; width: 100%; min-height: 100vh; background: #F5F2EE; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; }
 .sidebar { width: 220px; min-width: 220px; background: #1E1E1E; display: flex; flex-direction: column; }
 .sb-fleet { padding: 20px 18px 16px; border-bottom: 1px solid #2A2A2A; display: flex; align-items: center; gap: 10px; }
 .sb-fleet-icon { width: 32px; height: 32px; background: #F5A623; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
