@@ -30,9 +30,9 @@ const Router = (() => {
     const p = prompt.toLowerCase();
     if (p.includes('dashboard')) { navigate('dashboard'); }
     else if (p.includes('go to login') || p.includes('show login') || p === 'login') { navigate('login'); }
-    else if (p.includes('order history') || p.includes('order detail') || p.includes('tracking')) { navigate('order-history'); }
-    else if (p.includes('work order detail') || p.includes('wo #100094') || p.includes('wo #100102')) { navigate('wo-detail'); }
+    else if (p.includes('order history') || p.includes('tracking')) { navigate('order-history'); }
     else if (p.includes('parts search') || p.includes('search parts') || p.includes('diagram')) { navigate('parts-search'); }
+    else if (p.includes('work order') || p.includes('wo #100094') || p.includes('wo #100102')) { navigate('wo-detail'); }
     else if (p.includes('diagnostic')) { navigate('diagnostics'); }
     else if (p.includes('manual') || p.includes('doc')) { navigate('manuals'); }
     else if (p.includes('recommended')) { navigate('recommended'); }
