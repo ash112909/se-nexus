@@ -4,6 +4,7 @@ const Router = (() => {
   const views = {
     'login': 'view-login',
     'dashboard': 'view-dashboard',
+    'wo-list': 'view-wo-list',
     'wo-detail': 'view-wo-detail',
     'parts-search': 'view-parts-search',
     'order-history': 'view-order-history',
@@ -32,7 +33,8 @@ const Router = (() => {
     else if (p.includes('go to login') || p.includes('show login') || p === 'login') { navigate('login'); }
     else if (p.includes('order history') || p.includes('tracking')) { navigate('order-history'); }
     else if (p.includes('parts search') || p.includes('search parts') || p.includes('diagram')) { navigate('parts-search'); }
-    else if (p.includes('work order') || p.includes('wo #100094') || p.includes('wo #100102')) { navigate('wo-detail'); }
+    else if (p.includes('wo #100094') || p.includes('wo #100102') || p.includes('work order detail')) { navigate('wo-detail'); }
+    else if (p.includes('work order') || p.includes('open wo') || p.includes('wo list')) { navigate('wo-list'); }
     else if (p.includes('diagnostic')) { navigate('diagnostics'); }
     else if (p.includes('manual') || p.includes('doc')) { navigate('manuals'); }
     else if (p.includes('recommended')) { navigate('recommended'); }

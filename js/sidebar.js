@@ -13,7 +13,7 @@ function buildSidebar(activeItem) {
     <div class="sb-nav">
       <div class="sb-section-label">My work</div>
       <div class="sb-item ${activeItem==='dashboard'?'active':''}" onclick="sendPrompt('Go back to dashboard')"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
-      <div class="sb-item ${activeItem==='wo'?'active':''}" onclick="sendPrompt('Show me the Work Order detail view for WO #100094')"><i class="ti ti-clipboard-list"></i> Work orders <span class="sb-badge">2</span></div>
+      <div class="sb-item ${activeItem==='wo'?'active':''}" onclick="sendPrompt('Open work orders list')"><i class="ti ti-clipboard-list"></i> Work orders <span class="sb-badge">2</span></div>
       <div class="sb-item ${activeItem==='order-history'?'active':''}" onclick="sendPrompt('Open order history')"><i class="ti ti-history"></i> Order history</div>
       <div class="sb-section-label">Parts</div>
       <div class="sb-item ${activeItem==='parts'?'active':''}" onclick="sendPrompt('Open Parts Search scoped to WO #100094, Skyjack SJIII 3219 — diagram view, hydraulic lift cylinder')"><i class="ti ti-search"></i> Search parts</div>
