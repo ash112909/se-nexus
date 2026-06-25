@@ -31,7 +31,7 @@ const Router = (() => {
     const p = prompt.toLowerCase();
     if (p.includes('dashboard')) { navigate('dashboard'); }
     else if (p.includes('go to login') || p.includes('show login') || p === 'login') { navigate('login'); }
-    else if (p.includes('order history') || p.includes('tracking')) { navigate('order-history'); }
+    else if (p.includes('order history')) { navigate('order-history'); }
     else if (p.includes('parts search') || p.includes('search parts') || p.includes('diagram')) { navigate('parts-search'); }
     else if (p.includes('wo #100094') || p.includes('wo #100102') || p.includes('work order detail')) { navigate('wo-detail'); }
     else if (p.includes('work order') || p.includes('open wo') || p.includes('wo list')) { navigate('wo-list'); }
