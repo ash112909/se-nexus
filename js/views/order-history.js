@@ -136,43 +136,43 @@ function render_order_history(el) {
             </tr>
           </thead>
           <tbody id="oh-tbody">
-            <tr onclick="ohOpenDetail('ord-sub-1')" id="oh-row-ord-sub-1">
+            <tr data-status="submitted" onclick="ohOpenDetail('ord-sub-1')" id="oh-row-ord-sub-1">
               <td><strong style="color:#111318;">Skyjack</strong></td><td style="font-size:11px;color:#9CA3AF;">SKJ-DIST</td><td>Jun 20, 2026</td><td>James W.</td><td>Hydraulic seals &mdash; WO #100094</td><td>WO #100094 &middot; FL-094</td><td style="font-weight:600;color:#111318;">$268.00</td><td><span class="status-pill pill-submitted">Submitted</span></td><td style="font-size:11px;color:#9CA3AF;">PO-7841</td>
               <td><div class="oh-actions"><button class="oh-action-btn"><i class="ti ti-eye"></i></button><button class="oh-action-btn"><i class="ti ti-dots"></i></button></div></td>
             </tr>
-            <tr onclick="ohOpenDetail(null)">
+            <tr data-status="drafts" onclick="ohOpenDetail(null)">
               <td><strong style="color:#111318;">Grainger</strong></td><td style="font-size:11px;color:#9CA3AF;">GRG-001</td><td>Jun 18, 2026</td><td>James W.</td><td>Filters &amp; consumables</td><td>WO #100102 &middot; FL-102</td><td style="font-weight:600;color:#111318;">$94.50</td><td><span class="status-pill pill-saved">Saved</span></td><td style="font-size:11px;color:#9CA3AF;">&mdash;</td>
               <td><div class="oh-actions"><button class="oh-action-btn"><i class="ti ti-eye"></i></button><button class="oh-action-btn"><i class="ti ti-dots"></i></button></div></td>
             </tr>
-            <tr onclick="ohOpenDetail(null)">
+            <tr data-status="submitted" onclick="ohOpenDetail(null)">
               <td><strong style="color:#111318;">Parker</strong></td><td style="font-size:11px;color:#9CA3AF;">PKR-WD</td><td>Jun 15, 2026</td><td>M. Torres</td><td>Valve kit &mdash; FL-091</td><td>WO #100088 &middot; FL-091</td><td style="font-weight:600;color:#111318;">$145.00</td><td><span class="status-pill pill-delivered">Delivered</span></td><td style="font-size:11px;color:#9CA3AF;">PO-7792</td>
               <td><div class="oh-actions"><button class="oh-action-btn"><i class="ti ti-eye"></i></button><button class="oh-action-btn"><i class="ti ti-dots"></i></button></div></td>
             </tr>
-            <tr onclick="ohOpenDetail(null)">
+            <tr data-status="submitted" onclick="ohOpenDetail(null)">
               <td><strong style="color:#111318;">Skyjack</strong></td><td style="font-size:11px;color:#9CA3AF;">SKJ-DIST</td><td>Jun 12, 2026</td><td>James W.</td><td>Pump seal kit &times;2 &mdash; FL-094</td><td>WO #100094 &middot; FL-094</td><td style="font-weight:600;color:#111318;">$212.00</td><td><span class="status-pill pill-backordered">Backordered</span></td><td style="font-size:11px;color:#9CA3AF;">PO-7801</td>
               <td><div class="oh-actions"><button class="oh-action-btn"><i class="ti ti-eye"></i></button><button class="oh-action-btn"><i class="ti ti-dots"></i></button></div></td>
             </tr>
-            <tr onclick="ohOpenDetail(null)">
+            <tr data-status="review approvals" onclick="ohOpenDetail(null)">
               <td><strong style="color:#111318;">Grainger</strong></td><td style="font-size:11px;color:#9CA3AF;">GRG-001</td><td>Jun 10, 2026</td><td>R. Singh</td><td>Safety equipment restock</td><td>General &middot; Austin</td><td style="font-weight:600;color:#111318;">$330.75</td><td><span class="status-pill pill-review">In review</span></td><td style="font-size:11px;color:#9CA3AF;">&mdash;</td>
               <td><div class="oh-actions"><button class="oh-action-btn"><i class="ti ti-eye"></i></button><button class="oh-action-btn"><i class="ti ti-dots"></i></button></div></td>
             </tr>
-            <tr onclick="ohOpenDetail(null)">
+            <tr data-status="submitted" onclick="ohOpenDetail(null)">
               <td><strong style="color:#111318;">Parker</strong></td><td style="font-size:11px;color:#9CA3AF;">PKR-WD</td><td>Jun 8, 2026</td><td>James W.</td><td>Aftermarket valve PAR-88821</td><td>WO #100094 &middot; FL-094</td><td style="font-weight:600;color:#111318;">$89.00</td><td><span class="status-pill pill-submitted">Submitted</span></td><td style="font-size:11px;color:#9CA3AF;">PO-7789</td>
               <td><div class="oh-actions"><button class="oh-action-btn"><i class="ti ti-eye"></i></button><button class="oh-action-btn"><i class="ti ti-dots"></i></button></div></td>
             </tr>
-            <tr onclick="ohOpenDetail(null)">
+            <tr data-status="submitted" onclick="ohOpenDetail(null)">
               <td><strong style="color:#111318;">Skyjack</strong></td><td style="font-size:11px;color:#9CA3AF;">SKJ-DIST</td><td>Jun 5, 2026</td><td>M. Torres</td><td>Hydraulic hose assembly</td><td>WO #100081 &middot; FL-088</td><td style="font-weight:600;color:#111318;">$174.00</td><td><span class="status-pill pill-delivered">Delivered</span></td><td style="font-size:11px;color:#9CA3AF;">PO-7755</td>
               <td><div class="oh-actions"><button class="oh-action-btn"><i class="ti ti-eye"></i></button><button class="oh-action-btn"><i class="ti ti-dots"></i></button></div></td>
             </tr>
-            <tr onclick="ohOpenDetail(null)">
+            <tr data-status="drafts" onclick="ohOpenDetail(null)">
               <td><strong style="color:#111318;">Grainger</strong></td><td style="font-size:11px;color:#9CA3AF;">GRG-001</td><td>Jun 2, 2026</td><td>R. Singh</td><td>Oil &amp; lubrication kits</td><td>General &middot; Austin</td><td style="font-weight:600;color:#111318;">$58.20</td><td><span class="status-pill pill-saved">Saved</span></td><td style="font-size:11px;color:#9CA3AF;">&mdash;</td>
               <td><div class="oh-actions"><button class="oh-action-btn"><i class="ti ti-eye"></i></button><button class="oh-action-btn"><i class="ti ti-dots"></i></button></div></td>
             </tr>
-            <tr onclick="ohOpenDetail(null)">
+            <tr data-status="submitted" onclick="ohOpenDetail(null)">
               <td><strong style="color:#111318;">Skyjack</strong></td><td style="font-size:11px;color:#9CA3AF;">SKJ-DIST</td><td>May 29, 2026</td><td>James W.</td><td>Drive motor brush kit</td><td>WO #100074 &middot; FL-077</td><td style="font-weight:600;color:#111318;">$122.00</td><td><span class="status-pill pill-delivered">Delivered</span></td><td style="font-size:11px;color:#9CA3AF;">PO-7720</td>
               <td><div class="oh-actions"><button class="oh-action-btn"><i class="ti ti-eye"></i></button><button class="oh-action-btn"><i class="ti ti-dots"></i></button></div></td>
             </tr>
-            <tr onclick="ohOpenDetail(null)">
+            <tr data-status="submitted" onclick="ohOpenDetail(null)">
               <td><strong style="color:#111318;">Parker</strong></td><td style="font-size:11px;color:#9CA3AF;">PKR-WD</td><td>May 25, 2026</td><td>M. Torres</td><td>Cylinder rod seal set</td><td>WO #100069 &middot; FL-071</td><td style="font-weight:600;color:#111318;">$66.40</td><td><span class="status-pill pill-delivered">Delivered</span></td><td style="font-size:11px;color:#9CA3AF;">PO-7708</td>
               <td><div class="oh-actions"><button class="oh-action-btn"><i class="ti ti-eye"></i></button><button class="oh-action-btn"><i class="ti ti-dots"></i></button></div></td>
             </tr>
@@ -289,6 +289,10 @@ function render_order_history(el) {
     document.querySelectorAll('.oh-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
     ohCloseDetail();
+    document.querySelectorAll('#oh-tbody tr').forEach(row => {
+      const status = row.getAttribute('data-status') || '';
+      row.style.display = (tab === 'all' || status.split(' ').includes(tab)) ? '' : 'none';
+    });
   };
 
   window.ohOpenDetail = function(orderId) {
@@ -305,4 +309,7 @@ function render_order_history(el) {
     document.getElementById('oh-detail-panel').style.display = 'none';
     document.querySelectorAll('#oh-tbody tr').forEach(r => r.classList.remove('selected-row'));
   };
+
+  // apply initial tab filter
+  ohSwitchTab('drafts', document.querySelector('.oh-tab.active'));
 }
