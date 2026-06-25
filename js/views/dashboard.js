@@ -134,7 +134,7 @@ function render_dashboard(el) {
       <div style="margin-bottom:20px;"></div>
       <div class="section-label">Quick actions</div>
       <div class="grid-2">
-        <div class="action-card">
+        <div class="action-card" onclick="sendPrompt('Open order history')">
           <div class="action-card-icon icon-blue"><i class="ti ti-package"></i></div>
           <div class="action-card-title">Previous orders &amp; tracking</div>
           <div class="action-card-sub">View history and delivery status</div>
@@ -156,7 +156,7 @@ function render_dashboard(el) {
           <div class="action-card-title">Diagnostic assistant</div>
           <div class="action-card-sub">Fault codes &amp; troubleshooting</div>
         </div>
-        <div class="action-card">
+        <div class="action-card" onclick="sendPrompt('Open order history')">
           <div class="action-card-icon icon-amber"><i class="ti ti-truck-delivery"></i></div>
           <div class="action-card-title">Delivery tracking</div>
           <div class="action-card-sub">Live shipment status</div>
