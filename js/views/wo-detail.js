@@ -221,7 +221,7 @@ function render_wo_detail(el) {
 </div>`;
   }
 
-  renderWO();
+  el.innerHTML = renderWO();
 
   // Wire up status change
   const statusSel = document.getElementById('wod-status-select');
