@@ -1,4 +1,69 @@
 function render_dashboard(el) {
+  const activeWOs = Store.getWorkOrders('active');
+  const activeCount = activeWOs.length;
+
+  function machineIcon(machine) {
+    const m = (machine || '').toLowerCase();
+    if (m.includes('skyjack') || m.includes('scissor')) return 'ti-crane';
+    if (m.includes('cat') || m.includes('excavator')) return 'ti-backhoe';
+    if (m.includes('toyota') || m.includes('forklift')) return 'ti-forklift';
+    if (m.includes('bobcat')) return 'ti-bulldozer';
+    return 'ti-tool';
+  }
+
+  function priorityPill(priority) {
+    if (priority === 'high') return '<span class="pill pill-high">High</span>';
+    if (priority === 'medium') return '<span class="pill pill-med">Medium</span>';
+    return '<span class="pill pill-low">Low</span>';
+  }
+
+  function warrantyBadge(wo) {
+    if (wo.warranty && wo.warranty.active && wo.warranty.expiry) {
+      return `<span class="wo-warranty"><i class="ti ti-shield-check"></i> Warranty · ${wo.warranty.expiry}</span>`;
+    }
+    return `<span class="wo-warranty expired"><i class="ti ti-shield-off"></i> Warranty expired</span>`;
+  }
+
+  function statusPill(wo) {
+    if (wo.partIds && wo.partIds.length > 0) return '<span class="pill pill-ordered">Parts ordered</span>';
+    return '<span class="pill pill-open">Open</span>';
+  }
+
+  function renderWOCard(wo, i) {
+    const hasparts = wo.partIds && wo.partIds.length > 0;
+    const cardClass = i === 0 ? 'wo-active-card' : 'wo-card';
+    const btnHtml = hasparts
+      ? `<button class="wo-action-btn" onclick="event.stopPropagation();sendPrompt('Show me the Work Order detail view for WO #${wo.id}')">Open WO <i class="ti ti-arrow-right" style="font-size:12px;"></i></button>`
+      : `<button class="wo-action-btn-ghost" onclick="event.stopPropagation();sendPrompt('Open Parts Search scoped to WO #${wo.id}')">Search parts</button>`;
+    const statsHtml = hasparts
+      ? `<div class="wo-stat"><i class="ti ti-package"></i> <strong>${wo.partIds.length}</strong> parts ordered</div>`
+      : `<div class="wo-stat"><i class="ti ti-shopping-cart"></i> <strong>No parts</strong> ordered yet</div>`;
+
+    return `
+      <div class="${cardClass}" onclick="sendPrompt('Show me the Work Order detail view for WO #${wo.id}')">
+        <div class="wo-header">
+          ${statusPill(wo)}
+          <span class="wo-num">#${wo.id}</span>
+          <span class="wo-priority">${priorityPill(wo.priority)}</span>
+        </div>
+        <div class="wo-body">
+          <div class="wo-machine-thumb"><i class="ti ${machineIcon(wo.machine)}"></i></div>
+          <div>
+            <div class="wo-machine-name">${wo.machine} · Asset ${wo.asset}</div>
+            <div class="wo-machine-meta">
+              <span class="wo-machine-issue">${wo.issue}</span>
+              ${warrantyBadge(wo)}
+            </div>
+          </div>
+        </div>
+        <div class="wo-footer">
+          ${statsHtml}
+          <div class="wo-stat"><i class="ti ti-calendar"></i> Opened <strong>${wo.opened}</strong></div>
+          ${btnHtml}
+        </div>
+      </div>`;
+  }
+
   el.innerHTML = `
 <style>
 .topbar-search { flex: 1; max-width: 380px; height: 32px; background: #2A2A2A; border: 1px solid #333; border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 0 10px; color: #5C6070; font-size: 13px; cursor:text; }
@@ -24,16 +89,17 @@ function render_dashboard(el) {
 .pill-open { background: #E6F1FB; color: #185FA5; }
 .pill-high { background: #FCEBEB; color: #A32D2D; }
 .pill-med { background: #FAEEDA; color: #854F0B; }
+.pill-low { background: #EAF3DE; color: #3B6D11; }
 .wo-num { font-size: 12px; color: #9CA3AF; font-weight: 500; }
 .wo-priority { margin-left: auto; }
 .wo-body { display: flex; align-items: center; gap: 12px; }
 .wo-machine-thumb { width: 48px; height: 48px; background: #F5F2EE; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #9CA3AF; font-size: 22px; }
 .wo-machine-name { font-size: 14px; font-weight: 600; color: #111318; margin-bottom: 2px; }
-.wo-machine-meta { display: flex; align-items: center; gap: 10px; }
+.wo-machine-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .wo-machine-issue { font-size: 13px; color: #7A7F8E; }
 .wo-warranty { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: #0F6E56; background: #E1F5EE; border-radius: 999px; padding: 2px 7px; }
 .wo-warranty.expired { color: #5F5E5A; background: #F1EFE8; }
-.wo-footer { display: flex; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 0.5px solid #F0ECE8; gap: 16px; }
+.wo-footer { display: flex; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 0.5px solid #F0ECE8; gap: 16px; flex-wrap: wrap; }
 .wo-stat { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #9CA3AF; }
 .wo-stat strong { color: #3A3D4A; font-weight: 600; }
 .wo-action-btn { margin-left: auto; background: #F5A623; border: none; border-radius: 7px; padding: 5px 13px; font-size: 12px; font-weight: 600; color: #1A1200; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: inherit; }
@@ -76,7 +142,7 @@ function render_dashboard(el) {
     <div class="content">
       <div class="greeting">
         <div class="greeting-top">Good morning, James</div>
-        <div class="greeting-sub">Monday, June 22 · Austin Branch · 2 open work orders</div>
+        <div class="greeting-sub">Monday, Jun 26 · Austin Branch · ${activeCount} active work order${activeCount !== 1 ? 's' : ''}</div>
       </div>
       <div class="ai-strip" onclick="sendPrompt('Open diagnostic assistant')">
         <div class="ai-icon"><i class="ti ti-sparkles"></i></div>
@@ -87,50 +153,7 @@ function render_dashboard(el) {
         <i class="ti ti-arrow-right ai-arrow"></i>
       </div>
       <div class="section-label">Active work orders</div>
-      <div class="wo-active-card" onclick="sendPrompt('Show me the Work Order detail view for WO #100094')">
-        <div class="wo-header">
-          <span class="pill pill-ordered">Parts ordered</span>
-          <span class="wo-num">#100094</span>
-          <span class="pill pill-high wo-priority">High</span>
-        </div>
-        <div class="wo-body">
-          <div class="wo-machine-thumb"><i class="ti ti-crane"></i></div>
-          <div>
-            <div class="wo-machine-name">Skyjack SJIII 3219 · Asset FL-094</div>
-            <div class="wo-machine-meta">
-              <span class="wo-machine-issue">Scissor lift won't elevate — hydraulic fault</span>
-              <span class="wo-warranty"><i class="ti ti-shield-check"></i> Warranty · Sep 2027</span>
-            </div>
-          </div>
-        </div>
-        <div class="wo-footer">
-          <div class="wo-stat"><i class="ti ti-package"></i> <strong>3</strong> parts ordered</div>
-          <div class="wo-stat"><i class="ti ti-clock"></i> Est. arrival <strong>today</strong></div>
-          <button class="wo-action-btn" onclick="event.stopPropagation();sendPrompt('Show me the Work Order detail view for WO #100094')">Open WO <i class="ti ti-arrow-right" style="font-size:12px;"></i></button>
-        </div>
-      </div>
-      <div class="wo-card" onclick="sendPrompt('Show me the Work Order detail view for WO #100102')">
-        <div class="wo-header">
-          <span class="pill pill-open">Open</span>
-          <span class="wo-num">#100102</span>
-          <span class="pill pill-med wo-priority">Medium</span>
-        </div>
-        <div class="wo-body">
-          <div class="wo-machine-thumb"><i class="ti ti-backhoe"></i></div>
-          <div>
-            <div class="wo-machine-name">Cat 320 Excavator · Asset FL-017</div>
-            <div class="wo-machine-meta">
-              <span class="wo-machine-issue">Track tension out of spec — right side</span>
-              <span class="wo-warranty expired"><i class="ti ti-shield-off"></i> Warranty expired</span>
-            </div>
-          </div>
-        </div>
-        <div class="wo-footer">
-          <div class="wo-stat"><i class="ti ti-shopping-cart"></i> <strong>No parts</strong> ordered yet</div>
-          <div class="wo-stat"><i class="ti ti-calendar"></i> Opened <strong>today</strong></div>
-          <button class="wo-action-btn-ghost" onclick="event.stopPropagation();sendPrompt('Open Parts Search scoped to WO #100102')">Search parts</button>
-        </div>
-      </div>
+      ${activeWOs.length ? activeWOs.map((wo, i) => renderWOCard(wo, i)).join('') : '<div style="color:#9CA3AF;font-size:13px;padding:12px 0;">No active work orders.</div>'}
       <div style="margin-bottom:20px;"></div>
       <div class="section-label">Quick actions</div>
       <div class="grid-2">

@@ -13,7 +13,10 @@ const Router = (() => {
     'recommended': 'view-recommended',
   };
 
-  function navigate(view) {
+  Router.context = {};
+
+  function navigate(view, ctx) {
+    Router.context = ctx || {};
     if (current) {
       document.getElementById(views[current])?.classList.remove('active');
     }
@@ -29,11 +32,18 @@ const Router = (() => {
   // sendPrompt is referenced by all the HTML snippets' onclick handlers
   window.sendPrompt = function(prompt) {
     const p = prompt.toLowerCase();
+
+    // Extract WO ID from strings like "WO #100094" or "wo #100094"
+    const woMatch = prompt.match(/WO\s*#?(\d{5,6})/i);
+    const woId = woMatch ? parseInt(woMatch[1]) : null;
+
     if (p.includes('dashboard')) { navigate('dashboard'); }
     else if (p.includes('go to login') || p.includes('show login') || p === 'login') { navigate('login'); }
     else if (p.includes('order history')) { navigate('order-history'); }
     else if (p.includes('parts search') || p.includes('search parts') || p.includes('diagram')) { navigate('parts-search'); }
-    else if (p.includes('wo #100094') || p.includes('wo #100102') || p.includes('work order detail')) { navigate('wo-detail'); }
+    else if ((p.includes('work order detail') || p.includes('wo #') || p.includes('wo detail')) && woId) {
+      navigate('wo-detail', { woId });
+    }
     else if (p.includes('work order') || p.includes('open wo') || p.includes('wo list')) { navigate('wo-list'); }
     else if (p.includes('diagnostic')) { navigate('diagnostics'); }
     else if (p.includes('manual') || p.includes('doc')) { navigate('manuals'); }
@@ -41,5 +51,8 @@ const Router = (() => {
     else { navigate('dashboard'); }
   };
 
-  return { navigate };
+  return { navigate, get context() { return Router.context; } };
 })();
+
+// expose context at top level
+Router.context = {};

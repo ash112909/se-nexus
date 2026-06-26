@@ -211,5 +211,74 @@ function render_diagnostics(el) {
     if (isRecording) { btn.classList.add('recording'); input.placeholder = 'Listening…'; setTimeout(() => { isRecording = false; btn.classList.remove('recording'); input.placeholder = 'Describe a fault, enter a code, or ask a question…'; input.value = "The scissor lift won't go up, pump sounds like it's running but nothing moves"; }, 2500); }
     else { btn.classList.remove('recording'); input.placeholder = 'Describe a fault, enter a code, or ask a question…'; }
   };
-  window.diagAddToCart = function(btn, cardId) { const card = document.getElementById(cardId); card.classList.add('in-cart'); btn.outerHTML = '<span class="in-cart-badge">In cart</span>'; };
+  window.diagAddToCart = function(btn, cardId) {
+    const card = document.getElementById(cardId);
+    card.classList.add('in-cart');
+    // find a part from Store that matches a part num in the card
+    const partNumEl = card.querySelector('[data-partnum]');
+    if (partNumEl) {
+      const part = Store.getParts(partNumEl.dataset.partnum, '')[0];
+      if (part) Store.addToCart(part);
+    }
+    btn.outerHTML = '<span class="in-cart-badge">In cart</span>';
+  };
+
+  const CANNED = [
+    'Based on fault code **HYD-04** and your description, this is consistent with an internal seal failure in the lift cylinder. I recommend starting with the cylinder rod wiper seal (SKJ-103100) per Service Bulletin SB-2847.',
+    'The hydraulic pump appears to be running (audible) but pressure is not reaching the cylinder. Check the pressure relief valve (SKJ-103278) — it may be stuck open, bypassing pressure back to tank.',
+    'For the Cat 320 track tension issue (WO #100102): track tension spec is 300–350mm sag measured at center span. Use grease cylinder CAT-TRK-7201 to adjust. Recheck after first hour of operation.',
+    'Toyota 8FGU25 mast chain elongation: maximum allowable stretch is 3% over nominal pitch. Measure 10-link span and compare to spec. If exceeded, replace chain set TOY-MCH-114 — do not re-use worn chains.',
+    'For the Bobcat S650 hydraulic coupler leak (WO #100081): inspect the quick coupler O-ring (BOB-QC-520 seal kit). Clean seating surface before installing new seals. Torque to 45 ft-lbs.',
+    'Refer to SJIII 3219 Service Manual Section 7.4 for the complete hydraulic system bleed procedure. After seal replacement, bleed air using the bleed screws (SKJ-103601) — 3 cycles at idle before loading.',
+    'Based on ambient temperature data for Austin TX in June (avg 98°F), I recommend switching to high-viscosity hydraulic fluid ISO 68 (SKJ-HF068-1G) for the summer months to prevent thinning at operating temperature.',
+  ];
+  let cannedIdx = 0;
+
+  function appendMessage(role, text) {
+    const chat = document.getElementById('diag-chat-messages');
+    if (!chat) return;
+    const div = document.createElement('div');
+    div.style.cssText = role === 'user' ? 'display:flex;justify-content:flex-end;margin-bottom:12px;' : 'display:flex;gap:10px;margin-bottom:16px;';
+    if (role === 'user') {
+      div.innerHTML = `<div style="max-width:70%;background:#F5A623;color:#1A1200;border-radius:12px 12px 4px 12px;padding:10px 14px;font-size:13px;font-weight:500;">${text}</div>`;
+    } else {
+      const md = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      div.innerHTML = `<div style="width:32px;height:32px;background:#F5A623;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#1A1200;flex-shrink:0;"><i class="ti ti-sparkles"></i></div><div style="flex:1;max-width:80%;background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:4px 12px 12px 12px;padding:12px 14px;font-size:13px;line-height:1.6;color:#111318;">${md}</div>`;
+    }
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function sendDiagMessage() {
+    const input = document.getElementById('diag-chat-input');
+    const text = (input.value || '').trim();
+    if (!text) return;
+    input.value = '';
+    input.style.height = 'auto';
+    appendMessage('user', text);
+    Store.addDiagnosticMessage({ role: 'user', text });
+    setTimeout(() => {
+      const reply = CANNED[cannedIdx % CANNED.length];
+      cannedIdx++;
+      appendMessage('ai', reply);
+      Store.addDiagnosticMessage({ role: 'ai', text: reply });
+    }, 800);
+  }
+
+  const sendBtn = el.querySelector('.send-btn');
+  if (sendBtn) sendBtn.addEventListener('click', sendDiagMessage);
+
+  const chatInput = document.getElementById('diag-chat-input');
+  if (chatInput) {
+    chatInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendDiagMessage(); }
+    });
+  }
+
+  el.querySelectorAll('.input-hint-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const input = document.getElementById('diag-chat-input');
+      if (input) { input.value = chip.getAttribute('onclick') ? chip.textContent : input.value; sendDiagMessage(); }
+    });
+  });
 }

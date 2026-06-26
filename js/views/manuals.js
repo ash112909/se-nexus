@@ -147,4 +147,38 @@ function render_manuals(el) {
     </div>
   </div>
 </div>`;
+
+  // Wire up search input
+  const searchInput = el.querySelector('input[type="text"], input[placeholder*="search"], input[placeholder*="Search"]');
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      const q = this.value.toLowerCase();
+      el.querySelectorAll('.doc-card, .doc-list-item').forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = (!q || text.includes(q)) ? '' : 'none';
+      });
+    });
+  }
+
+  // Wire up View/Download buttons to show modal
+  el.querySelectorAll('.doc-btn').forEach(btn => {
+    if (btn.onclick || btn.getAttribute('onclick')) return;
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const card = btn.closest('.doc-card, .doc-list-item');
+      const title = card ? (card.querySelector('.doc-title, .doc-list-title') || {}).textContent : 'Document';
+      const isDownload = btn.textContent.trim().toLowerCase().includes('download');
+      Modal.show({
+        title: isDownload ? 'Download started' : 'Viewing document',
+        body: `<div style="text-align:center;padding:20px 0;">
+          <div style="width:56px;height:56px;background:#EAF3DE;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;color:#3B6D11;margin:0 auto 14px;">
+            <i class="ti ti-${isDownload?'download':'file-text'}"></i>
+          </div>
+          <div style="font-size:14px;font-weight:600;color:#111318;margin-bottom:6px;">${title}</div>
+          <div style="font-size:13px;color:#7A7F8E;">${isDownload?'Your download has started. Check your downloads folder.':'Document viewer would open here in a full implementation.'}</div>
+        </div>`,
+        actions: [{ label: 'OK', primary: true, onClick: Modal.close }]
+      });
+    });
+  });
 }

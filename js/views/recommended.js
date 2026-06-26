@@ -127,8 +127,66 @@ function render_recommended(el) {
           <div class="part-card"><div class="part-card-top"><div class="part-thumb"><i class="ti ti-droplet"></i></div><div class="part-card-info"><div class="part-card-name">Hydraulic fluid — high-temp ISO 68</div><div class="part-card-num">SKJ-HF068-1G <span class="oem-badge">OEM</span></div></div></div><div class="part-card-reason"><i class="ti ti-sun" style="color:#0F6E56;"></i> High-viscosity fluid recommended above 95°F ambient</div><div class="part-card-bottom"><div><div class="part-card-price">$32.00</div><div class="part-card-avail"><div class="avail-dot amber"></div><span class="avail-label amber">Low stock (2)</span></div></div><button class="add-cart-btn"><i class="ti ti-shopping-cart" style="font-size:12px;"></i> Add to cart</button></div></div>
         </div>
       </div>
-      <div class="cart-strip"><i class="ti ti-shopping-cart" style="font-size:18px;color:#F5A623;"></i><div style="flex:1;"><div class="cart-strip-label">2 parts in cart · $210.00</div><div class="cart-strip-sub">WO #100094 · Skyjack SJIII 3219</div></div><button class="cart-btn">View cart</button></div>
+      <div class="cart-strip" id="rec-cart-strip" style="display:none;"><i class="ti ti-shopping-cart" style="font-size:18px;color:#F5A623;"></i><div style="flex:1;"><div class="cart-strip-label" id="rec-cart-label">0 parts in cart</div><div class="cart-strip-sub">Click "View cart" to review &amp; submit</div></div><button class="cart-btn" id="rec-cart-btn">View cart</button></div>
     </div>
   </div>
 </div>`;
+
+  function updateCartStrip() {
+    const cart = Store.getCart();
+    const strip = document.getElementById('rec-cart-strip');
+    const label = document.getElementById('rec-cart-label');
+    if (!strip) return;
+    if (cart.length > 0) {
+      strip.style.display = 'flex';
+      const total = cart.reduce((s, i) => s + (i.price * (i.qty || 1)), 0);
+      label.textContent = `${cart.length} part${cart.length!==1?'s':''} in cart · $${total.toFixed(2)}`;
+    } else {
+      strip.style.display = 'none';
+    }
+  }
+
+  updateCartStrip();
+
+  el.querySelectorAll('.add-cart-btn, .reorder-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const card = btn.closest('.part-card, .reorder-card');
+      if (!card) return;
+      const nameEl = card.querySelector('.part-card-name, .reorder-name');
+      const numEl = card.querySelector('.part-card-num, .reorder-meta span:first-child');
+      const priceEl = card.querySelector('.part-card-price, .reorder-price');
+      const name = nameEl ? nameEl.textContent.trim() : 'Part';
+      const partNum = numEl ? numEl.textContent.replace(/OEM|Aftermarket/g, '').trim() : 'GEN';
+      const price = priceEl ? parseFloat(priceEl.textContent.replace(/[^0-9.]/g,'')) : 0;
+      const part = Store.getParts(partNum, '')[0] || { id: partNum, partNum, description: name, price, vendor: 'Various', oemOnly: false, inStock: true, category: 'General' };
+      Store.addToCart(part);
+      btn.innerHTML = '<i class="ti ti-check" style="font-size:12px;"></i> Added';
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+      updateCartStrip();
+    });
+  });
+
+  const cartBtn = document.getElementById('rec-cart-btn');
+  if (cartBtn) {
+    cartBtn.addEventListener('click', () => {
+      const cart = Store.getCart();
+      const wos = Store.getWorkOrders('all');
+      Modal.show({
+        title: 'Cart', wide: true,
+        body: `<div style="margin-bottom:12px;">${cart.map(i=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid #F0ECE8;"><div style="flex:1;font-size:13px;color:#111318;">${i.description}</div><div style="font-size:12px;color:#9CA3AF;">${i.partNum}</div><div style="font-size:13px;font-weight:600;">$${i.price.toFixed(2)}</div></div>`).join('')}</div>
+        <div><label style="font-size:12px;color:#7A7F8E;display:block;margin-bottom:4px;">Assign to Work Order</label><select id="rc-wo" style="width:100%;border:1px solid #E2DDD8;border-radius:7px;padding:8px 12px;font-family:inherit;font-size:13px;"><option value="">No WO</option>${wos.map(w=>`<option value="${w.id}">WO #${w.id} — ${w.machine}</option>`).join('')}</select></div>`,
+        actions: [{
+          label: 'Submit Order', primary: true, onClick: () => {
+            const woId = document.getElementById('rc-wo')?.value;
+            Store.submitCart(woId || null);
+            Modal.close();
+            updateCartStrip();
+            Modal.show({ title: 'Order submitted', body: '<div style="text-align:center;padding:16px 0;"><div style="font-size:40px;margin-bottom:10px;">✓</div><div style="font-size:14px;color:#111318;">Your order has been submitted successfully.</div></div>', actions: [{ label: 'View order history', primary: true, onClick: () => { Modal.close(); sendPrompt('Open order history'); } }, { label: 'Close', onClick: Modal.close }] });
+          }
+        }, { label: 'Cancel', onClick: Modal.close }]
+      });
+    });
+  }
 }
