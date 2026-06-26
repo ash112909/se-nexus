@@ -13,10 +13,10 @@ const Router = (() => {
     'recommended': 'view-recommended',
   };
 
-  Router.context = {};
+  let _context = {};
 
   function navigate(view, ctx) {
-    Router.context = ctx || {};
+    _context = ctx || {};
     if (current) {
       document.getElementById(views[current])?.classList.remove('active');
     }
@@ -51,8 +51,5 @@ const Router = (() => {
     else { navigate('dashboard'); }
   };
 
-  return { navigate, get context() { return Router.context; } };
+  return { navigate, get context() { return _context; } };
 })();
-
-// expose context at top level
-Router.context = {};
