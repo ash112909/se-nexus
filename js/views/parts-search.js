@@ -242,7 +242,7 @@ function render_parts_search(el) {
         { icon:'ti-bell',      label:'Bulletins & Alerts' },
         { icon:'ti-star',      label:'Recommended Service Parts' },
       ],
-      description: 'Caterpillar is the world's largest manufacturer of construction and mining equipment. Mid-County Rental sources genuine Cat parts for our excavator and dozer fleet.',
+      description: "Caterpillar is the world's largest manufacturer of construction and mining equipment. Mid-County Rental sources genuine Cat parts for our excavator and dozer fleet.",
       features: [
         { ok:true,  label:'Parts Lookup' },
         { ok:true,  label:'Parts Diagrams' },
