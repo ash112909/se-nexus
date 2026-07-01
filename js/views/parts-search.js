@@ -156,6 +156,199 @@ function render_parts_search(el) {
     </svg>`;
   }
 
+  // ── Supplier landing-page profiles ────────────────────────────────────────
+  const SUPPLIER_PROFILES = {
+    'SKJ': {
+      displayName: 'Skyjack',
+      tagline: 'Aerial Work Platforms',
+      color: '#F5A623',
+      accentText: '#1A1200',
+      logo: `<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="180" height="48" rx="4" fill="#1E1E1E"/>
+        <text x="14" y="32" font-size="22" font-weight="800" font-family="Inter,sans-serif" fill="#F5A623" letter-spacing="-0.5">SKYJACK</text>
+      </svg>`,
+      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="800" height="120" fill="#1A1A1A"/>
+        <rect x="0" y="0" width="800" height="120" fill="url(#skj-grad)"/>
+        <defs><linearGradient id="skj-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#1A1A1A"/><stop offset="100%" stop-color="#2A2210"/></linearGradient></defs>
+        <text x="28" y="52" font-size="32" font-weight="800" font-family="Inter,sans-serif" fill="#F5A623" letter-spacing="-1">SKYJACK</text>
+        <text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#8A8878" letter-spacing="2">AERIAL WORK PLATFORMS</text>
+        <rect x="28" y="88" width="64" height="3" rx="1.5" fill="#F5A623"/>
+        <rect x="480" y="20" width="120" height="80" rx="6" fill="#232010" stroke="#3A3010" stroke-width="1"/>
+        <rect x="508" y="36" width="8" height="48" rx="2" fill="#F5A623" opacity=".6"/>
+        <rect x="524" y="24" width="8" height="60" rx="2" fill="#F5A623" opacity=".8"/>
+        <rect x="540" y="44" width="8" height="40" rx="2" fill="#F5A623" opacity=".5"/>
+        <rect x="556" y="30" width="8" height="54" rx="2" fill="#F5A623" opacity=".7"/>
+        <rect x="572" y="50" width="8" height="34" rx="2" fill="#F5A623" opacity=".4"/>
+      </svg>`,
+      categories: [
+        { icon:'ti-crane',       label:'Scissor Lifts',        sub:'SJIII, SJIV Series' },
+        { icon:'ti-forklift',    label:'Boom Lifts',           sub:'SJ45T, SJ66T' },
+        { icon:'ti-droplet',     label:'Hydraulic Parts',      sub:'Cylinders, Valves, Pumps' },
+        { icon:'ti-battery',     label:'Electrical Parts',     sub:'Batteries, Controls' },
+        { icon:'ti-settings',    label:'Drive System',         sub:'Motors, Hubs, Wheels' },
+        { icon:'ti-tool',        label:'Wear Parts',           sub:'Filters, Seals, O-rings' },
+      ],
+      actions: [
+        { icon:'ti-package',   label:'Order by Item' },
+        { icon:'ti-book',      label:'All Manuals' },
+        { icon:'ti-bell',      label:'Bulletins & Alerts' },
+        { icon:'ti-star',      label:'Recommended Service Parts' },
+      ],
+      description: 'Skyjack is a world-leading manufacturer of scissor lifts, boom lifts, and telehandlers. Mid-County Rental stocks genuine Skyjack OEM parts for all fleet units.',
+      features: [
+        { ok:true,  label:'Parts Lookup' },
+        { ok:true,  label:'Parts Diagrams' },
+        { ok:true,  label:'Support Manuals' },
+        { ok:true,  label:'Recommended Service Parts' },
+        { ok:false, label:'Real-Time OEM Inventory' },
+        { ok:true,  label:'Digital Order Delivery' },
+      ],
+      news: [
+        { date:'Jun 2026', title:'SJIII 3219 hydraulic seal kit now available' },
+        { date:'May 2026', title:'Updated service bulletin — lift cylinder torque specs' },
+      ],
+    },
+    'CAT': {
+      displayName: 'Caterpillar',
+      tagline: 'Heavy Construction Equipment',
+      color: '#F5A623',
+      accentText: '#1A1200',
+      logo: `<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="180" height="48" rx="4" fill="#F5A623"/>
+        <text x="14" y="33" font-size="20" font-weight="900" font-family="Inter,sans-serif" fill="#1A1200" letter-spacing="-0.5">CAT</text>
+        <text x="60" y="33" font-size="11" font-weight="600" font-family="Inter,sans-serif" fill="#4A3600" letter-spacing="0.5">CATERPILLAR</text>
+      </svg>`,
+      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="800" height="120" fill="#1A0E00"/>
+        <rect x="0" y="0" width="800" height="120" fill="url(#cat-grad)"/>
+        <defs><linearGradient id="cat-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#1A0E00"/><stop offset="100%" stop-color="#2A1800"/></linearGradient></defs>
+        <text x="28" y="52" font-size="32" font-weight="900" font-family="Inter,sans-serif" fill="#F5A623" letter-spacing="-1">CAT</text>
+        <text x="110" y="52" font-size="18" font-weight="600" font-family="Inter,sans-serif" fill="#D4880A" letter-spacing="2">CATERPILLAR</text>
+        <text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#6A5A38" letter-spacing="2">HEAVY CONSTRUCTION EQUIPMENT</text>
+        <rect x="28" y="88" width="64" height="3" rx="1.5" fill="#F5A623"/>
+      </svg>`,
+      categories: [
+        { icon:'ti-backhoe',     label:'Excavators',           sub:'320, 323, 330 Series' },
+        { icon:'ti-bulldozer',   label:'Track-Type Tractors',  sub:'D6, D8, D9' },
+        { icon:'ti-settings',    label:'Undercarriage',        sub:'Track, Rollers, Idlers' },
+        { icon:'ti-engine',      label:'Engine Parts',         sub:'Filters, Belts, Seals' },
+        { icon:'ti-droplet',     label:'Hydraulic System',     sub:'Pumps, Cylinders, Hoses' },
+        { icon:'ti-tool',        label:'Ground Engagement',    sub:'Teeth, Adapters, Blades' },
+      ],
+      actions: [
+        { icon:'ti-package',   label:'Order by Item' },
+        { icon:'ti-book',      label:'All Manuals' },
+        { icon:'ti-bell',      label:'Bulletins & Alerts' },
+        { icon:'ti-star',      label:'Recommended Service Parts' },
+      ],
+      description: 'Caterpillar is the world's largest manufacturer of construction and mining equipment. Mid-County Rental sources genuine Cat parts for our excavator and dozer fleet.',
+      features: [
+        { ok:true,  label:'Parts Lookup' },
+        { ok:true,  label:'Parts Diagrams' },
+        { ok:false, label:'Support Manuals' },
+        { ok:true,  label:'Recommended Service Parts' },
+        { ok:false, label:'Real-Time OEM Inventory' },
+        { ok:true,  label:'Digital Order Delivery' },
+      ],
+      news: [
+        { date:'Jun 2026', title:'320 track adjuster grease spec update' },
+        { date:'Apr 2026', title:'C7.1 engine filter cross-reference now available' },
+      ],
+    },
+    'TOY': {
+      displayName: 'Toyota',
+      tagline: 'Material Handling Equipment',
+      color: '#C8102E',
+      accentText: '#FFFFFF',
+      logo: `<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="180" height="48" rx="4" fill="#C8102E"/>
+        <text x="14" y="33" font-size="18" font-weight="800" font-family="Inter,sans-serif" fill="#FFFFFF" letter-spacing="1">TOYOTA</text>
+        <text x="112" y="33" font-size="10" font-weight="500" font-family="Inter,sans-serif" fill="#FFAAAA" letter-spacing="0.5">FORKLIFTS</text>
+      </svg>`,
+      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="800" height="120" fill="#6B0618"/>
+        <rect x="0" y="0" width="800" height="120" fill="url(#toy-grad)"/>
+        <defs><linearGradient id="toy-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#6B0618"/><stop offset="100%" stop-color="#3A0210"/></linearGradient></defs>
+        <text x="28" y="52" font-size="28" font-weight="800" font-family="Inter,sans-serif" fill="#FFFFFF" letter-spacing="2">TOYOTA</text>
+        <text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#FFAAAA" letter-spacing="2">MATERIAL HANDLING EQUIPMENT</text>
+        <rect x="28" y="88" width="64" height="3" rx="1.5" fill="#C8102E"/>
+      </svg>`,
+      categories: [
+        { icon:'ti-forklift',    label:'IC Forklifts',         sub:'8FGU, 8FG Series' },
+        { icon:'ti-battery-2',   label:'Electric Forklifts',   sub:'8FBET, 7FBEU Series' },
+        { icon:'ti-crane',       label:'Mast & Lift System',   sub:'Chains, Cylinders' },
+        { icon:'ti-gear',        label:'Transmission',         sub:'Clutches, Torque Conv.' },
+        { icon:'ti-settings',    label:'Drive & Steer Axle',   sub:'Bearings, Seals' },
+        { icon:'ti-tool',        label:'Wear Parts',           sub:'Tires, Forks, Filters' },
+      ],
+      actions: [
+        { icon:'ti-package',   label:'Order by Item' },
+        { icon:'ti-book',      label:'All Manuals' },
+        { icon:'ti-bell',      label:'Bulletins & Alerts' },
+        { icon:'ti-star',      label:'Recommended Service Parts' },
+      ],
+      description: 'Toyota Material Handling is the #1 forklift brand worldwide. Mid-County Rental services Toyota IC and electric forklifts with genuine OEM and quality aftermarket parts.',
+      features: [
+        { ok:true,  label:'Parts Lookup' },
+        { ok:true,  label:'Parts Diagrams' },
+        { ok:true,  label:'Support Manuals' },
+        { ok:true,  label:'Recommended Service Parts' },
+        { ok:false, label:'Real-Time OEM Inventory' },
+        { ok:false, label:'Invoice Lookup' },
+      ],
+      news: [
+        { date:'May 2026', title:'8FGU25 mast chain inspection interval bulletin' },
+        { date:'Mar 2026', title:'New OEM lift cylinder seals now stocked' },
+      ],
+    },
+    'BOB': {
+      displayName: 'Bobcat',
+      tagline: 'Compact Equipment',
+      color: '#E87722',
+      accentText: '#FFFFFF',
+      logo: `<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="180" height="48" rx="4" fill="#E87722"/>
+        <text x="14" y="33" font-size="20" font-weight="900" font-family="Inter,sans-serif" fill="#FFFFFF" letter-spacing="-0.5">BOBCAT</text>
+      </svg>`,
+      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="800" height="120" fill="#1A0A00"/>
+        <rect x="0" y="0" width="800" height="120" fill="url(#bob-grad)"/>
+        <defs><linearGradient id="bob-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#1A0A00"/><stop offset="100%" stop-color="#2A1408"/></linearGradient></defs>
+        <text x="28" y="52" font-size="32" font-weight="900" font-family="Inter,sans-serif" fill="#E87722" letter-spacing="-1">BOBCAT</text>
+        <text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#6A4A28" letter-spacing="2">COMPACT EQUIPMENT</text>
+        <rect x="28" y="88" width="64" height="3" rx="1.5" fill="#E87722"/>
+      </svg>`,
+      categories: [
+        { icon:'ti-bulldozer',   label:'Skid-Steer Loaders',   sub:'S650, S750, S850' },
+        { icon:'ti-tractor',     label:'Compact Track Loaders', sub:'T590, T650' },
+        { icon:'ti-droplet',     label:'Hydraulic System',      sub:'Pumps, Hoses, Couplers' },
+        { icon:'ti-bolt',        label:'Electrical System',     sub:'Fuses, Relays, Controls' },
+        { icon:'ti-settings',    label:'Drive Train',           sub:'Chain Case, Motors' },
+        { icon:'ti-tool',        label:'Attachments',           sub:'Buckets, Augers, Grapples' },
+      ],
+      actions: [
+        { icon:'ti-package',   label:'Order by Item' },
+        { icon:'ti-book',      label:'All Manuals' },
+        { icon:'ti-bell',      label:'Bulletins & Alerts' },
+        { icon:'ti-star',      label:'Recommended Service Parts' },
+      ],
+      description: 'Bobcat Company is a leading manufacturer of compact equipment. Mid-County Rental maintains a fleet of Bobcat skid-steer loaders serviced with OEM and compatible parts.',
+      features: [
+        { ok:true,  label:'Parts Lookup' },
+        { ok:false, label:'Parts Diagrams' },
+        { ok:false, label:'Support Manuals' },
+        { ok:true,  label:'Recommended Service Parts' },
+        { ok:false, label:'Real-Time OEM Inventory' },
+        { ok:true,  label:'Digital Order Delivery' },
+      ],
+      news: [
+        { date:'Jun 2026', title:'S650 hydraulic quick-coupler recall notice' },
+        { date:'Feb 2026', title:'Revised fuse panel layout — S-Series 2020+' },
+      ],
+    },
+  };
+
   // ── Helpers ───────────────────────────────────────────────────────────────
   const ALL_PARTS = Store.getParts('', '');
   function fp(id) { return ALL_PARTS.find(p => p.id === id); }
@@ -339,6 +532,35 @@ function render_parts_search(el) {
 .dp-add{width:100%;background:#F5A623;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;color:#1A1200;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
 .dp-add:hover{background:#E8980F;}
 .dp-incart{width:100%;background:#FAEEDA;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;color:#854F0B;cursor:default;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
+/* Supplier landing page */
+.slp-scroll{overflow-y:auto;flex:1;display:flex;flex-direction:column;}
+.slp-banner{flex-shrink:0;line-height:0;}
+.slp-banner svg{width:100%;display:block;}
+.slp-body{display:flex;gap:18px;padding:18px;align-items:flex-start;flex:1;}
+.slp-main{flex:1;min-width:0;}
+.slp-side{width:240px;min-width:240px;display:flex;flex-direction:column;gap:14px;flex-shrink:0;}
+.slp-section-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#9CA3AF;margin-bottom:10px;}
+.slp-cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.slp-cat-tile{background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:14px 12px;cursor:pointer;}
+.slp-cat-tile:hover{border-color:#C8C3BC;}
+.slp-cat-icon{font-size:20px;margin-bottom:6px;}
+.slp-cat-label{font-size:12px;font-weight:600;color:#111318;margin-bottom:2px;}
+.slp-cat-sub{font-size:10px;color:#9CA3AF;}
+.slp-action-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.slp-action-tile{background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:14px 10px;text-align:center;cursor:pointer;}
+.slp-action-tile:hover{border-color:#C8C3BC;}
+.slp-info-card{background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:16px;}
+.slp-info-title{font-size:14px;font-weight:700;color:#111318;margin-bottom:2px;}
+.slp-info-tag{font-size:11px;color:#9CA3AF;margin-bottom:10px;}
+.slp-info-desc{font-size:12px;color:#5A5F6E;line-height:1.6;margin-bottom:12px;}
+.slp-feat-list{display:flex;flex-direction:column;gap:5px;}
+.slp-feat-row{display:flex;align-items:flex-start;gap:6px;font-size:12px;color:#3A3D4A;}
+.slp-news-card{background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;overflow:hidden;}
+.slp-news-hdr{background:#F5F2EE;padding:10px 14px;font-size:11px;font-weight:700;color:#3A3D4A;border-bottom:0.5px solid #E8E4DF;}
+.slp-news-body{padding:10px 14px;display:flex;flex-direction:column;gap:10px;}
+.slp-news-item{}
+.slp-news-date{font-size:10px;color:#9CA3AF;margin-bottom:2px;}
+.slp-news-title{font-size:12px;color:#3A3D4A;line-height:1.5;}
 /* WO ribbon */
 .wo-ribbon{background:#1E1E1E;padding:9px 22px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #2A2A2A;flex-shrink:0;flex-wrap:wrap;}
 .wr-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#8A8FA8;}
@@ -512,17 +734,88 @@ function render_parts_search(el) {
 
   function renderSupplier() {
     const s = CATALOG.find(x=>x.id===_nav.supplierId); if(!s) return;
-    document.getElementById('ps-center').innerHTML = `<div class="center-body">
-      <div class="center-hdr"><div class="center-title">${s.name}</div><div class="center-sub">${s.models.length} model${s.models.length!==1?'s':''}</div></div>
-      <div class="card-grid">${s.models.map(m=>{
-        const eq=EQUIPMENT.filter(e=>e.modelId===m.id);
-        const c=[...new Set(m.components.flatMap(c=>c.subs.flatMap(s=>s.partIds)))].length;
-        return `<div class="m-card" onclick="psNavTo('${s.id}','${m.id}',null,null)">
-          <div class="m-card-name">${m.name}</div>
-          <div class="m-card-meta">${c} parts · ${m.components.length} systems</div>
-          ${eq.length?`<div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap;">${eq.map(e=>`<span class="eq-chip"><i class="ti ti-barcode" style="font-size:10px;"></i> ${e.asset}</span>`).join('')}</div>`:''}
-        </div>`;
-      }).join('')}</div>
+    const pr = SUPPLIER_PROFILES[s.id] || {};
+    const accent = pr.color || '#F5A623';
+    const fleetEq = EQUIPMENT.filter(e=>e.supplierId===s.id);
+
+    const categoryTiles = (pr.categories || []).map(cat =>
+      `<div class="slp-cat-tile">
+        <div class="slp-cat-icon" style="color:${accent};"><i class="ti ${cat.icon}"></i></div>
+        <div class="slp-cat-label">${cat.label}</div>
+        <div class="slp-cat-sub">${cat.sub}</div>
+      </div>`
+    ).join('');
+
+    const actionTiles = (pr.actions || []).map(a =>
+      `<div class="slp-action-tile">
+        <i class="ti ${a.icon}" style="font-size:20px;color:#9CA3AF;display:block;margin-bottom:6px;"></i>
+        <div style="font-size:12px;font-weight:600;color:#3A3D4A;">${a.label}</div>
+      </div>`
+    ).join('');
+
+    const featureList = (pr.features || []).map(f =>
+      `<div class="slp-feat-row">
+        <i class="ti ${f.ok?'ti-check':'ti-x'}" style="color:${f.ok?'#639922':'#C0392B'};font-size:12px;flex-shrink:0;margin-top:1px;"></i>
+        <span>${f.label}</span>
+      </div>`
+    ).join('');
+
+    const newsList = (pr.news || []).map(n =>
+      `<div class="slp-news-item">
+        <div class="slp-news-date">${n.date}</div>
+        <div class="slp-news-title">${n.title}</div>
+      </div>`
+    ).join('');
+
+    const modelCards = s.models.map(m => {
+      const eq = EQUIPMENT.filter(e=>e.modelId===m.id);
+      const cnt = [...new Set(m.components.flatMap(c=>c.subs.flatMap(sub=>sub.partIds)))].length;
+      return `<div class="m-card" onclick="psNavTo('${s.id}','${m.id}',null,null)">
+        <div class="m-card-name">${m.name}</div>
+        <div class="m-card-meta">${cnt} parts · ${m.components.length} systems</div>
+        ${eq.length?`<div style="margin-top:6px;display:flex;gap:5px;flex-wrap:wrap;">${eq.map(e=>`<span class="eq-chip"><i class="ti ti-barcode" style="font-size:10px;"></i> ${e.asset}</span>`).join('')}</div>`:''}
+      </div>`;
+    }).join('');
+
+    document.getElementById('ps-center').innerHTML = `
+    <div class="slp-scroll">
+      <!-- Banner -->
+      <div class="slp-banner" style="position:relative;overflow:hidden;border-radius:0;">${pr.bannerSvg || ''}</div>
+
+      <!-- Body grid -->
+      <div class="slp-body">
+        <!-- Main column -->
+        <div class="slp-main">
+          <!-- Categories -->
+          <div class="slp-section-label">Product Families</div>
+          <div class="slp-cat-grid">${categoryTiles}</div>
+
+          <!-- Actions -->
+          <div class="slp-section-label" style="margin-top:22px;">Actions</div>
+          <div class="slp-action-grid">${actionTiles}</div>
+
+          <!-- Fleet equipment -->
+          ${fleetEq.length ? `<div class="slp-section-label" style="margin-top:22px;">Fleet Equipment (${fleetEq.length})</div>
+          <div class="card-grid" style="margin-bottom:0;">${modelCards}</div>` : ''}
+        </div>
+
+        <!-- Side column -->
+        <div class="slp-side">
+          <!-- Info card -->
+          <div class="slp-info-card">
+            <div class="slp-info-title">${pr.displayName || s.name}</div>
+            <div class="slp-info-tag">${pr.tagline || ''}</div>
+            <p class="slp-info-desc">${pr.description || ''}</p>
+            <div class="slp-feat-list">${featureList}</div>
+          </div>
+
+          <!-- News card -->
+          ${newsList ? `<div class="slp-news-card">
+            <div class="slp-news-hdr">${pr.displayName || s.name} News and Info</div>
+            <div class="slp-news-body">${newsList}</div>
+          </div>` : ''}
+        </div>
+      </div>
     </div>`;
   }
 
