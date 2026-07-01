@@ -4,21 +4,31 @@ function render_parts_search(el) {
   let psSelected = null;
   let psListSelected = null;
 
+  // WO context — set when navigated from a work order
+  const _woId = Router.context && Router.context.woId;
+  const _wo = _woId ? Store.getWorkOrder(_woId) : null;
+
   const CATEGORIES = ['All', 'Hydraulic', 'Electrical', 'Drive', 'Seals'];
 
   function getFilteredParts() {
     return Store.getParts(_searchQuery, _category === 'All' ? '' : _category);
   }
 
-  function cartCount() { return Store.getCart().length; }
-  function isInCart(partId) { return Store.getCart().some(c => c.id === partId); }
+  function getActiveCart() {
+    return _woId ? Store.getWoCart(_woId) : Store.getCart();
+  }
+  function cartCount() { return getActiveCart().length; }
+  function isInCart(partId) { return getActiveCart().some(c => c.id === partId); }
+  function addToActiveCart(part) {
+    if (_woId) Store.addToWoCart(_woId, part);
+    else Store.addToCart(part);
+  }
 
   function updateCartStrip() {
-    const strips = document.querySelectorAll('.cart-strip-count');
-    strips.forEach(s => s.textContent = cartCount() + ' item' + (cartCount() !== 1 ? 's' : '') + ' in cart');
-    const total = Store.getCart().reduce((s, c) => s + c.price * (c.qty || 1), 0);
-    const strips2 = document.querySelectorAll('.cart-strip-total');
-    strips2.forEach(s => s.textContent = '$' + total.toFixed(2));
+    const count = cartCount();
+    const total = getActiveCart().reduce((s, c) => s + c.price * (c.qty || 1), 0);
+    document.querySelectorAll('.cart-strip-count').forEach(s => s.textContent = count + ' item' + (count !== 1 ? 's' : '') + ' in cart');
+    document.querySelectorAll('.cart-strip-total').forEach(s => s.textContent = '$' + total.toFixed(2));
   }
 
   function machineIcon(machine) {
@@ -114,6 +124,7 @@ function render_parts_search(el) {
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
         <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('dashboard')">Dashboard</a>
         <span style="color:#3C4052;">/</span>
+        ${_wo ? `<a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('Work Order detail WO #${_wo.id}')">WO #${_wo.id}</a><span style="color:#3C4052;">/</span>` : ''}
         <span style="color:#FFFFFF;font-weight:500;">Search parts</span>
       </div>
       <div class="topbar-right">
@@ -122,6 +133,7 @@ function render_parts_search(el) {
       </div>
     </div>
     <div style="display:flex;flex-direction:column;flex:1;min-height:0;">
+      ${_wo ? `<div class="wo-context-ribbon"><div class="ribbon-item"><i class="ti ti-shopping-cart" style="color:#F5A623;"></i> Adding parts to <strong>WO #${_wo.id}</strong></div><span class="ribbon-sep">·</span><div class="ribbon-item"><strong>${_wo.machine}</strong></div><span class="ribbon-sep">·</span><div class="ribbon-item"><strong>${_wo.asset}</strong></div><button onclick="sendPrompt('Work Order detail WO #${_wo.id}')" style="margin-left:auto;background:none;border:1px solid #3C4052;border-radius:7px;padding:4px 12px;font-size:12px;color:#8A8FA8;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;"><i class="ti ti-arrow-left" style="font-size:12px;"></i> Back to WO</button></div>` : ''}
       <div class="content-row" style="flex:1;min-height:0;">
         <div class="tree-panel">
           <div class="tree-search">
@@ -155,7 +167,7 @@ function render_parts_search(el) {
                 <div class="cart-strip-label2 cart-strip-count">0 items in cart</div>
                 <div class="cart-strip-sub2 cart-strip-total">$0.00</div>
               </div>
-              <button class="cart-btn2" style="margin-left:auto;" id="ps-cart-review-btn">Review &amp; submit order</button>
+              <button class="cart-btn2" style="margin-left:auto;" id="ps-cart-review-btn">${_wo ? 'View WO cart' : 'Review &amp; submit order'}</button>
             </div>
           </div>
           <div id="ps-diagram-view" class="diagram-view-body" style="display:none;">
@@ -316,10 +328,32 @@ function render_parts_search(el) {
   window.psAddToCart = function(partId) {
     const part = Store.getParts('', '').find(p => p.id === partId);
     if (!part) return;
-    Store.addToCart(part);
-    renderListView();
-    renderDiagramParts();
-    updateCartStrip();
+    if (_woId) {
+      addToActiveCart(part);
+      renderListView();
+      renderDiagramParts();
+      updateCartStrip();
+    } else {
+      // No WO context — ask which WO or add to general cart
+      const wos = Store.getWorkOrders('active');
+      const woOptions = wos.map(w => `<option value="${w.id}">${w.machine} — WO #${w.id}</option>`).join('');
+      Modal.show({
+        title: 'Add to cart',
+        body: `<p style="font-size:13px;color:#3A3D4A;margin-bottom:14px;"><strong>${part.description}</strong> (${part.partNum}) · $${part.price.toFixed(2)}</p><label style="font-size:12px;font-weight:600;color:#5A5F6E;display:block;margin-bottom:6px;">Assign to Work Order</label><select id="ps-wo-picker" style="width:100%;height:36px;border:1px solid #E2DDD8;border-radius:7px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;"><option value="">No WO (general)</option>${woOptions}</select>`,
+        actions: [
+          { label: 'Cancel', onClick: () => Modal.close() },
+          { label: 'Add to cart', primary: true, onClick: () => {
+            const selectedWoId = document.getElementById('ps-wo-picker').value;
+            if (selectedWoId) Store.addToWoCart(parseInt(selectedWoId), part);
+            else Store.addToCart(part);
+            Modal.close();
+            renderListView();
+            renderDiagramParts();
+            updateCartStrip();
+          }}
+        ]
+      });
+    }
   };
 
   window.psSwitchView = function(mode) {
@@ -343,9 +377,14 @@ function render_parts_search(el) {
   };
 
   function openCartModal() {
+    // If WO context, clicking "View WO cart" goes back to the WO detail
+    if (_woId) {
+      sendPrompt('Work Order detail WO #' + _woId);
+      return;
+    }
     const cart = Store.getCart();
     if (!cart.length) {
-      Modal.show({ title: 'Cart is empty', body: '<p style="color:#9CA3AF;font-size:13px;">Add parts to cart first.</p>' });
+      Modal.show({ title: 'Cart is empty', body: '<p style="color:#9CA3AF;font-size:13px;">Add parts to a work order cart first.</p>' });
       return;
     }
     const wos = Store.getWorkOrders('active');
@@ -385,7 +424,6 @@ function render_parts_search(el) {
             updateCartStrip();
             renderListView();
             renderDiagramParts();
-            // navigate to order history
             sendPrompt('Open order history');
           }
         }

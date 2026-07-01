@@ -40,7 +40,7 @@ const Router = (() => {
     if (p.includes('dashboard')) { navigate('dashboard'); }
     else if (p.includes('go to login') || p.includes('show login') || p === 'login') { navigate('login'); }
     else if (p.includes('order history')) { navigate('order-history'); }
-    else if (p.includes('parts search') || p.includes('search parts') || p.includes('diagram')) { navigate('parts-search'); }
+    else if (p.includes('parts search') || p.includes('search parts') || p.includes('diagram')) { navigate('parts-search', woId ? { woId } : {}); }
     else if ((p.includes('work order detail') || p.includes('wo #') || p.includes('wo detail')) && woId) {
       navigate('wo-detail', { woId });
     }

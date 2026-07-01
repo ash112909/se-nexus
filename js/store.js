@@ -56,7 +56,32 @@ const Store = (() => {
           { text: 'Ran diagnostic — HYD-04 fault code confirmed. Suspect internal seal failure.', author: 'James W.', time: '9:20' },
           { text: 'Parts ordered: SKJ-103100, SKJ-103278. Awaiting delivery.', author: 'James W.', time: '9:45' }
         ],
-        partIds: ['SKJ-103100', 'SKJ-103278', 'SKJ-107732']
+        cart: [
+          { id: 'SKJ-104880', partNum: 'SKJ-104880', description: 'Hydraulic filter — return line', vendor: 'Skyjack', price: 34.00, oemOnly: true, inStock: true, category: 'Hydraulic', qty: 1 }
+        ],
+        submittedOrders: [
+          {
+            id: 'wo-ord-100094-1',
+            poNum: 'PO-7841',
+            date: 'Jun 20, 2026',
+            items: [
+              { id: 'SKJ-103100', partNum: 'SKJ-103100', description: 'Hydraulic lift cylinder seal kit', vendor: 'Skyjack', price: 84.00, qty: 1 },
+              { id: 'SKJ-103278', partNum: 'SKJ-103278', description: 'Pressure relief valve', vendor: 'Skyjack', price: 126.00, qty: 1 },
+            ],
+            total: 210.00,
+            status: 'submitted',
+          },
+          {
+            id: 'wo-ord-100094-2',
+            poNum: 'PO-7801',
+            date: 'Jun 12, 2026',
+            items: [
+              { id: 'SKJ-107732', partNum: 'SKJ-107732', description: 'Pump seal kit', vendor: 'Skyjack', price: 49.00, qty: 2 },
+            ],
+            total: 98.00,
+            status: 'backordered',
+          }
+        ]
       },
       {
         id: 100102,
@@ -69,7 +94,8 @@ const Store = (() => {
         assignee: 'James W.',
         opened: 'Jun 22, 2026',
         notes: [],
-        partIds: []
+        cart: [],
+        submittedOrders: []
       },
       {
         id: 100089,
@@ -82,7 +108,8 @@ const Store = (() => {
         assignee: 'M. Torres',
         opened: 'Jun 18, 2026',
         notes: [],
-        partIds: []
+        cart: [],
+        submittedOrders: []
       },
       {
         id: 100081,
@@ -95,7 +122,8 @@ const Store = (() => {
         assignee: 'R. Kim',
         opened: 'Jun 15, 2026',
         notes: [],
-        partIds: []
+        cart: [],
+        submittedOrders: []
       }
     ],
     orders: [
@@ -172,7 +200,8 @@ const Store = (() => {
       assignee: 'James W.',
       opened: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       notes: [],
-      partIds: []
+      cart: [],
+      submittedOrders: [],
     }, fields);
     _data.workOrders.unshift(wo);
     save(_data);
@@ -200,6 +229,70 @@ const Store = (() => {
 
   function closeWorkOrder(id) {
     return updateWorkOrder(id, { status: 'closed' });
+  }
+
+  // --- WO Cart ---
+  function getWoCart(woId) {
+    const wo = getWorkOrder(woId);
+    if (!wo) return [];
+    if (!wo.cart) wo.cart = [];
+    return wo.cart;
+  }
+
+  function addToWoCart(woId, part) {
+    const wo = getWorkOrder(woId);
+    if (!wo) return;
+    if (!wo.cart) wo.cart = [];
+    const existing = wo.cart.find(c => c.id === part.id);
+    if (existing) { existing.qty = (existing.qty || 1) + 1; }
+    else { wo.cart.push(Object.assign({}, part, { qty: 1 })); }
+    save(_data);
+  }
+
+  function removeFromWoCart(woId, partId) {
+    const wo = getWorkOrder(woId);
+    if (!wo || !wo.cart) return;
+    wo.cart = wo.cart.filter(c => c.id !== partId);
+    save(_data);
+  }
+
+  function updateWoCartQty(woId, partId, qty) {
+    const wo = getWorkOrder(woId);
+    if (!wo || !wo.cart) return;
+    const item = wo.cart.find(c => c.id === partId);
+    if (item) { item.qty = Math.max(1, qty); save(_data); }
+  }
+
+  function submitWoCart(woId) {
+    const wo = getWorkOrder(woId);
+    if (!wo || !wo.cart || !wo.cart.length) return null;
+    const items = wo.cart.slice();
+    const total = items.reduce((s, c) => s + c.price * (c.qty || 1), 0);
+    const poNum = _nextPoNum();
+    const submitted = {
+      id: 'wo-ord-' + Date.now(),
+      poNum,
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      items,
+      total: Math.round(total * 100) / 100,
+      status: 'submitted',
+    };
+    if (!wo.submittedOrders) wo.submittedOrders = [];
+    wo.submittedOrders.unshift(submitted);
+    addOrder({
+      vendor: items.length === 1 ? items[0].vendor : 'Various',
+      name: items.length === 1 ? items[0].description : items.length + ' parts — WO #' + wo.id,
+      wo: 'WO #' + wo.id,
+      asset: wo.asset,
+      amount: Math.round(total * 100) / 100,
+      status: 'submitted',
+      tab: 'submitted',
+      items,
+      poNum,
+    });
+    wo.cart = [];
+    save(_data);
+    return submitted;
   }
 
   // --- Orders ---
@@ -331,6 +424,7 @@ const Store = (() => {
     getWorkOrders, getWorkOrder, addWorkOrder, updateWorkOrder, addWoNote, closeWorkOrder,
     getOrders, addOrder, updateOrder,
     getCart, addToCart, removeFromCart, updateCartQty, clearCart, submitCart,
+    getWoCart, addToWoCart, removeFromWoCart, updateWoCartQty, submitWoCart,
     addDiagnosticMessage, getDiagnosticHistory, clearDiagnosticHistory,
     getParts, getManuals,
     reset,
