@@ -20,6 +20,8 @@ const UserPanel = (() => {
 
   // ── Notifications panel ───────────────────────────────────────────────────
   function openNotifications() {
+    if (!document.getElementById('up-profile-panel')) _profileOpen = false;
+    if (!document.getElementById('up-notif-panel')) _notifOpen = false;
     if (_profileOpen) closeProfile();
     if (_notifOpen) { closeNotifications(); return; }
     _notifOpen = true;
@@ -99,6 +101,8 @@ const UserPanel = (() => {
 
   // ── Profile / location panel ──────────────────────────────────────────────
   function openProfile() {
+    if (!document.getElementById('up-notif-panel')) _notifOpen = false;
+    if (!document.getElementById('up-profile-panel')) _profileOpen = false;
     if (_notifOpen) closeNotifications();
     if (_profileOpen) { closeProfile(); return; }
     _profileOpen = true;
