@@ -133,7 +133,7 @@ function render_dashboard(el) {
   ${buildSidebar('dashboard')}
   <div class="main">
     <div class="topbar">
-      <div class="topbar-search"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
+      <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
       <div class="topbar-right">
         <button class="topbar-icon-btn"><i class="ti ti-bell"></i><span class="notif-dot"></span></button>
         <button class="topbar-icon-btn"><i class="ti ti-settings"></i></button>

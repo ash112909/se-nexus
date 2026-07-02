@@ -143,7 +143,7 @@ function render_wo_list(el) {
   ${buildSidebar('wo')}
   <div class="main">
     <div class="topbar">
-      <div class="wol-topbar-search"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
+      <div class="wol-topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
       <div class="topbar-right">
         <button class="topbar-icon-btn"><i class="ti ti-bell"></i><span class="notif-dot"></span></button>
         <button class="topbar-icon-btn"><i class="ti ti-settings"></i></button>
