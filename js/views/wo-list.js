@@ -150,7 +150,7 @@ function render_wo_list(el) {
       <div class="wol-header">
         <div>
           <div class="wol-title">Work Orders</div>
-          <div class="wol-subtitle">Austin Branch · <span id="wol-sum-active">0</span> active</div>
+          <div class="wol-subtitle">${(Store.getCurrentLocation()||{name:'—'}).name} · <span id="wol-sum-active">0</span> active</div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <input class="wol-search" type="text" placeholder="Search machine or issue…" id="wol-search-input"/>

@@ -138,7 +138,7 @@ function render_dashboard(el) {
     <div class="content">
       <div class="greeting">
         <div class="greeting-top">Good morning, James</div>
-        <div class="greeting-sub">Monday, Jun 26 · Austin Branch · ${activeCount} active work order${activeCount !== 1 ? 's' : ''}</div>
+        <div class="greeting-sub">Monday, Jun 26 · ${(Store.getCurrentLocation()||{name:'—'}).name} · ${activeCount} active work order${activeCount !== 1 ? 's' : ''}</div>
       </div>
       <div class="ai-strip" onclick="sendPrompt('Open diagnostic assistant')">
         <div class="ai-icon"><i class="ti ti-sparkles"></i></div>

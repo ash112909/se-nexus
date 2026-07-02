@@ -51,5 +51,5 @@ const Router = (() => {
     else { navigate('dashboard'); }
   };
 
-  return { navigate, get context() { return _context; } };
+  return { navigate, get context() { return _context; }, get currentView() { return current; } };
 })();

@@ -44,6 +44,7 @@ const Store = (() => {
     workOrders: [
       {
         id: 100094,
+        locationId: 'austin',
         status: 'active',
         priority: 'high',
         machine: 'Skyjack SJIII 3219',
@@ -85,6 +86,7 @@ const Store = (() => {
       },
       {
         id: 100102,
+        locationId: 'austin',
         status: 'active',
         priority: 'medium',
         machine: 'Cat 320 Excavator',
@@ -99,6 +101,7 @@ const Store = (() => {
       },
       {
         id: 100089,
+        locationId: 'austin',
         status: 'active',
         priority: 'low',
         machine: 'Toyota 8FGU25',
@@ -113,6 +116,7 @@ const Store = (() => {
       },
       {
         id: 100081,
+        locationId: 'austin',
         status: 'pending',
         priority: 'medium',
         machine: 'Bobcat S650',
@@ -121,6 +125,66 @@ const Store = (() => {
         warranty: { active: false, expiry: null },
         assignee: 'R. Kim',
         opened: 'Jun 15, 2026',
+        notes: [],
+        cart: [],
+        submittedOrders: []
+      },
+      {
+        id: 100110,
+        locationId: 'san-marcos',
+        status: 'active',
+        priority: 'high',
+        machine: 'Skyjack SJIII 4632',
+        asset: 'SM-011',
+        issue: 'Platform leveling sensor fault — tilt alarm triggered',
+        warranty: { active: true, expiry: 'Mar 2028' },
+        assignee: 'James W.',
+        opened: 'Jun 24, 2026',
+        notes: [],
+        cart: [],
+        submittedOrders: []
+      },
+      {
+        id: 100108,
+        locationId: 'san-marcos',
+        status: 'pending',
+        priority: 'medium',
+        machine: 'Toyota 8FGU32',
+        asset: 'SM-004',
+        issue: 'Brake drag — left rear wheel',
+        warranty: { active: false, expiry: null },
+        assignee: 'D. Reyes',
+        opened: 'Jun 21, 2026',
+        notes: [],
+        cart: [],
+        submittedOrders: []
+      },
+      {
+        id: 100115,
+        locationId: 'kyle',
+        status: 'active',
+        priority: 'medium',
+        machine: 'Bobcat S770',
+        asset: 'KY-003',
+        issue: 'Loader arm hydraulic cylinder slow extension',
+        warranty: { active: false, expiry: null },
+        assignee: 'James W.',
+        opened: 'Jun 25, 2026',
+        notes: [],
+        cart: [],
+        submittedOrders: []
+      },
+      {
+        id: 100113,
+        locationId: 'kyle',
+        status: 'closed',
+        priority: 'low',
+        machine: 'Cat 308 Mini Excavator',
+        asset: 'KY-007',
+        issue: 'Engine coolant leak — water pump seal',
+        warranty: { active: false, expiry: null },
+        assignee: 'T. Nguyen',
+        opened: 'Jun 10, 2026',
         notes: [],
         cart: [],
         submittedOrders: []
@@ -178,8 +242,9 @@ const Store = (() => {
 
   // --- Work Orders ---
   function getWorkOrders(statusFilter) {
-    if (!statusFilter || statusFilter === 'all') return _data.workOrders;
-    return _data.workOrders.filter(wo => wo.status === statusFilter);
+    let wos = _data.workOrders.filter(wo => !wo.locationId || wo.locationId === _currentLocationId);
+    if (statusFilter && statusFilter !== 'all') wos = wos.filter(wo => wo.status === statusFilter);
+    return wos;
   }
 
   function getWorkOrder(id) {
@@ -427,6 +492,9 @@ const Store = (() => {
   function setCurrentLocation(id) {
     _currentLocationId = id;
     try { localStorage.setItem('se-nexus-location', id); } catch(e) {}
+    if (typeof Router !== 'undefined' && Router.currentView) {
+      Router.navigate(Router.currentView, Router.context);
+    }
   }
 
   // --- Notifications ---

@@ -242,7 +242,7 @@ function render_wo_detail(el) {
       <div class="wo-detail-header">
         <div>
           <div class="wo-detail-title">Work Order #${wo.id}</div>
-          <div class="wo-detail-meta">Opened ${wo.opened} · Austin Branch · ${wo.assignee}</div>
+          <div class="wo-detail-meta">Opened ${wo.opened} · ${(Store.getCurrentLocation()||{name:'—'}).name} · ${wo.assignee}</div>
           <div class="wo-status-row">
             ${statusBadge()} ${priorityBadge()} ${warrantyBadge()}
           </div>
