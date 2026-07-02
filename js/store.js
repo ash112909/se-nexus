@@ -492,9 +492,6 @@ const Store = (() => {
   function setCurrentLocation(id) {
     _currentLocationId = id;
     try { localStorage.setItem('se-nexus-location', id); } catch(e) {}
-    if (typeof Router !== 'undefined' && Router.currentView) {
-      Router.navigate(Router.currentView, Router.context);
-    }
   }
 
   // --- Notifications ---

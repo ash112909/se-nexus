@@ -154,11 +154,9 @@ const UserPanel = (() => {
   function _switchLocation(id) {
     Store.setCurrentLocation(id);
     closeProfile();
-    // Re-render current view's topbar location text
-    document.querySelectorAll('.tp-loc').forEach(el => {
-      const loc = Store.getCurrentLocation();
-      if (loc) el.textContent = loc.name;
-    });
+    if (typeof Router !== 'undefined' && Router.currentView && Router.currentView !== 'login') {
+      Router.navigate(Router.currentView, Router.context);
+    }
   }
 
   // ── Shared positioning ────────────────────────────────────────────────────
