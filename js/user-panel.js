@@ -161,7 +161,8 @@ const UserPanel = (() => {
   function positionPanel(panel, type) {
     panel.className = 'up-panel';
     const btnId = type === 'notif' ? 'up-btn-notif' : 'up-btn-profile';
-    const btn = document.getElementById(btnId);
+    const activeView = document.querySelector('.view.active');
+    const btn = (activeView || document).querySelector('#' + btnId);
     if (!btn) { panel.style.cssText = 'top:56px;right:16px;'; return; }
     const r = btn.getBoundingClientRect();
     panel.style.top = (r.bottom + 8) + 'px';
@@ -208,8 +209,11 @@ const UserPanel = (() => {
 
   // ── Close on outside click ────────────────────────────────────────────────
   document.addEventListener('click', function(e) {
-    if (_notifOpen && !e.target.closest('#up-notif-panel') && !e.target.closest('#up-btn-notif')) closeNotifications();
-    if (_profileOpen && !e.target.closest('#up-profile-panel') && !e.target.closest('#up-btn-profile')) closeProfile();
+    const activeView = document.querySelector('.view.active');
+    const notifBtn = activeView && activeView.querySelector('#up-btn-notif');
+    const profileBtn = activeView && activeView.querySelector('#up-btn-profile');
+    if (_notifOpen && !e.target.closest('#up-notif-panel') && !(notifBtn && notifBtn.contains(e.target))) closeNotifications();
+    if (_profileOpen && !e.target.closest('#up-profile-panel') && !(profileBtn && profileBtn.contains(e.target))) closeProfile();
   });
 
   // ── Init ─────────────────────────────────────────────────────────────────
