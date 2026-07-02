@@ -10,6 +10,11 @@ function buildSidebar(activeItem) {
         <div class="sb-fleet-sub">Austin Branch</div>
       </div>
     </div>
+    <div class="sb-search" onclick="GlobalSearch.open()">
+      <i class="ti ti-search" style="font-size:13px;color:#5C6070;"></i>
+      <span style="flex:1;font-size:12px;color:#5C6070;">Search everything…</span>
+      <span style="font-size:10px;color:#3C4052;background:#2A2A2A;border-radius:4px;padding:2px 5px;">⌘K</span>
+    </div>
     <div class="sb-nav">
       <div class="sb-section-label">My work</div>
       <div class="sb-item ${activeItem==='dashboard'?'active':''}" onclick="sendPrompt('Go back to dashboard')"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
