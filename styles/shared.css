@@ -25,4 +25,53 @@
 .topbar-icon-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: none; border: none; color: #8A8FA8; cursor: pointer; font-size: 17px; position: relative; }
 .topbar-icon-btn:hover { background: #2A2A2A; color: #fff; }
 .notif-dot { position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; background: #E24B4A; border-radius: 50%; border: 1.5px solid #1E1E1E; }
+/* Topbar profile button */
+.topbar-profile-btn { display:flex; align-items:center; gap:8px; background:none; border:0.5px solid #2A2A2A; border-radius:8px; padding:4px 10px 4px 4px; cursor:pointer; font-family:inherit; }
+.topbar-profile-btn:hover { background:#2A2A2A; border-color:#3C4052; }
+.tp-avatar { width:26px; height:26px; border-radius:50%; background:#3C4052; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:#FFFFFF; flex-shrink:0; }
+.tp-info { display:flex; flex-direction:column; gap:1px; text-align:left; }
+.tp-name { font-size:12px; font-weight:600; color:#FFFFFF; line-height:1.1; }
+.tp-loc { font-size:10px; color:#5C6070; line-height:1.1; }
+/* User panel dropdown */
+.up-panel { position:fixed; z-index:8888; width:300px; background:#FFFFFF; border:0.5px solid #E2DDD8; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,.14); display:flex; flex-direction:column; overflow:hidden; }
+.up-panel-header { display:flex; align-items:center; gap:8px; padding:12px 16px; border-bottom:0.5px solid #F0ECE8; flex-shrink:0; }
+.up-panel-title { font-size:13px; font-weight:600; color:#111318; flex:1; }
+.up-filter-toggle { display:flex; background:#F5F2EE; border-radius:6px; padding:2px; gap:2px; }
+.up-ftab { background:none; border:none; border-radius:4px; padding:3px 9px; font-size:11px; font-weight:500; color:#7A7F8E; cursor:pointer; font-family:inherit; }
+.up-ftab.active { background:#FFFFFF; color:#111318; box-shadow:0 1px 2px rgba(0,0,0,.06); }
+.up-mark-all { margin-left:auto; font-size:11px; color:#C08A1A; font-weight:500; background:none; border:none; cursor:pointer; font-family:inherit; white-space:nowrap; }
+.up-notif-list { overflow-y:auto; max-height:360px; }
+.up-notif-row { display:flex; align-items:flex-start; gap:10px; padding:11px 16px; cursor:pointer; border-bottom:0.5px solid #F8F6F2; }
+.up-notif-row:last-child { border-bottom:none; }
+.up-notif-row:hover { background:#FAFAF8; }
+.up-notif-row.unread { background:#FFFBF2; }
+.up-notif-row.unread:hover { background:#FFF5E0; }
+.up-notif-icon-wrap { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; margin-top:1px; }
+.up-icon-order { background:#EAF3DE; color:#3B6D11; }
+.up-icon-bulletin { background:#FEF3C7; color:#92400E; }
+.up-icon-wo { background:#EDE9FE; color:#5B21B6; }
+.up-icon-warranty { background:#E0F2FE; color:#0369A1; }
+.up-notif-body { flex:1; min-width:0; }
+.up-notif-title { font-size:12px; font-weight:600; color:#111318; line-height:1.4; margin-bottom:2px; }
+.up-notif-time { font-size:11px; color:#9CA3AF; }
+.up-unread-dot { width:7px; height:7px; border-radius:50%; background:#F5A623; flex-shrink:0; margin-top:5px; }
+.up-empty { padding:24px; text-align:center; font-size:13px; color:#9CA3AF; }
+/* Profile panel */
+.up-profile-hdr { display:flex; align-items:center; gap:10px; padding:14px 16px; }
+.up-profile-avatar { width:38px; height:38px; border-radius:50%; background:#3C4052; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:600; color:#FFFFFF; flex-shrink:0; }
+.up-profile-name { font-size:13px; font-weight:600; color:#111318; }
+.up-profile-role { font-size:11px; color:#9CA3AF; margin-top:1px; }
+.up-panel-divider { height:0.5px; background:#F0ECE8; }
+.up-panel-section-label { font-size:10px; font-weight:600; letter-spacing:1.2px; text-transform:uppercase; color:#B0AAA3; padding:10px 16px 4px; }
+.up-loc-row { display:flex; align-items:center; gap:10px; padding:9px 16px; cursor:pointer; }
+.up-loc-row:hover { background:#FAFAF8; }
+.up-loc-row.active { background:#FAEEDA; }
+.up-loc-icon { width:28px; height:28px; border-radius:7px; background:#F5F2EE; display:flex; align-items:center; justify-content:center; font-size:13px; color:#9CA3AF; flex-shrink:0; }
+.up-loc-row.active .up-loc-icon { background:#F5A623; color:#1A1200; }
+.up-loc-body { flex:1; min-width:0; }
+.up-loc-name { font-size:12px; font-weight:600; color:#111318; margin-bottom:1px; }
+.up-loc-addr { font-size:10px; color:#9CA3AF; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.up-panel-action { display:flex; align-items:center; gap:8px; padding:10px 16px; font-size:12px; font-weight:500; color:#7A7F8E; cursor:pointer; }
+.up-panel-action:hover { background:#FFF5F5; color:#C0392B; }
+.up-panel-action i { font-size:14px; }
 .oem-badge { background: #E1F5EE; color: #0F6E56; font-size: 9px; font-weight: 700; border-radius: 3px; padding: 1px 4px; }

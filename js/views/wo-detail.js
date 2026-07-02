@@ -13,9 +13,7 @@ function render_wo_detail(el) {
         <span>/</span><span style="color:#FFFFFF;">WO not found</span>
       </div>
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
-      <div class="topbar-right">
-        <button class="topbar-icon-btn"><i class="ti ti-bell"></i></button>
-      </div>
+      ${buildTopbarRight()}
     </div>
     <div style="padding:40px;color:#9CA3AF;font-size:14px;">
       <p>Work order not found. <a style="color:#F5A623;cursor:pointer;" onclick="sendPrompt('Work orders')">Return to work orders list</a></p>
@@ -238,10 +236,7 @@ function render_wo_detail(el) {
         <span style="color:#FFFFFF;font-weight:500;">WO #${wo.id}</span>
       </div>
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
-      <div class="topbar-right">
-        <button class="topbar-icon-btn"><i class="ti ti-bell"></i><span class="notif-dot"></span></button>
-        <button class="topbar-icon-btn"><i class="ti ti-settings"></i></button>
-      </div>
+      ${buildTopbarRight()}
     </div>
     <div class="wo-detail-content">
       <div class="wo-detail-header">

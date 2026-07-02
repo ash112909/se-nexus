@@ -122,7 +122,7 @@ function render_login(el) {
         <a href="#" class="login-forgot">Forgot password?</a>
       </div>
 
-      <button class="btn-sign-in" onclick="sendPrompt('Signed in &mdash; show the Fleet Mechanic dashboard for James')">
+      <button class="btn-sign-in" onclick="loginSubmit()">
         Sign in <i class="ti ti-arrow-right" aria-hidden="true" style="font-size:15px;"></i>
       </button>
 
@@ -142,6 +142,10 @@ function render_login(el) {
         Continue with Google SSO
       </button>
 
+      <div id="login-location-step" style="display:none;margin-bottom:18px;">
+        <div style="font-size:13px;font-weight:600;color:#3A3D4A;margin-bottom:10px;display:flex;align-items:center;gap:6px;"><i class="ti ti-map-pin" style="color:#F5A623;"></i> Select your branch</div>
+        <div id="login-location-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+      </div>
       <div class="login-form-footer">
         Need access? <a href="#">Contact your administrator</a><br>
         <a href="#">Terms &amp; Privacy</a> &middot; <a href="#">Cookie Preferences</a>
@@ -149,4 +153,27 @@ function render_login(el) {
     </div>
   </div>
 </div>`;
+
+  window.loginSubmit = function() {
+    if (Store.getCurrentLocation()) { sendPrompt('dashboard'); return; }
+    const step = document.getElementById('login-location-step');
+    const list = document.getElementById('login-location-list');
+    if (!step || !list) { sendPrompt('dashboard'); return; }
+    list.innerHTML = Store.getLocations().map(l => `
+      <div onclick="loginPickLocation('${l.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid #E2DDD8;border-radius:9px;cursor:pointer;background:#FFFFFF;" onmouseover="this.style.borderColor='#F5A623'" onmouseout="this.style.borderColor='#E2DDD8'">
+        <div style="width:32px;height:32px;background:#FAEEDA;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#854F0B;flex-shrink:0;"><i class="ti ti-map-pin"></i></div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;color:#111318;">${l.name}</div>
+          <div style="font-size:11px;color:#9CA3AF;">${l.fleetSize} units · ${l.address.split(',').slice(1).join(',').trim()}</div>
+        </div>
+        <i class="ti ti-chevron-right" style="color:#C8C3BC;font-size:13px;"></i>
+      </div>`).join('');
+    step.style.display = 'block';
+    step.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  };
+
+  window.loginPickLocation = function(id) {
+    Store.setCurrentLocation(id);
+    sendPrompt('dashboard');
+  };
 }

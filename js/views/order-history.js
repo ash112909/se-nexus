@@ -191,10 +191,7 @@ function render_order_history(el) {
         <span style="color:#FFFFFF;font-weight:500;">Order history</span>
       </div>
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
-      <div class="topbar-right">
-        <button class="topbar-icon-btn"><i class="ti ti-bell"></i><span class="notif-dot"></span></button>
-        <button class="topbar-icon-btn"><i class="ti ti-settings"></i></button>
-      </div>
+      ${buildTopbarRight()}
     </div>
 
     <div style="display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;" id="oh-content">

@@ -414,6 +414,47 @@ const Store = (() => {
     return manuals;
   }
 
+  // --- Locations ---
+  const LOCATIONS = [
+    { id: 'austin',     name: 'Austin Branch',      address: '1204 N Lamar Blvd, Austin TX 78703',          fleetSize: 14 },
+    { id: 'san-marcos', name: 'San Marcos Branch',  address: '912 Wonder World Dr, San Marcos TX 78666',    fleetSize: 8  },
+    { id: 'kyle',       name: 'Kyle Branch',        address: '401 Kohlers Crossing, Kyle TX 78640',         fleetSize: 6  },
+  ];
+  let _currentLocationId = localStorage.getItem('se-nexus-location') || null;
+
+  function getLocations() { return LOCATIONS; }
+  function getCurrentLocation() { return LOCATIONS.find(l => l.id === _currentLocationId) || null; }
+  function setCurrentLocation(id) {
+    _currentLocationId = id;
+    try { localStorage.setItem('se-nexus-location', id); } catch(e) {}
+  }
+
+  // --- Notifications ---
+  const DEFAULT_NOTIFICATIONS = [
+    { id:'notif-1', type:'order',    icon:'ti-package',     title:'PO-7841 delivered',                          body:'Your order PO-7841 (Hydraulic seals — WO #100094) has been delivered to Austin Branch. 2 items, $268.00.',                                                    time:'2h ago',   read:false },
+    { id:'notif-2', type:'order',    icon:'ti-alert-circle',title:'PO-7801 backordered',                        body:'Pump seal kit ×2 (SKJ-107732) on PO-7801 is backordered with Skyjack. Estimated availability: Jun 26, 2026. WO #100094 is affected.',                       time:'5h ago',   read:false },
+    { id:'notif-3', type:'bulletin', icon:'ti-file-alert',  title:'Service bulletin: SB-2847',                  body:'Skyjack has issued Service Bulletin SB-2847 — Lift Cylinder Seal Replacement Procedure. Affects SJIII 3219 units with serial range SJ3219-00600 through SJ3219-01100. Review before performing cylinder service on FL-094.', time:'Yesterday', read:false },
+    { id:'notif-4', type:'wo',       icon:'ti-clipboard-list',title:'WO #100089 assigned to M. Torres',         body:'Work order WO #100089 (Toyota 8FGU25 — mast chain elongation inspection) has been assigned to M. Torres. Asset: FL-031, Austin Branch.',                    time:'Yesterday', read:true  },
+    { id:'notif-5', type:'warranty', icon:'ti-shield-check', title:'Warranty expiry: FL-031 in 6 months',       body:'The warranty on FL-031 (Toyota 8FGU25, serial TOY8FGU-00391) expires Dec 2026. Schedule any warranty service before expiry to avoid out-of-pocket costs.',  time:'Jun 20',   read:true  },
+    { id:'notif-6', type:'order',    icon:'ti-check',        title:'PO-7792 delivered',                          body:'Order PO-7792 (Valve kit — FL-091) has been delivered. Submitted by M. Torres on Jun 15, 2026. $145.00.',                                                   time:'Jun 15',   read:true  },
+  ];
+
+  function getNotifications(unreadOnly) {
+    const notifs = _data.notifications || DEFAULT_NOTIFICATIONS;
+    return unreadOnly ? notifs.filter(n => !n.read) : notifs;
+  }
+  function markNotificationRead(id) {
+    if (!_data.notifications) _data.notifications = JSON.parse(JSON.stringify(DEFAULT_NOTIFICATIONS));
+    const n = _data.notifications.find(x => x.id === id);
+    if (n) { n.read = true; save(_data); }
+  }
+  function markAllNotificationsRead() {
+    if (!_data.notifications) _data.notifications = JSON.parse(JSON.stringify(DEFAULT_NOTIFICATIONS));
+    _data.notifications.forEach(n => n.read = true);
+    save(_data);
+  }
+  function getUnreadCount() { return getNotifications(true).length; }
+
   // --- Reset ---
   function reset() {
     _data = JSON.parse(JSON.stringify(DEFAULTS));
@@ -427,6 +468,8 @@ const Store = (() => {
     getWoCart, addToWoCart, removeFromWoCart, updateWoCartQty, submitWoCart,
     addDiagnosticMessage, getDiagnosticHistory, clearDiagnosticHistory,
     getParts, getManuals,
+    getLocations, getCurrentLocation, setCurrentLocation,
+    getNotifications, markNotificationRead, markAllNotificationsRead, getUnreadCount,
     reset,
   };
 })();

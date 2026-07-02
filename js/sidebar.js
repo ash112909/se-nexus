@@ -1,4 +1,6 @@
 function buildSidebar(activeItem) {
+  const loc = (typeof Store !== 'undefined' && Store.getCurrentLocation) ? Store.getCurrentLocation() : null;
+  const locName = loc ? loc.name : 'Mid-County Rental';
   return `
   <div class="sidebar">
     <div class="sb-fleet">
@@ -7,7 +9,7 @@ function buildSidebar(activeItem) {
       </div>
       <div>
         <div class="sb-fleet-name">Mid-County Rental</div>
-        <div class="sb-fleet-sub">Austin Branch</div>
+        <div class="sb-fleet-sub">${locName}</div>
       </div>
     </div>
     <div class="sb-nav">
@@ -17,15 +19,31 @@ function buildSidebar(activeItem) {
       <div class="sb-item ${activeItem==='order-history'?'active':''}" onclick="sendPrompt('Open order history')"><i class="ti ti-history"></i> Order history</div>
       <div class="sb-section-label">Parts</div>
       <div class="sb-item ${activeItem==='parts'?'active':''}" onclick="sendPrompt('Open Parts Search scoped to WO #100094, Skyjack SJIII 3219 — diagram view, hydraulic lift cylinder')"><i class="ti ti-search"></i> Search parts</div>
-<div class="sb-item ${activeItem==='recommended'?'active':''}" onclick="sendPrompt('Open recommended parts')"><i class="ti ti-star"></i> Recommended</div>
+      <div class="sb-item ${activeItem==='recommended'?'active':''}" onclick="sendPrompt('Open recommended parts')"><i class="ti ti-star"></i> Recommended</div>
       <div class="sb-section-label">Knowledge</div>
       <div class="sb-item ${activeItem==='manuals'?'active':''}" onclick="sendPrompt('Open manuals and docs')"><i class="ti ti-book"></i> Manuals &amp; docs</div>
       <div class="sb-item ${activeItem==='diagnostics'?'active':''}" onclick="sendPrompt('Open diagnostic assistant')"><i class="ti ti-tool"></i> Diagnostics</div>
     </div>
-    <div class="sb-footer">
-      <div class="sb-avatar">JW</div>
-      <div><div class="sb-user-name">James W.</div><div class="sb-user-role">Fleet Mechanic</div></div>
-      <i class="ti ti-logout sb-logout" onclick="sendPrompt('show login')" style="cursor:pointer;"></i>
-    </div>
+  </div>`;
+}
+
+function buildTopbarRight() {
+  const loc = (typeof Store !== 'undefined' && Store.getCurrentLocation) ? Store.getCurrentLocation() : null;
+  const locName = loc ? loc.name : 'Austin Branch';
+  const unread = (typeof Store !== 'undefined' && Store.getUnreadCount) ? Store.getUnreadCount() : 0;
+  return `<div class="topbar-right">
+    <button class="topbar-icon-btn" id="up-btn-notif" onclick="UserPanel.openNotifications()" title="Notifications">
+      <i class="ti ti-bell"></i>
+      <span class="notif-dot" style="${unread > 0 ? '' : 'display:none;'}"></span>
+    </button>
+    <button class="topbar-icon-btn" title="Settings"><i class="ti ti-settings"></i></button>
+    <button class="topbar-profile-btn" id="up-btn-profile" onclick="UserPanel.openProfile()">
+      <div class="tp-avatar">JW</div>
+      <div class="tp-info">
+        <div class="tp-name">James W.</div>
+        <div class="tp-loc">${locName}</div>
+      </div>
+      <i class="ti ti-selector" style="font-size:12px;color:#5C6070;flex-shrink:0;"></i>
+    </button>
   </div>`;
 }

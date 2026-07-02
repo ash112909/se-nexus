@@ -144,10 +144,7 @@ function render_wo_list(el) {
   <div class="main">
     <div class="topbar">
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
-      <div class="topbar-right">
-        <button class="topbar-icon-btn"><i class="ti ti-bell"></i><span class="notif-dot"></span></button>
-        <button class="topbar-icon-btn"><i class="ti ti-settings"></i></button>
-      </div>
+      ${buildTopbarRight()}
     </div>
     <div class="wol-content">
       <div class="wol-header">
