@@ -66,7 +66,6 @@ function render_dashboard(el) {
 
   el.innerHTML = `
 <style>
-.topbar-search { flex: 1; max-width: 380px; height: 32px; background: #2A2A2A; border: 1px solid #333; border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 0 10px; color: #5C6070; font-size: 13px; cursor:text; }
 .content { flex: 1; padding: 24px; overflow-y: auto; }
 .greeting { margin-bottom: 20px; }
 .greeting-top { font-size: 20px; font-weight: 700; color: #111318; letter-spacing: -0.3px; }

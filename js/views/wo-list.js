@@ -88,7 +88,7 @@ function render_wo_list(el) {
 
   el.innerHTML = `
 <style>
-.wol-topbar-search { flex: 1; max-width: 380px; height: 32px; background: #2A2A2A; border: 1px solid #333; border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 0 10px; color: #5C6070; font-size: 13px; cursor: text; }
+.topbar-search { flex: 1; max-width: 380px; height: 32px; background: #2A2A2A; border: 1px solid #333; border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 0 10px; color: #5C6070; font-size: 13px; cursor: text; }
 .wol-content { flex: 1; padding: 28px 28px 40px; overflow-y: auto; }
 .wol-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
 .wol-title { font-size: 18px; font-weight: 700; color: #111318; letter-spacing: -0.3px; }
@@ -143,7 +143,7 @@ function render_wo_list(el) {
   ${buildSidebar('wo')}
   <div class="main">
     <div class="topbar">
-      <div class="wol-topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
+      <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
       <div class="topbar-right">
         <button class="topbar-icon-btn"><i class="ti ti-bell"></i><span class="notif-dot"></span></button>
         <button class="topbar-icon-btn"><i class="ti ti-settings"></i></button>

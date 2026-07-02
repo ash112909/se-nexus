@@ -578,6 +578,7 @@ function render_parts_search(el) {
         ${_wo ? `<a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('Work Order detail WO #${_wo.id}')">WO #${_wo.id}</a><span style="color:#3C4052;">/</span>` : ''}
         <span style="color:#FFFFFF;font-weight:500;">Parts search</span>
       </div>
+      <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
       <div class="topbar-right">
         <button class="topbar-icon-btn"><i class="ti ti-bell"></i><span class="notif-dot"></span></button>
         <button class="topbar-icon-btn"><i class="ti ti-settings"></i></button>
