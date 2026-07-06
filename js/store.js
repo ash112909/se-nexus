@@ -1,5 +1,5 @@
 const Store = (() => {
-  const LS_KEY = 'se-nexus-v2';
+  const LS_KEY = 'se-nexus-v3';
 
   const DEFAULT_PARTS = [
     { id: 'SKJ-103100', partNum: 'SKJ-103100', description: 'Hydraulic lift cylinder seal kit', vendor: 'Skyjack', price: 84.00, oemOnly: true, inStock: true, category: 'Seals', recommended: true },
@@ -50,7 +50,7 @@ const Store = (() => {
         machine: 'Skyjack SJIII 3219',
         asset: 'FL-094',
         issue: "Scissor lift won't elevate — hydraulic fault",
-        warranty: { active: true, expiry: 'Sep 2027' },
+        warranty: { active: true, expiry: 'Sep 14, 2027' },
         assignee: 'James W.',
         opened: 'Jun 20, 2026',
         notes: [
@@ -107,7 +107,7 @@ const Store = (() => {
         machine: 'Toyota 8FGU25',
         asset: 'FL-031',
         issue: 'Mast chain elongation — scheduled inspection',
-        warranty: { active: true, expiry: 'Dec 2026' },
+        warranty: { active: true, expiry: 'Dec 3, 2026' },
         assignee: 'M. Torres',
         opened: 'Jun 18, 2026',
         notes: [],
@@ -137,7 +137,7 @@ const Store = (() => {
         machine: 'Skyjack SJIII 4632',
         asset: 'SM-011',
         issue: 'Platform leveling sensor fault — tilt alarm triggered',
-        warranty: { active: true, expiry: 'Mar 2028' },
+        warranty: { active: true, expiry: 'Mar 28, 2028' },
         assignee: 'James W.',
         opened: 'Jun 24, 2026',
         notes: [],
@@ -500,7 +500,7 @@ const Store = (() => {
     { id:'notif-2', type:'order',    icon:'ti-alert-circle',title:'PO-7801 backordered',                        body:'Pump seal kit ×2 (SKJ-107732) on PO-7801 is backordered with Skyjack. Estimated availability: Jun 26, 2026. WO #100094 is affected.',                       time:'5h ago',   read:false },
     { id:'notif-3', type:'bulletin', icon:'ti-file-alert',  title:'Service bulletin: SB-2847',                  body:'Skyjack has issued Service Bulletin SB-2847 — Lift Cylinder Seal Replacement Procedure. Affects SJIII 3219 units with serial range SJ3219-00600 through SJ3219-01100. Review before performing cylinder service on FL-094.', time:'Yesterday', read:false },
     { id:'notif-4', type:'wo',       icon:'ti-clipboard-list',title:'WO #100089 assigned to M. Torres',         body:'Work order WO #100089 (Toyota 8FGU25 — mast chain elongation inspection) has been assigned to M. Torres. Asset: FL-031, Austin Branch.',                    time:'Yesterday', read:true  },
-    { id:'notif-5', type:'warranty', icon:'ti-shield-check', title:'Warranty expiry: FL-031 in 6 months',       body:'The warranty on FL-031 (Toyota 8FGU25, serial TOY8FGU-00391) expires Dec 2026. Schedule any warranty service before expiry to avoid out-of-pocket costs.',  time:'Jun 20',   read:true  },
+    { id:'notif-5', type:'warranty', icon:'ti-shield-check', title:'Warranty expiry: FL-031 in 6 months',       body:'The warranty on FL-031 (Toyota 8FGU25, serial TOY8FGU-00391) expires Dec 3, 2026. Schedule any warranty service before expiry to avoid out-of-pocket costs.',  time:'Jun 20',   read:true  },
     { id:'notif-6', type:'order',    icon:'ti-check',        title:'PO-7792 delivered',                          body:'Order PO-7792 (Valve kit — FL-091) has been delivered. Submitted by M. Torres on Jun 15, 2026. $145.00.',                                                   time:'Jun 15',   read:true  },
   ];
 
