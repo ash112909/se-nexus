@@ -100,6 +100,25 @@ function render_order_history(el) {
           <div class="oh-detail-row"><span class="oh-detail-label">Vendor ID</span><span class="oh-detail-val">${o.vendorId || '—'}</span></div>
         </div>
       </div>
+      ${(o.items && o.items.length) ? `
+      <div class="oh-items-section">
+        <div class="oh-items-title"><i class="ti ti-package" style="font-size:14px;color:#9CA3AF;"></i> Line items <span style="font-size:11px;font-weight:600;background:#F0ECE8;color:#5A5F6E;border-radius:999px;padding:1px 8px;margin-left:4px;">${o.items.length}</span></div>
+        <table class="oh-items-table">
+          <thead><tr><th>Part #</th><th>Description</th><th>Vendor</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Unit</th><th style="text-align:right;">Total</th></tr></thead>
+          <tbody>
+            ${o.items.map(it => `
+            <tr>
+              <td style="font-family:monospace;font-size:11px;color:#5A5F6E;">${it.partNum || '—'}</td>
+              <td>${it.description || it.name || '—'}${it.oemOnly ? ' <span style="font-size:10px;font-weight:600;background:#F5F2EE;color:#5A5F6E;border-radius:4px;padding:1px 5px;">OEM</span>' : ''}</td>
+              <td style="color:#7A7F8E;">${it.vendor || '—'}</td>
+              <td style="text-align:center;">×${it.qty || 1}</td>
+              <td style="text-align:right;">$${(+it.price).toFixed(2)}</td>
+              <td style="text-align:right;font-weight:600;color:#111318;">$${(it.price * (it.qty || 1)).toFixed(2)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+        <div class="oh-items-total">Total <strong>$${(+o.amount).toFixed(2)}</strong></div>
+      </div>` : ''}
       <div class="oh-comments">
         <div class="oh-comments-label">Comments</div>
         <input class="oh-comment-input" type="text" placeholder="Add a comment…"/>
@@ -168,6 +187,13 @@ function render_order_history(el) {
 .oh-detail-row { display: flex; justify-content: space-between; padding: 3px 0; }
 .oh-detail-label { font-size: 12px; color: #9CA3AF; }
 .oh-detail-val { font-size: 12px; font-weight: 500; color: #111318; text-align: right; }
+.oh-items-section { border-top: 0.5px solid #E8E4DF; }
+.oh-items-title { display: flex; align-items: center; gap: 6px; padding: 12px 24px 8px; font-size: 12px; font-weight: 600; color: #5A5F6E; text-transform: uppercase; letter-spacing: 0.8px; }
+.oh-items-table { width: 100%; border-collapse: collapse; }
+.oh-items-table th { font-size: 10px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: #9CA3AF; padding: 6px 24px; text-align: left; background: #FAFAF8; border-top: 0.5px solid #F0ECE8; border-bottom: 0.5px solid #F0ECE8; }
+.oh-items-table td { padding: 8px 24px; font-size: 12px; color: #3A3D4A; border-bottom: 0.5px solid #F5F2EE; vertical-align: middle; }
+.oh-items-table tr:last-child td { border-bottom: none; }
+.oh-items-total { padding: 10px 24px; font-size: 12px; color: #7A7F8E; text-align: right; border-top: 0.5px solid #F0ECE8; }
 .oh-comments { padding: 14px 24px; border-top: 0.5px solid #E8E4DF; }
 .oh-comments-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: #9CA3AF; margin-bottom: 8px; }
 .oh-comment-input { width: 100%; height: 36px; background: #F5F2EE; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 12px; font-size: 13px; font-family: inherit; color: #111318; outline: none; }
