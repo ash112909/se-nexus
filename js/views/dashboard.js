@@ -1,5 +1,5 @@
 function render_dashboard(el) {
-  const activeWOs = Store.getWorkOrders('active');
+  const activeWOs = Store.getWorkOrders('active', 'James W.');
   const activeCount = activeWOs.length;
 
   function machineIcon(machine) {

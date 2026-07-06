@@ -1,5 +1,5 @@
 const Store = (() => {
-  const LS_KEY = 'se-nexus-v3';
+  const LS_KEY = 'se-nexus-v4';
 
   const DEFAULT_PARTS = [
     { id: 'SKJ-103100', partNum: 'SKJ-103100', description: 'Hydraulic lift cylinder seal kit', vendor: 'Skyjack', price: 84.00, oemOnly: true, inStock: true, category: 'Seals', recommended: true },
@@ -42,17 +42,15 @@ const Store = (() => {
 
   const DEFAULTS = {
     workOrders: [
+      // ── Austin – James W. active/pending ──
       {
-        id: 100094,
-        locationId: 'austin',
-        status: 'active',
-        priority: 'high',
-        machine: 'Skyjack SJIII 3219',
-        asset: 'FL-094',
+        id: 100094, externalId: 'RM-10094', locationId: 'austin', woType: 'equipment',
+        status: 'active', priority: 'high', dueDate: 'Jun 30, 2026',
+        make: 'Skyjack', model: 'SJIII 3219', serial: 'SJ3219-00847',
+        machine: 'Skyjack SJIII 3219', asset: 'FL-094',
         issue: "Scissor lift won't elevate — hydraulic fault",
         warranty: { active: true, expiry: 'Sep 14, 2027' },
-        assignee: 'James W.',
-        opened: 'Jun 20, 2026',
+        assignee: 'James W.', opened: 'Jun 20, 2026',
         notes: [
           { text: 'Ran diagnostic — HYD-04 fault code confirmed. Suspect internal seal failure.', author: 'James W.', time: '9:20' },
           { text: 'Parts ordered: SKJ-103100, SKJ-103278. Awaiting delivery.', author: 'James W.', time: '9:45' }
@@ -62,133 +60,194 @@ const Store = (() => {
         ],
         submittedOrders: [
           {
-            id: 'wo-ord-100094-1',
-            poNum: 'PO-7841',
-            date: 'Jun 20, 2026',
+            id: 'wo-ord-100094-1', poNum: 'PO-7841', date: 'Jun 20, 2026',
             items: [
               { id: 'SKJ-103100', partNum: 'SKJ-103100', description: 'Hydraulic lift cylinder seal kit', vendor: 'Skyjack', price: 84.00, qty: 1 },
               { id: 'SKJ-103278', partNum: 'SKJ-103278', description: 'Pressure relief valve', vendor: 'Skyjack', price: 126.00, qty: 1 },
             ],
-            total: 210.00,
-            status: 'submitted',
+            total: 210.00, status: 'in_transit',
           },
           {
-            id: 'wo-ord-100094-2',
-            poNum: 'PO-7801',
-            date: 'Jun 12, 2026',
+            id: 'wo-ord-100094-2', poNum: 'PO-7801', date: 'Jun 12, 2026',
             items: [
               { id: 'SKJ-107732', partNum: 'SKJ-107732', description: 'Pump seal kit', vendor: 'Skyjack', price: 49.00, qty: 2 },
             ],
-            total: 98.00,
-            status: 'backordered',
+            total: 98.00, status: 'backordered',
           }
         ]
       },
       {
-        id: 100102,
-        locationId: 'austin',
-        status: 'active',
-        priority: 'medium',
-        machine: 'Cat 320 Excavator',
-        asset: 'FL-017',
+        id: 100102, externalId: 'RM-10102', locationId: 'austin', woType: 'equipment',
+        status: 'active', priority: 'medium', dueDate: 'Jul 3, 2026',
+        make: 'Caterpillar', model: '320 Excavator', serial: 'CAT320-01044',
+        machine: 'Cat 320 Excavator', asset: 'FL-017',
         issue: 'Track tension out of spec — right side',
         warranty: { active: false, expiry: null },
-        assignee: 'James W.',
-        opened: 'Jun 22, 2026',
-        notes: [],
-        cart: [],
-        submittedOrders: []
+        assignee: 'James W.', opened: 'Jun 22, 2026',
+        notes: [], cart: [], submittedOrders: []
       },
+      // ── Austin – other assignees (not shown to James W. in list) ──
       {
-        id: 100089,
-        locationId: 'austin',
-        status: 'active',
-        priority: 'low',
-        machine: 'Toyota 8FGU25',
-        asset: 'FL-031',
+        id: 100089, externalId: 'RM-10089', locationId: 'austin', woType: 'pm',
+        status: 'active', priority: 'low', dueDate: 'Jul 10, 2026',
+        make: 'Toyota', model: '8FGU25', serial: 'TOY8FGU-00391',
+        machine: 'Toyota 8FGU25', asset: 'FL-031',
         issue: 'Mast chain elongation — scheduled inspection',
         warranty: { active: true, expiry: 'Dec 3, 2026' },
-        assignee: 'M. Torres',
-        opened: 'Jun 18, 2026',
-        notes: [],
-        cart: [],
-        submittedOrders: []
+        assignee: 'M. Torres', opened: 'Jun 18, 2026',
+        notes: [], cart: [], submittedOrders: []
       },
       {
-        id: 100081,
-        locationId: 'austin',
-        status: 'pending',
-        priority: 'medium',
-        machine: 'Bobcat S650',
-        asset: 'FL-008',
+        id: 100081, externalId: 'RM-10081', locationId: 'austin', woType: 'equipment',
+        status: 'pending', priority: 'medium', dueDate: 'Jun 28, 2026',
+        make: 'Bobcat', model: 'S650', serial: 'BOB-S650-00814',
+        machine: 'Bobcat S650', asset: 'FL-008',
         issue: 'Hydraulic quick coupler leak',
         warranty: { active: false, expiry: null },
-        assignee: 'R. Kim',
-        opened: 'Jun 15, 2026',
-        notes: [],
+        assignee: 'R. Kim', opened: 'Jun 15, 2026',
+        notes: [], cart: [], submittedOrders: []
+      },
+      // ── Austin – James W. closed ──
+      {
+        id: 100071, externalId: 'RM-10071', locationId: 'austin', woType: 'equipment',
+        status: 'closed', priority: 'high', dueDate: 'Jun 5, 2026', closedDate: 'Jun 6, 2026',
+        make: 'Skyjack', model: 'SJIII 3219', serial: 'SJ3219-00847',
+        machine: 'Skyjack SJIII 3219', asset: 'FL-094',
+        issue: 'Hydraulic pump failure — unit down',
+        warranty: { active: true, expiry: 'Sep 14, 2027' },
+        assignee: 'James W.', opened: 'Jun 2, 2026',
+        notes: [
+          { text: 'Pump confirmed failed. Ordered SKJ-104210 (complete pump assembly).', author: 'James W.', time: '8:15' },
+          { text: 'Part arrived. Installed and tested — unit back in service.', author: 'James W.', time: '14:30' },
+        ],
         cart: [],
-        submittedOrders: []
+        submittedOrders: [
+          {
+            id: 'wo-ord-100071-1', poNum: 'PO-7762', date: 'Jun 3, 2026',
+            items: [{ id: 'SKJ-104210', partNum: 'SKJ-104210', description: 'Lift cylinder assembly — complete', vendor: 'Skyjack', price: 648.00, qty: 1 }],
+            total: 648.00, status: 'delivered',
+          }
+        ]
       },
       {
-        id: 100110,
-        locationId: 'san-marcos',
-        status: 'active',
-        priority: 'high',
-        machine: 'Skyjack SJIII 4632',
-        asset: 'SM-011',
+        id: 100058, externalId: 'RM-10058', locationId: 'austin', woType: 'pm',
+        status: 'closed', priority: 'low', dueDate: 'May 28, 2026', closedDate: 'May 28, 2026',
+        make: 'Caterpillar', model: '320 Excavator', serial: 'CAT320-01044',
+        machine: 'Cat 320 Excavator', asset: 'FL-017',
+        issue: '500-hr preventive maintenance service',
+        warranty: { active: false, expiry: null },
+        assignee: 'James W.', opened: 'May 25, 2026',
+        notes: [
+          { text: 'PM completed. Replaced oil, fuel filter, and hydraulic pilot filter. Track tension within spec.', author: 'James W.', time: '11:00' },
+        ],
+        cart: [],
+        submittedOrders: [
+          {
+            id: 'wo-ord-100058-1', poNum: 'PO-7735', date: 'May 26, 2026',
+            items: [
+              { id: 'CAT-1R0716', partNum: 'CAT-1R0716', description: 'Engine oil filter — Cat 320', vendor: 'Caterpillar', price: 22.00, qty: 1 },
+              { id: 'CAT-1R0750', partNum: 'CAT-1R0750', description: 'Fuel filter primary — Cat 320', vendor: 'Caterpillar', price: 31.00, qty: 1 },
+              { id: 'CAT-093-7521', partNum: 'CAT-093-7521', description: 'Hydraulic pilot filter — Cat 320', vendor: 'Caterpillar', price: 44.00, qty: 1 },
+            ],
+            total: 97.00, status: 'delivered',
+          }
+        ]
+      },
+      {
+        id: 100044, externalId: 'RM-10044', locationId: 'austin', woType: 'equipment',
+        status: 'closed', priority: 'medium', dueDate: 'May 15, 2026', closedDate: 'May 15, 2026',
+        make: 'Bobcat', model: 'S650', serial: 'BOB-S650-00814',
+        machine: 'Bobcat S650', asset: 'FL-008',
+        issue: 'Rear brake drag — left wheel adjustment',
+        warranty: { active: false, expiry: null },
+        assignee: 'James W.', opened: 'May 12, 2026',
+        notes: [
+          { text: 'Brake adjusted and tested. No further drag. Returned to service.', author: 'James W.', time: '10:40' },
+        ],
+        cart: [], submittedOrders: []
+      },
+      // ── San Marcos – James W. ──
+      {
+        id: 100110, externalId: 'RM-10110', locationId: 'san-marcos', woType: 'equipment',
+        status: 'active', priority: 'high', dueDate: 'Jun 28, 2026',
+        make: 'Skyjack', model: 'SJIII 4632', serial: 'SJ4632-01122',
+        machine: 'Skyjack SJIII 4632', asset: 'SM-011',
         issue: 'Platform leveling sensor fault — tilt alarm triggered',
         warranty: { active: true, expiry: 'Mar 28, 2028' },
-        assignee: 'James W.',
-        opened: 'Jun 24, 2026',
-        notes: [],
-        cart: [],
-        submittedOrders: []
+        assignee: 'James W.', opened: 'Jun 24, 2026',
+        notes: [], cart: [], submittedOrders: []
       },
+      // ── San Marcos – other assignees ──
       {
-        id: 100108,
-        locationId: 'san-marcos',
-        status: 'pending',
-        priority: 'medium',
-        machine: 'Toyota 8FGU32',
-        asset: 'SM-004',
+        id: 100108, externalId: 'RM-10108', locationId: 'san-marcos', woType: 'equipment',
+        status: 'pending', priority: 'medium', dueDate: 'Jul 1, 2026',
+        make: 'Toyota', model: '8FGU32', serial: 'TOY8FGU32-00205',
+        machine: 'Toyota 8FGU32', asset: 'SM-004',
         issue: 'Brake drag — left rear wheel',
         warranty: { active: false, expiry: null },
-        assignee: 'D. Reyes',
-        opened: 'Jun 21, 2026',
-        notes: [],
-        cart: [],
-        submittedOrders: []
+        assignee: 'D. Reyes', opened: 'Jun 21, 2026',
+        notes: [], cart: [], submittedOrders: []
       },
+      // ── San Marcos – James W. closed ──
       {
-        id: 100115,
-        locationId: 'kyle',
-        status: 'active',
-        priority: 'medium',
-        machine: 'Bobcat S770',
-        asset: 'KY-003',
+        id: 100096, externalId: 'RM-10096', locationId: 'san-marcos', woType: 'stock',
+        status: 'closed', priority: 'low', dueDate: 'Jun 14, 2026', closedDate: 'Jun 13, 2026',
+        make: '', model: '', serial: '',
+        machine: '', asset: 'SM-STOCK',
+        issue: 'Hydraulic consumables stock replenishment',
+        warranty: { active: false, expiry: null },
+        assignee: 'James W.', opened: 'Jun 10, 2026',
+        notes: [
+          { text: 'Stock order placed and received. Shelved at new parts room bin H-12.', author: 'James W.', time: '13:20' },
+        ],
+        cart: [],
+        submittedOrders: [
+          {
+            id: 'wo-ord-100096-1', poNum: 'PO-7780', date: 'Jun 11, 2026',
+            items: [
+              { id: 'SKJ-HF046-1G', partNum: 'SKJ-HF046-1G', description: 'Hydraulic fluid — ISO 46 · 1 gal', vendor: 'Skyjack', price: 28.00, qty: 4 },
+              { id: 'SKJ-104880', partNum: 'SKJ-104880', description: 'Hydraulic filter — return line', vendor: 'Skyjack', price: 34.00, qty: 2 },
+            ],
+            total: 180.00, status: 'delivered',
+          }
+        ]
+      },
+      // ── Kyle – James W. ──
+      {
+        id: 100115, externalId: 'RM-10115', locationId: 'kyle', woType: 'equipment',
+        status: 'active', priority: 'medium', dueDate: 'Jul 5, 2026',
+        make: 'Bobcat', model: 'S770', serial: 'BOB-S770-00301',
+        machine: 'Bobcat S770', asset: 'KY-003',
         issue: 'Loader arm hydraulic cylinder slow extension',
         warranty: { active: false, expiry: null },
-        assignee: 'James W.',
-        opened: 'Jun 25, 2026',
-        notes: [],
-        cart: [],
-        submittedOrders: []
+        assignee: 'James W.', opened: 'Jun 25, 2026',
+        notes: [], cart: [], submittedOrders: []
       },
+      // ── Kyle – other assignees ──
       {
-        id: 100113,
-        locationId: 'kyle',
-        status: 'closed',
-        priority: 'low',
-        machine: 'Cat 308 Mini Excavator',
-        asset: 'KY-007',
+        id: 100113, externalId: 'RM-10113', locationId: 'kyle', woType: 'equipment',
+        status: 'closed', priority: 'low', dueDate: 'Jun 15, 2026', closedDate: 'Jun 16, 2026',
+        make: 'Caterpillar', model: '308 Mini Excavator', serial: 'CAT308-00512',
+        machine: 'Cat 308 Mini Excavator', asset: 'KY-007',
         issue: 'Engine coolant leak — water pump seal',
         warranty: { active: false, expiry: null },
-        assignee: 'T. Nguyen',
-        opened: 'Jun 10, 2026',
-        notes: [],
-        cart: [],
-        submittedOrders: []
-      }
+        assignee: 'T. Nguyen', opened: 'Jun 10, 2026',
+        notes: [], cart: [], submittedOrders: []
+      },
+      // ── Kyle – James W. closed ──
+      {
+        id: 100103, externalId: 'RM-10103', locationId: 'kyle', woType: 'pm',
+        status: 'closed', priority: 'medium', dueDate: 'Jun 18, 2026', closedDate: 'Jun 18, 2026',
+        make: 'Bobcat', model: 'S770', serial: 'BOB-S770-00301',
+        machine: 'Bobcat S770', asset: 'KY-003',
+        issue: '250-hr scheduled PM — filters and lubrication',
+        warranty: { active: false, expiry: null },
+        assignee: 'James W.', opened: 'Jun 16, 2026',
+        notes: [
+          { text: 'PM complete. Engine oil, air filter, and all grease points serviced.', author: 'James W.', time: '15:00' },
+        ],
+        cart: [], submittedOrders: []
+      },
     ],
     orders: [
       { id: 'ord-1', poNum: 'PO-7841', vendor: 'Skyjack', vendorId: 'SKJ-DIST', date: 'Jun 20, 2026', user: 'James W.', name: 'Hydraulic seals — WO #100094', wo: 'WO #100094', asset: 'FL-094', amount: 268.00, status: 'submitted', tab: 'submitted' },
@@ -241,8 +300,9 @@ const Store = (() => {
   let _data = load();
 
   // --- Work Orders ---
-  function getWorkOrders(statusFilter) {
+  function getWorkOrders(statusFilter, assigneeFilter) {
     let wos = _data.workOrders.filter(wo => !wo.locationId || wo.locationId === _currentLocationId);
+    if (assigneeFilter) wos = wos.filter(wo => wo.assignee === assigneeFilter);
     if (statusFilter && statusFilter !== 'all') wos = wos.filter(wo => wo.status === statusFilter);
     return wos;
   }
@@ -256,8 +316,15 @@ const Store = (() => {
     const maxId = _data.workOrders.reduce((m, w) => Math.max(m, w.id), 100000);
     const wo = Object.assign({
       id: maxId + 1,
+      externalId: '',
+      locationId: _currentLocationId || 'austin',
+      woType: 'equipment',
       status: 'active',
       priority: 'medium',
+      dueDate: '',
+      make: '',
+      model: '',
+      serial: '',
       machine: '',
       asset: '',
       issue: '',
