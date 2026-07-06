@@ -1,5 +1,5 @@
 const Store = (() => {
-  const LS_KEY = 'se-nexus-v1';
+  const LS_KEY = 'se-nexus-v2';
 
   const DEFAULT_PARTS = [
     { id: 'SKJ-103100', partNum: 'SKJ-103100', description: 'Hydraulic lift cylinder seal kit', vendor: 'Skyjack', price: 84.00, oemOnly: true, inStock: true, category: 'Seals', recommended: true },
