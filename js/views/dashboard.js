@@ -203,7 +203,7 @@ function render_dashboard(el) {
         <span class="section-view-all" onclick="sendPrompt('Open manuals and docs')">View all <i class="ti ti-arrow-right" style="font-size:11px;"></i></span>
       </div>
       <div class="news-list">
-        <div class="news-item" onclick="sendPrompt('Open manuals and docs')">
+        <div class="news-item" onclick="newsOpenArticle('n-01')">
           <div class="news-icon icon-amber"><i class="ti ti-alert-triangle"></i></div>
           <div class="news-body">
             <div class="news-tag" style="color:#854F0B;">Service Bulletin</div>
@@ -212,7 +212,7 @@ function render_dashboard(el) {
           </div>
           <div class="news-meta">Jun 24</div>
         </div>
-        <div class="news-item">
+        <div class="news-item" onclick="newsOpenArticle('n-02')">
           <div class="news-icon icon-blue"><i class="ti ti-building"></i></div>
           <div class="news-body">
             <div class="news-tag" style="color:#185FA5;">Fleet Update</div>
@@ -221,7 +221,7 @@ function render_dashboard(el) {
           </div>
           <div class="news-meta">Jun 22</div>
         </div>
-        <div class="news-item" onclick="sendPrompt('Open news and updates')">
+        <div class="news-item" onclick="newsOpenArticle('n-12')">
           <div class="news-icon icon-blue"><i class="ti ti-building"></i></div>
           <div class="news-body">
             <div class="news-tag" style="color:#185FA5;">Fleet Update</div>
@@ -230,7 +230,7 @@ function render_dashboard(el) {
           </div>
           <div class="news-meta">Jun 10</div>
         </div>
-        <div class="news-item">
+        <div class="news-item" onclick="newsOpenArticle('n-04')">
           <div class="news-icon icon-teal"><i class="ti ti-shield-check"></i></div>
           <div class="news-body">
             <div class="news-tag" style="color:#0F6E56;">Warranty</div>

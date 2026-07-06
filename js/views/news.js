@@ -1,28 +1,32 @@
-function render_news(el) {
-  let _search = '';
-  let _filterType = 'all';
-  let _filterPoster = 'all';
-  let _filterPriority = 'all';
-  let _sortDir = 'desc'; // desc = newest first
+// Shared article data — defined at module level so dashboard and other views can call newsOpenArticle
+const NEWS_TYPE_META = {
+  bulletin:  { label: 'Service Bulletin', color: '#854F0B', bg: '#FAEEDA', icon: 'ti-alert-triangle' },
+  fleet:     { label: 'Fleet Update',     color: '#185FA5', bg: '#E6F1FB', icon: 'ti-building'       },
+  supplier:  { label: 'Supplier News',    color: '#534AB7', bg: '#EEEDFE', icon: 'ti-news'            },
+  warranty:  { label: 'Warranty',         color: '#0F6E56', bg: '#E1F5EE', icon: 'ti-shield-check'   },
+  safety:    { label: 'Safety Alert',     color: '#B91C1C', bg: '#FEE2E2', icon: 'ti-alert-octagon'  },
+  pricing:   { label: 'Pricing',          color: '#6B7280', bg: '#F3F4F6', icon: 'ti-tag'            },
+  training:  { label: 'Training',         color: '#5B21B6', bg: '#EDE9FE', icon: 'ti-certificate'    },
+};
 
-  const TYPE_META = {
-    bulletin:  { label: 'Service Bulletin', color: '#854F0B', bg: '#FAEEDA', icon: 'ti-alert-triangle' },
-    fleet:     { label: 'Fleet Update',     color: '#185FA5', bg: '#E6F1FB', icon: 'ti-building'       },
-    supplier:  { label: 'Supplier News',    color: '#534AB7', bg: '#EEEDFE', icon: 'ti-news'            },
-    warranty:  { label: 'Warranty',         color: '#0F6E56', bg: '#E1F5EE', icon: 'ti-shield-check'   },
-    safety:    { label: 'Safety Alert',     color: '#B91C1C', bg: '#FEE2E2', icon: 'ti-alert-octagon'  },
-    pricing:   { label: 'Pricing',          color: '#6B7280', bg: '#F3F4F6', icon: 'ti-tag'            },
-    training:  { label: 'Training',         color: '#5B21B6', bg: '#EDE9FE', icon: 'ti-certificate'    },
-  };
+const NEWS_PRIORITY_META = {
+  critical: { label: 'Critical',  color: '#B91C1C', bg: '#FEE2E2' },
+  high:     { label: 'High',      color: '#C2410C', bg: '#FFF7ED' },
+  medium:   { label: 'Medium',    color: '#B45309', bg: '#FFFBEB' },
+  low:      { label: 'Low',       color: '#6B7280', bg: '#F9FAFB' },
+};
 
-  const PRIORITY_META = {
-    critical: { label: 'Critical',  color: '#B91C1C', bg: '#FEE2E2', icon: 'ti-circle-filled' },
-    high:     { label: 'High',      color: '#C2410C', bg: '#FFF7ED', icon: 'ti-circle-filled' },
-    medium:   { label: 'Medium',    color: '#B45309', bg: '#FFFBEB', icon: 'ti-circle-filled' },
-    low:      { label: 'Low',       color: '#6B7280', bg: '#F9FAFB', icon: 'ti-circle-filled' },
-  };
+function _newsTypeChip(type) {
+  const m = NEWS_TYPE_META[type] || NEWS_TYPE_META.supplier;
+  return `<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;background:${m.bg};color:${m.color};border-radius:4px;padding:2px 7px;"><i class="ti ${m.icon}" style="font-size:11px;"></i>${m.label}</span>`;
+}
 
-  const NEWS = [
+function _newsPriorityChip(priority) {
+  const p = NEWS_PRIORITY_META[priority] || NEWS_PRIORITY_META.low;
+  return `<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;letter-spacing:.5px;background:${p.bg};color:${p.color};border-radius:4px;padding:2px 7px;"><span style="width:6px;height:6px;border-radius:50%;background:${p.color};display:inline-block;flex-shrink:0;"></span>${p.label}</span>`;
+}
+
+const NEWS_ARTICLES = [
     {
       id:'n-01', type:'bulletin', poster:'Skyjack', date:'2026-06-24', dateLabel:'Jun 24, 2026', priority:'critical',
       title:'SB-2026-047 — Hydraulic pressure relief valve inspection required',
@@ -198,9 +202,49 @@ function render_news(el) {
       body:'Skyjack has released firmware version 3.1.2 for the pothole protection module on SJIII series scissor lifts. The update corrects a known issue where the tilt sensor could trigger a false-positive fault (ERR-TILT-02) when traversing minor surface irregularities at low speed. The fault would lock platform elevation and require a power cycle to reset. The update is available via USB programmer through your Skyjack dealer or via the SmartConnect telematics portal if the unit is SmartConnect-enabled. Firmware can be applied during any scheduled service.',
       tags:['skyjack','firmware','software','tilt'],
     },
-  ];
+];
 
-  const POSTERS = ['All', 'Mid-County Rental', 'Skyjack', 'Caterpillar', 'Toyota', 'Bobcat', 'Parker', 'Grainger'];
+const NEWS_POSTERS = ['All', 'Mid-County Rental', 'Skyjack', 'Caterpillar', 'Toyota', 'Bobcat', 'Parker', 'Grainger'];
+
+// Global — callable from dashboard and any other view without needing the news view rendered
+window.newsOpenArticle = function(id) {
+  const n = NEWS_ARTICLES.find(x => x.id === id);
+  if (!n) return;
+  const saved = new Set(JSON.parse(localStorage.getItem('se-news-saved') || '[]')).has(id);
+  Modal.show({
+    title: n.title,
+    body: `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+        ${_newsTypeChip(n.type)}${_newsPriorityChip(n.priority)}
+        <span style="font-size:12px;color:#9CA3AF;">Posted by <strong style="color:#3A3D4A;">${n.poster}</strong> · ${n.dateLabel}</span>
+      </div>
+      <p style="font-size:13px;color:#3A3D4A;line-height:1.8;margin-bottom:16px;">${n.body}</p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+        ${n.tags.map(t => `<span style="font-size:11px;background:#F5F2EE;color:#7A7F8E;border-radius:4px;padding:2px 8px;">${t}</span>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;padding-top:12px;border-top:0.5px solid #F0ECE8;">
+        <button onclick="newsSave('${n.id}');Modal.close();" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:0.5px solid #E2DDD8;background:${saved?'#FAEEDA':'#FFFFFF'};color:${saved?'#854F0B':'#5A5F6E'};font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;">
+          <i class="ti ${saved?'ti-bookmark-filled':'ti-bookmark'}"></i> ${saved ? 'Remove from saved' : 'Save article'}
+        </button>
+        <button onclick="Modal.close();setTimeout(()=>newsReport('${n.id}'),80);" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:0.5px solid #E2DDD8;background:#FFFFFF;color:#5A5F6E;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;">
+          <i class="ti ti-flag"></i> Report a problem
+        </button>
+      </div>`,
+    actions: [{ label: 'Close', onClick: () => Modal.close() }]
+  });
+};
+
+// newsReport/newsSave are re-registered each time the news view renders (they need closure state)
+// but they also work globally since they just write to localStorage and call renderCards (no-op if not rendered)
+window.newsReport = window.newsReport || function(id) { /* defined in render_news */ };
+window.newsSave   = window.newsSave   || function(id) { /* defined in render_news */ };
+
+function render_news(el) {
+  let _search = '';
+  let _filterType = 'all';
+  let _filterPoster = 'all';
+  let _filterPriority = 'all';
+  let _sortDir = 'desc';
 
   // Persist saved + reported in localStorage
   let _saved = new Set(JSON.parse(localStorage.getItem('se-news-saved') || '[]'));
@@ -209,6 +253,13 @@ function render_news(el) {
 
   function persistSaved() { try { localStorage.setItem('se-news-saved', JSON.stringify([..._saved])); } catch(e) {} }
   function persistReported() { try { localStorage.setItem('se-news-reported', JSON.stringify([..._reported])); } catch(e) {} }
+
+  const NEWS = NEWS_ARTICLES;
+  const TYPE_META = NEWS_TYPE_META;
+  const PRIORITY_META = NEWS_PRIORITY_META;
+  const POSTERS = NEWS_POSTERS;
+  function typeChip(t) { return _newsTypeChip(t); }
+  function priorityChip(p) { return _newsPriorityChip(p); }
 
   function filteredNews() {
     let items = NEWS.slice();
@@ -279,33 +330,6 @@ function render_news(el) {
       </div>`;
     }).join('');
   }
-
-  window.newsOpenArticle = function(id) {
-    const n = NEWS.find(x => x.id === id);
-    if (!n) return;
-    const saved = _saved.has(n.id);
-    Modal.show({
-      title: n.title,
-      body: `
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
-          ${typeChip(n.type)}${priorityChip(n.priority)}
-          <span style="font-size:12px;color:#9CA3AF;">Posted by <strong style="color:#3A3D4A;">${n.poster}</strong> · ${n.dateLabel}</span>
-        </div>
-        <p style="font-size:13px;color:#3A3D4A;line-height:1.8;margin-bottom:16px;">${n.body}</p>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
-          ${n.tags.map(t => `<span style="font-size:11px;background:#F5F2EE;color:#7A7F8E;border-radius:4px;padding:2px 8px;">${t}</span>`).join('')}
-        </div>
-        <div style="display:flex;gap:8px;padding-top:12px;border-top:0.5px solid #F0ECE8;">
-          <button onclick="newsSave('${n.id}');Modal.close();" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:0.5px solid #E2DDD8;background:${saved?'#FAEEDA':'#FFFFFF'};color:${saved?'#854F0B':'#5A5F6E'};font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;">
-            <i class="ti ${saved?'ti-bookmark-filled':'ti-bookmark'}"></i> ${saved ? 'Remove from saved' : 'Save article'}
-          </button>
-          <button onclick="Modal.close();setTimeout(()=>newsReport('${n.id}'),80);" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:0.5px solid #E2DDD8;background:#FFFFFF;color:#5A5F6E;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;">
-            <i class="ti ti-flag"></i> Report a problem
-          </button>
-        </div>`,
-      actions: [{ label: 'Close', onClick: () => Modal.close() }]
-    });
-  };
 
   window.newsSave = function(id) {
     if (_saved.has(id)) { _saved.delete(id); } else { _saved.add(id); }
