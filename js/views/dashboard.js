@@ -221,14 +221,14 @@ function render_dashboard(el) {
           </div>
           <div class="news-meta">Jun 22</div>
         </div>
-        <div class="news-item" onclick="sendPrompt('Open manuals and docs')">
-          <div class="news-icon icon-purple"><i class="ti ti-news"></i></div>
+        <div class="news-item" onclick="sendPrompt('Open news and updates')">
+          <div class="news-icon icon-blue"><i class="ti ti-building"></i></div>
           <div class="news-body">
-            <div class="news-tag" style="color:#534AB7;">Supplier News</div>
-            <div class="news-title">Caterpillar parts price update effective Jul 1, 2026</div>
-            <div class="news-sub">Track adjuster and undercarriage parts see a 3–5% price increase. Review open POs before end of June.</div>
+            <div class="news-tag" style="color:#185FA5;">Fleet Update</div>
+            <div class="news-title">Q3 2026 PM schedule published — WOs auto-created Jul 1</div>
+            <div class="news-sub">Preventive maintenance work orders will be auto-assigned on July 1 for all fleet units due in Q3.</div>
           </div>
-          <div class="news-meta">Jun 19</div>
+          <div class="news-meta">Jun 10</div>
         </div>
         <div class="news-item">
           <div class="news-icon icon-teal"><i class="ti ti-shield-check"></i></div>
