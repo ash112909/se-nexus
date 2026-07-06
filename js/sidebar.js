@@ -23,6 +23,7 @@ function buildSidebar(activeItem) {
       <div class="sb-section-label">Knowledge</div>
       <div class="sb-item ${activeItem==='manuals'?'active':''}" onclick="sendPrompt('Open manuals and docs')"><i class="ti ti-book"></i> Manuals &amp; docs</div>
       <div class="sb-item ${activeItem==='diagnostics'?'active':''}" onclick="sendPrompt('Open diagnostic assistant')"><i class="ti ti-tool"></i> Diagnostics</div>
+      <div class="sb-item ${activeItem==='news'?'active':''}" onclick="sendPrompt('Open news and updates')"><i class="ti ti-news"></i> News &amp; updates</div>
     </div>
   </div>`;
 }
