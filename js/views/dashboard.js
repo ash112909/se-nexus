@@ -19,7 +19,7 @@ function render_dashboard(el) {
 
   function warrantyBadge(wo) {
     if (wo.warranty && wo.warranty.active && wo.warranty.expiry) {
-      return `<span class="wo-warranty"><i class="ti ti-shield-check"></i> Warranty · ${wo.warranty.expiry}</span>`;
+      return `<span class="wo-warranty"><i class="ti ti-shield-check"></i> Warranty · ${wo.warranty.expiry}<span class="wb-tip">This machine is under warranty until ${wo.warranty.expiry}.</span></span>`;
     }
     return `<span class="wo-warranty expired"><i class="ti ti-shield-off"></i> Warranty expired</span>`;
   }
@@ -96,8 +96,11 @@ function render_dashboard(el) {
 .wo-machine-name { font-size: 14px; font-weight: 600; color: #111318; margin-bottom: 2px; }
 .wo-machine-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .wo-machine-issue { font-size: 13px; color: #7A7F8E; }
-.wo-warranty { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: #0F6E56; background: #E1F5EE; border-radius: 999px; padding: 2px 7px; }
+.wo-warranty { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: #0F6E56; background: #E1F5EE; border-radius: 999px; padding: 2px 7px; position: relative; cursor: default; }
 .wo-warranty.expired { color: #5F5E5A; background: #F1EFE8; }
+.wo-warranty .wb-tip { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #1E1E1E; color: #FFFFFF; font-size: 12px; font-weight: 400; border-radius: 8px; padding: 8px 12px; white-space: nowrap; pointer-events: none; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
+.wo-warranty .wb-tip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #1E1E1E; }
+.wo-warranty:hover .wb-tip { display: block; }
 .wo-footer { display: flex; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 0.5px solid #F0ECE8; gap: 16px; flex-wrap: wrap; }
 .wo-stat { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #9CA3AF; }
 .wo-stat strong { color: #3A3D4A; font-weight: 600; }
