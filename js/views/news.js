@@ -194,8 +194,17 @@ function render_news(el) {
 
   const POSTERS = ['All', 'Mid-County Rental', 'Skyjack', 'Caterpillar', 'Toyota', 'Bobcat', 'Parker', 'Grainger'];
 
+  // Persist saved + reported in localStorage
+  let _saved = new Set(JSON.parse(localStorage.getItem('se-news-saved') || '[]'));
+  let _reported = new Set(JSON.parse(localStorage.getItem('se-news-reported') || '[]'));
+  let _showSaved = false;
+
+  function persistSaved() { try { localStorage.setItem('se-news-saved', JSON.stringify([..._saved])); } catch(e) {} }
+  function persistReported() { try { localStorage.setItem('se-news-reported', JSON.stringify([..._reported])); } catch(e) {} }
+
   function filteredNews() {
     let items = NEWS.slice();
+    if (_showSaved) items = items.filter(n => _saved.has(n.id));
     if (_filterType !== 'all') items = items.filter(n => n.type === _filterType);
     if (_filterPoster !== 'all') items = items.filter(n => n.poster === _filterPoster);
     if (_search.trim()) {
@@ -230,9 +239,11 @@ function render_news(el) {
     document.getElementById('news-count').textContent = `${items.length} article${items.length !== 1 ? 's' : ''}`;
     grid.innerHTML = items.map(n => {
       const m = TYPE_META[n.type] || TYPE_META.supplier;
+      const saved = _saved.has(n.id);
+      const reported = _reported.has(n.id);
       return `
-      <div class="news-card" onclick="newsOpenArticle('${n.id}')">
-        <div class="nc-top">
+      <div class="news-card" id="nc-${n.id}">
+        <div class="nc-top" onclick="newsOpenArticle('${n.id}')" style="cursor:pointer;">
           <div class="nc-icon" style="background:${m.bg};color:${m.color};"><i class="ti ${m.icon}"></i></div>
           <div class="nc-meta">
             ${typeChip(n.type)}
@@ -240,9 +251,17 @@ function render_news(el) {
           </div>
           <span class="nc-date">${n.dateLabel}</span>
         </div>
-        <div class="nc-title">${n.title}</div>
-        <div class="nc-summary">${n.summary}</div>
-        <div class="nc-tags">${n.tags.map(t => `<span class="nc-tag">${t}</span>`).join('')}</div>
+        <div class="nc-title" onclick="newsOpenArticle('${n.id}')" style="cursor:pointer;">${n.title}</div>
+        <div class="nc-summary" onclick="newsOpenArticle('${n.id}')" style="cursor:pointer;">${n.summary}</div>
+        <div class="nc-tags" onclick="newsOpenArticle('${n.id}')" style="cursor:pointer;">${n.tags.map(t => `<span class="nc-tag">${t}</span>`).join('')}</div>
+        <div class="nc-actions">
+          <button class="nc-action-btn ${saved ? 'nc-saved' : ''}" onclick="event.stopPropagation();newsSave('${n.id}')" title="${saved ? 'Remove from saved' : 'Save article'}">
+            <i class="ti ${saved ? 'ti-bookmark-filled' : 'ti-bookmark'}"></i> ${saved ? 'Saved' : 'Save'}
+          </button>
+          <button class="nc-action-btn nc-report-btn ${reported ? 'nc-reported' : ''}" onclick="event.stopPropagation();newsReport('${n.id}')" title="Report a problem">
+            <i class="ti ti-flag"></i> ${reported ? 'Reported' : 'Report'}
+          </button>
+        </div>
       </div>`;
     }).join('');
   }
@@ -250,7 +269,7 @@ function render_news(el) {
   window.newsOpenArticle = function(id) {
     const n = NEWS.find(x => x.id === id);
     if (!n) return;
-    const m = TYPE_META[n.type] || TYPE_META.supplier;
+    const saved = _saved.has(n.id);
     Modal.show({
       title: n.title,
       body: `
@@ -259,10 +278,62 @@ function render_news(el) {
           <span style="font-size:12px;color:#9CA3AF;">Posted by <strong style="color:#3A3D4A;">${n.poster}</strong> · ${n.dateLabel}</span>
         </div>
         <p style="font-size:13px;color:#3A3D4A;line-height:1.8;margin-bottom:16px;">${n.body}</p>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
           ${n.tags.map(t => `<span style="font-size:11px;background:#F5F2EE;color:#7A7F8E;border-radius:4px;padding:2px 8px;">${t}</span>`).join('')}
+        </div>
+        <div style="display:flex;gap:8px;padding-top:12px;border-top:0.5px solid #F0ECE8;">
+          <button onclick="newsSave('${n.id}');Modal.close();" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:0.5px solid #E2DDD8;background:${saved?'#FAEEDA':'#FFFFFF'};color:${saved?'#854F0B':'#5A5F6E'};font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;">
+            <i class="ti ${saved?'ti-bookmark-filled':'ti-bookmark'}"></i> ${saved ? 'Remove from saved' : 'Save article'}
+          </button>
+          <button onclick="Modal.close();setTimeout(()=>newsReport('${n.id}'),80);" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:0.5px solid #E2DDD8;background:#FFFFFF;color:#5A5F6E;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;">
+            <i class="ti ti-flag"></i> Report a problem
+          </button>
         </div>`,
       actions: [{ label: 'Close', onClick: () => Modal.close() }]
+    });
+  };
+
+  window.newsSave = function(id) {
+    if (_saved.has(id)) { _saved.delete(id); } else { _saved.add(id); }
+    persistSaved();
+    renderCards();
+    const savedCount = _saved.size;
+    const lbl = document.getElementById('nfp-saved-count');
+    if (lbl) lbl.textContent = savedCount > 0 ? ` (${savedCount})` : '';
+  };
+
+  window.newsReport = function(id) {
+    if (_reported.has(id)) {
+      Modal.show({ title: 'Already reported', body: '<p style="font-size:13px;color:#3A3D4A;">You have already submitted a report for this article.</p>', actions: [{ label: 'OK', onClick: () => Modal.close() }] });
+      return;
+    }
+    const n = NEWS.find(x => x.id === id);
+    Modal.show({
+      title: 'Report a problem',
+      body: `
+        <p style="font-size:13px;color:#7A7F8E;margin-bottom:16px;">Let us know what's wrong with "<strong style="color:#111318;">${n ? n.title.slice(0,60)+'…' : 'this article'}</strong>"</p>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+          ${['Inaccurate or incorrect information','Outdated — information no longer applies','Duplicate post','Inappropriate or irrelevant content','Missing critical information','Other'].map((reason, i) => `
+            <label style="display:flex;align-items:center;gap:9px;padding:9px 12px;border:0.5px solid #E2DDD8;border-radius:8px;cursor:pointer;font-size:13px;color:#3A3D4A;">
+              <input type="radio" name="report-reason" value="${reason}" ${i===0?'checked':''} style="accent-color:#F5A623;"/> ${reason}
+            </label>`).join('')}
+        </div>
+        <textarea id="report-notes" placeholder="Additional notes (optional)" style="width:100%;height:72px;padding:9px 12px;border:0.5px solid #E2DDD8;border-radius:8px;font-size:13px;font-family:inherit;color:#111318;resize:none;outline:none;"></textarea>`,
+      actions: [
+        { label: 'Cancel', onClick: () => Modal.close() },
+        { label: 'Submit report', onClick: () => {
+          const reason = document.querySelector('input[name="report-reason"]:checked')?.value || 'Other';
+          _reported.add(id);
+          persistReported();
+          renderCards();
+          Modal.close();
+          setTimeout(() => Modal.show({
+            title: 'Report submitted',
+            body: `<p style="font-size:13px;color:#3A3D4A;line-height:1.7;">Thanks for flagging this. Your report has been sent to the content team.<br><span style="color:#9CA3AF;font-size:12px;">Reason: ${reason}</span></p>`,
+            actions: [{ label: 'Done', onClick: () => Modal.close() }]
+          }), 80);
+        }}
+      ]
     });
   };
 
@@ -300,6 +371,13 @@ function render_news(el) {
 .nc-summary { font-size:12px; color:#7A7F8E; line-height:1.6; margin-bottom:10px; }
 .nc-tags { display:flex; gap:5px; flex-wrap:wrap; }
 .nc-tag { font-size:10px; background:#F5F2EE; color:#7A7F8E; border-radius:4px; padding:2px 7px; }
+.nc-actions { display:flex; align-items:center; gap:8px; margin-top:10px; padding-top:10px; border-top:0.5px solid #F0ECE8; }
+.nc-action-btn { display:inline-flex; align-items:center; gap:5px; padding:5px 11px; border-radius:7px; border:0.5px solid #E2DDD8; background:#FFFFFF; color:#5A5F6E; font-size:11px; font-weight:500; cursor:pointer; font-family:inherit; transition:background .1s,border-color .1s; }
+.nc-action-btn:hover { background:#F5F2EE; }
+.nc-saved { background:#FAEEDA; color:#854F0B; border-color:#F5A623; }
+.nc-saved:hover { background:#F5DFC0; }
+.nc-report-btn:hover { background:#FFF5F5; color:#B91C1C; border-color:#FCA5A5; }
+.nc-reported { color:#9CA3AF; border-color:#E2DDD8; cursor:default; }
 </style>
 <h2 class="sr-only">News &amp; updates</h2>
 <div class="shell">
@@ -316,6 +394,9 @@ function render_news(el) {
     </div>
     <div class="news-shell">
       <div class="news-filter-panel">
+        <div class="nfp-section">
+          <div class="nfp-item ${_showSaved ? 'active' : ''}" id="nfp-saved-filter" onclick="newsFilter('saved','')"><i class="ti ti-bookmark" style="font-size:13px;"></i> Saved<span id="nfp-saved-count">${_saved.size > 0 ? ' (' + _saved.size + ')' : ''}</span></div>
+        </div>
         <div class="nfp-section">
           <div class="nfp-label">Category</div>
           <div class="nfp-item active" id="nft-all" onclick="newsFilter('type','all')"><div class="nfp-item-dot" style="background:#D1D5DB;"></div>All types</div>
@@ -357,7 +438,10 @@ function render_news(el) {
   });
 
   window.newsFilter = function(dimension, value) {
-    if (dimension === 'type') {
+    if (dimension === 'saved') {
+      _showSaved = !_showSaved;
+      document.getElementById('nfp-saved-filter')?.classList.toggle('active', _showSaved);
+    } else if (dimension === 'type') {
       _filterType = value;
       document.querySelectorAll('[id^="nft-"]').forEach(el => el.classList.remove('active'));
       document.getElementById('nft-' + (value === 'all' ? 'all' : value))?.classList.add('active');
