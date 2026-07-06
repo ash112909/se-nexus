@@ -309,8 +309,9 @@ function render_wo_list(el) {
           </select>
         </div>
         <div class="modal-form-field">
-          <label class="modal-form-label">Due Date <span class="lbl-opt">(optional)</span></label>
+          <label class="modal-form-label" id="nwo-due-label">Due Date *</label>
           <input class="modal-form-input" id="nwo-due" type="date"/>
+          <div class="modal-field-error" id="nwo-due-err">Required</div>
         </div>
         <div class="modal-form-field">
           <label class="modal-form-label">Assignee</label>
@@ -323,8 +324,10 @@ function render_wo_list(el) {
           </select>
         </div>
         <div class="modal-form-field">
-          <label class="modal-form-label">External WO ID <span class="lbl-opt">(RentalMan / ERP)</span></label>
+          <label class="modal-form-label" id="nwo-extid-label">Work Order ID * <span class="lbl-opt" style="font-size:10px;">(RentalMan / ERP)</span></label>
           <input class="modal-form-input" id="nwo-extid" type="text" placeholder="e.g. RM-10122"/>
+          <div class="modal-field-error" id="nwo-extid-err">Required</div>
+          <div class="modal-form-hint" id="nwo-extid-hint" style="display:none;">Leave blank to auto-assign a system ID</div>
         </div>
       </div>`;
 
@@ -335,26 +338,38 @@ function render_wo_list(el) {
         { label: 'Cancel', onClick: () => Modal.close() },
         {
           label: 'Create WO', primary: true, onClick: () => {
-            const issue = document.getElementById('nwo-issue').value.trim();
-            const errEl = document.getElementById('nwo-issue-err');
-            if (!issue) { errEl.style.display = 'block'; return; }
-            errEl.style.display = 'none';
+            const woType  = document.getElementById('nwo-type').value;
+            const issue   = document.getElementById('nwo-issue').value.trim();
+            const extId   = document.getElementById('nwo-extid').value.trim();
+            const dueRaw  = document.getElementById('nwo-due').value;
 
-            const woType = document.getElementById('nwo-type').value;
+            // Validate
+            const isEquipment = woType === 'equipment';
+            let valid = true;
+            const show = (id, v) => { const e = document.getElementById(id); if (e) e.style.display = v ? 'block' : 'none'; };
+            show('nwo-issue-err', !issue); if (!issue) valid = false;
+            if (isEquipment) {
+              show('nwo-extid-err', !extId); if (!extId) valid = false;
+              show('nwo-due-err',   !dueRaw); if (!dueRaw) valid = false;
+            }
+            if (!valid) return;
+
+            const nextId = Store.getWorkOrders('all').reduce((m, w) => Math.max(m, w.id), 100000) + 1;
+            const resolvedExtId = extId || `SE-${nextId}`;
+
+            const dueDate = dueRaw
+              ? new Date(dueRaw).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+              : '';
+
             const asset  = document.getElementById('nwo-asset')?.value.trim() || '';
             const make   = document.getElementById('nwo-make')?.value.trim() || '';
             const model  = document.getElementById('nwo-model')?.value.trim() || '';
             const serial = document.getElementById('nwo-serial')?.value.trim() || '';
             const machine = (make && model) ? `${make} ${model}` : asset || '';
 
-            const dueDateRaw = document.getElementById('nwo-due').value;
-            const dueDate = dueDateRaw
-              ? new Date(dueDateRaw).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-              : '';
-
             Store.addWorkOrder({
               woType, asset, make, model, serial, machine, issue, dueDate,
-              externalId: document.getElementById('nwo-extid').value.trim(),
+              externalId: resolvedExtId,
               priority:   document.getElementById('nwo-priority').value,
               assignee:   document.getElementById('nwo-assignee').value,
             });
@@ -382,10 +397,24 @@ function render_wo_list(el) {
         banner.style.display = 'block';
       });
 
-      // Hide equipment section for stock/other types
+      // Update required/optional state and hide equipment section for stock/other
       document.getElementById('nwo-type').addEventListener('change', function() {
+        const isEquipment = this.value === 'equipment';
         const section = document.getElementById('nwo-equipment-section');
         section.style.display = (this.value === 'stock' || this.value === 'other') ? 'none' : 'grid';
+
+        const dueLabel   = document.getElementById('nwo-due-label');
+        const extIdLabel = document.getElementById('nwo-extid-label');
+        const extIdHint  = document.getElementById('nwo-extid-hint');
+
+        dueLabel.innerHTML   = isEquipment ? 'Due Date *' : 'Due Date <span class="lbl-opt">(optional)</span>';
+        extIdLabel.innerHTML = isEquipment
+          ? 'Work Order ID * <span class="lbl-opt" style="font-size:10px;">(RentalMan / ERP)</span>'
+          : 'Work Order ID <span class="lbl-opt" style="font-size:10px;">(RentalMan / ERP, optional)</span>';
+        extIdHint.style.display = isEquipment ? 'none' : 'block';
+
+        document.getElementById('nwo-due-err').style.display   = 'none';
+        document.getElementById('nwo-extid-err').style.display = 'none';
       });
     }, 50);
   });
