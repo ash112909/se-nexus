@@ -129,6 +129,19 @@ function render_dashboard(el) {
 .notif-sub { font-size: 12px; color: #9CA3AF; }
 .notif-time { font-size: 11px; color: #C0BAB3; white-space: nowrap; }
 .notif-unread { width: 7px; height: 7px; background: #F5A623; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+.news-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.news-item { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 10px; padding: 13px 14px; display: flex; align-items: flex-start; gap: 11px; cursor: pointer; transition: border-color 0.12s; }
+.news-item:hover { border-color: #C8C3BC; }
+.news-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.news-body { flex: 1; min-width: 0; }
+.news-tag { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
+.news-title { font-size: 13px; font-weight: 600; color: #111318; line-height: 1.4; margin-bottom: 2px; }
+.news-sub { font-size: 12px; color: #9CA3AF; line-height: 1.5; }
+.news-meta { font-size: 11px; color: #C0BAB3; white-space: nowrap; margin-top: 2px; }
+.section-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.section-header-row .section-label { margin-bottom: 0; }
+.section-view-all { font-size: 12px; color: #C08A1A; font-weight: 500; cursor: pointer; }
+.section-view-all:hover { text-decoration: underline; }
 </style>
 <h2 class="sr-only">Fleet Mechanic dashboard for James</h2>
 <div class="shell">
@@ -183,6 +196,48 @@ function render_dashboard(el) {
           <div class="action-card-title">Delivery tracking</div>
           <div class="action-card-sub">Live shipment status</div>
           <div class="action-card-badge"><i class="ti ti-clock" style="font-size:11px;"></i> 1 arriving today</div>
+        </div>
+      </div>
+      <div class="section-header-row">
+        <div class="section-label">Fleet news &amp; updates</div>
+        <span class="section-view-all" onclick="sendPrompt('Open manuals and docs')">View all <i class="ti ti-arrow-right" style="font-size:11px;"></i></span>
+      </div>
+      <div class="news-list">
+        <div class="news-item" onclick="sendPrompt('Open manuals and docs')">
+          <div class="news-icon icon-amber"><i class="ti ti-alert-triangle"></i></div>
+          <div class="news-body">
+            <div class="news-tag" style="color:#854F0B;">Service Bulletin</div>
+            <div class="news-title">Skyjack SB-2026-047 — Hydraulic pressure relief valve inspection</div>
+            <div class="news-sub">Affects SJIII 3219 &amp; 4626 units manufactured before Jan 2024. Inspect relief valve torque spec before next lift cycle.</div>
+          </div>
+          <div class="news-meta">Jun 24</div>
+        </div>
+        <div class="news-item">
+          <div class="news-icon icon-blue"><i class="ti ti-building"></i></div>
+          <div class="news-body">
+            <div class="news-tag" style="color:#185FA5;">Fleet Update</div>
+            <div class="news-title">2 new Bobcat S770 units arriving at Kyle Branch — Jul 8</div>
+            <div class="news-sub">Pre-delivery inspection checklist has been uploaded to Manuals. Assign intake WOs before arrival.</div>
+          </div>
+          <div class="news-meta">Jun 22</div>
+        </div>
+        <div class="news-item" onclick="sendPrompt('Open manuals and docs')">
+          <div class="news-icon icon-purple"><i class="ti ti-news"></i></div>
+          <div class="news-body">
+            <div class="news-tag" style="color:#534AB7;">Supplier News</div>
+            <div class="news-title">Caterpillar parts price update effective Jul 1, 2026</div>
+            <div class="news-sub">Track adjuster and undercarriage parts see a 3–5% price increase. Review open POs before end of June.</div>
+          </div>
+          <div class="news-meta">Jun 19</div>
+        </div>
+        <div class="news-item">
+          <div class="news-icon icon-teal"><i class="ti ti-shield-check"></i></div>
+          <div class="news-body">
+            <div class="news-tag" style="color:#0F6E56;">Warranty</div>
+            <div class="news-title">Toyota 8FGU25 FL-031 warranty expires in 6 months — schedule service</div>
+            <div class="news-sub">Coverage ends Dec 3, 2026. Submit any outstanding warranty claims through SmartEquip before expiry.</div>
+          </div>
+          <div class="news-meta">Jun 20</div>
         </div>
       </div>
       <div class="section-label">Notifications</div>
