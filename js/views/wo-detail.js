@@ -225,6 +225,10 @@ function render_wo_detail(el) {
 .tl-meta { font-size: 11px; color: #9CA3AF; }
 .status-select { height: 34px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; cursor: pointer; }
 .status-select:focus { border-color: #F5A623; }
+.field-select { height: 30px; border: 1px solid #E2DDD8; border-radius: 6px; padding: 0 8px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; cursor: pointer; font-weight: 500; }
+.field-select:focus { border-color: #F5A623; }
+.field-date { height: 30px; border: 1px solid #E2DDD8; border-radius: 6px; padding: 0 8px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; }
+.field-date:focus { border-color: #F5A623; }
 </style>
 <h2 class="sr-only">Work Order #${wo.id} — ${wo.machine}</h2>
 <div class="shell">
@@ -275,8 +279,28 @@ function render_wo_detail(el) {
         <div class="wo-card-section">
           <div class="wo-section-label">Fault &amp; complaint</div>
           <div class="wo-field"><div class="wo-field-label">Reported issue</div><div class="wo-field-value">${wo.issue}</div></div>
-          <div class="wo-field"><div class="wo-field-label">Priority</div><div class="wo-field-value" style="text-transform:capitalize;">${wo.priority}</div></div>
-          <div class="wo-field"><div class="wo-field-label">Assignee</div><div class="wo-field-value">${wo.assignee}</div></div>
+          <div class="wo-field">
+            <div class="wo-field-label">Priority</div>
+            <select class="field-select" id="wod-priority-select">
+              <option value="high" ${wo.priority === 'high' ? 'selected' : ''}>High</option>
+              <option value="medium" ${wo.priority === 'medium' ? 'selected' : ''}>Medium</option>
+              <option value="low" ${(wo.priority === 'low' || !wo.priority) ? 'selected' : ''}>Low</option>
+            </select>
+          </div>
+          <div class="wo-field">
+            <div class="wo-field-label">Due Date</div>
+            <input class="field-date" type="date" id="wod-due-date" value="${wo.dueDate || ''}"/>
+          </div>
+          <div class="wo-field">
+            <div class="wo-field-label">Assignee</div>
+            <select class="field-select" id="wod-assignee-select">
+              <option value="James W." ${wo.assignee === 'James W.' ? 'selected' : ''}>James W.</option>
+              <option value="Carlos M." ${wo.assignee === 'Carlos M.' ? 'selected' : ''}>Carlos M.</option>
+              <option value="Rita T." ${wo.assignee === 'Rita T.' ? 'selected' : ''}>Rita T.</option>
+              <option value="Devon K." ${wo.assignee === 'Devon K.' ? 'selected' : ''}>Devon K.</option>
+              <option value="Priya S." ${wo.assignee === 'Priya S.' ? 'selected' : ''}>Priya S.</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -330,6 +354,33 @@ function render_wo_detail(el) {
     statusSel.addEventListener('change', function() {
       Store.updateWorkOrder(wo.id, { status: this.value });
       wo.status = this.value;
+    });
+  }
+
+  // Priority select
+  const prioritySel = document.getElementById('wod-priority-select');
+  if (prioritySel) {
+    prioritySel.addEventListener('change', function() {
+      Store.updateWorkOrder(wo.id, { priority: this.value });
+      wo.priority = this.value;
+    });
+  }
+
+  // Due date
+  const dueDateInput = document.getElementById('wod-due-date');
+  if (dueDateInput) {
+    dueDateInput.addEventListener('change', function() {
+      Store.updateWorkOrder(wo.id, { dueDate: this.value });
+      wo.dueDate = this.value;
+    });
+  }
+
+  // Assignee select
+  const assigneeSel = document.getElementById('wod-assignee-select');
+  if (assigneeSel) {
+    assigneeSel.addEventListener('change', function() {
+      Store.updateWorkOrder(wo.id, { assignee: this.value });
+      wo.assignee = this.value;
     });
   }
 
