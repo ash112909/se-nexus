@@ -33,7 +33,7 @@ function render_wo_detail(el) {
 
   function warrantyBadge() {
     if (wo.warranty && wo.warranty.active && wo.warranty.expiry) {
-      return `<span class="warranty-badge"><i class="ti ti-shield-check"></i> Under warranty · ${wo.warranty.expiry}</span>`;
+      return `<span class="warranty-badge"><i class="ti ti-shield-check"></i> Under warranty · ${wo.warranty.expiry}<span class="wb-tip"><i class="ti ti-shield-check" style="color:#4ADE80;margin-right:5px;"></i>This machine is under warranty until ${wo.warranty.expiry}.</span></span>`;
     }
     return `<span class="warranty-badge" style="background:#F1EFE8;color:#5F5E5A;"><i class="ti ti-shield-off"></i> Warranty expired</span>`;
   }
@@ -162,7 +162,10 @@ function render_wo_detail(el) {
 .wo-field { margin-bottom: 10px; }
 .wo-field-label { font-size: 11px; color: #9CA3AF; margin-bottom: 2px; }
 .wo-field-value { font-size: 13px; font-weight: 500; color: #111318; }
-.warranty-badge { display: inline-flex; align-items: center; gap: 5px; background: #E1F5EE; border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 600; color: #0F6E56; }
+.warranty-badge { display: inline-flex; align-items: center; gap: 5px; background: #E1F5EE; border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 600; color: #0F6E56; position: relative; cursor: default; }
+.warranty-badge .wb-tip { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #1E1E1E; color: #FFFFFF; font-size: 12px; font-weight: 400; border-radius: 8px; padding: 8px 12px; white-space: nowrap; pointer-events: none; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
+.warranty-badge .wb-tip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #1E1E1E; }
+.warranty-badge:hover .wb-tip { display: block; }
 /* Cart */
 .cart-section { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
 .cart-section-header { padding: 14px 16px; border-bottom: 0.5px solid #F0ECE8; display: flex; align-items: center; justify-content: space-between; }
