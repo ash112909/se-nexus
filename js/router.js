@@ -12,6 +12,7 @@ const Router = (() => {
     'manuals': 'view-manuals',
     'recommended': 'view-recommended',
     'news': 'view-news',
+    'approvals': 'view-approvals',
   };
 
   let _context = {};
@@ -50,6 +51,7 @@ const Router = (() => {
     else if (p.includes('manual') || p.includes('doc')) { navigate('manuals'); }
     else if (p.includes('recommended')) { navigate('recommended'); }
     else if (p.includes('news')) { navigate('news'); }
+    else if (p.includes('approval')) { navigate('approvals'); }
     else { navigate('dashboard'); }
   };
 

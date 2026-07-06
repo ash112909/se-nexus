@@ -113,7 +113,6 @@ function render_order_history(el) {
       local: Store.getOrders('local').length,
       review: Store.getOrders('review').length,
       submitted: Store.getOrders('submitted').length,
-      approvals: Store.getOrders('approvals').length,
     };
     Object.entries(tabs).forEach(([tab, count]) => {
       const el2 = document.querySelector(`.oh-tab[data-tab="${tab}"] .oh-tab-badge`);
@@ -172,13 +171,6 @@ function render_order_history(el) {
 .oh-comments { padding: 14px 24px; border-top: 0.5px solid #E8E4DF; }
 .oh-comments-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: #9CA3AF; margin-bottom: 8px; }
 .oh-comment-input { width: 100%; height: 36px; background: #F5F2EE; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 12px; font-size: 13px; font-family: inherit; color: #111318; outline: none; }
-/* modal form */
-.modal-form-field { margin-bottom: 14px; }
-.modal-form-label { font-size: 12px; font-weight: 600; color: #5A5F6E; margin-bottom: 5px; display: block; }
-.modal-form-input { width: 100%; height: 36px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; }
-.modal-form-input:focus { border-color: #F5A623; }
-.modal-form-select { width: 100%; height: 36px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; cursor: pointer; }
-.modal-field-error { font-size: 11px; color: #A32D2D; margin-top: 3px; display: none; }
 </style>
 <h2 class="sr-only">Order History</h2>
 <div class="shell">
@@ -200,7 +192,6 @@ function render_order_history(el) {
         <div class="oh-tab" data-tab="local">Local <span class="oh-tab-badge oh-badge-neutral">0</span></div>
         <div class="oh-tab" data-tab="review">In review <span class="oh-tab-badge oh-badge-neutral">0</span></div>
         <div class="oh-tab" data-tab="submitted">Submitted <span class="oh-tab-badge oh-badge-neutral">0</span></div>
-        <div class="oh-tab" data-tab="approvals">Manage approvals <span class="oh-tab-badge oh-badge-red">0</span></div>
       </div>
 
       <div class="oh-filter-bar">
@@ -209,7 +200,6 @@ function render_order_history(el) {
           <input class="oh-search" id="oh-search-input" type="text" placeholder="Search orders…"/>
         </div>
         <select class="oh-select"><option>All vendors</option><option>Skyjack</option><option>Parker</option><option>Grainger</option></select>
-        <button class="oh-btn-primary" id="oh-new-order-btn"><i class="ti ti-plus" style="font-size:13px;"></i> New Order</button>
         <button class="oh-btn-ghost oh-btn-ghost-ml"><i class="ti ti-download"></i> Export</button>
       </div>
 
@@ -254,87 +244,6 @@ function render_order_history(el) {
     renderRows();
   });
 
-  // New Order button
-  document.getElementById('oh-new-order-btn').addEventListener('click', function() {
-    const wos = Store.getWorkOrders('all');
-    const woOptions = wos.map(w => `<option value="WO #${w.id}">${w.machine} — WO #${w.id}</option>`).join('');
-
-    const formHtml = `
-      <div class="modal-form-field">
-        <label class="modal-form-label">Order name *</label>
-        <input class="modal-form-input" id="no-name" type="text" placeholder="e.g. Hydraulic seals — WO #100094"/>
-        <div class="modal-field-error" id="no-name-err">Required</div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div class="modal-form-field">
-          <label class="modal-form-label">Vendor *</label>
-          <select class="modal-form-select" id="no-vendor">
-            <option value="">Select vendor</option>
-            <option>Skyjack</option>
-            <option>Parker</option>
-            <option>Grainger</option>
-            <option>Caterpillar</option>
-            <option>Toyota</option>
-          </select>
-          <div class="modal-field-error" id="no-vendor-err">Required</div>
-        </div>
-        <div class="modal-form-field">
-          <label class="modal-form-label">Work order</label>
-          <select class="modal-form-select" id="no-wo">
-            <option value="General">General (no WO)</option>
-            ${woOptions}
-          </select>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div class="modal-form-field">
-          <label class="modal-form-label">Amount ($) *</label>
-          <input class="modal-form-input" id="no-amount" type="number" min="0" step="0.01" placeholder="0.00"/>
-          <div class="modal-field-error" id="no-amount-err">Required</div>
-        </div>
-        <div class="modal-form-field">
-          <label class="modal-form-label">Status</label>
-          <select class="modal-form-select" id="no-status">
-            <option value="saved">Draft (saved)</option>
-            <option value="submitted">Submit now</option>
-            <option value="review">Send for review</option>
-          </select>
-        </div>
-      </div>`;
-
-    Modal.show({
-      title: 'New Order',
-      body: formHtml,
-      actions: [
-        { label: 'Cancel', onClick: () => Modal.close() },
-        {
-          label: 'Create Order', primary: true, onClick: () => {
-            const name = document.getElementById('no-name').value.trim();
-            const vendor = document.getElementById('no-vendor').value.trim();
-            const amountRaw = document.getElementById('no-amount').value.trim();
-            let valid = true;
-            if (!name) { document.getElementById('no-name-err').style.display = 'block'; valid = false; } else document.getElementById('no-name-err').style.display = 'none';
-            if (!vendor) { document.getElementById('no-vendor-err').style.display = 'block'; valid = false; } else document.getElementById('no-vendor-err').style.display = 'none';
-            if (!amountRaw) { document.getElementById('no-amount-err').style.display = 'block'; valid = false; } else document.getElementById('no-amount-err').style.display = 'none';
-            if (!valid) return;
-            const status = document.getElementById('no-status').value;
-            const tabMap = { saved: 'drafts', submitted: 'submitted', review: 'review' };
-            Store.addOrder({
-              name, vendor,
-              wo: document.getElementById('no-wo').value,
-              amount: parseFloat(amountRaw),
-              status,
-              tab: tabMap[status] || 'drafts',
-            });
-            Modal.close();
-            updateTabBadges();
-            renderRows();
-          }
-        }
-      ]
-    });
-  });
-
   window.ohOpenDetail = function(orderId) {
     _selectedOrderId = orderId;
     // Highlight row
@@ -349,18 +258,6 @@ function render_order_history(el) {
     document.querySelectorAll('#oh-tbody tr').forEach(r => r.classList.remove('selected-row'));
     const panel = document.getElementById('oh-detail-panel');
     if (panel) panel.style.display = 'none';
-  };
-
-  window.ohApprove = function(orderId) {
-    Store.updateOrder(orderId, { status: 'submitted', tab: 'submitted' });
-    updateTabBadges();
-    renderRows();
-  };
-
-  window.ohReject = function(orderId) {
-    Store.updateOrder(orderId, { status: 'saved', tab: 'drafts' });
-    updateTabBadges();
-    renderRows();
   };
 
   // Trigger initial tab
