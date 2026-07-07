@@ -2761,7 +2761,7 @@ function render_parts_search(el) {
       const title = man ? man.title : ref.title;
       return `<div class="dp-manref">
         <i class="ti ti-book" style="font-size:10px;color:#9CA3AF;flex-shrink:0;"></i>
-        <a class="dp-manref-link" onclick="sendPrompt('Open manual ${ref.manId}')" href="javascript:void(0)">${title}</a>
+        <a class="dp-manref-link" onclick="Router.navigate('manuals',{manualId:'${ref.manId}'})" href="javascript:void(0)">${title}</a>
         <span class="dp-manref-sec">§${ref.section} p.${ref.page}</span>
       </div>`;
     }).join('');

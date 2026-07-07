@@ -44,7 +44,7 @@ function render_manuals(el) {
       return;
     }
     container.innerHTML = manuals.map(function(m) {
-      return '<div class="doc-card"><div class="doc-icon-wrap" style="' + typeBackground(m.type) + '"><i class="ti ' + typeIconClass(m.type) + '"></i></div><div class="doc-body"><div class="doc-title">' + m.title + '</div><div class="doc-meta"><span>' + m.machine + '</span><span class="doc-meta-sep">·</span><span>' + m.year + '</span><span class="doc-meta-sep">·</span><span>' + m.pages + ' pages</span><span class="doc-meta-sep">·</span><span>' + m.size + '</span></div><div class="doc-tags"><span class="doc-tag tag-machine">' + m.type + '</span></div><div class="doc-actions"><button class="doc-btn doc-btn-primary" onclick="manViewManual(\'' + m.id + '\')"><i class="ti ti-eye" style="font-size:12px;"></i> View</button><button class="doc-btn doc-btn-ghost" onclick="manDownloadManual(\'' + m.id + '\')"><i class="ti ti-download" style="font-size:12px;"></i> Download</button></div></div></div>';
+      return '<div class="doc-card" data-manual-id="' + m.id + '"><div class="doc-icon-wrap" style="' + typeBackground(m.type) + '"><i class="ti ' + typeIconClass(m.type) + '"></i></div><div class="doc-body"><div class="doc-title">' + m.title + '</div><div class="doc-meta"><span>' + m.machine + '</span><span class="doc-meta-sep">·</span><span>' + m.year + '</span><span class="doc-meta-sep">·</span><span>' + m.pages + ' pages</span><span class="doc-meta-sep">·</span><span>' + m.size + '</span></div><div class="doc-tags"><span class="doc-tag tag-machine">' + m.type + '</span></div><div class="doc-actions"><button class="doc-btn doc-btn-primary" onclick="manViewManual(\'' + m.id + '\')"><i class="ti ti-eye" style="font-size:12px;"></i> View</button><button class="doc-btn doc-btn-ghost" onclick="manDownloadManual(\'' + m.id + '\')"><i class="ti ti-download" style="font-size:12px;"></i> Download</button></div></div></div>';
     }).join('');
   }
 
@@ -75,6 +75,18 @@ function render_manuals(el) {
     _searchQuery = this.value;
     renderGrid();
   });
+
+  var _targetManualId = Router.context && Router.context.manualId;
+  if (_targetManualId) {
+    var _target = Store.getManuals('').find(function(x) { return x.id === _targetManualId; });
+    if (_target) {
+      setTimeout(function() {
+        var card = document.querySelector('[data-manual-id="' + _targetManualId + '"]');
+        if (card) { card.scrollIntoView({ behavior:'smooth', block:'center' }); card.style.borderColor = '#F5A623'; }
+        manViewManual(_targetManualId);
+      }, 80);
+    }
+  }
 
   window.manViewManual = function(id) {
     var m = Store.getManuals('').find(function(x) { return x.id === id; });
