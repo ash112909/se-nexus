@@ -2761,7 +2761,7 @@ function render_parts_search(el) {
       const title = man ? man.title : ref.title;
       return `<div class="dp-manref">
         <i class="ti ti-book" style="font-size:10px;color:#9CA3AF;flex-shrink:0;"></i>
-        <a class="dp-manref-link" onclick="Router.navigate('manuals',{manualId:'${ref.manId}'})" href="javascript:void(0)">${title}</a>
+        <a class="dp-manref-link" onclick="psOpenManual('${ref.manId}')" href="javascript:void(0)">${title}</a>
         <span class="dp-manref-sec">§${ref.section} p.${ref.page}</span>
       </div>`;
     }).join('');
@@ -2858,6 +2858,25 @@ function render_parts_search(el) {
     renderCenter();
     setTimeout(() => wireupDiagram(modelId, compName || null, _nav.subName), 0);
   };
+  window.psOpenManual = function(manId) {
+    const m = Store.getManuals('').find(x => x.id === manId);
+    if (!m) return;
+    const iconClass = m.type === 'Service' ? 'ti-file-text' : m.type === 'Parts' ? 'ti-schema' : m.type === 'Operator' ? 'ti-book' : 'ti-file';
+    const iconStyle = m.type === 'Service' ? 'background:#FCEBEB;color:#A32D2D;' : m.type === 'Parts' ? 'background:#EEEDFE;color:#534AB7;' : m.type === 'Operator' ? 'background:#E6F1FB;color:#185FA5;' : 'background:#EAF3DE;color:#3B6D11;';
+    const body = '<div style="display:flex;gap:16px;align-items:flex-start;padding:4px 0 16px;">'
+      + '<div style="width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;' + iconStyle + '"><i class="ti ' + iconClass + '"></i></div>'
+      + '<div><div style="font-size:15px;font-weight:700;color:#111318;margin-bottom:4px;">' + m.title + '</div>'
+      + '<div style="font-size:12px;color:#7A7F8E;">' + m.machine + ' · ' + m.type + ' Manual · ' + m.year + '</div>'
+      + '<div style="font-size:12px;color:#7A7F8E;margin-top:2px;">' + m.pages + ' pages · ' + m.size + '</div></div></div>'
+      + '<div style="background:#F5F2EE;border-radius:8px;padding:12px 14px;font-size:12px;color:#5A5F6E;">'
+      + '<strong>Publisher:</strong> ' + m.vendor + ' &nbsp;·&nbsp; <strong>Rev:</strong> ' + (m.year||'—')
+      + '</div>';
+    Modal.show({ title: m.title, body: body, actions: [
+      { label: 'Download', onClick: function() { Modal.close(); setTimeout(function() { Modal.show({ title: 'Download started', body: '<div style="text-align:center;padding:20px;"><i class="ti ti-download" style="font-size:40px;color:#3B6D11;"></i><p style="margin-top:12px;font-size:14px;font-weight:600;color:#111318;">' + m.title + '</p><p style="font-size:13px;color:#7A7F8E;margin-top:4px;">' + m.size + ' · Download in progress</p></div>', actions: [{label:'OK',primary:true,onClick:function(){Modal.close();}}] }); }, 0); } },
+      { label: 'Close', primary: true, onClick: function() { Modal.close(); } }
+    ] });
+  };
+
   window.psNavFromWo = function(woId) {
     const wo = Store.getWorkOrder(woId); if(!wo) return;
     const eq = EQUIPMENT.find(e=>e.asset===wo.asset); if(!eq) return;

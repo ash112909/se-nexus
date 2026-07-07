@@ -78,8 +78,13 @@ function render_manuals(el) {
     if (!_vendorFilter) return;
     var banner = document.createElement('div');
     banner.id = 'man-vendor-banner';
-    banner.style.cssText = 'display:flex;align-items:center;gap:10px;background:#FAEEDA;border:0.5px solid #F5A623;border-radius:8px;padding:9px 14px;margin-bottom:14px;font-size:12px;color:#854F0B;';
-    banner.innerHTML = '<i class="ti ti-filter" style="font-size:13px;flex-shrink:0;"></i><span>Filtered to <strong>' + _vendorFilter + '</strong> manuals</span><button onclick="manClearVendor()" style="margin-left:auto;background:none;border:none;font-size:11px;color:#854F0B;cursor:pointer;font-family:inherit;text-decoration:underline;">Clear filter</button>';
+    banner.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;';
+    banner.innerHTML = '<span style="font-size:11px;color:#7A7F8E;">Filtered by:</span>'
+      + '<span style="display:inline-flex;align-items:center;gap:5px;background:#FAEEDA;border:0.5px solid #F5A623;border-radius:100px;padding:3px 10px 3px 10px;font-size:12px;font-weight:600;color:#854F0B;">'
+      + '<i class="ti ti-building-store" style="font-size:11px;"></i>'
+      + _vendorFilter
+      + '<button onclick="manClearVendor()" style="background:none;border:none;padding:0;margin-left:2px;cursor:pointer;color:#854F0B;font-size:14px;line-height:1;display:flex;align-items:center;" title="Remove filter">×</button>'
+      + '</span>';
     body.insertBefore(banner, body.firstChild);
   }
 
