@@ -318,8 +318,34 @@ function render_approvals(el) {
   };
 
   window.apReject = function(orderId) {
-    Store.updateOrder(orderId, { status: 'saved', tab: 'drafts' });
-    if (_selectedOrderId === orderId) apCloseDetail();
-    renderRows();
+    var o = Store.getOrders('all').find(function(x) { return x.id === orderId; });
+    if (!o) return;
+    var body = '<div style="margin-bottom:8px;">'
+      + '<label style="font-size:12px;font-weight:600;color:#5A5F6E;display:block;margin-bottom:6px;">Reason for rejection <span style="color:#B0AAA3;font-weight:400;">(optional)</span></label>'
+      + '<textarea id="ap-reject-comment" rows="4" placeholder="e.g. Incorrect part numbers, budget not approved, need OEM parts only…" style="width:100%;border:1px solid #E2DDD8;border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;color:#111318;outline:none;resize:vertical;box-sizing:border-box;"></textarea>'
+      + '</div>'
+      + '<div style="background:#FCEBEB;border-radius:8px;padding:10px 12px;font-size:12px;color:#A32D2D;">'
+      + '<strong>' + o.name + '</strong> will be moved back to Drafts and the requester will be notified.'
+      + '</div>';
+    Modal.show({
+      title: 'Reject order',
+      body: body,
+      actions: [
+        { label: 'Cancel', onClick: function() { Modal.close(); } },
+        { label: 'Confirm rejection', primary: false, onClick: function() {
+          var comment = document.getElementById('ap-reject-comment').value.trim();
+          var changes = { status: 'saved', tab: 'drafts' };
+          if (comment) changes.rejectionComment = comment;
+          Store.updateOrder(orderId, changes);
+          Modal.close();
+          if (_selectedOrderId === orderId) apCloseDetail();
+          renderRows();
+        }}
+      ]
+    });
+    setTimeout(function() {
+      var ta = document.getElementById('ap-reject-comment');
+      if (ta) ta.focus();
+    }, 50);
   };
 }
