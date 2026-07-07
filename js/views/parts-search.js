@@ -2503,7 +2503,7 @@ function render_parts_search(el) {
     }).join('');
 
     const actionTiles = (pr.actions || []).map(a => {
-      const onclick = `Router.navigate('${a.navView}',${JSON.stringify(a.navCtx)})`;
+      const onclick = `Router.navigate('${a.navView}',{vendor:'${a.navCtx.vendor}'})`;
       return `<div class="slp-action-tile" onclick="${onclick}">
         <i class="ti ${a.icon}" style="font-size:20px;color:#9CA3AF;display:block;margin-bottom:6px;"></i>
         <div style="font-size:12px;font-weight:600;color:#3A3D4A;">${a.label}</div>
