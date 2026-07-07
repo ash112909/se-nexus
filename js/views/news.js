@@ -242,7 +242,7 @@ window.newsSave   = window.newsSave   || function(id) { /* defined in render_new
 function render_news(el) {
   let _search = '';
   let _filterType = 'all';
-  let _filterPoster = 'all';
+  let _filterPoster = (Router.context && Router.context.vendor) || 'all';
   let _filterPriority = 'all';
   let _sortDir = 'desc';
 
@@ -477,6 +477,12 @@ function render_news(el) {
 </div>`;
 
   renderCards();
+
+  if (_filterPoster !== 'all') {
+    document.querySelectorAll('[id^="nfp-"]').forEach(function(el) { el.classList.remove('active'); });
+    var posterEl = document.getElementById('nfp-' + _filterPoster.replace(/\s+/g,'-').toLowerCase());
+    if (posterEl) posterEl.classList.add('active');
+  }
 
   document.getElementById('news-search-input').addEventListener('input', function() {
     _search = this.value;

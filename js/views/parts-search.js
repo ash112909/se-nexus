@@ -1976,9 +1976,9 @@ function render_parts_search(el) {
         { icon:'ti-tool',     label:'Wear Parts',       sub:'Filters, Seals, Pads',   navModelId:'SKJ-SJIII4632',navComp:'Hydraulic System' },
       ],
       actions: [
-        { icon:'ti-book',  label:'All Manuals',               navView:'manuals',     navCtx:{ vendor:'SKJ' } },
-        { icon:'ti-bell',  label:'Bulletins & Alerts',         navView:'news',        navCtx:{ vendor:'SKJ' } },
-        { icon:'ti-star',  label:'Recommended Service Parts',  navView:'recommended', navCtx:{ vendor:'SKJ' } },
+        { icon:'ti-book',  label:'All Manuals',               navView:'manuals',     navCtx:{ vendor:'Skyjack' } },
+        { icon:'ti-bell',  label:'Bulletins & Alerts',         navView:'news',        navCtx:{ vendor:'Skyjack' } },
+        { icon:'ti-star',  label:'Recommended Service Parts',  navView:'recommended', navCtx:{ vendor:'Skyjack' } },
       ],
       description: 'Skyjack is a world-leading manufacturer of scissor lifts, boom lifts, and telehandlers. Mid-County Rental stocks genuine Skyjack OEM parts for all fleet units.',
       features: [
@@ -2009,9 +2009,9 @@ function render_parts_search(el) {
         { icon:'ti-tool',      label:'Ground Engagement', sub:'Teeth, Adapters, Blades',navModelId:'CAT-308', navComp:'Track System' },
       ],
       actions: [
-        { icon:'ti-book',  label:'All Manuals',               navView:'manuals',     navCtx:{ vendor:'CAT' } },
-        { icon:'ti-bell',  label:'Bulletins & Alerts',         navView:'news',        navCtx:{ vendor:'CAT' } },
-        { icon:'ti-star',  label:'Recommended Service Parts',  navView:'recommended', navCtx:{ vendor:'CAT' } },
+        { icon:'ti-book',  label:'All Manuals',               navView:'manuals',     navCtx:{ vendor:'Caterpillar' } },
+        { icon:'ti-bell',  label:'Bulletins & Alerts',         navView:'news',        navCtx:{ vendor:'Caterpillar' } },
+        { icon:'ti-star',  label:'Recommended Service Parts',  navView:'recommended', navCtx:{ vendor:'Caterpillar' } },
       ],
       description: "Caterpillar is the world's largest manufacturer of construction and mining equipment. Mid-County Rental sources genuine Cat parts for our excavator fleet.",
       features: [
@@ -2042,9 +2042,9 @@ function render_parts_search(el) {
         { icon:'ti-tool',      label:'Wear Parts',         sub:'Forks, Tires, Filters',navModelId:'TOY-8FGU32', navComp:'Lift System' },
       ],
       actions: [
-        { icon:'ti-book',  label:'All Manuals',               navView:'manuals',     navCtx:{ vendor:'TOY' } },
-        { icon:'ti-bell',  label:'Bulletins & Alerts',         navView:'news',        navCtx:{ vendor:'TOY' } },
-        { icon:'ti-star',  label:'Recommended Service Parts',  navView:'recommended', navCtx:{ vendor:'TOY' } },
+        { icon:'ti-book',  label:'All Manuals',               navView:'manuals',     navCtx:{ vendor:'Toyota' } },
+        { icon:'ti-bell',  label:'Bulletins & Alerts',         navView:'news',        navCtx:{ vendor:'Toyota' } },
+        { icon:'ti-star',  label:'Recommended Service Parts',  navView:'recommended', navCtx:{ vendor:'Toyota' } },
       ],
       description: 'Toyota Material Handling is the #1 forklift brand worldwide. Mid-County Rental services Toyota IC and electric forklifts with genuine OEM and quality aftermarket parts.',
       features: [
@@ -2075,9 +2075,9 @@ function render_parts_search(el) {
         { icon:'ti-tool',      label:'Attachments',           sub:'Buckets, Augers',     navModelId:'BOB-S770', navComp:'Hydraulic System' },
       ],
       actions: [
-        { icon:'ti-book',  label:'All Manuals',               navView:'manuals',     navCtx:{ vendor:'BOB' } },
-        { icon:'ti-bell',  label:'Bulletins & Alerts',         navView:'news',        navCtx:{ vendor:'BOB' } },
-        { icon:'ti-star',  label:'Recommended Service Parts',  navView:'recommended', navCtx:{ vendor:'BOB' } },
+        { icon:'ti-book',  label:'All Manuals',               navView:'manuals',     navCtx:{ vendor:'Bobcat' } },
+        { icon:'ti-bell',  label:'Bulletins & Alerts',         navView:'news',        navCtx:{ vendor:'Bobcat' } },
+        { icon:'ti-star',  label:'Recommended Service Parts',  navView:'recommended', navCtx:{ vendor:'Bobcat' } },
       ],
       description: 'Bobcat Company is a leading manufacturer of compact equipment. Mid-County Rental maintains a fleet of Bobcat skid-steer loaders serviced with OEM and compatible parts.',
       features: [
