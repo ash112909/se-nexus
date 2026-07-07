@@ -1,5 +1,5 @@
 const Store = (() => {
-  const LS_KEY = 'se-nexus-v5';
+  const LS_KEY = 'se-nexus-v6';
 
   const DEFAULT_PARTS = [
     // ── Skyjack — SJIII 3219 / shared ────────────────────────────────────────
@@ -323,16 +323,73 @@ const Store = (() => {
       },
     ],
     orders: [
-      { id: 'ord-1', poNum: 'PO-7841', vendor: 'Skyjack', vendorId: 'SKJ-DIST', date: 'Jun 20, 2026', user: 'James W.', name: 'Hydraulic seals — WO #100094', wo: 'WO #100094', asset: 'FL-094', amount: 268.00, status: 'submitted', tab: 'submitted' },
-      { id: 'ord-2', poNum: null, vendor: 'Grainger', vendorId: 'GRG-001', date: 'Jun 18, 2026', user: 'James W.', name: 'Filters & consumables', wo: 'WO #100102', asset: 'FL-102', amount: 94.50, status: 'saved', tab: 'drafts' },
-      { id: 'ord-3', poNum: 'PO-7792', vendor: 'Parker', vendorId: 'PKR-WD', date: 'Jun 15, 2026', user: 'M. Torres', name: 'Valve kit — FL-091', wo: 'WO #100088', asset: 'FL-091', amount: 145.00, status: 'delivered', tab: 'submitted' },
-      { id: 'ord-4', poNum: 'PO-7801', vendor: 'Skyjack', vendorId: 'SKJ-DIST', date: 'Jun 12, 2026', user: 'James W.', name: 'Pump seal kit ×2', wo: 'WO #100094', asset: 'FL-094', amount: 212.00, status: 'backordered', tab: 'submitted' },
-      { id: 'ord-5', poNum: null, vendor: 'Grainger', vendorId: 'GRG-001', date: 'Jun 10, 2026', user: 'R. Singh', name: 'Safety equipment restock', wo: 'General', asset: 'Austin', amount: 330.75, status: 'review', tab: 'review' },
-      { id: 'ord-6', poNum: 'PO-7789', vendor: 'Parker', vendorId: 'PKR-WD', date: 'Jun 8, 2026', user: 'James W.', name: 'Aftermarket valve PAR-88821', wo: 'WO #100094', asset: 'FL-094', amount: 89.00, status: 'submitted', tab: 'submitted' },
-      { id: 'ord-7', poNum: 'PO-7755', vendor: 'Skyjack', vendorId: 'SKJ-DIST', date: 'Jun 5, 2026', user: 'M. Torres', name: 'Hydraulic hose assembly', wo: 'WO #100081', asset: 'FL-088', amount: 174.00, status: 'delivered', tab: 'submitted' },
-      { id: 'ord-8', poNum: null, vendor: 'Grainger', vendorId: 'GRG-001', date: 'Jun 2, 2026', user: 'R. Singh', name: 'Oil & lubrication kits', wo: 'General', asset: 'Austin', amount: 58.20, status: 'saved', tab: 'drafts' },
-      { id: 'ord-9', poNum: 'PO-7720', vendor: 'Skyjack', vendorId: 'SKJ-DIST', date: 'May 29, 2026', user: 'James W.', name: 'Drive motor brush kit', wo: 'WO #100074', asset: 'FL-077', amount: 122.00, status: 'delivered', tab: 'submitted' },
-      { id: 'ord-10', poNum: 'PO-7708', vendor: 'Parker', vendorId: 'PKR-WD', date: 'May 25, 2026', user: 'M. Torres', name: 'Cylinder rod seal set', wo: 'WO #100069', asset: 'FL-071', amount: 66.40, status: 'delivered', tab: 'submitted' },
+      { id: 'ord-1', poNum: 'PO-7841', vendor: 'Skyjack', vendorId: 'SKJ-DIST', date: 'Jun 20, 2026', user: 'James W.', name: 'Hydraulic seals — WO #100094', wo: 'WO #100094', asset: 'FL-094', amount: 268.00, status: 'submitted', tab: 'submitted',
+        items: [
+          { id: 'p-skj-1', partNum: 'SKJ-702-1285', description: 'Hydraulic Cylinder Seal Kit', vendor: 'Skyjack', price: 94.00, qty: 2, oemOnly: true },
+          { id: 'p-skj-2', partNum: 'SKJ-702-1291', description: 'O-Ring Kit — Manifold Block', vendor: 'Skyjack', price: 42.00, qty: 1, oemOnly: false },
+          { id: 'p-skj-3', partNum: 'SKJ-702-0855', description: 'Pump Shaft Seal', vendor: 'Skyjack', price: 38.00, qty: 1, oemOnly: true },
+        ]
+      },
+      { id: 'ord-2', poNum: null, vendor: 'Grainger', vendorId: 'GRG-001', date: 'Jun 18, 2026', user: 'James W.', name: 'Filters & consumables', wo: 'WO #100102', asset: 'FL-102', amount: 94.50, status: 'saved', tab: 'drafts',
+        items: [
+          { id: 'p-fil-1', partNum: 'GRG-3HYK4', description: 'Hydraulic Oil Filter', vendor: 'Grainger', price: 18.50, qty: 3, oemOnly: false },
+          { id: 'p-fil-2', partNum: 'GRG-4LMN9', description: 'Engine Air Filter', vendor: 'Grainger', price: 22.00, qty: 1, oemOnly: false },
+          { id: 'p-fil-3', partNum: 'GRG-2TKR7', description: 'Grease Cartridge 400g', vendor: 'Grainger', price: 8.00, qty: 2, oemOnly: false },
+        ]
+      },
+      { id: 'ord-3', poNum: 'PO-7792', vendor: 'Parker', vendorId: 'PKR-WD', date: 'Jun 15, 2026', user: 'M. Torres', name: 'Valve kit — FL-091', wo: 'WO #100088', asset: 'FL-091', amount: 145.00, status: 'delivered', tab: 'submitted',
+        items: [
+          { id: 'p-pkr-1', partNum: 'PAR-D1VW-4A', description: 'Directional Control Valve', vendor: 'Parker', price: 110.00, qty: 1, oemOnly: false },
+          { id: 'p-pkr-2', partNum: 'PAR-VEP-018', description: 'Valve End Plate Seal', vendor: 'Parker', price: 35.00, qty: 1, oemOnly: false },
+        ]
+      },
+      { id: 'ord-4', poNum: 'PO-7801', vendor: 'Skyjack', vendorId: 'SKJ-DIST', date: 'Jun 12, 2026', user: 'James W.', name: 'Pump seal kit ×2', wo: 'WO #100094', asset: 'FL-094', amount: 212.00, status: 'backordered', tab: 'submitted',
+        items: [
+          { id: 'p-skj-4', partNum: 'SKJ-105-5255', description: 'Gear Pump Seal Kit', vendor: 'Skyjack', price: 106.00, qty: 2, oemOnly: true },
+        ]
+      },
+      { id: 'ord-5', poNum: null, vendor: 'Grainger', vendorId: 'GRG-001', date: 'Jun 10, 2026', user: 'R. Singh', name: 'Safety equipment restock', wo: 'General', asset: 'Austin', amount: 330.75, status: 'review', tab: 'review',
+        items: [
+          { id: 'p-sft-1', partNum: 'GRG-6LM49', description: 'Safety Harness Class III', vendor: 'Grainger', price: 89.00, qty: 2, oemOnly: false },
+          { id: 'p-sft-2', partNum: 'GRG-2TLP8', description: 'Fall Arrest Lanyard 6ft', vendor: 'Grainger', price: 44.25, qty: 3, oemOnly: false },
+          { id: 'p-sft-3', partNum: 'GRG-8KRN2', description: 'Hard Hat Type II Class E', vendor: 'Grainger', price: 24.00, qty: 2, oemOnly: false },
+        ]
+      },
+      { id: 'ord-5b', poNum: null, vendor: 'Skyjack', vendorId: 'SKJ-DIST', date: 'Jun 11, 2026', user: 'M. Torres', name: 'Platform parts — WO #100081', wo: 'WO #100081', asset: 'FL-088', amount: 487.50, status: 'review', tab: 'review',
+        items: [
+          { id: 'p-skj-5', partNum: 'SKJ-158-0055', description: 'Platform Extension Slide Kit', vendor: 'Skyjack', price: 215.00, qty: 1, oemOnly: true },
+          { id: 'p-skj-6', partNum: 'SKJ-702-0900', description: 'Cylinder Wiper Seal', vendor: 'Skyjack', price: 28.50, qty: 3, oemOnly: true },
+          { id: 'p-skj-7', partNum: 'SKJ-105-5310', description: 'Hydraulic Gear Pump', vendor: 'Skyjack', price: 158.00, qty: 1, oemOnly: false },
+        ]
+      },
+      { id: 'ord-6', poNum: 'PO-7789', vendor: 'Parker', vendorId: 'PKR-WD', date: 'Jun 8, 2026', user: 'James W.', name: 'Aftermarket valve PAR-88821', wo: 'WO #100094', asset: 'FL-094', amount: 89.00, status: 'submitted', tab: 'submitted',
+        items: [
+          { id: 'p-pkr-3', partNum: 'PAR-88821', description: 'Relief Valve 3000 PSI', vendor: 'Parker', price: 89.00, qty: 1, oemOnly: false },
+        ]
+      },
+      { id: 'ord-7', poNum: 'PO-7755', vendor: 'Skyjack', vendorId: 'SKJ-DIST', date: 'Jun 5, 2026', user: 'M. Torres', name: 'Hydraulic hose assembly', wo: 'WO #100081', asset: 'FL-088', amount: 174.00, status: 'delivered', tab: 'submitted',
+        items: [
+          { id: 'p-skj-8', partNum: 'SKJ-702-1104', description: 'Hydraulic Hose 3/8" × 48"', vendor: 'Skyjack', price: 58.00, qty: 2, oemOnly: false },
+          { id: 'p-skj-9', partNum: 'SKJ-702-1108', description: 'JIC Fitting Kit', vendor: 'Skyjack', price: 29.00, qty: 2, oemOnly: false },
+        ]
+      },
+      { id: 'ord-8', poNum: null, vendor: 'Grainger', vendorId: 'GRG-001', date: 'Jun 2, 2026', user: 'R. Singh', name: 'Oil & lubrication kits', wo: 'General', asset: 'Austin', amount: 58.20, status: 'saved', tab: 'drafts',
+        items: [
+          { id: 'p-lub-1', partNum: 'GRG-5MT22', description: 'Hydraulic Oil AW46 1-gal', vendor: 'Grainger', price: 19.40, qty: 2, oemOnly: false },
+          { id: 'p-lub-2', partNum: 'GRG-3KLP6', description: 'Multi-Purpose Grease 14oz', vendor: 'Grainger', price: 9.70, qty: 2, oemOnly: false },
+        ]
+      },
+      { id: 'ord-9', poNum: 'PO-7720', vendor: 'Skyjack', vendorId: 'SKJ-DIST', date: 'May 29, 2026', user: 'James W.', name: 'Drive motor brush kit', wo: 'WO #100074', asset: 'FL-077', amount: 122.00, status: 'delivered', tab: 'submitted',
+        items: [
+          { id: 'p-skj-10', partNum: 'SKJ-121-0047', description: 'Drive Motor Carbon Brush Kit', vendor: 'Skyjack', price: 61.00, qty: 2, oemOnly: true },
+        ]
+      },
+      { id: 'ord-10', poNum: 'PO-7708', vendor: 'Parker', vendorId: 'PKR-WD', date: 'May 25, 2026', user: 'M. Torres', name: 'Cylinder rod seal set', wo: 'WO #100069', asset: 'FL-071', amount: 66.40, status: 'delivered', tab: 'submitted',
+        items: [
+          { id: 'p-pkr-4', partNum: 'PAR-SS-12-OE', description: 'Cylinder Rod Seal 1.5"', vendor: 'Parker', price: 22.80, qty: 1, oemOnly: false },
+          { id: 'p-pkr-5', partNum: 'PAR-WP-12-U', description: 'Wiper Seal & U-cup Kit', vendor: 'Parker', price: 21.80, qty: 2, oemOnly: false },
+        ]
+      },
     ],
     cart: [],
     diagnosticHistory: [],

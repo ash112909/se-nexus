@@ -59,12 +59,44 @@ function render_approvals(el) {
     if (badge) badge.textContent = count > 0 ? count + ' pending' : 'No items pending';
   }
 
+  // editable working copy of items for the open approval
+  let _editItems = [];
+
+  function calcTotal(items) {
+    return items.reduce(function(s, it) { return s + it.price * (it.qty || 1); }, 0);
+  }
+
+  function renderEditItemsTable() {
+    const tbody = document.getElementById('ap-items-tbody');
+    const totalEl = document.getElementById('ap-items-total');
+    if (!tbody) return;
+    if (!_editItems.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#9CA3AF;font-size:13px;">No line items.</td></tr>';
+      if (totalEl) totalEl.textContent = '$0.00';
+      return;
+    }
+    tbody.innerHTML = _editItems.map(function(it, idx) {
+      return '<tr>'
+        + '<td style="font-family:monospace;font-size:11px;color:#5A5F6E;">' + (it.partNum || '—') + '</td>'
+        + '<td>' + (it.description || it.name || '—') + (it.oemOnly ? ' <span style="font-size:10px;font-weight:600;background:#F5F2EE;color:#5A5F6E;border-radius:4px;padding:1px 5px;">OEM</span>' : '') + '</td>'
+        + '<td style="color:#7A7F8E;">' + (it.vendor || '—') + '</td>'
+        + '<td style="text-align:center;"><div class="ap-qty-wrap"><button class="ap-qty-btn" onclick="apQtyDec(' + idx + ')">−</button><input class="ap-qty-input" type="number" min="1" value="' + (it.qty || 1) + '" oninput="apQtySet(' + idx + ',this.value)"/><button class="ap-qty-btn" onclick="apQtyInc(' + idx + ')">+</button></div></td>'
+        + '<td style="text-align:right;">$' + (+it.price).toFixed(2) + '</td>'
+        + '<td style="text-align:right;font-weight:600;color:#111318;">$' + (it.price * (it.qty || 1)).toFixed(2) + '</td>'
+        + '<td style="text-align:center;"><button class="ap-remove-btn" onclick="apRemoveItem(' + idx + ')" title="Remove"><i class="ti ti-trash" style="font-size:12px;"></i></button></td>'
+        + '</tr>';
+    }).join('');
+    if (totalEl) totalEl.textContent = '$' + calcTotal(_editItems).toFixed(2);
+  }
+
   function renderDetailPanel(orderId) {
     const panel = document.getElementById('ap-detail-panel');
     if (!panel) return;
     if (!orderId) { panel.style.display = 'none'; return; }
     const o = Store.getOrders('all').find(x => x.id === orderId);
     if (!o) { panel.style.display = 'none'; return; }
+
+    _editItems = (o.items || []).map(function(it) { return Object.assign({}, it); });
 
     panel.style.display = 'block';
     panel.innerHTML = `
@@ -81,7 +113,6 @@ function render_approvals(el) {
           <div class="ap-detail-row"><span class="ap-detail-label">PO #</span><span class="ap-detail-val">${o.poNum || '—'}</span></div>
           <div class="ap-detail-row"><span class="ap-detail-label">Date</span><span class="ap-detail-val">${o.date}</span></div>
           <div class="ap-detail-row"><span class="ap-detail-label">Requested by</span><span class="ap-detail-val">${o.user}</span></div>
-          <div class="ap-detail-row"><span class="ap-detail-label">Total</span><span class="ap-detail-val" style="color:#111318;font-weight:700;">$${(+o.amount).toFixed(2)}</span></div>
         </div>
         <div class="ap-detail-section">
           <div class="ap-detail-section-title">Ship to / Bill to</div>
@@ -98,10 +129,23 @@ function render_approvals(el) {
           <div class="ap-detail-row"><span class="ap-detail-label">Vendor ID</span><span class="ap-detail-val">${o.vendorId || '—'}</span></div>
         </div>
       </div>
+      <div class="ap-items-section">
+        <div class="ap-items-header">
+          <div style="display:flex;align-items:center;gap:6px;"><i class="ti ti-package" style="font-size:14px;color:#9CA3AF;"></i> <span>Line items</span> <span class="ap-items-badge" id="ap-items-badge">${_editItems.length}</span></div>
+          <div style="font-size:11px;color:#9CA3AF;">Edit quantities or remove items before approving</div>
+        </div>
+        <table class="ap-items-table">
+          <thead><tr><th>Part #</th><th>Description</th><th>Vendor</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Unit</th><th style="text-align:right;">Total</th><th></th></tr></thead>
+          <tbody id="ap-items-tbody"></tbody>
+        </table>
+        <div class="ap-items-total-row">Order total <strong id="ap-items-total">$0.00</strong></div>
+      </div>
       <div class="ap-panel-actions">
-        <button class="ap-panel-approve" onclick="apApprove('${o.id}')"><i class="ti ti-check"></i> Approve order</button>
+        <button class="ap-panel-approve" onclick="apApprove('${o.id}')"><i class="ti ti-check"></i> Approve &amp; submit</button>
         <button class="ap-panel-reject" onclick="apReject('${o.id}')"><i class="ti ti-x"></i> Reject</button>
+        <span id="ap-edit-indicator" style="display:none;font-size:11px;color:#854F0B;margin-left:4px;"><i class="ti ti-pencil" style="font-size:11px;"></i> Unsaved edits — will be saved on approve</span>
       </div>`;
+    renderEditItemsTable();
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
@@ -151,6 +195,22 @@ function render_approvals(el) {
 .ap-panel-approve:hover { background: #D5EBBE; }
 .ap-panel-reject { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 16px; background: none; color: #A32D2D; border: 1px solid #F5C5C5; border-radius: 8px; font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; }
 .ap-panel-reject:hover { background: #FCEBEB; }
+.ap-items-section { border-top: 0.5px solid #E8E4DF; }
+.ap-items-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px 8px; }
+.ap-items-header span { font-size: 12px; font-weight: 600; color: #5A5F6E; text-transform: uppercase; letter-spacing: 0.8px; }
+.ap-items-badge { font-size: 10px; font-weight: 700; border-radius: 999px; padding: 1px 8px; background: #F0ECE8; color: #5A5F6E; }
+.ap-items-table { width: 100%; border-collapse: collapse; }
+.ap-items-table th { font-size: 10px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: #9CA3AF; padding: 6px 24px; text-align: left; background: #FAFAF8; border-top: 0.5px solid #F0ECE8; border-bottom: 0.5px solid #F0ECE8; }
+.ap-items-table td { padding: 8px 24px; font-size: 12px; color: #3A3D4A; border-bottom: 0.5px solid #F5F2EE; vertical-align: middle; }
+.ap-items-table tr:last-child td { border-bottom: none; }
+.ap-items-total-row { padding: 10px 24px; font-size: 12px; color: #7A7F8E; text-align: right; border-top: 0.5px solid #F0ECE8; }
+.ap-qty-wrap { display: inline-flex; align-items: center; gap: 4px; }
+.ap-qty-btn { width: 22px; height: 22px; background: #F0ECE8; border: none; border-radius: 4px; font-size: 14px; font-weight: 700; color: #5A5F6E; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+.ap-qty-btn:hover { background: #E2DDD8; }
+.ap-qty-input { width: 40px; height: 22px; text-align: center; border: 1px solid #E2DDD8; border-radius: 4px; font-size: 12px; font-family: inherit; color: #111318; outline: none; }
+.ap-qty-input:focus { border-color: #F5A623; }
+.ap-remove-btn { background: none; border: none; color: #C0BAB4; cursor: pointer; border-radius: 4px; padding: 2px 4px; }
+.ap-remove-btn:hover { background: #FCEBEB; color: #A32D2D; }
 </style>
 <h2 class="sr-only">Approvals</h2>
 <div class="shell">
@@ -220,8 +280,39 @@ function render_approvals(el) {
     if (panel) panel.style.display = 'none';
   };
 
+  function markEdited() {
+    const ind = document.getElementById('ap-edit-indicator');
+    if (ind) ind.style.display = 'inline-flex';
+    const badge = document.getElementById('ap-items-badge');
+    if (badge) badge.textContent = _editItems.length;
+  }
+
+  window.apQtyDec = function(idx) {
+    if (!_editItems[idx]) return;
+    _editItems[idx].qty = Math.max(1, (_editItems[idx].qty || 1) - 1);
+    markEdited();
+    renderEditItemsTable();
+  };
+  window.apQtyInc = function(idx) {
+    if (!_editItems[idx]) return;
+    _editItems[idx].qty = (_editItems[idx].qty || 1) + 1;
+    markEdited();
+    renderEditItemsTable();
+  };
+  window.apQtySet = function(idx, val) {
+    if (!_editItems[idx]) return;
+    const n = parseInt(val);
+    if (!isNaN(n) && n > 0) { _editItems[idx].qty = n; markEdited(); renderEditItemsTable(); }
+  };
+  window.apRemoveItem = function(idx) {
+    _editItems.splice(idx, 1);
+    markEdited();
+    renderEditItemsTable();
+  };
+
   window.apApprove = function(orderId) {
-    Store.updateOrder(orderId, { status: 'submitted', tab: 'submitted' });
+    const newTotal = Math.round(calcTotal(_editItems) * 100) / 100;
+    Store.updateOrder(orderId, { status: 'submitted', tab: 'submitted', items: _editItems.slice(), amount: newTotal });
     if (_selectedOrderId === orderId) apCloseDetail();
     renderRows();
   };
