@@ -57,6 +57,17 @@ function render_wo_detail(el) {
       : '<div style="color:#9CA3AF;font-size:13px;">No notes yet.</div>';
   }
 
+  function itemStatus(c) {
+    if (c.replacedBy) return 'replaced';
+    if (c.replacesId) return c.inStock ? 'orderable' : 'needs_attention';
+    const hasMandUnresolved = (c.crossRefs || []).some(r => r.mandatory);
+    if (!c.inStock && !(c.crossRefs || []).length) return 'unorderable';
+    if (hasMandUnresolved) return 'blocked';
+    if (!c.inStock) return 'needs_attention';
+    if ((c.localInventory || []).length && !c.selectedSource) return 'needs_attention';
+    return 'orderable';
+  }
+
   function renderCart() {
     const cart = Store.getWoCart(wo.id);
     const container = document.getElementById('wod-cart-body');
@@ -68,46 +79,48 @@ function render_wo_detail(el) {
       return;
     }
 
-    function itemStatus(c) {
-      const hasMand = (c.crossRefs || []).some(r => r.mandatory);
-      const hasLocal = (c.localInventory || []).length > 0;
-      if (!c.inStock && !(c.crossRefs || []).length) return 'unorderable';
-      if (!c.inStock || hasMand || hasLocal) return 'needs_attention';
-      return 'orderable';
-    }
-
     function statusCell(c) {
       const st = itemStatus(c);
       const reasons = [];
+      if (st === 'replaced') return `<div class="ci-status" style="color:#C8C3BC;"><i class="ti ti-replace"></i></div>`;
+      if (st === 'blocked') return `<div class="ci-status ci-err" onmouseenter="wodShowTip(this,'Mandatory cross-ref required — select substitute to proceed')" onmouseleave="wodHideTip()"><i class="ti ti-lock"></i></div>`;
       if (!c.inStock) reasons.push('Backordered');
-      if ((c.crossRefs || []).some(r => r.mandatory)) reasons.push('Fleet substitution required');
-      if ((c.localInventory || []).length) reasons.push('Local stock available');
+      if ((c.localInventory || []).length && !c.selectedSource) reasons.push('Local stock available — select source');
       const tip = reasons.join(' · ') || 'Ready to order';
       if (st === 'orderable') {
-        return `<div class="ci-status ci-ok" title="${tip}"><i class="ti ti-circle-check"></i></div>`;
+        return `<div class="ci-status ci-ok" onmouseenter="wodShowTip(this,'${tip}')" onmouseleave="wodHideTip()"><i class="ti ti-circle-check"></i></div>`;
       } else if (st === 'needs_attention') {
-        return `<div class="ci-status ci-warn"><i class="ti ti-alert-triangle"></i><span class="ci-tip">${tip}</span></div>`;
+        return `<div class="ci-status ci-warn" onmouseenter="wodShowTip(this,'${tip}')" onmouseleave="wodHideTip()"><i class="ti ti-alert-triangle"></i></div>`;
       }
-      return `<div class="ci-status ci-err"><i class="ti ti-circle-x"></i><span class="ci-tip">Item unavailable — contact vendor</span></div>`;
+      return `<div class="ci-status ci-err" onmouseenter="wodShowTip(this,'Item unavailable — no alternatives')" onmouseleave="wodHideTip()"><i class="ti ti-circle-x"></i></div>`;
     }
 
     function xrefBadge(c) {
+      if (c.replacedBy || c.replacesId) return '';
       const refs = c.crossRefs || [];
       if (!refs.length) return '';
       if (refs.some(r => r.mandatory)) {
-        return `<button class="ci-xref ci-xref-mand" onclick="wodOpenCrossRefs('${c.id}')"><i class="ti ti-switch-horizontal" style="font-size:10px;"></i> Sub required</button>`;
+        return `<button class="ci-xref ci-xref-mand" onclick="wodOpenCrossRefs('${c.id}')"><i class="ti ti-switch-horizontal" style="font-size:10px;"></i> Mandatory cross-ref</button>`;
       }
-      return `<button class="ci-xref ci-xref-opt" onclick="wodOpenCrossRefs('${c.id}')"><i class="ti ti-switch-horizontal" style="font-size:10px;"></i> ${refs.length} alt</button>`;
+      return `<button class="ci-xref ci-xref-opt" onclick="wodOpenCrossRefs('${c.id}')"><i class="ti ti-switch-horizontal" style="font-size:10px;"></i> ${refs.length} optional cross-ref${refs.length !== 1 ? 's' : ''}</button>`;
     }
 
-    function localBadge(c) {
+    function localCell(c) {
+      if (c.replacedBy) return '<span class="ci-dash">—</span>';
+      if (c.selectedSource) {
+        return `<button class="ci-local ci-local-sel" onclick="wodOpenLocal('${c.id}')"><i class="ti ti-map-pin" style="font-size:10px;"></i> ${c.selectedSource.locationName}</button>`;
+      }
       const inv = c.localInventory || [];
       if (!inv.length) return '<span class="ci-dash">—</span>';
       const total = inv.reduce((s, l) => s + l.qty, 0);
       return `<button class="ci-local" onclick="wodOpenLocal('${c.id}')"><i class="ti ti-map-pin" style="font-size:10px;"></i> ${total} avail</button>`;
     }
 
-    const total = cart.reduce((s, c) => s + c.price * (c.qty || 1), 0);
+    const isReplaced = c => !!c.replacedBy;
+    const submittable = cart.filter(c => !['blocked','unorderable','replaced'].includes(itemStatus(c)));
+    const notSubmittable = cart.filter(c => ['blocked','unorderable'].includes(itemStatus(c))).length;
+    const total = submittable.reduce((s, c) => s + c.price * (c.qty || 1), 0);
+
     container.innerHTML = `
       <table class="wod-cart-table">
         <thead><tr>
@@ -115,46 +128,57 @@ function render_wo_detail(el) {
           <th class="col-pn">Part #</th>
           <th class="col-desc">Description</th>
           <th class="col-uom">UOM</th>
-          <th class="col-loc">Local stock</th>
+          <th class="col-loc">Source / stock</th>
           <th class="col-qty" style="text-align:center;">Qty</th>
           <th class="col-unit" style="text-align:right;">Unit</th>
           <th class="col-tot" style="text-align:right;">Total</th>
           <th class="col-rm"></th>
         </tr></thead>
-        <tbody>${cart.map(c => `
-          <tr class="cart-row">
+        <tbody>${cart.map(c => {
+          const replaced = isReplaced(c);
+          const rowStyle = replaced ? 'opacity:0.45;' : '';
+          const descStyle = replaced ? 'text-decoration:line-through;color:#9CA3AF;' : '';
+          const partStyle = replaced ? 'text-decoration:line-through;color:#9CA3AF;' : '';
+          const replacesOrig = c.replacesId ? cart.find(x => x.id === c.replacesId) : null;
+          return `
+          <tr class="cart-row" style="${rowStyle}">
             <td class="col-st">${statusCell(c)}</td>
             <td class="col-pn">
-              <div class="ci-partnum">${c.partNum}</div>
+              <div class="ci-partnum" style="${partStyle}">${c.partNum}</div>
               <div class="ci-vendor-line">${c.vendor}${c.oemOnly ? ' <span class="oem-badge">OEM</span>' : ''}</div>
             </td>
             <td class="col-desc">
-              <div class="ci-desc-name">${c.description}</div>
+              <div class="ci-desc-name" style="${descStyle}">${c.description}</div>
+              ${replacesOrig ? `<div style="font-size:10px;color:#7A7F8E;margin-top:2px;display:flex;align-items:center;gap:3px;"><i class="ti ti-arrows-exchange" style="font-size:10px;"></i> Replaces ${replacesOrig.partNum}</div>` : ''}
               <div style="display:flex;align-items:center;gap:5px;margin-top:3px;">${xrefBadge(c)}</div>
             </td>
             <td class="col-uom"><span class="uom-badge">${c.uom || 'EA'}</span></td>
-            <td class="col-loc">${localBadge(c)}</td>
+            <td class="col-loc">${localCell(c)}</td>
             <td class="col-qty">
-              <div class="ci-qty-ctrl">
+              ${replaced ? '<span style="color:#C8C3BC;font-size:12px;">—</span>' : `<div class="ci-qty-ctrl">
                 <button class="qty-btn" onclick="wodQtyDec('${c.id}')">−</button>
                 <span class="qty-val">${c.qty || 1}</span>
                 <button class="qty-btn" onclick="wodQtyInc('${c.id}')">+</button>
-              </div>
+              </div>`}
             </td>
-            <td class="col-unit" style="text-align:right;font-size:12px;color:#7A7F8E;">$${c.price.toFixed(2)}</td>
-            <td class="col-tot" style="text-align:right;font-size:13px;font-weight:700;color:#111318;">$${(c.price * (c.qty || 1)).toFixed(2)}</td>
-            <td class="col-rm"><button class="ci-remove" onclick="wodRemoveItem('${c.id}')" title="Remove"><i class="ti ti-trash" style="font-size:13px;"></i></button></td>
-          </tr>`).join('')}
+            <td class="col-unit" style="text-align:right;font-size:12px;color:#7A7F8E;">${replaced ? '—' : '$' + c.price.toFixed(2)}</td>
+            <td class="col-tot" style="text-align:right;font-size:13px;font-weight:700;color:${replaced ? '#C8C3BC' : '#111318'};">${replaced ? '—' : '$' + (c.price * (c.qty || 1)).toFixed(2)}</td>
+            <td class="col-rm">${replaced ? '' : `<button class="ci-remove" onclick="wodRemoveItem('${c.id}')" title="Remove"><i class="ti ti-trash" style="font-size:13px;"></i></button>`}</td>
+          </tr>`;
+        }).join('')}
         </tbody>
       </table>`;
 
     const totalRow = document.getElementById('wod-cart-total-row');
     if (totalRow) {
       totalRow.style.display = 'flex';
+      const submitLabel = notSubmittable > 0
+        ? `Submit orderable items <span style="font-size:12px;background:rgba(0,0,0,0.15);border-radius:4px;padding:1px 6px;margin-left:4px;">⚠ ${notSubmittable} unorderable</span>`
+        : `<i class="ti ti-check" style="font-size:14px;"></i> Submit order`;
       totalRow.innerHTML = `
         <div style="flex:1;font-size:13px;color:#7A7F8E;">${cart.length} item${cart.length !== 1 ? 's' : ''}</div>
         <div style="font-size:14px;font-weight:700;color:#111318;margin-right:14px;">$${total.toFixed(2)}</div>
-        <button class="btn-primary" onclick="wodSubmitCart()"><i class="ti ti-check" style="font-size:14px;"></i> Submit order</button>`;
+        <button class="btn-primary" onclick="wodSubmitCart()" ${submittable.length === 0 ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>${submitLabel}</button>`;
     }
   }
 
@@ -244,13 +268,12 @@ function render_wo_detail(el) {
 .col-tot { width: 72px; }
 .col-rm { width: 36px; padding-right: 10px !important; }
 /* Status icon */
-.ci-status { position: relative; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: default; }
+.ci-status { display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: default; }
 .ci-ok { color: #639922; }
 .ci-warn { color: #BA7517; }
 .ci-err { color: #A32D2D; }
-.ci-tip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: #1E1E1E; color: #FFFFFF; font-size: 11px; font-weight: 400; border-radius: 7px; padding: 6px 10px; white-space: nowrap; pointer-events: none; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
-.ci-tip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: #1E1E1E; }
-.ci-status:hover .ci-tip { display: block; }
+/* Fixed-position tooltip — appended to body so it escapes overflow:hidden */
+#wod-float-tip { position: fixed; background: #1E1E1E; color: #FFFFFF; font-size: 11px; font-weight: 400; border-radius: 7px; padding: 6px 10px; white-space: nowrap; pointer-events: none; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,.25); display: none; }
 /* Part # cell */
 .ci-partnum { font-family: 'SF Mono','Consolas',monospace; font-size: 11px; color: #3A3D4A; font-weight: 600; }
 .ci-vendor-line { font-size: 10px; color: #9CA3AF; margin-top: 2px; display: flex; align-items: center; gap: 4px; }
@@ -266,6 +289,8 @@ function render_wo_detail(el) {
 /* Local stock badge */
 .ci-local { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; background: #EAF3DE; color: #3B6D11; border: none; border-radius: 4px; padding: 3px 7px; cursor: pointer; font-family: inherit; }
 .ci-local:hover { background: #D5EBBE; }
+.ci-local-sel { background: #3B6D11; color: #FFFFFF; }
+.ci-local-sel:hover { background: #2D5309; }
 .ci-dash { color: #D1CBC4; font-size: 13px; }
 /* UOM */
 .uom-badge { font-size: 10px; font-weight: 700; background: #F0ECE8; color: #5A5F6E; border-radius: 4px; padding: 2px 6px; letter-spacing: 0.3px; }
@@ -515,12 +540,17 @@ function render_wo_detail(el) {
   window.wodSubmitCart = function() {
     const cart = Store.getWoCart(wo.id);
     if (!cart.length) return;
-    Modal.confirm('Submit order for WO #' + wo.id + '? (' + cart.length + ' item' + (cart.length !== 1 ? 's' : '') + ')', function() {
-      Store.submitWoCart(wo.id);
+    const submittable = cart.filter(c => !['blocked','unorderable','replaced'].includes(itemStatus(c)));
+    if (!submittable.length) return;
+    const notSubmittable = cart.filter(c => ['blocked','unorderable'].includes(itemStatus(c))).length;
+    const label = notSubmittable > 0
+      ? `Submit ${submittable.length} orderable item${submittable.length !== 1 ? 's' : ''} (${notSubmittable} will remain in cart)?`
+      : `Submit order for WO #${wo.id}? (${submittable.length} item${submittable.length !== 1 ? 's' : ''})`;
+    Modal.confirm(label, function() {
+      Store.submitWoCartItems(wo.id, submittable.map(c => c.id));
       renderCart();
       renderSubmittedOrders();
       updateCartBadge();
-      // refresh submitted orders count in header
       const ordBadge = document.querySelector('.orders-section .cart-section-title span');
       if (ordBadge) ordBadge.textContent = (wo.submittedOrders || []).length;
     });
@@ -537,7 +567,7 @@ function render_wo_detail(el) {
     const refs = item.crossRefs || [];
     const hasMand = refs.some(r => r.mandatory);
     const body = `
-      ${hasMand ? '<div style="display:flex;align-items:center;gap:8px;background:#FAEEDA;border:0.5px solid #F5A623;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#854F0B;"><i class="ti ti-alert-triangle" style="flex-shrink:0;"></i><span>Fleet policy requires using the substitute below when ordering this part. Review and confirm before submitting.</span></div>' : ''}
+      ${hasMand ? '<div style="display:flex;align-items:center;gap:8px;background:#FAEEDA;border:0.5px solid #F5A623;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#854F0B;"><i class="ti ti-alert-triangle" style="flex-shrink:0;"></i><span>Fleet policy requires using the substitute below. Select it to unblock this item in the cart.</span></div>' : ''}
       <div style="margin-bottom:14px;font-size:12px;color:#7A7F8E;">Original part: <strong style="color:#111318;">${item.partNum}</strong> — ${item.description}</div>
       <table style="width:100%;border-collapse:collapse;">
         <thead><tr style="background:#FAFAF8;">
@@ -556,19 +586,21 @@ function render_wo_detail(el) {
             <td style="padding:9px 12px;text-align:center;border-bottom:0.5px solid #F0ECE8;"><span style="font-size:10px;background:#F0ECE8;color:#5A5F6E;border-radius:4px;padding:2px 6px;font-weight:700;">${r.uom || 'EA'}</span></td>
             <td style="padding:9px 12px;text-align:right;font-size:13px;font-weight:700;color:#111318;border-bottom:0.5px solid #F0ECE8;">$${r.price.toFixed(2)}</td>
             <td style="padding:9px 12px;border-bottom:0.5px solid #F0ECE8;">
-              ${r.mandatory
-                ? '<span style="font-size:10px;font-weight:700;background:#FAEEDA;color:#854F0B;border-radius:4px;padding:3px 8px;display:inline-flex;align-items:center;gap:3px;"><i class="ti ti-shield-check" style="font-size:10px;"></i> Fleet required</span>'
-                : '<button style="font-size:11px;font-weight:600;background:#F5A623;border:none;border-radius:6px;padding:5px 12px;color:#1A1200;cursor:pointer;font-family:inherit;" onclick="wodSwapCrossRef(\''+item.id+'\',\''+r.partNum+'\')">Use this instead</button>'}
+              <button style="font-size:11px;font-weight:600;background:#F5A623;border:none;border-radius:6px;padding:5px 12px;color:#1A1200;cursor:pointer;font-family:inherit;" onclick="wodSwapCrossRef('${item.id}',${JSON.stringify(r)})">Use this instead</button>
             </td>
           </tr>`).join('')}
         </tbody>
-      </table>
-      <div style="margin-top:12px;font-size:11px;color:#9CA3AF;">Cross-references are configured by your fleet manager. Contact them to update substitution policies.</div>`;
+      </table>`;
     Modal.show({ title: 'Cross-references — ' + item.partNum, body, wide: true, actions: [{ label: 'Close', onClick: () => Modal.close() }] });
   };
 
-  window.wodSwapCrossRef = function(partId, newPartNum) {
-    Modal.show({ title: 'Substitution noted', body: '<div style="text-align:center;padding:16px;"><i class="ti ti-circle-check" style="font-size:40px;color:#3B6D11;"></i><p style="margin-top:12px;font-size:13px;color:#111318;font-weight:600;">Substitute selected: ' + newPartNum + '</p><p style="font-size:12px;color:#7A7F8E;margin-top:6px;">This substitution will be noted on the order submitted to your vendor.</p></div>', actions: [{ label: 'OK', primary: true, onClick: () => Modal.close() }] });
+  window.wodSwapCrossRef = function(partId, refJson) {
+    const ref = typeof refJson === 'string' ? JSON.parse(refJson) : refJson;
+    const newPart = { id: ref.partNum, partNum: ref.partNum, description: ref.description, vendor: ref.vendor, price: ref.price, uom: ref.uom || 'EA', inStock: true, localInventory: [], crossRefs: [] };
+    Store.swapWoCartItem(wo.id, partId, newPart);
+    Modal.close();
+    renderCart();
+    updateCartBadge();
   };
 
   window.wodOpenLocal = function(partId) {
@@ -579,11 +611,13 @@ function render_wo_detail(el) {
       <div style="margin-bottom:14px;">
         <div style="font-size:13px;font-weight:600;color:#111318;">${item.description}</div>
         <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">${item.partNum} · ${item.vendor}</div>
-        <div style="font-size:12px;color:#5A5F6E;margin-top:8px;">The following fleet locations have this item in stock. Request a pickup to reserve it for this work order instead of placing a new vendor order.</div>
+        <div style="font-size:12px;color:#5A5F6E;margin-top:8px;">Select a fleet location as the source for this item instead of placing a new vendor order.</div>
       </div>
-      ${inv.map(loc => `
-        <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;border:0.5px solid #E8E4DF;border-radius:10px;margin-bottom:8px;background:#FAFAF8;">
-          <div style="width:38px;height:38px;background:#EAF3DE;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#3B6D11;flex-shrink:0;"><i class="ti ${loc.type === 'shop' ? 'ti-building' : 'ti-crane'}"></i></div>
+      ${inv.map(loc => {
+        const isSelected = item.selectedSource && item.selectedSource.locationId === loc.locationId;
+        return `
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;border:${isSelected ? '1.5px solid #3B6D11' : '0.5px solid #E8E4DF'};border-radius:10px;margin-bottom:8px;background:${isSelected ? '#EAF3DE' : '#FAFAF8'};">
+          <div style="width:38px;height:38px;background:${isSelected ? '#3B6D11' : '#EAF3DE'};border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;color:${isSelected ? '#FFFFFF' : '#3B6D11'};flex-shrink:0;"><i class="ti ${loc.type === 'shop' ? 'ti-building' : 'ti-crane'}"></i></div>
           <div style="flex:1;">
             <div style="font-size:13px;font-weight:600;color:#111318;">${loc.locationName}</div>
             <div style="font-size:11px;color:#7A7F8E;margin-top:2px;">${loc.distance} · ${loc.type === 'shop' ? 'Shop stock' : 'Fleet yard'}</div>
@@ -592,16 +626,34 @@ function render_wo_detail(el) {
             <div style="font-size:20px;font-weight:700;color:#3B6D11;line-height:1;">${loc.qty}</div>
             <div style="font-size:10px;color:#9CA3AF;">available</div>
           </div>
-          <button style="background:#EAF3DE;border:none;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:600;color:#3B6D11;cursor:pointer;font-family:inherit;flex-shrink:0;" onclick="wodRequestPickup('${item.id}','${loc.locationId}','${loc.locationName}')">Request pickup</button>
-        </div>`).join('')}
-      <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Requesting a pickup notifies the location manager to reserve the item for WO #${wo.id}.</div>`;
+          <button style="background:${isSelected ? '#3B6D11' : '#EAF3DE'};border:none;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:600;color:${isSelected ? '#FFFFFF' : '#3B6D11'};cursor:pointer;font-family:inherit;flex-shrink:0;" onclick="wodSelectSource('${item.id}','${loc.locationId}','${loc.locationName}')">${isSelected ? '✓ Selected' : 'Select as source'}</button>
+        </div>`;
+      }).join('')}`;
     Modal.show({ title: 'Local inventory — ' + item.partNum, body, actions: [{ label: 'Close', onClick: () => Modal.close() }] });
   };
 
-  window.wodRequestPickup = function(partId, locationId, locationName) {
+  window.wodSelectSource = function(partId, locationId, locationName) {
+    Store.setWoCartItemSource(wo.id, partId, { locationId, locationName });
     Modal.close();
-    setTimeout(() => {
-      Modal.show({ title: 'Pickup requested', body: '<div style="text-align:center;padding:16px;"><i class="ti ti-circle-check" style="font-size:40px;color:#3B6D11;"></i><p style="margin-top:12px;font-size:13px;color:#111318;font-weight:600;">Request sent to ' + locationName + '</p><p style="font-size:12px;color:#7A7F8E;margin-top:6px;">The location manager will confirm availability and reserve the item for WO #' + wo.id + '.</p></div>', actions: [{ label: 'OK', primary: true, onClick: () => Modal.close() }] });
-    }, 0);
+    renderCart();
+  };
+
+  window.wodShowTip = function(el, text) {
+    let tip = document.getElementById('wod-float-tip');
+    if (!tip) {
+      tip = document.createElement('div');
+      tip.id = 'wod-float-tip';
+      document.body.appendChild(tip);
+    }
+    tip.textContent = text;
+    tip.style.display = 'block';
+    const rect = el.getBoundingClientRect();
+    tip.style.left = (rect.left + rect.width / 2 - tip.offsetWidth / 2) + 'px';
+    tip.style.top = (rect.top - tip.offsetHeight - 7) + 'px';
+  };
+
+  window.wodHideTip = function() {
+    const tip = document.getElementById('wod-float-tip');
+    if (tip) tip.style.display = 'none';
   };
 }

@@ -548,6 +548,63 @@ const Store = (() => {
     if (item) { item.qty = Math.max(1, qty); save(_data); }
   }
 
+  function swapWoCartItem(woId, originalId, newPart) {
+    const wo = getWorkOrder(woId);
+    if (!wo || !wo.cart) return;
+    const original = wo.cart.find(c => c.id === originalId);
+    if (!original) return;
+    const qty = original.qty || 1;
+    original.replacedBy = newPart.id;
+    if (!wo.cart.find(c => c.id === newPart.id)) {
+      const idx = wo.cart.indexOf(original);
+      wo.cart.splice(idx + 1, 0, Object.assign({}, newPart, { qty, replacesId: originalId }));
+    }
+    save(_data);
+  }
+
+  function setWoCartItemSource(woId, partId, source) {
+    const wo = getWorkOrder(woId);
+    if (!wo || !wo.cart) return;
+    const item = wo.cart.find(c => c.id === partId);
+    if (item) { item.selectedSource = source; save(_data); }
+  }
+
+  function submitWoCartItems(woId, itemIds) {
+    const wo = getWorkOrder(woId);
+    if (!wo || !wo.cart) return null;
+    const idSet = new Set(itemIds);
+    const items = wo.cart.filter(c => idSet.has(c.id));
+    if (!items.length) return null;
+    const total = items.reduce((s, c) => s + c.price * (c.qty || 1), 0);
+    const poNum = _nextPoNum();
+    const submitted = {
+      id: 'wo-ord-' + Date.now(),
+      poNum,
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      items: items.map(c => Object.assign({}, c)),
+      total: Math.round(total * 100) / 100,
+      status: 'submitted',
+    };
+    if (!wo.submittedOrders) wo.submittedOrders = [];
+    wo.submittedOrders.unshift(submitted);
+    addOrder({
+      vendor: items.length === 1 ? items[0].vendor : 'Various',
+      name: items.length === 1 ? items[0].description : items.length + ' parts — WO #' + wo.id,
+      wo: 'WO #' + wo.id,
+      asset: wo.asset,
+      amount: Math.round(total * 100) / 100,
+      status: 'submitted',
+      tab: 'submitted',
+      items,
+      poNum,
+    });
+    const replacedOriginalIds = items.filter(c => c.replacesId).map(c => c.replacesId);
+    const removeSet = new Set([...itemIds, ...replacedOriginalIds]);
+    wo.cart = wo.cart.filter(c => !removeSet.has(c.id));
+    save(_data);
+    return submitted;
+  }
+
   function submitWoCart(woId) {
     const wo = getWorkOrder(woId);
     if (!wo || !wo.cart || !wo.cart.length) return null;
@@ -751,6 +808,7 @@ const Store = (() => {
     getOrders, addOrder, updateOrder,
     getCart, addToCart, removeFromCart, updateCartQty, clearCart, submitCart,
     getWoCart, addToWoCart, removeFromWoCart, updateWoCartQty, submitWoCart,
+    swapWoCartItem, setWoCartItemSource, submitWoCartItems,
     addDiagnosticMessage, getDiagnosticHistory, clearDiagnosticHistory,
     getParts, getManuals,
     getLocations, getCurrentLocation, setCurrentLocation,
