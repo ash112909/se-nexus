@@ -579,7 +579,7 @@ const Store = (() => {
     save(_data);
   }
 
-  function submitWoCartItems(woId, itemIds) {
+  function submitWoCartItems(woId, itemIds, orderMeta) {
     const wo = getWorkOrder(woId);
     if (!wo || !wo.cart) return null;
     const idSet = new Set(itemIds);
@@ -587,14 +587,14 @@ const Store = (() => {
     if (!items.length) return null;
     const total = items.reduce((s, c) => s + c.price * (c.qty || 1), 0);
     const poNum = _nextPoNum();
-    const submitted = {
+    const submitted = Object.assign({
       id: 'wo-ord-' + Date.now(),
       poNum,
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       items: items.map(c => Object.assign({}, c)),
       total: Math.round(total * 100) / 100,
       status: 'submitted',
-    };
+    }, orderMeta || {});
     if (!wo.submittedOrders) wo.submittedOrders = [];
     wo.submittedOrders.unshift(submitted);
     addOrder({

@@ -545,18 +545,7 @@ function render_wo_detail(el) {
     if (!cart.length) return;
     const submittable = cart.filter(c => !['blocked','unorderable','replaced'].includes(itemStatus(c)));
     if (!submittable.length) return;
-    const notSubmittable = cart.filter(c => ['blocked','unorderable'].includes(itemStatus(c))).length;
-    const label = notSubmittable > 0
-      ? `Submit ${submittable.length} orderable item${submittable.length !== 1 ? 's' : ''} (${notSubmittable} will remain in cart)?`
-      : `Submit order for WO #${wo.id}? (${submittable.length} item${submittable.length !== 1 ? 's' : ''})`;
-    Modal.confirm(label, function() {
-      Store.submitWoCartItems(wo.id, submittable.map(c => c.id));
-      renderCart();
-      renderSubmittedOrders();
-      updateCartBadge();
-      const ordBadge = document.querySelector('.orders-section .cart-section-title span');
-      if (ordBadge) ordBadge.textContent = (wo.submittedOrders || []).length;
-    });
+    Router.navigate('order-review', { woId: wo.id, itemIds: submittable.map(c => c.id) });
   };
 
   function updateCartBadge() {
