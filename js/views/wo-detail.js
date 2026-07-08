@@ -63,34 +63,90 @@ function render_wo_detail(el) {
     if (!container) return;
 
     if (!cart.length) {
-      container.innerHTML = `
-        <div style="padding:20px;text-align:center;color:#9CA3AF;font-size:13px;">
-          No items in cart. <a style="color:#F5A623;cursor:pointer;" onclick="sendPrompt('Open Parts Search scoped to WO #${wo.id}')">Search parts to add</a>
-        </div>`;
+      container.innerHTML = `<div style="padding:24px;text-align:center;color:#9CA3AF;font-size:13px;">No items in cart. <a style="color:#F5A623;cursor:pointer;" onclick="sendPrompt('Open Parts Search scoped to WO #${wo.id}')">Search parts to add</a></div>`;
       document.getElementById('wod-cart-total-row').style.display = 'none';
       return;
     }
 
+    function itemStatus(c) {
+      const hasMand = (c.crossRefs || []).some(r => r.mandatory);
+      const hasLocal = (c.localInventory || []).length > 0;
+      if (!c.inStock && !(c.crossRefs || []).length) return 'unorderable';
+      if (!c.inStock || hasMand || hasLocal) return 'needs_attention';
+      return 'orderable';
+    }
+
+    function statusCell(c) {
+      const st = itemStatus(c);
+      const reasons = [];
+      if (!c.inStock) reasons.push('Backordered');
+      if ((c.crossRefs || []).some(r => r.mandatory)) reasons.push('Fleet substitution required');
+      if ((c.localInventory || []).length) reasons.push('Local stock available');
+      const tip = reasons.join(' · ') || 'Ready to order';
+      if (st === 'orderable') {
+        return `<div class="ci-status ci-ok" title="${tip}"><i class="ti ti-circle-check"></i></div>`;
+      } else if (st === 'needs_attention') {
+        return `<div class="ci-status ci-warn"><i class="ti ti-alert-triangle"></i><span class="ci-tip">${tip}</span></div>`;
+      }
+      return `<div class="ci-status ci-err"><i class="ti ti-circle-x"></i><span class="ci-tip">Item unavailable — contact vendor</span></div>`;
+    }
+
+    function xrefBadge(c) {
+      const refs = c.crossRefs || [];
+      if (!refs.length) return '';
+      if (refs.some(r => r.mandatory)) {
+        return `<button class="ci-xref ci-xref-mand" onclick="wodOpenCrossRefs('${c.id}')"><i class="ti ti-switch-horizontal" style="font-size:10px;"></i> Sub required</button>`;
+      }
+      return `<button class="ci-xref ci-xref-opt" onclick="wodOpenCrossRefs('${c.id}')"><i class="ti ti-switch-horizontal" style="font-size:10px;"></i> ${refs.length} alt</button>`;
+    }
+
+    function localBadge(c) {
+      const inv = c.localInventory || [];
+      if (!inv.length) return '<span class="ci-dash">—</span>';
+      const total = inv.reduce((s, l) => s + l.qty, 0);
+      return `<button class="ci-local" onclick="wodOpenLocal('${c.id}')"><i class="ti ti-map-pin" style="font-size:10px;"></i> ${total} avail</button>`;
+    }
+
     const total = cart.reduce((s, c) => s + c.price * (c.qty || 1), 0);
-    container.innerHTML = cart.map(c => `
-      <div class="cart-item-row">
-        <div class="ci-icon"><i class="ti ${c.category === 'Hydraulic' ? 'ti-droplet' : c.category === 'Seals' ? 'ti-circle-dashed' : c.category === 'Drive' ? 'ti-engine' : 'ti-settings'}"></i></div>
-        <div class="ci-info">
-          <div class="ci-name">${c.description}</div>
-          <div class="ci-num">${c.partNum} · ${c.vendor}${c.oemOnly ? ' <span class="oem-badge">OEM</span>' : ''}</div>
-        </div>
-        <div class="ci-avail">
-          <span class="avail-dot-sm ${c.inStock ? 'green' : 'amber'}"></span>
-          <span class="avail-lbl ${c.inStock ? 'green' : 'amber'}">${c.inStock ? 'In stock' : 'Backordered'}</span>
-        </div>
-        <div class="ci-qty-ctrl">
-          <button class="qty-btn" onclick="wodQtyDec('${c.id}')">−</button>
-          <span class="qty-val">${c.qty || 1}</span>
-          <button class="qty-btn" onclick="wodQtyInc('${c.id}')">+</button>
-        </div>
-        <div class="ci-price">$${(c.price * (c.qty || 1)).toFixed(2)}</div>
-        <button class="ci-remove" onclick="wodRemoveItem('${c.id}')" title="Remove"><i class="ti ti-trash" style="font-size:13px;"></i></button>
-      </div>`).join('');
+    container.innerHTML = `
+      <table class="wod-cart-table">
+        <thead><tr>
+          <th class="col-st"></th>
+          <th class="col-pn">Part #</th>
+          <th class="col-desc">Description</th>
+          <th class="col-uom">UOM</th>
+          <th class="col-loc">Local stock</th>
+          <th class="col-qty" style="text-align:center;">Qty</th>
+          <th class="col-unit" style="text-align:right;">Unit</th>
+          <th class="col-tot" style="text-align:right;">Total</th>
+          <th class="col-rm"></th>
+        </tr></thead>
+        <tbody>${cart.map(c => `
+          <tr class="cart-row">
+            <td class="col-st">${statusCell(c)}</td>
+            <td class="col-pn">
+              <div class="ci-partnum">${c.partNum}</div>
+              <div class="ci-vendor-line">${c.vendor}${c.oemOnly ? ' <span class="oem-badge">OEM</span>' : ''}</div>
+            </td>
+            <td class="col-desc">
+              <div class="ci-desc-name">${c.description}</div>
+              <div style="display:flex;align-items:center;gap:5px;margin-top:3px;">${xrefBadge(c)}</div>
+            </td>
+            <td class="col-uom"><span class="uom-badge">${c.uom || 'EA'}</span></td>
+            <td class="col-loc">${localBadge(c)}</td>
+            <td class="col-qty">
+              <div class="ci-qty-ctrl">
+                <button class="qty-btn" onclick="wodQtyDec('${c.id}')">−</button>
+                <span class="qty-val">${c.qty || 1}</span>
+                <button class="qty-btn" onclick="wodQtyInc('${c.id}')">+</button>
+              </div>
+            </td>
+            <td class="col-unit" style="text-align:right;font-size:12px;color:#7A7F8E;">$${c.price.toFixed(2)}</td>
+            <td class="col-tot" style="text-align:right;font-size:13px;font-weight:700;color:#111318;">$${(c.price * (c.qty || 1)).toFixed(2)}</td>
+            <td class="col-rm"><button class="ci-remove" onclick="wodRemoveItem('${c.id}')" title="Remove"><i class="ti ti-trash" style="font-size:13px;"></i></button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
 
     const totalRow = document.getElementById('wod-cart-total-row');
     if (totalRow) {
@@ -171,30 +227,56 @@ function render_wo_detail(el) {
 .cart-section-header { padding: 14px 16px; border-bottom: 0.5px solid #F0ECE8; display: flex; align-items: center; justify-content: space-between; }
 .cart-section-title { font-size: 14px; font-weight: 600; color: #111318; display: flex; align-items: center; gap: 8px; }
 .cart-badge { background: #F5A623; color: #1A1200; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 8px; }
-.cart-item-row { display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-bottom: 0.5px solid #F5F2EE; }
-.cart-item-row:last-child { border-bottom: none; }
-.ci-icon { width: 34px; height: 34px; background: #F5F2EE; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #C8C3BC; flex-shrink: 0; }
-.ci-info { flex: 1; min-width: 0; }
-.ci-name { font-size: 13px; font-weight: 500; color: #111318; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ci-num { font-size: 11px; color: #9CA3AF; display: flex; align-items: center; gap: 5px; }
-.oem-badge { background: #F5F2EE; color: #5A5F6E; font-size: 10px; font-weight: 600; border-radius: 4px; padding: 1px 5px; }
-.ci-avail { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
-.avail-dot-sm { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-.avail-dot-sm.green { background: #639922; }
-.avail-dot-sm.amber { background: #BA7517; }
-.avail-lbl { font-size: 11px; }
-.avail-lbl.green { color: #3B6D11; }
-.avail-lbl.amber { color: #854F0B; }
-.ci-qty-ctrl { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-.qty-btn { width: 24px; height: 24px; border: 1px solid #E2DDD8; border-radius: 5px; background: #F5F2EE; color: #3A3D4A; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit; line-height: 1; padding: 0; }
-.qty-btn:hover { background: #ECEAE6; }
-.qty-val { font-size: 13px; font-weight: 600; color: #111318; min-width: 18px; text-align: center; }
-.ci-price { font-size: 13px; font-weight: 700; color: #111318; flex-shrink: 0; min-width: 60px; text-align: right; }
-.ci-remove { background: none; border: none; color: #C8C3BC; cursor: pointer; padding: 4px; border-radius: 5px; flex-shrink: 0; }
-.ci-remove:hover { background: #FCEBEB; color: #A32D2D; }
-.cart-total-row { display: flex; align-items: center; padding: 12px 16px; background: #FAFAF8; border-top: 0.5px solid #F0ECE8; }
 .add-parts-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #854F0B; background: #FAEEDA; border: none; border-radius: 7px; padding: 6px 12px; cursor: pointer; font-family: inherit; }
 .add-parts-btn:hover { background: #F5DEB5; }
+/* Cart table */
+.wod-cart-table { width: 100%; border-collapse: collapse; }
+.wod-cart-table th { font-size: 10px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: #9CA3AF; padding: 7px 10px; text-align: left; background: #FAFAF8; border-bottom: 1px solid #E8E4DF; white-space: nowrap; }
+.wod-cart-table td { padding: 9px 10px; border-bottom: 0.5px solid #F5F2EE; vertical-align: middle; }
+.cart-row:last-child td { border-bottom: none; }
+.col-st { width: 32px; padding-left: 14px !important; }
+.col-pn { width: 130px; }
+.col-desc { }
+.col-uom { width: 52px; }
+.col-loc { width: 88px; }
+.col-qty { width: 96px; }
+.col-unit { width: 68px; }
+.col-tot { width: 72px; }
+.col-rm { width: 36px; padding-right: 10px !important; }
+/* Status icon */
+.ci-status { position: relative; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: default; }
+.ci-ok { color: #639922; }
+.ci-warn { color: #BA7517; }
+.ci-err { color: #A32D2D; }
+.ci-tip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: #1E1E1E; color: #FFFFFF; font-size: 11px; font-weight: 400; border-radius: 7px; padding: 6px 10px; white-space: nowrap; pointer-events: none; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
+.ci-tip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: #1E1E1E; }
+.ci-status:hover .ci-tip { display: block; }
+/* Part # cell */
+.ci-partnum { font-family: 'SF Mono','Consolas',monospace; font-size: 11px; color: #3A3D4A; font-weight: 600; }
+.ci-vendor-line { font-size: 10px; color: #9CA3AF; margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+.oem-badge { background: #F5F2EE; color: #5A5F6E; font-size: 9px; font-weight: 700; border-radius: 3px; padding: 1px 4px; letter-spacing: 0.3px; }
+/* Description cell */
+.ci-desc-name { font-size: 13px; font-weight: 500; color: #111318; line-height: 1.3; }
+/* Cross-ref badges */
+.ci-xref { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; border: none; border-radius: 4px; padding: 2px 7px; cursor: pointer; font-family: inherit; }
+.ci-xref-mand { background: #FAEEDA; color: #854F0B; }
+.ci-xref-mand:hover { background: #F5DEB5; }
+.ci-xref-opt { background: #EEEDFE; color: #534AB7; }
+.ci-xref-opt:hover { background: #DDD9FE; }
+/* Local stock badge */
+.ci-local { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; background: #EAF3DE; color: #3B6D11; border: none; border-radius: 4px; padding: 3px 7px; cursor: pointer; font-family: inherit; }
+.ci-local:hover { background: #D5EBBE; }
+.ci-dash { color: #D1CBC4; font-size: 13px; }
+/* UOM */
+.uom-badge { font-size: 10px; font-weight: 700; background: #F0ECE8; color: #5A5F6E; border-radius: 4px; padding: 2px 6px; letter-spacing: 0.3px; }
+/* Qty controls */
+.ci-qty-ctrl { display: flex; align-items: center; gap: 5px; justify-content: center; }
+.qty-btn { width: 22px; height: 22px; border: 1px solid #E2DDD8; border-radius: 4px; background: #F5F2EE; color: #3A3D4A; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit; line-height: 1; padding: 0; }
+.qty-btn:hover { background: #ECEAE6; }
+.qty-val { font-size: 13px; font-weight: 600; color: #111318; min-width: 16px; text-align: center; }
+.ci-remove { background: none; border: none; color: #C8C3BC; cursor: pointer; padding: 4px; border-radius: 5px; }
+.ci-remove:hover { background: #FCEBEB; color: #A32D2D; }
+.cart-total-row { display: flex; align-items: center; padding: 12px 16px; background: #FAFAF8; border-top: 0.5px solid #F0ECE8; }
 /* Submitted orders */
 .orders-section { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
 .ord-block { border-bottom: 0.5px solid #F0ECE8; }
@@ -448,4 +530,78 @@ function render_wo_detail(el) {
     const badge = document.getElementById('wod-cart-badge');
     if (badge) badge.textContent = Store.getWoCart(wo.id).length;
   }
+
+  window.wodOpenCrossRefs = function(partId) {
+    const item = Store.getWoCart(wo.id).find(c => c.id === partId);
+    if (!item) return;
+    const refs = item.crossRefs || [];
+    const hasMand = refs.some(r => r.mandatory);
+    const body = `
+      ${hasMand ? '<div style="display:flex;align-items:center;gap:8px;background:#FAEEDA;border:0.5px solid #F5A623;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#854F0B;"><i class="ti ti-alert-triangle" style="flex-shrink:0;"></i><span>Fleet policy requires using the substitute below when ordering this part. Review and confirm before submitting.</span></div>' : ''}
+      <div style="margin-bottom:14px;font-size:12px;color:#7A7F8E;">Original part: <strong style="color:#111318;">${item.partNum}</strong> — ${item.description}</div>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead><tr style="background:#FAFAF8;">
+          <th style="text-align:left;padding:7px 12px;font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;border-bottom:1px solid #E8E4DF;">Part #</th>
+          <th style="text-align:left;padding:7px 12px;font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;border-bottom:1px solid #E8E4DF;">Description</th>
+          <th style="text-align:left;padding:7px 12px;font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;border-bottom:1px solid #E8E4DF;">Vendor</th>
+          <th style="text-align:center;padding:7px 12px;font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;border-bottom:1px solid #E8E4DF;">UOM</th>
+          <th style="text-align:right;padding:7px 12px;font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;border-bottom:1px solid #E8E4DF;">Price</th>
+          <th style="padding:7px 12px;border-bottom:1px solid #E8E4DF;"></th>
+        </tr></thead>
+        <tbody>${refs.map(r => `
+          <tr>
+            <td style="padding:9px 12px;font-family:monospace;font-size:11px;color:#3A3D4A;font-weight:600;border-bottom:0.5px solid #F0ECE8;">${r.partNum}</td>
+            <td style="padding:9px 12px;font-size:12px;color:#111318;border-bottom:0.5px solid #F0ECE8;">${r.description}<br><span style="font-size:10px;color:#9CA3AF;">${r.note || ''}</span></td>
+            <td style="padding:9px 12px;font-size:12px;color:#7A7F8E;border-bottom:0.5px solid #F0ECE8;">${r.vendor}</td>
+            <td style="padding:9px 12px;text-align:center;border-bottom:0.5px solid #F0ECE8;"><span style="font-size:10px;background:#F0ECE8;color:#5A5F6E;border-radius:4px;padding:2px 6px;font-weight:700;">${r.uom || 'EA'}</span></td>
+            <td style="padding:9px 12px;text-align:right;font-size:13px;font-weight:700;color:#111318;border-bottom:0.5px solid #F0ECE8;">$${r.price.toFixed(2)}</td>
+            <td style="padding:9px 12px;border-bottom:0.5px solid #F0ECE8;">
+              ${r.mandatory
+                ? '<span style="font-size:10px;font-weight:700;background:#FAEEDA;color:#854F0B;border-radius:4px;padding:3px 8px;display:inline-flex;align-items:center;gap:3px;"><i class="ti ti-shield-check" style="font-size:10px;"></i> Fleet required</span>'
+                : '<button style="font-size:11px;font-weight:600;background:#F5A623;border:none;border-radius:6px;padding:5px 12px;color:#1A1200;cursor:pointer;font-family:inherit;" onclick="wodSwapCrossRef(\''+item.id+'\',\''+r.partNum+'\')">Use this instead</button>'}
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      <div style="margin-top:12px;font-size:11px;color:#9CA3AF;">Cross-references are configured by your fleet manager. Contact them to update substitution policies.</div>`;
+    Modal.show({ title: 'Cross-references — ' + item.partNum, body, wide: true, actions: [{ label: 'Close', onClick: () => Modal.close() }] });
+  };
+
+  window.wodSwapCrossRef = function(partId, newPartNum) {
+    Modal.show({ title: 'Substitution noted', body: '<div style="text-align:center;padding:16px;"><i class="ti ti-circle-check" style="font-size:40px;color:#3B6D11;"></i><p style="margin-top:12px;font-size:13px;color:#111318;font-weight:600;">Substitute selected: ' + newPartNum + '</p><p style="font-size:12px;color:#7A7F8E;margin-top:6px;">This substitution will be noted on the order submitted to your vendor.</p></div>', actions: [{ label: 'OK', primary: true, onClick: () => Modal.close() }] });
+  };
+
+  window.wodOpenLocal = function(partId) {
+    const item = Store.getWoCart(wo.id).find(c => c.id === partId);
+    if (!item) return;
+    const inv = item.localInventory || [];
+    const body = `
+      <div style="margin-bottom:14px;">
+        <div style="font-size:13px;font-weight:600;color:#111318;">${item.description}</div>
+        <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">${item.partNum} · ${item.vendor}</div>
+        <div style="font-size:12px;color:#5A5F6E;margin-top:8px;">The following fleet locations have this item in stock. Request a pickup to reserve it for this work order instead of placing a new vendor order.</div>
+      </div>
+      ${inv.map(loc => `
+        <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;border:0.5px solid #E8E4DF;border-radius:10px;margin-bottom:8px;background:#FAFAF8;">
+          <div style="width:38px;height:38px;background:#EAF3DE;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#3B6D11;flex-shrink:0;"><i class="ti ${loc.type === 'shop' ? 'ti-building' : 'ti-crane'}"></i></div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:600;color:#111318;">${loc.locationName}</div>
+            <div style="font-size:11px;color:#7A7F8E;margin-top:2px;">${loc.distance} · ${loc.type === 'shop' ? 'Shop stock' : 'Fleet yard'}</div>
+          </div>
+          <div style="text-align:center;min-width:44px;">
+            <div style="font-size:20px;font-weight:700;color:#3B6D11;line-height:1;">${loc.qty}</div>
+            <div style="font-size:10px;color:#9CA3AF;">available</div>
+          </div>
+          <button style="background:#EAF3DE;border:none;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:600;color:#3B6D11;cursor:pointer;font-family:inherit;flex-shrink:0;" onclick="wodRequestPickup('${item.id}','${loc.locationId}','${loc.locationName}')">Request pickup</button>
+        </div>`).join('')}
+      <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">Requesting a pickup notifies the location manager to reserve the item for WO #${wo.id}.</div>`;
+    Modal.show({ title: 'Local inventory — ' + item.partNum, body, actions: [{ label: 'Close', onClick: () => Modal.close() }] });
+  };
+
+  window.wodRequestPickup = function(partId, locationId, locationName) {
+    Modal.close();
+    setTimeout(() => {
+      Modal.show({ title: 'Pickup requested', body: '<div style="text-align:center;padding:16px;"><i class="ti ti-circle-check" style="font-size:40px;color:#3B6D11;"></i><p style="margin-top:12px;font-size:13px;color:#111318;font-weight:600;">Request sent to ' + locationName + '</p><p style="font-size:12px;color:#7A7F8E;margin-top:6px;">The location manager will confirm availability and reserve the item for WO #' + wo.id + '.</p></div>', actions: [{ label: 'OK', primary: true, onClick: () => Modal.close() }] });
+    }, 0);
+  };
 }

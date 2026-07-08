@@ -1,5 +1,5 @@
 const Store = (() => {
-  const LS_KEY = 'se-nexus-v6';
+  const LS_KEY = 'se-nexus-v7';
 
   const DEFAULT_PARTS = [
     // ── Skyjack — SJIII 3219 / shared ────────────────────────────────────────
@@ -129,7 +129,21 @@ const Store = (() => {
           { text: 'Parts ordered: SKJ-103100, SKJ-103278. Awaiting delivery.', author: 'James W.', time: '9:45' }
         ],
         cart: [
-          { id: 'SKJ-104880', partNum: 'SKJ-104880', description: 'Hydraulic filter — return line', vendor: 'Skyjack', price: 34.00, oemOnly: true, inStock: true, category: 'Hydraulic', qty: 1 }
+          { id: 'SKJ-104880', partNum: 'SKJ-104880', description: 'Hydraulic filter — return line', vendor: 'Skyjack', price: 34.00, oemOnly: true, inStock: true, category: 'Hydraulic', qty: 1, uom: 'EA',
+            localInventory: [{ locationId: 'dallas', locationName: 'Dallas Shop', qty: 3, distance: '182 mi', type: 'shop' }],
+            crossRefs: [{ partNum: 'PAR-HF-3219', description: 'Return-line hydraulic filter — Parker equiv.', vendor: 'Parker', uom: 'EA', price: 24.50, note: 'OEM-approved substitute, same micron rating', mandatory: false }] },
+          { id: 'SKJ-103601', partNum: 'SKJ-103601', description: 'Hydraulic bleed screw kit', vendor: 'Skyjack', price: 12.00, oemOnly: true, inStock: true, category: 'Hydraulic', qty: 1, uom: 'KIT',
+            localInventory: [],
+            crossRefs: [] },
+          { id: 'SKJ-HF046-1G', partNum: 'SKJ-HF046-1G', description: 'Hydraulic fluid — ISO 46 · 1 gal', vendor: 'Skyjack', price: 28.00, oemOnly: true, inStock: true, category: 'Hydraulic', qty: 2, uom: 'GAL',
+            localInventory: [
+              { locationId: 'austin', locationName: 'Austin Shop', qty: 6, distance: 'On-site', type: 'shop' },
+              { locationId: 'san-antonio', locationName: 'San Antonio Yard', qty: 4, distance: '78 mi', type: 'fleet' }
+            ],
+            crossRefs: [] },
+          { id: 'SKJ-HYD-201', partNum: 'SKJ-HYD-201', description: 'Hydraulic pump seal kit', vendor: 'Skyjack', price: 58.00, oemOnly: true, inStock: false, category: 'Seals', qty: 1, uom: 'KIT',
+            localInventory: [],
+            crossRefs: [{ partNum: 'TRE-HS-3219', description: 'Hydraulic pump seal kit — Trelleborg series', vendor: 'Trelleborg', uom: 'KIT', price: 47.00, note: 'Fleet-mandatory substitute when OEM backordered', mandatory: true }] },
         ],
         submittedOrders: [
           {
@@ -157,7 +171,16 @@ const Store = (() => {
         issue: 'Track tension out of spec — right side',
         warranty: { active: false, expiry: null },
         assignee: 'James W.', opened: 'Jun 22, 2026',
-        notes: [], cart: [], submittedOrders: []
+        notes: [],
+        cart: [
+          { id: 'CAT-1R0716', partNum: 'CAT-1R0716', description: 'Engine oil filter — Cat 320 C7.1', vendor: 'Caterpillar', price: 22.00, oemOnly: true, inStock: false, category: 'Filtration', qty: 3, uom: 'EA',
+            localInventory: [],
+            crossRefs: [{ partNum: 'GRG-CAT-OEQ-716', description: 'Heavy-duty oil filter — Cat equivalent', vendor: 'Grainger', uom: 'EA', price: 14.50, note: 'Fleet-mandatory substitute when OEM backordered', mandatory: true }] },
+          { id: 'CAT-TRK-7201', partNum: 'CAT-TRK-7201', description: 'Track adjuster grease cylinder — 320', vendor: 'Caterpillar', price: 156.00, oemOnly: true, inStock: true, category: 'Drive', qty: 1, uom: 'EA',
+            localInventory: [{ locationId: 'houston', locationName: 'Houston Equipment Yard', qty: 1, distance: '163 mi', type: 'fleet' }],
+            crossRefs: [] },
+        ],
+        submittedOrders: []
       },
       // ── Austin – other assignees (not shown to James W. in list) ──
       {
