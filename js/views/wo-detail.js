@@ -561,11 +561,15 @@ function render_wo_detail(el) {
     if (badge) badge.textContent = Store.getWoCart(wo.id).length;
   }
 
+  var _xrefMap = {};
+
   window.wodOpenCrossRefs = function(partId) {
     const item = Store.getWoCart(wo.id).find(c => c.id === partId);
     if (!item) return;
     const refs = item.crossRefs || [];
     const hasMand = refs.some(r => r.mandatory);
+    _xrefMap = {};
+    refs.forEach(function(r, i) { _xrefMap[i] = r; });
     const body = `
       ${hasMand ? '<div style="display:flex;align-items:center;gap:8px;background:#FAEEDA;border:0.5px solid #F5A623;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#854F0B;"><i class="ti ti-alert-triangle" style="flex-shrink:0;"></i><span>Fleet policy requires using the substitute below. Select it to unblock this item in the cart.</span></div>' : ''}
       <div style="margin-bottom:14px;font-size:12px;color:#7A7F8E;">Original part: <strong style="color:#111318;">${item.partNum}</strong> — ${item.description}</div>
@@ -586,7 +590,7 @@ function render_wo_detail(el) {
             <td style="padding:9px 12px;text-align:center;border-bottom:0.5px solid #F0ECE8;"><span style="font-size:10px;background:#F0ECE8;color:#5A5F6E;border-radius:4px;padding:2px 6px;font-weight:700;">${r.uom || 'EA'}</span></td>
             <td style="padding:9px 12px;text-align:right;font-size:13px;font-weight:700;color:#111318;border-bottom:0.5px solid #F0ECE8;">$${r.price.toFixed(2)}</td>
             <td style="padding:9px 12px;border-bottom:0.5px solid #F0ECE8;">
-              <button style="font-size:11px;font-weight:600;background:#F5A623;border:none;border-radius:6px;padding:5px 12px;color:#1A1200;cursor:pointer;font-family:inherit;" onclick="wodSwapCrossRef('${item.id}',${JSON.stringify(r)})">Use this instead</button>
+              <button style="font-size:11px;font-weight:600;background:#F5A623;border:none;border-radius:6px;padding:5px 12px;color:#1A1200;cursor:pointer;font-family:inherit;" onclick="wodSwapCrossRef('${item.id}',${refs.indexOf(r)})">Use this instead</button>
             </td>
           </tr>`).join('')}
         </tbody>
@@ -594,8 +598,9 @@ function render_wo_detail(el) {
     Modal.show({ title: 'Cross-references — ' + item.partNum, body, wide: true, actions: [{ label: 'Close', onClick: () => Modal.close() }] });
   };
 
-  window.wodSwapCrossRef = function(partId, refJson) {
-    const ref = typeof refJson === 'string' ? JSON.parse(refJson) : refJson;
+  window.wodSwapCrossRef = function(partId, refIdx) {
+    const ref = _xrefMap[refIdx];
+    if (!ref) return;
     const newPart = { id: ref.partNum, partNum: ref.partNum, description: ref.description, vendor: ref.vendor, price: ref.price, uom: ref.uom || 'EA', inStock: true, localInventory: [], crossRefs: [] };
     Store.swapWoCartItem(wo.id, partId, newPart);
     Modal.close();
