@@ -566,7 +566,17 @@ const Store = (() => {
     const wo = getWorkOrder(woId);
     if (!wo || !wo.cart) return;
     const item = wo.cart.find(c => c.id === partId);
-    if (item) { item.selectedSource = source; save(_data); }
+    if (item) { item.selectedSource = source; item.selectedSources = source ? [source] : []; save(_data); }
+  }
+
+  function setWoCartItemSources(woId, partId, sources) {
+    const wo = getWorkOrder(woId);
+    if (!wo || !wo.cart) return;
+    const item = wo.cart.find(c => c.id === partId);
+    if (!item) return;
+    item.selectedSources = sources || [];
+    item.selectedSource = sources && sources.length === 1 ? sources[0] : (sources && sources.length > 1 ? sources[0] : null);
+    save(_data);
   }
 
   function submitWoCartItems(woId, itemIds) {
@@ -808,7 +818,7 @@ const Store = (() => {
     getOrders, addOrder, updateOrder,
     getCart, addToCart, removeFromCart, updateCartQty, clearCart, submitCart,
     getWoCart, addToWoCart, removeFromWoCart, updateWoCartQty, submitWoCart,
-    swapWoCartItem, setWoCartItemSource, submitWoCartItems,
+    swapWoCartItem, setWoCartItemSource, setWoCartItemSources, submitWoCartItems,
     addDiagnosticMessage, getDiagnosticHistory, clearDiagnosticHistory,
     getParts, getManuals,
     getLocations, getCurrentLocation, setCurrentLocation,

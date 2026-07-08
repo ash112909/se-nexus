@@ -107,8 +107,11 @@ function render_wo_detail(el) {
 
     function localCell(c) {
       if (c.replacedBy) return '<span class="ci-dash">—</span>';
-      if (c.selectedSource) {
-        return `<button class="ci-local ci-local-sel" onclick="wodOpenLocal('${c.id}')"><i class="ti ti-map-pin" style="font-size:10px;"></i> ${c.selectedSource.locationName}</button>`;
+      const sources = c.selectedSources || (c.selectedSource ? [c.selectedSource] : []);
+      if (sources.length) {
+        const srcQty = sources.reduce((s, x) => s + (x.qty || 0), 0);
+        const label = sources.length === 1 ? sources[0].locationName : sources.length + ' locations';
+        return `<button class="ci-local ci-local-sel" onclick="wodOpenLocal('${c.id}')"><i class="ti ti-map-pin" style="font-size:10px;"></i> ${label}${srcQty ? ' (' + srcQty + ')' : ''}</button>`;
       }
       const inv = c.localInventory || [];
       if (!inv.length) return '<span class="ci-dash">—</span>';
@@ -612,35 +615,103 @@ function render_wo_detail(el) {
     const item = Store.getWoCart(wo.id).find(c => c.id === partId);
     if (!item) return;
     const inv = item.localInventory || [];
+    const existingSources = item.selectedSources || (item.selectedSource ? [item.selectedSource] : []);
+    const needed = item.qty || 1;
+
     const body = `
       <div style="margin-bottom:14px;">
         <div style="font-size:13px;font-weight:600;color:#111318;">${item.description}</div>
         <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">${item.partNum} · ${item.vendor}</div>
-        <div style="font-size:12px;color:#5A5F6E;margin-top:8px;">Select a fleet location as the source for this item instead of placing a new vendor order.</div>
+        <div style="font-size:12px;color:#5A5F6E;margin-top:8px;">Set how many units to pull from each location. You can split across multiple locations if needed.</div>
       </div>
-      ${inv.map(loc => {
-        const isSelected = item.selectedSource && item.selectedSource.locationId === loc.locationId;
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:8px 12px;background:#F5F2EE;border-radius:8px;">
+        <span style="font-size:12px;color:#5A5F6E;">Units needed for this WO</span>
+        <span style="font-size:13px;font-weight:700;color:#111318;">${needed}</span>
+      </div>
+      <div id="local-src-summary" style="margin-bottom:10px;font-size:12px;color:#5A5F6E;"></div>
+      ${inv.map((loc, i) => {
+        const existing = existingSources.find(s => s.locationId === loc.locationId);
+        const val = existing ? existing.qty : 0;
         return `
-        <div style="display:flex;align-items:center;gap:14px;padding:12px 14px;border:${isSelected ? '1.5px solid #3B6D11' : '0.5px solid #E8E4DF'};border-radius:10px;margin-bottom:8px;background:${isSelected ? '#EAF3DE' : '#FAFAF8'};">
-          <div style="width:38px;height:38px;background:${isSelected ? '#3B6D11' : '#EAF3DE'};border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;color:${isSelected ? '#FFFFFF' : '#3B6D11'};flex-shrink:0;"><i class="ti ${loc.type === 'shop' ? 'ti-building' : 'ti-crane'}"></i></div>
-          <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:0.5px solid #E8E4DF;border-radius:10px;margin-bottom:8px;background:#FAFAF8;" id="loc-row-${i}">
+          <div style="width:36px;height:36px;background:#EAF3DE;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;color:#3B6D11;flex-shrink:0;"><i class="ti ${loc.type === 'shop' ? 'ti-building' : 'ti-crane'}"></i></div>
+          <div style="flex:1;min-width:0;">
             <div style="font-size:13px;font-weight:600;color:#111318;">${loc.locationName}</div>
-            <div style="font-size:11px;color:#7A7F8E;margin-top:2px;">${loc.distance} · ${loc.type === 'shop' ? 'Shop stock' : 'Fleet yard'}</div>
+            <div style="font-size:11px;color:#7A7F8E;margin-top:1px;">${loc.distance} · ${loc.type === 'shop' ? 'Shop stock' : 'Fleet yard'} · <strong style="color:#3B6D11;">${loc.qty} available</strong></div>
           </div>
-          <div style="text-align:center;min-width:44px;">
-            <div style="font-size:20px;font-weight:700;color:#3B6D11;line-height:1;">${loc.qty}</div>
-            <div style="font-size:10px;color:#9CA3AF;">available</div>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+            <button style="width:24px;height:24px;border:1px solid #E2DDD8;border-radius:4px;background:#F5F2EE;color:#3A3D4A;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="wodLocalQtyAdj('${partId}',${i},${loc.qty},-1)">−</button>
+            <input id="loc-qty-${i}" type="number" min="0" max="${loc.qty}" value="${val}" oninput="wodLocalQtyUpdate('${partId}',${i},${loc.qty})" style="width:44px;height:24px;text-align:center;border:1px solid #E2DDD8;border-radius:4px;font-size:13px;font-weight:600;font-family:inherit;color:#111318;background:#FFFFFF;outline:none;padding:0 4px;"/>
+            <button style="width:24px;height:24px;border:1px solid #E2DDD8;border-radius:4px;background:#F5F2EE;color:#3A3D4A;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="wodLocalQtyAdj('${partId}',${i},${loc.qty},1)">+</button>
           </div>
-          <button style="background:${isSelected ? '#3B6D11' : '#EAF3DE'};border:none;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:600;color:${isSelected ? '#FFFFFF' : '#3B6D11'};cursor:pointer;font-family:inherit;flex-shrink:0;" onclick="wodSelectSource('${item.id}','${loc.locationId}','${loc.locationName}')">${isSelected ? '✓ Selected' : 'Select as source'}</button>
         </div>`;
       }).join('')}`;
-    Modal.show({ title: 'Local inventory — ' + item.partNum, body, actions: [{ label: 'Close', onClick: () => Modal.close() }] });
+
+    Modal.show({
+      title: 'Local inventory — ' + item.partNum,
+      body,
+      actions: [
+        { label: 'Clear sources', onClick: function() {
+            Store.setWoCartItemSources(wo.id, partId, []);
+            Modal.close();
+            renderCart();
+          }
+        },
+        { label: 'Save sources', primary: true, onClick: function() {
+            const sources = inv.map(function(loc, i) {
+              const input = document.getElementById('loc-qty-' + i);
+              const q = input ? parseInt(input.value) || 0 : 0;
+              return q > 0 ? { locationId: loc.locationId, locationName: loc.locationName, qty: q } : null;
+            }).filter(Boolean);
+            Store.setWoCartItemSources(wo.id, partId, sources);
+            Modal.close();
+            renderCart();
+          }
+        },
+      ],
+    });
+
+    wodLocalUpdateSummary(partId, inv, needed);
   };
 
-  window.wodSelectSource = function(partId, locationId, locationName) {
-    Store.setWoCartItemSource(wo.id, partId, { locationId, locationName });
-    Modal.close();
-    renderCart();
+  window.wodLocalQtyAdj = function(partId, idx, max, delta) {
+    const input = document.getElementById('loc-qty-' + idx);
+    if (!input) return;
+    const item = Store.getWoCart(wo.id).find(c => c.id === partId);
+    const inv = item ? item.localInventory || [] : [];
+    const needed = item ? (item.qty || 1) : 1;
+    input.value = Math.max(0, Math.min(max, (parseInt(input.value) || 0) + delta));
+    wodLocalUpdateSummary(partId, inv, needed);
+  };
+
+  window.wodLocalQtyUpdate = function(partId, idx, max) {
+    const input = document.getElementById('loc-qty-' + idx);
+    if (!input) return;
+    const v = parseInt(input.value) || 0;
+    input.value = Math.max(0, Math.min(max, v));
+    const item = Store.getWoCart(wo.id).find(c => c.id === partId);
+    const inv = item ? item.localInventory || [] : [];
+    const needed = item ? (item.qty || 1) : 1;
+    wodLocalUpdateSummary(partId, inv, needed);
+  };
+
+  window.wodLocalUpdateSummary = function(partId, inv, needed) {
+    const summary = document.getElementById('local-src-summary');
+    if (!summary) return;
+    let allocated = 0;
+    inv.forEach(function(loc, i) {
+      const input = document.getElementById('loc-qty-' + i);
+      allocated += input ? (parseInt(input.value) || 0) : 0;
+    });
+    if (allocated === 0) { summary.textContent = ''; return; }
+    const remaining = needed - allocated;
+    if (remaining > 0) {
+      summary.innerHTML = `<span style="color:#BA7517;">⚠ ${allocated} of ${needed} allocated — ${remaining} still needed from vendor order</span>`;
+    } else if (remaining < 0) {
+      summary.innerHTML = `<span style="color:#A32D2D;">⚠ ${allocated} allocated exceeds qty needed (${needed})</span>`;
+    } else {
+      summary.innerHTML = `<span style="color:#3B6D11;">✓ All ${needed} units allocated from local stock</span>`;
+    }
   };
 
   window.wodShowTip = function(el, text) {
