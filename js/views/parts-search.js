@@ -2124,6 +2124,20 @@ function render_parts_search(el) {
   }
   function getActiveCart() { return _woId ? Store.getWoCart(_woId) : Store.getCart(); }
   function isInCart(partId) { return getActiveCart().some(c=>c.id===partId); }
+  function cartQty(partId) { const c=getActiveCart().find(c=>c.id===partId); return c ? (c.qty||1) : 0; }
+  function inCartHtml(partId, size) {
+    const qty = cartQty(partId);
+    const sm = size==='sm';
+    const h = sm ? '20px' : '24px';
+    const fs = sm ? '10px' : '11px';
+    const btnStyle = `width:${h};height:${h};border:1px solid #D4B483;border-radius:4px;background:#F5DEB5;color:#854F0B;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit;padding:0;`;
+    const valStyle = `font-size:${fs};font-weight:700;color:#854F0B;min-width:14px;text-align:center;`;
+    return `<div style="display:inline-flex;align-items:center;gap:3px;background:#FAEEDA;border-radius:5px;padding:${sm?'1px 4px':'3px 6px'};">
+      <button style="${btnStyle}" onclick="event.stopPropagation();psQtyAdj('${partId}',-1)">−</button>
+      <span style="${valStyle}">${qty}</span>
+      <button style="${btnStyle}" onclick="event.stopPropagation();psQtyAdj('${partId}',1)">+</button>
+    </div>`;
+  }
   function doAddToCart(part) {
     if (_woId) { Store.addToWoCart(_woId, part); renderDetail(); refreshRows(); }
     else {
@@ -2682,7 +2696,7 @@ function render_parts_search(el) {
           <td style="color:#7A7F8E;font-size:11px;white-space:nowrap;">${p.vendor}</td>
           <td><span class="avdot ${p.inStock?'g':'a'}"></span><span class="avlbl ${p.inStock?'g':'a'}">${p.inStock?'In stock':'B/O'}</span></td>
           <td style="font-weight:700;color:#111318;white-space:nowrap;">$${p.price.toFixed(2)}</td>
-          <td>${inC?'<span class="incart-badge">In cart</span>':`<button class="add-btn" onclick="event.stopPropagation();psAddPart('${p.id}')"><i class="ti ti-plus" style="font-size:10px;"></i> Add</button>`}</td>
+          <td>${inC?inCartHtml(p.id,'sm'):`<button class="add-btn" onclick="event.stopPropagation();psAddPart('${p.id}')"><i class="ti ti-plus" style="font-size:10px;"></i> Add</button>`}</td>
         </tr>`;
       }).join('')}</tbody>
     </table>`;
@@ -2713,7 +2727,7 @@ function render_parts_search(el) {
               <span class="legend-name">${p.description}</span>
               <span class="legend-num">${p.partNum}</span>
               <span class="legend-price">$${p.price.toFixed(2)}</span>
-              ${iC?'<span class="incart-sm">In cart</span>':`<button class="add-sm" onclick="event.stopPropagation();psAddPart('${p.id}')">Add</button>`}
+              ${iC?inCartHtml(p.id,'sm'):`<button class="add-sm" onclick="event.stopPropagation();psAddPart('${p.id}')">Add</button>`}
             </div>`;}).join('')
         : '<div style="padding:12px;font-size:12px;color:#9CA3AF;">Navigate to a sub-component to see parts on diagram.</div>'}
       </div>
@@ -2780,7 +2794,7 @@ function render_parts_search(el) {
       <div class="dp-path"><i class="ti ti-sitemap" style="font-size:10px;margin-top:2px;flex-shrink:0;"></i><span>${catalogPathFor(p.id)||'—'}</span></div>
       ${manRefs ? `<div class="dp-sec-label">Manual References</div>${manRefs}` : ''}
       <div class="dp-actions">${iC
-        ?`<button class="dp-incart"><i class="ti ti-check"></i> In cart</button>`
+        ?`<div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;display:flex;align-items:center;gap:6px;background:#FAEEDA;border-radius:8px;padding:8px 12px;"><i class="ti ti-check" style="color:#854F0B;font-size:13px;"></i><span style="font-size:13px;font-weight:600;color:#854F0B;flex:1;">In cart</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#854F0B;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',-1)">−</button><span style="font-size:14px;font-weight:700;color:#854F0B;min-width:20px;text-align:center;">${cartQty(p.id)}</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#854F0B;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',1)">+</button></div></div>`
         :`<button class="dp-add" onclick="psAddPart('${p.id}')"><i class="ti ti-shopping-cart" style="font-size:13px;"></i> ${cartLabel}</button>`
       }</div>`;
   }
@@ -2795,7 +2809,7 @@ function render_parts_search(el) {
       const actionCell=r.cells[5];
       if (!actionCell) return;
       const iC=isInCart(p.id);
-      actionCell.innerHTML=iC?'<span class="incart-badge">In cart</span>':`<button class="add-btn" onclick="event.stopPropagation();psAddPart('${p.id}')"><i class="ti ti-plus" style="font-size:10px;"></i> Add</button>`;
+      actionCell.innerHTML=iC?inCartHtml(p.id,'sm'):`<button class="add-btn" onclick="event.stopPropagation();psAddPart('${p.id}')"><i class="ti ti-plus" style="font-size:10px;"></i> Add</button>`;
     });
   }
 
@@ -2851,6 +2865,16 @@ function render_parts_search(el) {
   window.psAddPart = function(partId) {
     const p=fp(partId); if(!p) return;
     doAddToCart(p);
+  };
+  window.psQtyAdj = function(partId, delta) {
+    const cart = getActiveCart();
+    const item = cart.find(c=>c.id===partId);
+    if (!item) return;
+    const newQty = Math.max(1, (item.qty||1) + delta);
+    if (_woId) Store.updateWoCartQty(_woId, partId, newQty);
+    else Store.updateCartQty(partId, newQty);
+    renderDetail();
+    refreshRows();
   };
   window.psDiagTab = function(modelId, compName, idx) {
     const key = modelId + '~' + (compName || '');
