@@ -154,8 +154,47 @@ function render_login(el) {
   </div>
 </div>`;
 
+  function showLoginError(msg) {
+    let err = document.getElementById('login-error');
+    if (!err) {
+      err = document.createElement('div');
+      err.id = 'login-error';
+      err.style.cssText = 'background:#FCEBEB;border:0.5px solid #F5C5C5;border-radius:8px;padding:10px 12px;font-size:12px;color:#A32D2D;margin-bottom:14px;display:flex;align-items:center;gap:7px;';
+      const btn = document.querySelector('.btn-sign-in');
+      btn.parentNode.insertBefore(err, btn);
+    }
+    err.innerHTML = '<i class="ti ti-alert-circle" style="font-size:14px;flex-shrink:0;"></i><span>' + msg + '</span>';
+    document.getElementById('login-password').style.borderColor = '#A32D2D';
+  }
+
+  function clearLoginError() {
+    const err = document.getElementById('login-error');
+    if (err) err.remove();
+    const pw = document.getElementById('login-password');
+    if (pw) pw.style.borderColor = '';
+  }
+
   window.loginSubmit = function() {
-    if (Store.getCurrentLocation()) { sendPrompt('dashboard'); return; }
+    clearLoginError();
+    const username = (document.getElementById('login-username') || {}).value || '';
+    const password = (document.getElementById('login-password') || {}).value || '';
+
+    const user = Store.authenticate(username.trim(), password);
+    if (!user) {
+      showLoginError('Incorrect username or password. Please try again.');
+      return;
+    }
+
+    Store.setCurrentUser(user);
+
+    // If user has a default location, set it and go straight to dashboard
+    if (user.defaultLocationId) {
+      Store.setCurrentLocation(user.defaultLocationId);
+      sendPrompt('dashboard');
+      return;
+    }
+
+    // Otherwise show location picker
     const step = document.getElementById('login-location-step');
     const list = document.getElementById('login-location-list');
     if (!step || !list) { sendPrompt('dashboard'); return; }
@@ -172,8 +211,18 @@ function render_login(el) {
     step.scrollIntoView({ behavior:'smooth', block:'nearest' });
   };
 
+  // Also allow Enter key to submit
+  el.querySelectorAll('.login-input').forEach(function(inp) {
+    inp.addEventListener('keydown', function(e) { if (e.key === 'Enter') loginSubmit(); });
+  });
+
   window.loginPickLocation = function(id) {
     Store.setCurrentLocation(id);
     sendPrompt('dashboard');
   };
+
+  // Auto-login if session already has a user + location
+  if (Store.getCurrentUser() && Store.getCurrentLocation()) {
+    sendPrompt('dashboard');
+  }
 }

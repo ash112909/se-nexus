@@ -766,6 +766,43 @@ const Store = (() => {
     return manuals;
   }
 
+  // --- Users ---
+  const USERS = [
+    {
+      id: 'user-james-w',
+      username: 'james.w',
+      password: 'MCR-mech-01',
+      displayName: 'James Whitfield',
+      shortName: 'James W.',
+      role: 'mechanic',
+      email: 'james.w@midcountyrental.com',
+      phone: '(512) 555-0182',
+      defaultLocationId: 'austin',
+      avatar: 'JW',
+    },
+  ];
+
+  let _currentUser = null;
+  try {
+    const saved = localStorage.getItem('se-nexus-user');
+    if (saved) _currentUser = JSON.parse(saved);
+  } catch(e) {}
+
+  function getUsers() { return USERS; }
+  function authenticate(username, password) {
+    const user = USERS.find(u => u.username === username && u.password === password);
+    return user || null;
+  }
+  function setCurrentUser(user) {
+    _currentUser = user;
+    try { localStorage.setItem('se-nexus-user', JSON.stringify(user)); } catch(e) {}
+  }
+  function getCurrentUser() { return _currentUser; }
+  function logout() {
+    _currentUser = null;
+    try { localStorage.removeItem('se-nexus-user'); } catch(e) {}
+  }
+
   // --- Locations ---
   const LOCATIONS = [
     { id: 'austin',     name: 'Austin Branch',      address: '1204 N Lamar Blvd, Austin TX 78703',          fleetSize: 14 },
@@ -821,6 +858,7 @@ const Store = (() => {
     swapWoCartItem, setWoCartItemSource, setWoCartItemSources, submitWoCartItems,
     addDiagnosticMessage, getDiagnosticHistory, clearDiagnosticHistory,
     getParts, getManuals,
+    getUsers, authenticate, setCurrentUser, getCurrentUser, logout,
     getLocations, getCurrentLocation, setCurrentLocation,
     getNotifications, markNotificationRead, markAllNotificationsRead, getUnreadCount,
     reset,
