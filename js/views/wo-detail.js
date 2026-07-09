@@ -408,10 +408,7 @@ function render_wo_detail(el) {
           <div class="wo-field">
             <div class="wo-field-label">Assignee</div>
             <select class="field-select" id="wod-assignee-select">
-              <option value="James W." ${wo.assignee === 'James W.' ? 'selected' : ''}>James W.</option>
-              <option value="Carlos M." ${wo.assignee === 'Carlos M.' ? 'selected' : ''}>Carlos M.</option>
-              <option value="Rita T." ${wo.assignee === 'Rita T.' ? 'selected' : ''}>Rita T.</option>
-              <option value="Devon K." ${wo.assignee === 'Devon K.' ? 'selected' : ''}>Devon K.</option>
+              ${['James W.','Marcus T.','Lena R.','Darius K.','Priya N.'].map(n => `<option value="${n}" ${wo.assignee === n ? 'selected' : ''}>${n}</option>`).join('')}
               <option value="Priya S." ${wo.assignee === 'Priya S.' ? 'selected' : ''}>Priya S.</option>
             </select>
           </div>

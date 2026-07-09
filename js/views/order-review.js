@@ -32,18 +32,19 @@ function render_order_review(el) {
   const _rec = recommendShipping();
 
   // State
-  let _shipTo = { name: (Store.getCurrentLocation() || {}).name || 'Austin Branch', attn: 'James W.', addr1: '1204 N Lamar Blvd', addr2: '', city: 'Austin', state: 'TX', zip: '78703', phone: '(512) 555-0182' };
+  const _orUser = Store.getCurrentUser();
+  let _shipTo = { name: (Store.getCurrentLocation() || {}).name || 'Austin Branch', attn: _orUser ? _orUser.shortName : 'James W.', addr1: '1204 N Lamar Blvd', addr2: '', city: 'Austin', state: 'TX', zip: '78703', phone: _orUser ? _orUser.phone : '(512) 555-0182' };
   let _billTo = { name: 'Mid-County Rental', attn: 'Accounts Payable', addr1: '1204 N Lamar Blvd', addr2: '', city: 'Austin', state: 'TX', zip: '78703', phone: '(512) 555-0100' };
   let _opts = {
     poNum: '',
     orderType: 'Standard',
     requestedDate: wo.dueDate || '',
     paymentTerms: 'MQ Terms',
-    fullName: 'James Whitfield',
-    orderedBy: 'James W.',
+    fullName: _orUser ? _orUser.displayName : 'James Whitfield',
+    orderedBy: _orUser ? _orUser.shortName : 'James W.',
     notifyBy: 'email',
-    phone: '(512) 555-0182',
-    email: 'james.w@midcountyrental.com',
+    phone: _orUser ? _orUser.phone : '(512) 555-0182',
+    email: _orUser ? _orUser.email : 'james.w@midcountyrental.com',
   };
   let _ship = {
     carrier: _rec.carrier,

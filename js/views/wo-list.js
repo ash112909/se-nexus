@@ -327,11 +327,7 @@ function render_wo_list(el) {
         <div class="modal-form-field">
           <label class="modal-form-label">Assignee</label>
           <select class="modal-form-select" id="nwo-assignee">
-            <option>James W.</option>
-            <option>M. Torres</option>
-            <option>R. Kim</option>
-            <option>D. Reyes</option>
-            <option>T. Nguyen</option>
+            ${['James W.','Marcus T.','Lena R.','Darius K.','Priya N.'].map(n => `<option${n === CURRENT_USER ? ' selected' : ''}>${n}</option>`).join('')}
           </select>
         </div>
         <div class="modal-form-field">

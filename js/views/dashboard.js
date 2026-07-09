@@ -146,7 +146,7 @@ function render_dashboard(el) {
 .section-view-all { font-size: 12px; color: #C08A1A; font-weight: 500; cursor: pointer; }
 .section-view-all:hover { text-decoration: underline; }
 </style>
-<h2 class="sr-only">Fleet Mechanic dashboard for James</h2>
+<h2 class="sr-only">${_isSupervisor ? 'Fleet Supervisor' : 'Fleet Mechanic'} dashboard for ${_firstName}</h2>
 <div class="shell">
   ${buildSidebar('dashboard')}
   <div class="main">
