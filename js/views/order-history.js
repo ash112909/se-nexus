@@ -1,5 +1,5 @@
 function render_order_history(el) {
-  let _currentTab = 'drafts';
+  let _currentTab = 'submitted';
   let _searchQuery = '';
   let _selectedOrderId = null;
 
@@ -128,7 +128,6 @@ function render_order_history(el) {
 
   function updateTabBadges() {
     const tabs = {
-      drafts: Store.getOrders('drafts').length,
       local: Store.getOrders('local').length,
       review: Store.getOrders('review').length,
       submitted: Store.getOrders('submitted').length,
@@ -214,10 +213,9 @@ function render_order_history(el) {
 
     <div style="display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;" id="oh-content">
       <div class="oh-tabs" id="oh-tabs">
-        <div class="oh-tab active" data-tab="drafts">Drafts <span class="oh-tab-badge oh-badge-neutral">0</span></div>
-        <div class="oh-tab" data-tab="local">Local <span class="oh-tab-badge oh-badge-neutral">0</span></div>
+        <div class="oh-tab active" data-tab="submitted">Submitted <span class="oh-tab-badge oh-badge-neutral">0</span></div>
         <div class="oh-tab" data-tab="review">In review <span class="oh-tab-badge oh-badge-neutral">0</span></div>
-        <div class="oh-tab" data-tab="submitted">Submitted <span class="oh-tab-badge oh-badge-neutral">0</span></div>
+        <div class="oh-tab" data-tab="local">Local <span class="oh-tab-badge oh-badge-neutral">0</span></div>
       </div>
 
       <div class="oh-filter-bar">

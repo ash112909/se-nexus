@@ -353,13 +353,6 @@ const Store = (() => {
           { id: 'p-skj-3', partNum: 'SKJ-702-0855', description: 'Pump Shaft Seal', vendor: 'Skyjack', price: 38.00, qty: 1, oemOnly: true },
         ]
       },
-      { id: 'ord-2', poNum: null, vendor: 'Grainger', vendorId: 'GRG-001', date: 'Jun 18, 2026', user: 'James W.', name: 'Filters & consumables', wo: 'WO #100102', asset: 'FL-102', amount: 94.50, status: 'saved', tab: 'drafts',
-        items: [
-          { id: 'p-fil-1', partNum: 'GRG-3HYK4', description: 'Hydraulic Oil Filter', vendor: 'Grainger', price: 18.50, qty: 3, oemOnly: false },
-          { id: 'p-fil-2', partNum: 'GRG-4LMN9', description: 'Engine Air Filter', vendor: 'Grainger', price: 22.00, qty: 1, oemOnly: false },
-          { id: 'p-fil-3', partNum: 'GRG-2TKR7', description: 'Grease Cartridge 400g', vendor: 'Grainger', price: 8.00, qty: 2, oemOnly: false },
-        ]
-      },
       { id: 'ord-3', poNum: 'PO-7792', vendor: 'Parker', vendorId: 'PKR-WD', date: 'Jun 15, 2026', user: 'M. Torres', name: 'Valve kit — FL-091', wo: 'WO #100088', asset: 'FL-091', amount: 145.00, status: 'delivered', tab: 'submitted',
         items: [
           { id: 'p-pkr-1', partNum: 'PAR-D1VW-4A', description: 'Directional Control Valve', vendor: 'Parker', price: 110.00, qty: 1, oemOnly: false },
@@ -394,12 +387,6 @@ const Store = (() => {
         items: [
           { id: 'p-skj-8', partNum: 'SKJ-702-1104', description: 'Hydraulic Hose 3/8" × 48"', vendor: 'Skyjack', price: 58.00, qty: 2, oemOnly: false },
           { id: 'p-skj-9', partNum: 'SKJ-702-1108', description: 'JIC Fitting Kit', vendor: 'Skyjack', price: 29.00, qty: 2, oemOnly: false },
-        ]
-      },
-      { id: 'ord-8', poNum: null, vendor: 'Grainger', vendorId: 'GRG-001', date: 'Jun 2, 2026', user: 'R. Singh', name: 'Oil & lubrication kits', wo: 'General', asset: 'Austin', amount: 58.20, status: 'saved', tab: 'drafts',
-        items: [
-          { id: 'p-lub-1', partNum: 'GRG-5MT22', description: 'Hydraulic Oil AW46 1-gal', vendor: 'Grainger', price: 19.40, qty: 2, oemOnly: false },
-          { id: 'p-lub-2', partNum: 'GRG-3KLP6', description: 'Multi-Purpose Grease 14oz', vendor: 'Grainger', price: 9.70, qty: 2, oemOnly: false },
         ]
       },
       { id: 'ord-9', poNum: 'PO-7720', vendor: 'Skyjack', vendorId: 'SKJ-DIST', date: 'May 29, 2026', user: 'James W.', name: 'Drive motor brush kit', wo: 'WO #100074', asset: 'FL-077', amount: 122.00, status: 'delivered', tab: 'submitted',
@@ -669,13 +656,13 @@ const Store = (() => {
       vendor: '',
       vendorId: '',
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      user: 'James W.',
+      user: _currentUser ? _currentUser.shortName : '',
       name: '',
       wo: '',
       asset: '',
       amount: 0,
-      status: 'saved',
-      tab: 'drafts'
+      status: 'submitted',
+      tab: 'submitted'
     }, fields, { id, poNum: fields.poNum !== undefined ? fields.poNum : poNum });
     _data.orders.unshift(order);
     save(_data);
