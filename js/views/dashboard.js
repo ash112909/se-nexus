@@ -111,11 +111,11 @@ function render_dashboard(el) {
 .wo-action-btn:hover { background: #E8980F; }
 .wo-action-btn-ghost { margin-left: auto; background: none; border: 0.5px solid #E2DDD8; border-radius: 7px; padding: 5px 13px; font-size: 12px; font-weight: 500; color: #5A5F6E; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: inherit; }
 .wo-action-btn-ghost:hover { background: #F5F2EE; }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-.action-card { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; padding: 16px; cursor: pointer; display: flex; flex-direction: column; gap: 8px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+.action-card { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; padding: 12px 14px; cursor: pointer; display: flex; flex-direction: column; gap: 5px; }
 .action-card:hover { border-color: #C8C3BC; }
-.action-card-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px; margin-bottom: 2px; }
+.action-card-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 15px; margin-bottom: 1px; }
 .icon-amber { background: #FAEEDA; color: #854F0B; }
 .icon-blue { background: #E6F1FB; color: #185FA5; }
 .icon-purple { background: #EEEDFE; color: #534AB7; }
@@ -171,39 +171,29 @@ function render_dashboard(el) {
       ${activeWOs.length ? activeWOs.map((wo, i) => renderWOCard(wo, i)).join('') : '<div style="color:#9CA3AF;font-size:13px;padding:12px 0;">No active work orders.</div>'}
       <div style="margin-bottom:20px;"></div>
       <div class="section-label">Quick actions</div>
-      ${_isSupervisor ? `
-      <div class="grid-2" style="margin-bottom:10px;">
-        <div class="action-card" onclick="sendPrompt('analytics')" style="border-color:#E0DBD5;background:linear-gradient(135deg,#FAFAF8 0%,#FFFFFF 100%);">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;">
-            <div class="action-card-icon" style="background:#111318;color:#F5A623;"><i class="ti ti-chart-bar"></i></div>
-            <span style="font-size:10px;font-weight:600;color:#3B6D11;background:#F0FDF4;padding:2px 7px;border-radius:8px;margin-top:2px;">Live</span>
-          </div>
+      <div class="grid-3">
+        ${_isSupervisor ? `
+        <div class="action-card" onclick="sendPrompt('analytics')">
+          <div class="action-card-icon" style="background:#F0F0F8;color:#534AB7;"><i class="ti ti-chart-bar"></i></div>
           <div class="action-card-title">Fleet analytics</div>
-          <div class="action-card-sub">Spend trends, mechanic performance, vendor insights</div>
-          <div class="action-card-badge" style="background:#111318;color:#F5A623;"><i class="ti ti-arrow-right" style="font-size:11px;"></i> View dashboard</div>
+          <div class="action-card-sub">Spend trends &amp; insights</div>
         </div>
         <div class="action-card" onclick="sendPrompt('approvals')">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;">
-            <div class="action-card-icon icon-amber"><i class="ti ti-circle-check"></i></div>
-            <span style="font-size:10px;font-weight:600;color:#A32D2D;background:#FEF2F2;padding:2px 7px;border-radius:8px;margin-top:2px;">3 pending</span>
-          </div>
+          <div class="action-card-icon icon-amber"><i class="ti ti-circle-check"></i></div>
           <div class="action-card-title">Order approvals</div>
-          <div class="action-card-sub">Review and approve parts orders from your team</div>
-        </div>
-      </div>` : ''}
-      <div class="grid-2">
+          <div class="action-card-sub">Review team orders</div>
+          <div class="action-card-badge"><i class="ti ti-clock" style="font-size:11px;"></i> 3 pending</div>
+        </div>` : ''}
         <div class="action-card" onclick="sendPrompt('Open order history')">
           <div class="action-card-icon icon-blue"><i class="ti ti-package"></i></div>
-          <div class="action-card-title">Previous orders &amp; tracking</div>
-          <div class="action-card-sub">View history and delivery status</div>
+          <div class="action-card-title">Order history</div>
+          <div class="action-card-sub">History &amp; tracking</div>
         </div>
         <div class="action-card" onclick="sendPrompt('Open manuals and docs')">
           <div class="action-card-icon icon-purple"><i class="ti ti-book-2"></i></div>
-          <div class="action-card-title">Manuals &amp; support docs</div>
-          <div class="action-card-sub">Bulletins, schematics, how-tos</div>
+          <div class="action-card-title">Manuals &amp; docs</div>
+          <div class="action-card-sub">Bulletins, schematics</div>
         </div>
-      </div>
-      <div class="grid-3">
         <div class="action-card" onclick="sendPrompt('Open recommended parts')">
           <div class="action-card-icon icon-green"><i class="ti ti-star"></i></div>
           <div class="action-card-title">Recommended parts</div>
@@ -211,7 +201,7 @@ function render_dashboard(el) {
         </div>
         <div class="action-card" onclick="sendPrompt('Open diagnostic assistant')">
           <div class="action-card-icon icon-teal"><i class="ti ti-tool"></i></div>
-          <div class="action-card-title">Diagnostic assistant</div>
+          <div class="action-card-title">Diagnostics</div>
           <div class="action-card-sub">Fault codes &amp; troubleshooting</div>
         </div>
         <div class="action-card" onclick="sendPrompt('Open order history')">
