@@ -60,11 +60,15 @@ function render_wo_detail(el) {
   function itemStatus(c) {
     if (c.replacedBy) return 'replaced';
     if (c.replacesId) return c.inStock ? 'orderable' : 'needs_attention';
-    const hasMandUnresolved = (c.crossRefs || []).some(r => r.mandatory);
+    const hasMand = (c.crossRefs || []).some(r => r.mandatory);
+    const hasOptOnly = !hasMand && (c.crossRefs || []).some(r => !r.mandatory);
+    // Out of stock with no cross-refs at all: truly unorderable
     if (!c.inStock && !(c.crossRefs || []).length) return 'unorderable';
-    if (hasMandUnresolved) return 'blocked';
+    // Unresolved mandatory cross-ref blocks submission
+    if (hasMand) return 'blocked';
+    // Out of stock with only optional cross-refs: still backordered but submittable
     if (!c.inStock) return 'needs_attention';
-    if ((c.localInventory || []).length && !c.selectedSource) return 'needs_attention';
+    if ((c.localInventory || []).length && !c.selectedSources && !c.selectedSource) return 'needs_attention';
     return 'orderable';
   }
 
@@ -563,7 +567,10 @@ function render_wo_detail(el) {
     _xrefMap = {};
     refs.forEach(function(r, i) { _xrefMap[i] = r; });
     const body = `
-      ${hasMand ? '<div style="display:flex;align-items:center;gap:8px;background:#FAEEDA;border:0.5px solid #F5A623;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#854F0B;"><i class="ti ti-alert-triangle" style="flex-shrink:0;"></i><span>Fleet policy requires using the substitute below. Select it to unblock this item in the cart.</span></div>' : ''}
+      ${hasMand
+        ? '<div style="display:flex;align-items:center;gap:8px;background:#FAEEDA;border:0.5px solid #F5A623;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#854F0B;"><i class="ti ti-alert-triangle" style="flex-shrink:0;"></i><span>Fleet policy requires using the substitute below. Select it to unblock this item in the cart.</span></div>'
+        : '<div style="display:flex;align-items:center;gap:8px;background:#F0ECE8;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#5A5F6E;"><i class="ti ti-info-circle" style="flex-shrink:0;"></i><span>These are optional alternatives — no action required. You can swap to one if preferred, or ignore and order the original.</span></div>'
+      }
       <div style="margin-bottom:14px;font-size:12px;color:#7A7F8E;">Original part: <strong style="color:#111318;">${item.partNum}</strong> — ${item.description}</div>
       <table style="width:100%;border-collapse:collapse;">
         <thead><tr style="background:#FAFAF8;">
@@ -582,7 +589,7 @@ function render_wo_detail(el) {
             <td style="padding:9px 12px;text-align:center;border-bottom:0.5px solid #F0ECE8;"><span style="font-size:10px;background:#F0ECE8;color:#5A5F6E;border-radius:4px;padding:2px 6px;font-weight:700;">${r.uom || 'EA'}</span></td>
             <td style="padding:9px 12px;text-align:right;font-size:13px;font-weight:700;color:#111318;border-bottom:0.5px solid #F0ECE8;">$${r.price.toFixed(2)}</td>
             <td style="padding:9px 12px;border-bottom:0.5px solid #F0ECE8;">
-              <button style="font-size:11px;font-weight:600;background:#F5A623;border:none;border-radius:6px;padding:5px 12px;color:#1A1200;cursor:pointer;font-family:inherit;" onclick="wodSwapCrossRef('${item.id}',${refs.indexOf(r)})">Use this instead</button>
+              <button style="font-size:11px;font-weight:600;background:${r.mandatory ? '#F5A623' : '#F0ECE8'};border:${r.mandatory ? 'none' : '0.5px solid #E2DDD8'};border-radius:6px;padding:5px 12px;color:${r.mandatory ? '#1A1200' : '#3A3D4A'};cursor:pointer;font-family:inherit;" onclick="wodSwapCrossRef('${item.id}',${refs.indexOf(r)})">${r.mandatory ? 'Use this instead' : 'Swap to this'}</button>
             </td>
           </tr>`).join('')}
         </tbody>
