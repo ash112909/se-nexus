@@ -140,6 +140,15 @@ const UserPanel = (() => {
       </div>
       <div class="up-panel-divider"></div>
       <div class="up-panel-section-label">Branch / Location</div>
+      ${user && user.role === 'supervisor' ? `
+        <div class="up-loc-row ${!loc ? 'active' : ''}" onclick="UserPanel._switchLocation(null)">
+          <div class="up-loc-icon"><i class="ti ti-stack-2"></i></div>
+          <div class="up-loc-body">
+            <div class="up-loc-name">All locations</div>
+            <div class="up-loc-addr">Cross-location view</div>
+          </div>
+          ${!loc ? '<i class="ti ti-check" style="color:#F5A623;font-size:13px;flex-shrink:0;"></i>' : ''}
+        </div>` : ''}
       ${locations.map(l => `
         <div class="up-loc-row ${loc && loc.id===l.id ? 'active' : ''}" onclick="UserPanel._switchLocation('${l.id}')">
           <div class="up-loc-icon"><i class="ti ti-map-pin"></i></div>

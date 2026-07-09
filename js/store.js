@@ -442,9 +442,14 @@ const Store = (() => {
   // --- Work Orders ---
   function getWorkOrders(statusFilter, assigneeFilter) {
     const isSupervisor = _currentUser && _currentUser.role === 'supervisor';
-    let wos = isSupervisor
-      ? _data.workOrders.slice()
-      : _data.workOrders.filter(wo => !wo.locationId || wo.locationId === _currentLocationId);
+    let wos;
+    if (isSupervisor && !_currentLocationId) {
+      // Supervisor with no location selected → all locations
+      wos = _data.workOrders.slice();
+    } else {
+      // Mechanic always filters by location; supervisor filters when one is selected
+      wos = _data.workOrders.filter(wo => !wo.locationId || wo.locationId === _currentLocationId);
+    }
     if (assigneeFilter) wos = wos.filter(wo => wo.assignee === assigneeFilter);
     if (statusFilter && statusFilter !== 'all') wos = wos.filter(wo => wo.status === statusFilter);
     return wos;
@@ -816,8 +821,11 @@ const Store = (() => {
   function getLocations() { return LOCATIONS; }
   function getCurrentLocation() { return LOCATIONS.find(l => l.id === _currentLocationId) || null; }
   function setCurrentLocation(id) {
-    _currentLocationId = id;
-    try { localStorage.setItem('se-nexus-location', id); } catch(e) {}
+    _currentLocationId = id || null;
+    try {
+      if (id) localStorage.setItem('se-nexus-location', id);
+      else localStorage.removeItem('se-nexus-location');
+    } catch(e) {}
   }
 
   // --- Notifications ---

@@ -187,7 +187,14 @@ function render_login(el) {
 
     Store.setCurrentUser(user);
 
-    // If user has a default location, set it and go straight to dashboard
+    // Supervisors start with no location filter (all locations view)
+    if (user.role === 'supervisor') {
+      Store.setCurrentLocation(null);
+      sendPrompt('dashboard');
+      return;
+    }
+
+    // Mechanics: use default location and go straight to dashboard
     if (user.defaultLocationId) {
       Store.setCurrentLocation(user.defaultLocationId);
       sendPrompt('dashboard');
