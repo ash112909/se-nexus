@@ -124,14 +124,18 @@ const UserPanel = (() => {
     }
     const loc = Store.getCurrentLocation();
     const locations = Store.getLocations();
+    const user = Store.getCurrentUser();
+    const avatar = user ? user.avatar : 'JW';
+    const name = user ? user.displayName : 'James Whitfield';
+    const roleLabel = user && user.role === 'supervisor' ? 'Fleet Supervisor' : 'Fleet Mechanic';
 
     p.innerHTML = `
       <div class="up-panel-arrow"></div>
       <div class="up-profile-hdr">
-        <div class="up-profile-avatar">JW</div>
+        <div class="up-profile-avatar">${avatar}</div>
         <div>
-          <div class="up-profile-name">James W.</div>
-          <div class="up-profile-role">Fleet Mechanic</div>
+          <div class="up-profile-name">${escHtml(name)}</div>
+          <div class="up-profile-role">${roleLabel}</div>
         </div>
       </div>
       <div class="up-panel-divider"></div>
@@ -146,9 +150,15 @@ const UserPanel = (() => {
           ${loc && loc.id===l.id ? '<i class="ti ti-check" style="color:#F5A623;font-size:13px;flex-shrink:0;"></i>' : ''}
         </div>`).join('')}
       <div class="up-panel-divider"></div>
-      <div class="up-panel-action" onclick="sendPrompt('show login');UserPanel.closeProfile()"><i class="ti ti-logout"></i> Sign out</div>`;
+      <div class="up-panel-action" onclick="UserPanel._signOut()"><i class="ti ti-logout"></i> Sign out</div>`;
 
     positionPanel(p, 'profile');
+  }
+
+  function _signOut() {
+    closeProfile();
+    Store.logout();
+    Router.navigate('login');
   }
 
   function _switchLocation(id) {
@@ -224,7 +234,7 @@ const UserPanel = (() => {
   return {
     init, openNotifications, closeNotifications, openProfile, closeProfile,
     showLocationPicker, refreshDot,
-    _setNotifFilter, _markAll, _openNotif, _switchLocation, _pickLocation,
+    _setNotifFilter, _markAll, _openNotif, _signOut, _switchLocation, _pickLocation,
   };
 })();
 
