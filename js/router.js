@@ -13,6 +13,7 @@ const Router = (() => {
     'recommended': 'view-recommended',
     'news': 'view-news',
     'approvals': 'view-approvals',
+    'order-review': 'view-order-review',
   };
 
   let _context = {};
