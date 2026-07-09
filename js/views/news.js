@@ -208,7 +208,8 @@ const NEWS_POSTERS = ['All', 'Mid-County Rental', 'Skyjack', 'Caterpillar', 'Toy
 
 // Global — callable from dashboard and any other view without needing the news view rendered
 window.newsOpenArticle = function(id) {
-  const n = NEWS_ARTICLES.find(x => x.id === id);
+  const cmsItems = (typeof Store !== 'undefined' && Store.getCmsArticles) ? Store.getCmsArticles('published') : [];
+  const n = NEWS_ARTICLES.find(x => x.id === id) || cmsItems.find(x => x.id === id);
   if (!n) return;
   const saved = new Set(JSON.parse(localStorage.getItem('se-news-saved') || '[]')).has(id);
   Modal.show({
@@ -254,7 +255,16 @@ function render_news(el) {
   function persistSaved() { try { localStorage.setItem('se-news-saved', JSON.stringify([..._saved])); } catch(e) {} }
   function persistReported() { try { localStorage.setItem('se-news-reported', JSON.stringify([..._reported])); } catch(e) {} }
 
-  const NEWS = NEWS_ARTICLES;
+  // Merge CMS-published articles at the front (they'll sort by date naturally)
+  const cmsPublished = (typeof Store !== 'undefined' && Store.getCmsArticles)
+    ? Store.getCmsArticles('published').map(a => ({
+        id: a.id, type: a.type || 'notice', poster: a.poster || 'Mid-County Rental',
+        date: a.postedDate || a.id, dateLabel: a.postedDate || '',
+        priority: a.priority || 'medium', title: a.title, summary: a.summary || '',
+        body: a.body || '', tags: a.tags || [],
+      }))
+    : [];
+  const NEWS = [...cmsPublished, ...NEWS_ARTICLES.filter(n => !cmsPublished.find(c => c.id === n.id))];
   const TYPE_META = NEWS_TYPE_META;
   const PRIORITY_META = NEWS_PRIORITY_META;
   const POSTERS = NEWS_POSTERS;

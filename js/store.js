@@ -828,6 +828,84 @@ const Store = (() => {
     } catch(e) {}
   }
 
+  // --- CMS Content ---
+  const DEFAULT_CMS_ARTICLES = [
+    {
+      id:'cms-1', type:'bulletin', subtype:'safety', priority:'critical', status:'published', postAs:'news',
+      title:'SB-2026-047 — Hydraulic pressure relief valve inspection required',
+      summary:'Affects SJIII 3219 and 4626 units manufactured before Jan 2024.',
+      body:'Skyjack has identified a batch of pressure relief valves manufactured between Aug 2022 and Jan 2024 that may have been assembled with incorrect torque values. Units operating under repeated high-load cycles could experience premature valve wear. Affected models: SJIII 3219, SJIII 4626. Action required: inspect relief valve torque to spec (22–24 Nm) before the next operational lift cycle. Replace valve if out of spec. Part number: SKJ-103278. This bulletin is mandatory for all affected units.',
+      poster:'Sarah M.', postedDate:'2026-06-24', expiryDate:'2026-09-24', language:'en',
+      tags:['hydraulics','safety','inspection'], attachments:['SB-2026-047.pdf'], locations:['all'],
+      banner:false, bannerDismissible:true,
+    },
+    {
+      id:'cms-2', type:'fleet', subtype:'operations', priority:'medium', status:'published', postAs:'news',
+      title:'2 new Bobcat S770 units arriving at Kyle Branch — Jul 8',
+      summary:'Pre-delivery inspection checklist uploaded to Manuals. Assign intake WOs before arrival date.',
+      body:'Two new Bobcat S770 skid steer loaders are scheduled for delivery to the Kyle Branch facility on July 8, 2026. Pre-delivery inspection checklists have been uploaded to the Manuals & Docs section. Please ensure intake work orders are created and assigned before arrival. Fleet IDs will be KY-009 and KY-010.',
+      poster:'Sarah M.', postedDate:'2026-06-22', expiryDate:'2026-07-10', language:'en',
+      tags:['fleet','intake','kyle'], attachments:[], locations:['kyle'],
+      banner:false, bannerDismissible:true,
+    },
+    {
+      id:'cms-3', type:'safety', subtype:'compliance', priority:'critical', status:'published', postAs:'both',
+      title:'Mandatory safety briefing: fall protection update — complete by Jun 30',
+      summary:'New OSHA guidance on fall protection for scissor lifts above 10 ft. All operators must complete refresher by Jun 30.',
+      body:'Following updated OSHA 1926.502 guidance issued May 2026, all operators of elevated work platforms above 10 feet must complete the updated fall protection refresher by June 30, 2026. Training materials have been uploaded to the Manuals section under Safety.',
+      poster:'Sarah M.', postedDate:'2026-06-18', expiryDate:'2026-06-30', language:'en',
+      tags:['safety','osha','training'], attachments:['OSHA-refresher-2026.pdf'], locations:['all'],
+      banner:true, bannerDismissible:true, bannerText:'Action required: Complete fall protection refresher by Jun 30.',
+    },
+  ];
+
+  const DEFAULT_CMS_BANNERS = [
+    {
+      id:'banner-1', articleId:'cms-3', text:'Action required: Complete fall protection refresher by Jun 30.',
+      priority:'critical', pages:['all'], dismissible:true, active:true,
+    },
+  ];
+
+  function getCmsArticles(statusFilter) {
+    const articles = _data.cmsArticles || DEFAULT_CMS_ARTICLES;
+    if (!statusFilter || statusFilter === 'all') return articles;
+    return articles.filter(a => a.status === statusFilter);
+  }
+  function getCmsArticle(id) {
+    return (_data.cmsArticles || DEFAULT_CMS_ARTICLES).find(a => a.id === id) || null;
+  }
+  function saveCmsArticle(article) {
+    if (!_data.cmsArticles) _data.cmsArticles = JSON.parse(JSON.stringify(DEFAULT_CMS_ARTICLES));
+    const idx = _data.cmsArticles.findIndex(a => a.id === article.id);
+    if (idx >= 0) _data.cmsArticles[idx] = article;
+    else _data.cmsArticles.unshift(article);
+    // Sync banners
+    if (article.banner && (article.status === 'published') && (article.postAs === 'banner' || article.postAs === 'both')) {
+      if (!_data.cmsBanners) _data.cmsBanners = JSON.parse(JSON.stringify(DEFAULT_CMS_BANNERS));
+      const bi = _data.cmsBanners.findIndex(b => b.articleId === article.id);
+      const bannerObj = { id:'banner-'+article.id, articleId:article.id, text:article.bannerText || article.summary, priority:article.priority, pages:['all'], dismissible:article.bannerDismissible !== false, active:true };
+      if (bi >= 0) _data.cmsBanners[bi] = bannerObj;
+      else _data.cmsBanners.push(bannerObj);
+    } else if (_data.cmsBanners) {
+      _data.cmsBanners = _data.cmsBanners.filter(b => b.articleId !== article.id);
+    }
+    save(_data);
+  }
+  function deleteCmsArticle(id) {
+    if (!_data.cmsArticles) _data.cmsArticles = JSON.parse(JSON.stringify(DEFAULT_CMS_ARTICLES));
+    _data.cmsArticles = _data.cmsArticles.filter(a => a.id !== id);
+    if (_data.cmsBanners) _data.cmsBanners = _data.cmsBanners.filter(b => b.articleId !== id);
+    save(_data);
+  }
+  function getActiveBanners() {
+    return (_data.cmsBanners || DEFAULT_CMS_BANNERS).filter(b => b.active);
+  }
+  function dismissBanner(id) {
+    if (!_data.cmsBanners) _data.cmsBanners = JSON.parse(JSON.stringify(DEFAULT_CMS_BANNERS));
+    const b = _data.cmsBanners.find(x => x.id === id);
+    if (b) { b.active = false; save(_data); }
+  }
+
   // --- Notifications ---
   const DEFAULT_NOTIFICATIONS = [
     { id:'notif-1', type:'order',    icon:'ti-package',     title:'PO-7841 delivered',                          body:'Your order PO-7841 (Hydraulic seals — WO #100094) has been delivered to Austin Branch. 2 items, $268.00.',                                                    time:'2h ago',   read:false },
@@ -871,6 +949,7 @@ const Store = (() => {
     getUsers, authenticate, setCurrentUser, getCurrentUser, logout,
     getLocations, getCurrentLocation, setCurrentLocation,
     getNotifications, markNotificationRead, markAllNotificationsRead, getUnreadCount,
+    getCmsArticles, getCmsArticle, saveCmsArticle, deleteCmsArticle, getActiveBanners, dismissBanner,
     reset,
   };
 })();

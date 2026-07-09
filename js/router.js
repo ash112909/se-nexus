@@ -15,6 +15,7 @@ const Router = (() => {
     'approvals': 'view-approvals',
     'order-review': 'view-order-review',
     'analytics': 'view-analytics',
+    'cms': 'view-cms',
   };
 
   let _context = {};
@@ -30,6 +31,22 @@ const Router = (() => {
       el.classList.add('active');
       const renderer = window['render_' + view.replace(/-/g, '_')];
       if (renderer) renderer(el);
+      // Inject banners after render (skip login)
+      if (view !== 'login' && typeof buildBanners === 'function') {
+        const mainEl = el.querySelector('.main');
+        if (mainEl) {
+          mainEl.querySelectorAll('.fleet-banner-host').forEach(b => b.remove());
+          const bannerHtml = buildBanners();
+          if (bannerHtml) {
+            const host = document.createElement('div');
+            host.className = 'fleet-banner-host';
+            host.innerHTML = bannerHtml;
+            const topbar = mainEl.querySelector('.topbar');
+            if (topbar) topbar.after(host);
+            else mainEl.insertAdjacentElement('afterbegin', host);
+          }
+        }
+      }
     }
   }
 
