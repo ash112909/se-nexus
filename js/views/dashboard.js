@@ -1,5 +1,8 @@
 function render_dashboard(el) {
-  const activeWOs = Store.getWorkOrders('active', 'James W.');
+  const _user = Store.getCurrentUser();
+  const _isSupervisor = _user && _user.role === 'supervisor';
+  const _firstName = _user ? _user.displayName.split(' ')[0] : 'James';
+  const activeWOs = Store.getWorkOrders('active', _isSupervisor ? null : (_user ? _user.shortName : 'James W.'));
   const activeCount = activeWOs.length;
 
   function machineIcon(machine) {
@@ -153,7 +156,7 @@ function render_dashboard(el) {
     </div>
     <div class="content">
       <div class="greeting">
-        <div class="greeting-top">Good morning, James</div>
+        <div class="greeting-top">Good morning, ${_firstName}</div>
         <div class="greeting-sub">Monday, Jun 26 · ${(Store.getCurrentLocation()||{name:'—'}).name} · ${activeCount} active work order${activeCount !== 1 ? 's' : ''}</div>
       </div>
       <div class="ai-strip" onclick="sendPrompt('Open diagnostic assistant')">
@@ -168,6 +171,26 @@ function render_dashboard(el) {
       ${activeWOs.length ? activeWOs.map((wo, i) => renderWOCard(wo, i)).join('') : '<div style="color:#9CA3AF;font-size:13px;padding:12px 0;">No active work orders.</div>'}
       <div style="margin-bottom:20px;"></div>
       <div class="section-label">Quick actions</div>
+      ${_isSupervisor ? `
+      <div class="grid-2" style="margin-bottom:10px;">
+        <div class="action-card" onclick="sendPrompt('analytics')" style="border-color:#E0DBD5;background:linear-gradient(135deg,#FAFAF8 0%,#FFFFFF 100%);">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+            <div class="action-card-icon" style="background:#111318;color:#F5A623;"><i class="ti ti-chart-bar"></i></div>
+            <span style="font-size:10px;font-weight:600;color:#3B6D11;background:#F0FDF4;padding:2px 7px;border-radius:8px;margin-top:2px;">Live</span>
+          </div>
+          <div class="action-card-title">Fleet analytics</div>
+          <div class="action-card-sub">Spend trends, mechanic performance, vendor insights</div>
+          <div class="action-card-badge" style="background:#111318;color:#F5A623;"><i class="ti ti-arrow-right" style="font-size:11px;"></i> View dashboard</div>
+        </div>
+        <div class="action-card" onclick="sendPrompt('approvals')">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+            <div class="action-card-icon icon-amber"><i class="ti ti-circle-check"></i></div>
+            <span style="font-size:10px;font-weight:600;color:#A32D2D;background:#FEF2F2;padding:2px 7px;border-radius:8px;margin-top:2px;">3 pending</span>
+          </div>
+          <div class="action-card-title">Order approvals</div>
+          <div class="action-card-sub">Review and approve parts orders from your team</div>
+        </div>
+      </div>` : ''}
       <div class="grid-2">
         <div class="action-card" onclick="sendPrompt('Open order history')">
           <div class="action-card-icon icon-blue"><i class="ti ti-package"></i></div>
