@@ -441,7 +441,10 @@ const Store = (() => {
 
   // --- Work Orders ---
   function getWorkOrders(statusFilter, assigneeFilter) {
-    let wos = _data.workOrders.filter(wo => !wo.locationId || wo.locationId === _currentLocationId);
+    const isSupervisor = _currentUser && _currentUser.role === 'supervisor';
+    let wos = isSupervisor
+      ? _data.workOrders.slice()
+      : _data.workOrders.filter(wo => !wo.locationId || wo.locationId === _currentLocationId);
     if (assigneeFilter) wos = wos.filter(wo => wo.assignee === assigneeFilter);
     if (statusFilter && statusFilter !== 'all') wos = wos.filter(wo => wo.status === statusFilter);
     return wos;
