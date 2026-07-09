@@ -780,6 +780,18 @@ const Store = (() => {
       defaultLocationId: 'austin',
       avatar: 'JW',
     },
+    {
+      id: 'user-sarah-m',
+      username: 'sarah.m',
+      password: 'MCR-sup-01',
+      displayName: 'Sarah Martinez',
+      shortName: 'Sarah M.',
+      role: 'supervisor',
+      email: 'sarah.m@midcountyrental.com',
+      phone: '(512) 555-0140',
+      defaultLocationId: 'austin',
+      avatar: 'SM',
+    },
   ];
 
   let _currentUser = null;

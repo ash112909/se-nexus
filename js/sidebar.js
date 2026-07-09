@@ -1,6 +1,9 @@
 function buildSidebar(activeItem) {
   const loc = (typeof Store !== 'undefined' && Store.getCurrentLocation) ? Store.getCurrentLocation() : null;
   const locName = loc ? loc.name : 'Mid-County Rental';
+  const user = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
+  const role = user ? user.role : 'mechanic';
+  const isSupervisor = role === 'supervisor';
   return `
   <div class="sidebar">
     <div class="sb-fleet">
@@ -13,11 +16,14 @@ function buildSidebar(activeItem) {
       </div>
     </div>
     <div class="sb-nav">
-      <div class="sb-section-label">My work</div>
+      <div class="sb-section-label">${isSupervisor ? 'Operations' : 'My work'}</div>
       <div class="sb-item ${activeItem==='dashboard'?'active':''}" onclick="sendPrompt('Go back to dashboard')"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
       <div class="sb-item ${activeItem==='wo'?'active':''}" onclick="sendPrompt('Open work orders list')"><i class="ti ti-clipboard-list"></i> Work orders <span class="sb-badge">2</span></div>
       <div class="sb-item ${activeItem==='order-history'?'active':''}" onclick="sendPrompt('Open order history')"><i class="ti ti-history"></i> Order history</div>
+      ${isSupervisor ? `
       <div class="sb-item ${activeItem==='approvals'?'active':''}" onclick="sendPrompt('Open approvals')"><i class="ti ti-circle-check"></i> Approvals</div>
+      <div class="sb-item ${activeItem==='analytics'?'active':''}" onclick="sendPrompt('Open analytics')"><i class="ti ti-chart-bar"></i> Analytics</div>
+      ` : ''}
       <div class="sb-section-label">Parts</div>
       <div class="sb-item ${activeItem==='parts'?'active':''}" onclick="sendPrompt('Open Parts Search scoped to WO #100094, Skyjack SJIII 3219 — diagram view, hydraulic lift cylinder')"><i class="ti ti-search"></i> Search parts</div>
       <div class="sb-item ${activeItem==='recommended'?'active':''}" onclick="sendPrompt('Open recommended parts')"><i class="ti ti-star"></i> Recommended</div>
@@ -33,6 +39,9 @@ function buildTopbarRight() {
   const loc = (typeof Store !== 'undefined' && Store.getCurrentLocation) ? Store.getCurrentLocation() : null;
   const locName = loc ? loc.name : 'Austin Branch';
   const unread = (typeof Store !== 'undefined' && Store.getUnreadCount) ? Store.getUnreadCount() : 0;
+  const user = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
+  const avatar = user ? user.avatar : 'JW';
+  const shortName = user ? user.shortName : 'James W.';
   return `<div class="topbar-right">
     <button class="topbar-icon-btn" id="up-btn-notif" onclick="UserPanel.openNotifications()" title="Notifications">
       <i class="ti ti-bell"></i>
@@ -40,9 +49,9 @@ function buildTopbarRight() {
     </button>
     <button class="topbar-icon-btn" title="Settings"><i class="ti ti-settings"></i></button>
     <button class="topbar-profile-btn" id="up-btn-profile" onclick="UserPanel.openProfile()">
-      <div class="tp-avatar">JW</div>
+      <div class="tp-avatar">${avatar}</div>
       <div class="tp-info">
-        <div class="tp-name">James W.</div>
+        <div class="tp-name">${shortName}</div>
         <div class="tp-loc">${locName}</div>
       </div>
       <i class="ti ti-selector" style="font-size:12px;color:#5C6070;flex-shrink:0;"></i>

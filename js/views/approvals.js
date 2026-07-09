@@ -1,4 +1,9 @@
 function render_approvals(el) {
+  const _user = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
+  if (!_user || _user.role !== 'supervisor') {
+    el.innerHTML = `<div class="shell">${buildSidebar('approvals')}<div class="main"><div style="padding:60px;text-align:center;color:#9CA3AF;font-size:14px;"><i class="ti ti-lock" style="font-size:32px;display:block;margin-bottom:12px;"></i>You don't have access to Approvals.<br><a style="color:#F5A623;cursor:pointer;margin-top:10px;display:inline-block;" onclick="sendPrompt('dashboard')">Back to Dashboard</a></div></div></div>`;
+    return;
+  }
   let _searchQuery = '';
   let _selectedOrderId = null;
 

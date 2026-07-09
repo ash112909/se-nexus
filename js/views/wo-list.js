@@ -1,5 +1,7 @@
 function render_wo_list(el) {
-  const CURRENT_USER = 'James W.';
+  const _user = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
+  const _isSupervisor = _user && _user.role === 'supervisor';
+  const CURRENT_USER = _user ? _user.shortName : 'James W.';
   let _currentFilter = 'all';
   let _searchQuery = '';
 
@@ -62,10 +64,15 @@ function render_wo_list(el) {
     return `<span style="font-size:12px;color:#3A3D4A;">${dueDate}</span>`;
   }
 
+  // Grid cols: supervisor gets an extra Assignee column
+  const _cols = _isSupervisor
+    ? '100px 80px 1fr 130px 110px 110px 80px 50px'
+    : '100px 80px 1fr 110px 110px 80px 50px';
+
   function renderRows(wos) {
     if (!wos.length) return '<div class="wol-empty">No work orders found.</div>';
     return wos.map(wo => `
-      <div class="wol-row" onclick="sendPrompt('Show me the Work Order detail view for WO #${wo.id}')">
+      <div class="wol-row" style="grid-template-columns:${_cols};" onclick="sendPrompt('Show me the Work Order detail view for WO #${wo.id}')">
         <div class="wol-td">
           <span class="wol-wo-id">#${wo.id}</span>
           ${wo.externalId ? `<div style="font-size:10px;color:#9CA3AF;margin-top:2px;">${wo.externalId}</div>` : ''}
@@ -80,6 +87,7 @@ function render_wo_list(el) {
             </div>
           </div>
         </div>
+        ${_isSupervisor ? `<div class="wol-td"><span style="font-size:12px;color:#5A5F6E;">${wo.assignee || '—'}</span></div>` : ''}
         <div class="wol-td">${dueDateCell(wo.dueDate, wo.status)}</div>
         <div class="wol-td">${statusPill(wo)}</div>
         <div class="wol-td">${priorityCell(wo.priority)}</div>
@@ -88,7 +96,8 @@ function render_wo_list(el) {
   }
 
   function getMyWOs(statusFilter) {
-    return Store.getWorkOrders(statusFilter || 'all', CURRENT_USER);
+    // Mechanics only see their own WOs; supervisors see all
+    return Store.getWorkOrders(statusFilter || 'all', _isSupervisor ? null : CURRENT_USER);
   }
 
   function getFilteredWOs() {
@@ -100,7 +109,8 @@ function render_wo_list(el) {
         (wo.issue || '').toLowerCase().includes(q) ||
         String(wo.id).includes(q) ||
         (wo.externalId || '').toLowerCase().includes(q) ||
-        (wo.asset || '').toLowerCase().includes(q)
+        (wo.asset || '').toLowerCase().includes(q) ||
+        (wo.assignee || '').toLowerCase().includes(q)
       );
     }
     return wos;
@@ -147,9 +157,9 @@ function render_wo_list(el) {
 .wol-new-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: #F5A623; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: #1A1200; cursor: pointer; font-family: inherit; }
 .wol-new-btn:hover { background: #E8980F; }
 .wol-table { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; overflow: hidden; }
-.wol-thead { display: grid; grid-template-columns: 100px 80px 1fr 110px 110px 80px 50px; gap: 0; border-bottom: 1px solid #F0ECE8; padding: 0 18px; background: #FAFAF9; }
+.wol-thead { display: grid; gap: 0; border-bottom: 1px solid #F0ECE8; padding: 0 18px; background: #FAFAF9; }
 .wol-th { font-size: 11px; font-weight: 600; color: #9CA3AF; letter-spacing: 0.8px; text-transform: uppercase; padding: 10px 8px; }
-.wol-row { display: grid; grid-template-columns: 100px 80px 1fr 110px 110px 80px 50px; gap: 0; padding: 0 18px; border-bottom: 0.5px solid #F5F2EE; cursor: pointer; transition: background 0.1s; align-items: center; }
+.wol-row { display: grid; gap: 0; padding: 0 18px; border-bottom: 0.5px solid #F5F2EE; cursor: pointer; transition: background 0.1s; align-items: center; }
 .wol-row:last-child { border-bottom: none; }
 .wol-row:hover { background: #FAFAF9; }
 .wol-td { padding: 12px 8px; font-size: 13px; color: #3A3D4A; }
@@ -195,7 +205,7 @@ function render_wo_list(el) {
     <div class="wol-content">
       <div class="wol-header">
         <div>
-          <div class="wol-title">My Work Orders</div>
+          <div class="wol-title">${_isSupervisor ? 'All Work Orders' : 'My Work Orders'}</div>
           <div class="wol-subtitle">${(Store.getCurrentLocation()||{name:'—'}).name} · <span id="wol-sum-active">0</span> active</div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
@@ -230,10 +240,11 @@ function render_wo_list(el) {
       </div>
 
       <div class="wol-table">
-        <div class="wol-thead">
+        <div class="wol-thead" style="grid-template-columns:${_cols};">
           <div class="wol-th">WO #</div>
           <div class="wol-th">Type</div>
           <div class="wol-th">Machine / Issue</div>
+          ${_isSupervisor ? '<div class="wol-th">Assignee</div>' : ''}
           <div class="wol-th">Due Date</div>
           <div class="wol-th">Status</div>
           <div class="wol-th">Priority</div>
