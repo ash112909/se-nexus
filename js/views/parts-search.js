@@ -2913,7 +2913,13 @@ function render_parts_search(el) {
     renderAll();
   };
 
-  function renderAll() { renderTree(); renderCenter(); renderDetail(); renderBreadcrumb(); }
+  function renderAll() {
+    // Hide tree panel on supplier landing (no model selected) so the full-width banner shows cleanly
+    const treePanel = document.getElementById('ps-tree');
+    const onSupplierLanding = _nav.supplierId && !_nav.modelId && !(_searchMode==='keyword' && _searchQuery.trim());
+    if (treePanel) treePanel.style.display = onSupplierLanding ? 'none' : '';
+    renderTree(); renderCenter(); renderDetail(); renderBreadcrumb();
+  }
 
   // ── Init ──────────────────────────────────────────────────────────────────────
   renderSearchBar();
