@@ -3,6 +3,7 @@ const Router = (() => {
 
   const views = {
     'login': 'view-login',
+    'home': 'view-home',
     'dashboard': 'view-dashboard',
     'wo-list': 'view-wo-list',
     'wo-detail': 'view-wo-detail',

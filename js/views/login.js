@@ -190,21 +190,21 @@ function render_login(el) {
     // Supervisors start with no location filter (all locations view)
     if (user.role === 'supervisor') {
       Store.setCurrentLocation(null);
-      sendPrompt('dashboard');
+      Router.navigate('home');
       return;
     }
 
     // Mechanics: use default location and go straight to dashboard
     if (user.defaultLocationId) {
       Store.setCurrentLocation(user.defaultLocationId);
-      sendPrompt('dashboard');
+      Router.navigate('home');
       return;
     }
 
     // Otherwise show location picker
     const step = document.getElementById('login-location-step');
     const list = document.getElementById('login-location-list');
-    if (!step || !list) { sendPrompt('dashboard'); return; }
+    if (!step || !list) { Router.navigate('home'); return; }
     list.innerHTML = Store.getLocations().map(l => `
       <div onclick="loginPickLocation('${l.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1.5px solid #E2DDD8;border-radius:9px;cursor:pointer;background:#FFFFFF;" onmouseover="this.style.borderColor='#F5A623'" onmouseout="this.style.borderColor='#E2DDD8'">
         <div style="width:32px;height:32px;background:#FAEEDA;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#854F0B;flex-shrink:0;"><i class="ti ti-map-pin"></i></div>
@@ -225,11 +225,11 @@ function render_login(el) {
 
   window.loginPickLocation = function(id) {
     Store.setCurrentLocation(id);
-    sendPrompt('dashboard');
+    Router.navigate('home');
   };
 
   // Auto-login if session already has a user + location
   if (Store.getCurrentUser() && Store.getCurrentLocation()) {
-    sendPrompt('dashboard');
+    Router.navigate('home');
   }
 }

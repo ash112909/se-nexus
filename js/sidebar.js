@@ -17,6 +17,7 @@ function buildSidebar(activeItem) {
     </div>
     <div class="sb-nav">
       <div class="sb-section-label">${isSupervisor ? 'Operations' : 'My work'}</div>
+      <div class="sb-item ${activeItem==='home'?'active':''}" onclick="Router.navigate('home')"><i class="ti ti-home"></i> Home</div>
       <div class="sb-item ${activeItem==='dashboard'?'active':''}" onclick="sendPrompt('Go back to dashboard')"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
       <div class="sb-item ${activeItem==='wo'?'active':''}" onclick="sendPrompt('Open work orders list')"><i class="ti ti-clipboard-list"></i> Work orders <span class="sb-badge">2</span></div>
       <div class="sb-item ${activeItem==='order-history'?'active':''}" onclick="sendPrompt('Open order history')"><i class="ti ti-history"></i> Order history</div>

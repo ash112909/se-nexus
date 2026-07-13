@@ -211,48 +211,6 @@ function render_dashboard(el) {
           <div class="action-card-badge"><i class="ti ti-clock" style="font-size:11px;"></i> 1 arriving today</div>
         </div>
       </div>
-      <div class="section-header-row">
-        <div class="section-label">Fleet news &amp; updates</div>
-        <span class="section-view-all" onclick="sendPrompt('Open manuals and docs')">View all <i class="ti ti-arrow-right" style="font-size:11px;"></i></span>
-      </div>
-      <div class="news-list">
-        <div class="news-item" onclick="newsOpenArticle('n-01')">
-          <div class="news-icon icon-amber"><i class="ti ti-alert-triangle"></i></div>
-          <div class="news-body">
-            <div class="news-tag" style="color:#854F0B;">Service Bulletin</div>
-            <div class="news-title">Skyjack SB-2026-047 — Hydraulic pressure relief valve inspection</div>
-            <div class="news-sub">Affects SJIII 3219 &amp; 4626 units manufactured before Jan 2024. Inspect relief valve torque spec before next lift cycle.</div>
-          </div>
-          <div class="news-meta">Jun 24</div>
-        </div>
-        <div class="news-item" onclick="newsOpenArticle('n-02')">
-          <div class="news-icon icon-blue"><i class="ti ti-building"></i></div>
-          <div class="news-body">
-            <div class="news-tag" style="color:#185FA5;">Fleet Update</div>
-            <div class="news-title">2 new Bobcat S770 units arriving at Kyle Branch — Jul 8</div>
-            <div class="news-sub">Pre-delivery inspection checklist has been uploaded to Manuals. Assign intake WOs before arrival.</div>
-          </div>
-          <div class="news-meta">Jun 22</div>
-        </div>
-        <div class="news-item" onclick="newsOpenArticle('n-12')">
-          <div class="news-icon icon-blue"><i class="ti ti-building"></i></div>
-          <div class="news-body">
-            <div class="news-tag" style="color:#185FA5;">Fleet Update</div>
-            <div class="news-title">Q3 2026 PM schedule published — WOs auto-created Jul 1</div>
-            <div class="news-sub">Preventive maintenance work orders will be auto-assigned on July 1 for all fleet units due in Q3.</div>
-          </div>
-          <div class="news-meta">Jun 10</div>
-        </div>
-        <div class="news-item" onclick="newsOpenArticle('n-04')">
-          <div class="news-icon icon-teal"><i class="ti ti-shield-check"></i></div>
-          <div class="news-body">
-            <div class="news-tag" style="color:#0F6E56;">Warranty</div>
-            <div class="news-title">Toyota 8FGU25 FL-031 warranty expires in 6 months — schedule service</div>
-            <div class="news-sub">Coverage ends Dec 3, 2026. Submit any outstanding warranty claims through SmartEquip before expiry.</div>
-          </div>
-          <div class="news-meta">Jun 20</div>
-        </div>
-      </div>
       <div class="section-label">Notifications</div>
       <div class="notif-list">
         <div class="notif-item">
