@@ -241,8 +241,15 @@ function render_home(el) {
     homeGoSlide((window._homeSlide + 1) % SLIDES.length);
   }, 6000);
 
-  // Navigate to supplier page
+  // Map home supplier IDs to parts-search catalog IDs (OEM suppliers with full catalog profiles)
+  const CATALOG_ID_MAP = { skyjack:'SKJ', caterpillar:'CAT', toyota:'TOY', bobcat:'BOB' };
+
   window.homeOpenSupplier = function(id) {
-    Router.navigate('supplier', { supplierId: id });
+    const catalogId = CATALOG_ID_MAP[id];
+    if (catalogId) {
+      Router.navigate('parts-search', { supplierId: catalogId });
+    } else {
+      Router.navigate('supplier', { supplierId: id });
+    }
   };
 }

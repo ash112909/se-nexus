@@ -1,6 +1,7 @@
 function render_parts_search(el) {
   const _woId = Router.context && Router.context.woId;
   const _wo = _woId ? Store.getWorkOrder(_woId) : null;
+  const _ctxSupplierId = Router.context && Router.context.supplierId;
 
   const CATALOG = [
     { id:'SKJ', name:'Skyjack', icon:'ti-crane', models:[
@@ -2169,6 +2170,9 @@ function render_parts_search(el) {
   if (_wo) {
     const eq = EQUIPMENT.find(e=>e.asset===_wo.asset);
     if (eq) { _nav.supplierId=eq.supplierId; _nav.modelId=eq.modelId; _expanded.add(eq.supplierId); _expanded.add(eq.modelId); }
+  } else if (_ctxSupplierId) {
+    _nav.supplierId = _ctxSupplierId;
+    _expanded.add(_ctxSupplierId);
   }
 
   // ── Initial HTML ─────────────────────────────────────────────────────────
