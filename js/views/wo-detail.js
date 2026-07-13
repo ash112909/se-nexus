@@ -632,12 +632,213 @@ function render_wo_detail(el) {
     renderCart();
     updateCartBadge();
   };
+  // ── Cart review modal ──────────────────────────────────────────────────────
+  let _reviewResolved = new Set();
+
+  function _reviewFlaggedItems(cart) {
+    const flags = [];
+    cart.forEach(c => {
+      const st = itemStatus(c);
+      const optXrefs = (c.crossRefs || []).filter(r => !r.mandatory);
+      const hasLocal = (c.localInventory || []).length > 0;
+      const hasSelectedLocal = !!(c.selectedSources && c.selectedSources.length) || !!c.selectedSource;
+
+      if (st === 'unorderable') {
+        flags.push({ item: c, flag: 'unorderable',
+          icon: 'ti-circle-x', iconColor: '#A32D2D', iconBg: '#FEE2E2',
+          flagMsg: 'Not orderable — no supplier stock and no alternatives available.',
+          recText: 'Remove this item from the order. It cannot be fulfilled at this time.',
+          primaryLabel: 'Remove from cart', primaryStyle: 'danger',
+        });
+      } else if (st === 'blocked') {
+        flags.push({ item: c, flag: 'blocked',
+          icon: 'ti-lock', iconColor: '#854F0B', iconBg: '#FAEEDA',
+          flagMsg: 'Mandatory cross-reference unresolved — fleet policy requires a substitute.',
+          recText: 'Open the cross-reference panel and select the required substitute part.',
+          primaryLabel: 'Resolve cross-ref', primaryStyle: 'warn',
+        });
+      } else if (!c.inStock && optXrefs.length) {
+        const inStockAlt = optXrefs.find(r => r.inStock !== false) || optXrefs[0];
+        flags.push({ item: c, flag: 'backordered_alt', bestAlt: inStockAlt,
+          icon: 'ti-clock', iconColor: '#92400E', iconBg: '#FEF3C7',
+          flagMsg: `Backordered — not in supplier stock. ${optXrefs.length} alternative${optXrefs.length > 1 ? 's' : ''} available.`,
+          recText: `Swap to ${inStockAlt.partNum} (${inStockAlt.vendor}${inStockAlt.inStock !== false ? ', in stock' : ''}, $${inStockAlt.price.toFixed(2)}) to avoid backorder delay.`,
+          primaryLabel: `Swap to ${inStockAlt.partNum}`, primaryStyle: 'primary',
+          altLabel: 'Accept backorder',
+        });
+      } else if (!c.inStock) {
+        flags.push({ item: c, flag: 'backordered',
+          icon: 'ti-clock', iconColor: '#92400E', iconBg: '#FEF3C7',
+          flagMsg: 'Backordered — not currently in supplier stock. No alternatives on file.',
+          recText: 'Accept the backorder. The item will ship when supplier stock is replenished.',
+          primaryLabel: 'Accept backorder', primaryStyle: 'neutral',
+        });
+      } else if (hasLocal && !hasSelectedLocal) {
+        const inv = c.localInventory || [];
+        const best = inv.slice().sort((a, b) => b.qty - a.qty)[0];
+        const needed = c.qty || 1;
+        const canFulfil = best && best.qty >= needed;
+        flags.push({ item: c, flag: 'local_available', bestLoc: best,
+          icon: 'ti-map-pin', iconColor: '#185FA5', iconBg: '#E6F1FB',
+          flagMsg: `Local stock available at ${inv.length} location${inv.length > 1 ? 's' : ''} — no source selected.`,
+          recText: canFulfil
+            ? `Pull all ${needed} unit${needed > 1 ? 's' : ''} from ${best.locationName} (${best.qty} available, ${best.distance}) to eliminate shipping cost.`
+            : `Split across available locations — ${best.locationName} has the most (${best.qty} units).`,
+          primaryLabel: `Apply: ${best.locationName}`, primaryStyle: 'primary',
+          altLabel: 'Order externally',
+        });
+      } else if (optXrefs.length && !c.replacedBy) {
+        flags.push({ item: c, flag: 'optional_xref',
+          icon: 'ti-switch-horizontal', iconColor: '#534AB7', iconBg: '#EEEDFE',
+          flagMsg: `${optXrefs.length} optional alternative${optXrefs.length > 1 ? 's' : ''} available — ordering original part.`,
+          recText: 'No action required. Alternatives are on file if the original is unavailable or preferred.',
+          primaryLabel: 'Acknowledge', primaryStyle: 'neutral',
+          altLabel: 'View alternatives',
+        });
+      }
+    });
+    return flags;
+  }
+
+  function _showCartReviewModal(flags) {
+    _reviewResolved = new Set();
+
+    const STYLES = {
+      primary: 'background:#111318;color:#FFFFFF;border:none;',
+      danger:  'background:#FCEBEB;color:#A32D2D;border:0.5px solid #F5C5C5;',
+      warn:    'background:#FAEEDA;color:#854F0B;border:0.5px solid #F5A623;',
+      neutral: 'background:#F5F2EE;color:#3A3D4A;border:0.5px solid #E2DDD8;',
+    };
+
+    function cardHtml(f) {
+      const btnBase = 'border-radius:7px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;';
+      const primaryBtn = `<button style="${btnBase}${STYLES[f.primaryStyle]}" onclick="reviewApply('${f.item.id}')">${f.primaryLabel}</button>`;
+      const altBtn = f.altLabel
+        ? `<button style="${btnBase}background:none;border:0.5px solid #E2DDD8;color:#7A7F8E;border-radius:7px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit;" onclick="reviewSkip('${f.item.id}')">${f.altLabel}</button>`
+        : `<button style="${btnBase}background:none;border:none;color:#9CA3AF;font-size:11px;cursor:pointer;font-family:inherit;padding:4px 8px;" onclick="reviewSkip('${f.item.id}')">Skip</button>`;
+
+      return `<div class="rev-card" id="rev-card-${f.item.id}" style="border:0.5px solid #E8E4DF;border-radius:10px;margin-bottom:12px;overflow:hidden;">
+        <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;">
+          <div style="width:34px;height:34px;border-radius:8px;background:${f.iconBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="ti ${f.icon}" style="font-size:16px;color:${f.iconColor};"></i>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span style="font-family:'SF Mono','Consolas',monospace;font-size:11px;font-weight:700;color:#3A3D4A;">${f.item.partNum}</span>
+              <span style="font-size:12px;color:#5A5F6E;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.item.description}</span>
+              <span id="rev-resolved-${f.item.id}" style="display:none;font-size:11px;font-weight:700;color:#3B6D11;display:none;align-items:center;gap:4px;flex-shrink:0;"><i class="ti ti-circle-check" style="font-size:13px;"></i> Done</span>
+            </div>
+            <div style="font-size:12px;color:#7A7F8E;margin-top:4px;">${f.flagMsg}</div>
+          </div>
+        </div>
+        <div id="rev-actions-${f.item.id}" style="border-top:0.5px solid #F5F2EE;background:#FAFAF8;padding:10px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:180px;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;margin-bottom:3px;">System recommendation</div>
+            <div style="font-size:12px;color:#3A3D4A;">${f.recText}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">${primaryBtn}${altBtn}</div>
+        </div>
+      </div>`;
+    }
+
+    const blockedCount = flags.filter(f => ['unorderable','blocked'].includes(f.flag)).length;
+    const body = `
+      <div style="padding:2px 0 12px;">
+        <div style="display:flex;align-items:center;gap:10px;background:#F5F2EE;border-radius:9px;padding:11px 14px;margin-bottom:16px;">
+          <i class="ti ti-robot" style="font-size:18px;color:#5C6070;flex-shrink:0;"></i>
+          <div style="font-size:12px;color:#3A3D4A;line-height:1.5;">System reviewed your cart and found <strong>${flags.length} item${flags.length > 1 ? 's' : ''}</strong> that may benefit from action before ordering.${blockedCount ? ` <strong style="color:#A32D2D;">${blockedCount} will be excluded</strong> from this order.` : ''} You can act on each item or proceed anyway.</div>
+        </div>
+        <div id="rev-items-list">${flags.map(cardHtml).join('')}</div>
+        <div id="rev-footer-msg" style="font-size:12px;color:#9CA3AF;text-align:center;padding:4px 0 2px;"></div>
+      </div>`;
+
+    // Define per-item handlers
+    window.reviewApply = function(itemId) {
+      const f = flags.find(x => x.item.id === itemId);
+      if (!f) return;
+
+      if (f.flag === 'unorderable') {
+        Store.removeWoCartItem(wo.id, itemId);
+        renderCart(); updateCartBadge();
+        _reviewMarkDone(itemId);
+      } else if (f.flag === 'blocked') {
+        Modal.close();
+        wodOpenCrossRefs(itemId);
+      } else if (f.flag === 'backordered_alt') {
+        const ref = f.bestAlt;
+        const newPart = { id: ref.partNum, partNum: ref.partNum, description: ref.description, vendor: ref.vendor, price: ref.price, uom: ref.uom || 'EA', inStock: true, localInventory: [], crossRefs: [] };
+        Store.swapWoCartItem(wo.id, itemId, newPart);
+        renderCart(); updateCartBadge();
+        _reviewMarkDone(itemId);
+      } else if (f.flag === 'backordered') {
+        _reviewMarkDone(itemId); // accept as-is
+      } else if (f.flag === 'local_available') {
+        const best = f.bestLoc;
+        if (best) {
+          const needed = f.item.qty || 1;
+          const pullQty = Math.min(needed, best.qty);
+          Store.setWoCartItemSources(wo.id, itemId, [{ locationId: best.locationId, locationName: best.locationName, qty: pullQty }]);
+          renderCart();
+        }
+        _reviewMarkDone(itemId);
+      } else if (f.flag === 'optional_xref') {
+        _reviewMarkDone(itemId); // acknowledge
+      }
+    };
+
+    window.reviewSkip = function(itemId) {
+      const f = flags.find(x => x.item.id === itemId);
+      if (f && f.flag === 'optional_xref' && f.altLabel === 'View alternatives') {
+        Modal.close();
+        wodOpenCrossRefs(itemId);
+      } else {
+        _reviewMarkDone(itemId);
+      }
+    };
+
+    window._reviewMarkDone = function(itemId) {
+      _reviewResolved.add(itemId);
+      const card = document.getElementById('rev-card-' + itemId);
+      const actions = document.getElementById('rev-actions-' + itemId);
+      const resolved = document.getElementById('rev-resolved-' + itemId);
+      if (card) card.style.opacity = '0.65';
+      if (actions) actions.innerHTML = '<span style="font-size:12px;color:#3B6D11;display:flex;align-items:center;gap:5px;"><i class="ti ti-circle-check"></i> Addressed — will be applied when you proceed</span>';
+      if (resolved) { resolved.style.display = 'inline-flex'; }
+      const remaining = flags.filter(f => !_reviewResolved.has(f.item.id)).length;
+      const msg = document.getElementById('rev-footer-msg');
+      if (msg) msg.textContent = remaining === 0 ? 'All items reviewed — ready to proceed.' : `${remaining} item${remaining > 1 ? 's' : ''} remaining.`;
+    };
+
+    Modal.show({
+      title: `Cart review — ${flags.length} item${flags.length > 1 ? 's' : ''} to review`,
+      body,
+      wide: true,
+      actions: [
+        { label: 'Proceed to order anyway', onClick: () => { Modal.close(); _doNavigateToOrder(); } },
+        { label: 'Continue →', primary: true, onClick: () => { Modal.close(); _doNavigateToOrder(); } },
+      ],
+    });
+  }
+
+  function _doNavigateToOrder() {
+    const cart = Store.getWoCart(wo.id);
+    const submittable = cart.filter(c => !['blocked','unorderable','replaced'].includes(itemStatus(c)));
+    if (!submittable.length) return;
+    Router.navigate('order-review', { woId: wo.id, itemIds: submittable.map(c => c.id) });
+  }
+
   window.wodSubmitCart = function() {
     const cart = Store.getWoCart(wo.id);
     if (!cart.length) return;
     const submittable = cart.filter(c => !['blocked','unorderable','replaced'].includes(itemStatus(c)));
     if (!submittable.length) return;
-    Router.navigate('order-review', { woId: wo.id, itemIds: submittable.map(c => c.id) });
+
+    const flags = _reviewFlaggedItems(cart);
+    if (!flags.length) {
+      _doNavigateToOrder();
+      return;
+    }
+    _showCartReviewModal(flags);
   };
 
   function updateCartBadge() {
