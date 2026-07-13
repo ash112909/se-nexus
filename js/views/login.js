@@ -74,7 +74,7 @@ function render_login(el) {
     <div class="login-center">
       <div class="login-eyebrow">Fleet Portal</div>
       <h1 class="login-headline">Your fleet,<br>ready to roll.</h1>
-      <p class="login-sub">Parts, work orders, and diagnostics &mdash; all in one place for your team.</p>
+      <p class="login-sub">Parts, service, diagnostics, and sourcing — all in one place for your team.</p>
     </div>
     <div class="login-footer">
       <span class="powered-by-text">Powered by</span>
