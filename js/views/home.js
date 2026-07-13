@@ -16,16 +16,6 @@ function render_home(el) {
     { id:'trelleborg', name:'Trelleborg',      category:'Sealing / Afmkt',   icon:'ti-circle-dashed', color:'#534AB7', bg:'#EDE9FE' },
   ];
 
-  const SUPPLIER_DETAILS = {
-    skyjack:    { tagline:'SJIII scissor lifts · boom lifts · telehandlers',     specialty:['Scissor Lifts','Boom Lifts','Telehandlers'],   parts:34 },
-    caterpillar:{ tagline:'Cat 320 excavators · undercarriage · track systems',  specialty:['Excavators','Track Systems','Undercarriage'],  parts:18 },
-    toyota:     { tagline:'8FGU25 forklifts · mast systems · electric lifts',    specialty:['Forklifts','Mast Systems','Electric Lifts'],   parts:22 },
-    bobcat:     { tagline:'S650 / S770 skid steers · loader attachments',        specialty:['Skid Steers','Attachments','Drive Systems'],   parts:16 },
-    parker:     { tagline:'Hose assemblies · control valves · cylinders',        specialty:['Hose Assemblies','Control Valves','Cylinders'],parts:12 },
-    grainger:   { tagline:'Fasteners · lubricants · electrical · safety PPE',    specialty:['Fasteners','Lubricants','Electrical','Safety'],parts:40 },
-    trelleborg: { tagline:'Hydraulic seals · O-rings · custom seal kits',        specialty:['Hydraulic Seals','O-rings','Custom Kits'],     parts:8  },
-  };
-
   function getNewsItems() {
     const cms = (Store.getCmsArticles ? Store.getCmsArticles('published') : []).map(a => ({
       id:a.id, type:a.type||'notice', date:a.postedDate||'', dateLabel:a.postedDate||'',
@@ -251,38 +241,8 @@ function render_home(el) {
     homeGoSlide((window._homeSlide + 1) % SLIDES.length);
   }, 6000);
 
-  // Supplier modal
+  // Navigate to supplier page
   window.homeOpenSupplier = function(id) {
-    const s = SUPPLIERS.find(x=>x.id===id);
-    const d = SUPPLIER_DETAILS[id];
-    if (!s||!d) return;
-    Modal.show({
-      title: s.name,
-      body: `<div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
-        <div style="width:48px;height:48px;border-radius:12px;background:${s.bg};color:${s.color};display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;"><i class="ti ${s.icon}"></i></div>
-        <div>
-          <div style="font-size:16px;font-weight:700;color:#111318;">${s.name}</div>
-          <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">${s.category}</div>
-          <div style="font-size:12px;color:#5A5F6E;margin-top:3px;">${d.tagline}</div>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-        <div style="background:#F5F2EE;border-radius:9px;padding:12px 14px;">
-          <div style="font-size:11px;color:#9CA3AF;">Parts on file</div>
-          <div style="font-size:22px;font-weight:800;color:#111318;">${d.parts}</div>
-        </div>
-        <div style="background:#F5F2EE;border-radius:9px;padding:12px 14px;">
-          <div style="font-size:11px;color:#9CA3AF;">Specialties</div>
-          <div style="font-size:18px;font-weight:800;color:#111318;">${d.specialty.length}</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        ${d.specialty.map(t=>`<span style="background:#FFF;border:0.5px solid #E2DDD8;border-radius:6px;padding:4px 10px;font-size:12px;color:#3A3D4A;">${t}</span>`).join('')}
-      </div>`,
-      actions:[
-        { label:'Search parts', primary:true, onClick:()=>{ Modal.close(); sendPrompt('Open Parts Search scoped to WO #100094'); } },
-        { label:'Close', onClick:()=>Modal.close() },
-      ],
-    });
+    Router.navigate('supplier', { supplierId: id });
   };
 }

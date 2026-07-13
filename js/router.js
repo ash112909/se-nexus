@@ -17,6 +17,7 @@ const Router = (() => {
     'order-review': 'view-order-review',
     'analytics': 'view-analytics',
     'cms': 'view-cms',
+    'supplier': 'view-supplier',
   };
 
   let _context = {};
