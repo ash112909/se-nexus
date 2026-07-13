@@ -1,3 +1,5 @@
+let _cartGroupBy = 'none'; // persists across renderCart calls
+
 function render_wo_detail(el) {
   const woId = Router.context && Router.context.woId;
   const wo = woId ? Store.getWorkOrder(woId) : null;
@@ -128,53 +130,119 @@ function render_wo_detail(el) {
     const notSubmittable = cart.filter(c => ['blocked','unorderable'].includes(itemStatus(c))).length;
     const total = submittable.reduce((s, c) => s + c.price * (c.qty || 1), 0);
 
-    container.innerHTML = `
-      <table class="wod-cart-table">
-        <thead><tr>
-          <th class="col-st"></th>
-          <th class="col-pn">Part #</th>
-          <th class="col-desc">Description</th>
-          <th class="col-uom">UOM</th>
-          <th class="col-loc">Source / stock</th>
-          <th class="col-qty" style="text-align:center;">Qty</th>
-          <th class="col-unit" style="text-align:right;">Unit</th>
-          <th class="col-tot" style="text-align:right;">Total</th>
-          <th class="col-rm"></th>
-        </tr></thead>
-        <tbody>${cart.map(c => {
-          const replaced = isReplaced(c);
-          const rowStyle = replaced ? 'opacity:0.45;' : '';
-          const descStyle = replaced ? 'text-decoration:line-through;color:#9CA3AF;' : '';
-          const partStyle = replaced ? 'text-decoration:line-through;color:#9CA3AF;' : '';
-          const replacesOrig = c.replacesId ? cart.find(x => x.id === c.replacesId) : null;
-          return `
-          <tr class="cart-row" style="${rowStyle}">
-            <td class="col-st">${statusCell(c)}</td>
-            <td class="col-pn">
-              <div class="ci-partnum" style="${partStyle}">${c.partNum}</div>
-              <div class="ci-vendor-line">${c.vendor}${c.oemOnly ? ' <span class="oem-badge">OEM</span>' : ''}</div>
-            </td>
-            <td class="col-desc">
-              <div class="ci-desc-name" style="${descStyle}">${c.description}</div>
-              ${replacesOrig ? `<div style="font-size:10px;color:#7A7F8E;margin-top:2px;display:flex;align-items:center;gap:3px;"><i class="ti ti-arrows-exchange" style="font-size:10px;"></i> Replaces ${replacesOrig.partNum}</div>` : ''}
-              <div style="display:flex;align-items:center;gap:5px;margin-top:3px;">${xrefBadge(c)}</div>
-            </td>
-            <td class="col-uom"><span class="uom-badge">${c.uom || 'EA'}</span></td>
-            <td class="col-loc">${localCell(c)}</td>
-            <td class="col-qty">
-              ${replaced ? '<span style="color:#C8C3BC;font-size:12px;">—</span>' : `<div class="ci-qty-ctrl">
-                <button class="qty-btn" onclick="wodQtyDec('${c.id}')">−</button>
-                <span class="qty-val">${c.qty || 1}</span>
-                <button class="qty-btn" onclick="wodQtyInc('${c.id}')">+</button>
-              </div>`}
-            </td>
-            <td class="col-unit" style="text-align:right;font-size:12px;color:#7A7F8E;">${replaced ? '—' : '$' + c.price.toFixed(2)}</td>
-            <td class="col-tot" style="text-align:right;font-size:13px;font-weight:700;color:${replaced ? '#C8C3BC' : '#111318'};">${replaced ? '—' : '$' + (c.price * (c.qty || 1)).toFixed(2)}</td>
-            <td class="col-rm">${replaced ? '' : `<button class="ci-remove" onclick="wodRemoveItem('${c.id}')" title="Remove"><i class="ti ti-trash" style="font-size:13px;"></i></button>`}</td>
-          </tr>`;
-        }).join('')}
-        </tbody>
-      </table>`;
+    function itemRow(c) {
+      const replaced = isReplaced(c);
+      const rowStyle = replaced ? 'opacity:0.45;' : '';
+      const descStyle = replaced ? 'text-decoration:line-through;color:#9CA3AF;' : '';
+      const partStyle = replaced ? 'text-decoration:line-through;color:#9CA3AF;' : '';
+      const replacesOrig = c.replacesId ? cart.find(x => x.id === c.replacesId) : null;
+      return `<tr class="cart-row" style="${rowStyle}">
+        <td class="col-st">${statusCell(c)}</td>
+        <td class="col-pn">
+          <div class="ci-partnum" style="${partStyle}">${c.partNum}</div>
+          <div class="ci-vendor-line">${c.vendor}${c.oemOnly ? ' <span class="oem-badge">OEM</span>' : ''}</div>
+        </td>
+        <td class="col-desc">
+          <div class="ci-desc-name" style="${descStyle}">${c.description}</div>
+          ${replacesOrig ? `<div style="font-size:10px;color:#7A7F8E;margin-top:2px;display:flex;align-items:center;gap:3px;"><i class="ti ti-arrows-exchange" style="font-size:10px;"></i> Replaces ${replacesOrig.partNum}</div>` : ''}
+          <div style="display:flex;align-items:center;gap:5px;margin-top:3px;">${xrefBadge(c)}</div>
+        </td>
+        <td class="col-uom"><span class="uom-badge">${c.uom || 'EA'}</span></td>
+        <td class="col-loc">${localCell(c)}</td>
+        <td class="col-qty">
+          ${replaced ? '<span style="color:#C8C3BC;font-size:12px;">—</span>' : `<div class="ci-qty-ctrl">
+            <button class="qty-btn" onclick="wodQtyDec('${c.id}')">−</button>
+            <span class="qty-val">${c.qty || 1}</span>
+            <button class="qty-btn" onclick="wodQtyInc('${c.id}')">+</button>
+          </div>`}
+        </td>
+        <td class="col-unit" style="text-align:right;font-size:12px;color:#7A7F8E;">${replaced ? '—' : '$' + c.price.toFixed(2)}</td>
+        <td class="col-tot" style="text-align:right;font-size:13px;font-weight:700;color:${replaced ? '#C8C3BC' : '#111318'};">${replaced ? '—' : '$' + (c.price * (c.qty || 1)).toFixed(2)}</td>
+        <td class="col-rm">${replaced ? '' : `<button class="ci-remove" onclick="wodRemoveItem('${c.id}')" title="Remove"><i class="ti ti-trash" style="font-size:13px;"></i></button>`}</td>
+      </tr>`;
+    }
+
+    // Grouping logic
+    const curLocName = (Store.getCurrentLocation() || {}).name || '';
+
+    function sourcingGroup(c) {
+      const inv = c.localInventory || [];
+      if (!inv.length) return 'external';
+      const atCurrent = inv.some(l => l.locationName === curLocName);
+      const atOther = inv.some(l => l.locationName !== curLocName);
+      if (atCurrent) return 'local';
+      if (atOther) return 'nearby';
+      return 'external';
+    }
+
+    function statusGroup(c) {
+      const st = itemStatus(c);
+      if (st === 'blocked' || st === 'unorderable') return 'not_orderable';
+      if (st === 'replaced') return 'replaced';
+      if (!c.inStock) return 'backordered';
+      return 'available';
+    }
+
+    const GROUPS = {
+      sourcing: [
+        { key: 'local',    label: 'In-location stock',   icon: 'ti-map-pin',       color: '#3B6D11' },
+        { key: 'nearby',   label: 'Nearby branches',     icon: 'ti-building',      color: '#185FA5' },
+        { key: 'external', label: 'External order',      icon: 'ti-truck',         color: '#854F0B' },
+      ],
+      status: [
+        { key: 'available',     label: 'Available',       icon: 'ti-circle-check', color: '#3B6D11' },
+        { key: 'backordered',   label: 'Backordered',     icon: 'ti-clock',        color: '#92400E' },
+        { key: 'not_orderable', label: 'Not orderable',   icon: 'ti-circle-x',     color: '#A32D2D' },
+        { key: 'replaced',      label: 'Replaced',        icon: 'ti-replace',      color: '#9CA3AF' },
+      ],
+      vendor: [], // built dynamically
+    };
+
+    const theadHtml = `<thead><tr>
+      <th class="col-st"></th>
+      <th class="col-pn">Part #</th>
+      <th class="col-desc">Description</th>
+      <th class="col-uom">UOM</th>
+      <th class="col-loc">Source / stock</th>
+      <th class="col-qty" style="text-align:center;">Qty</th>
+      <th class="col-unit" style="text-align:right;">Unit</th>
+      <th class="col-tot" style="text-align:right;">Total</th>
+      <th class="col-rm"></th>
+    </tr></thead>`;
+
+    let bodyHtml = '';
+
+    if (_cartGroupBy === 'none') {
+      bodyHtml = `<tbody>${cart.map(itemRow).join('')}</tbody>`;
+    } else {
+      let groups;
+      if (_cartGroupBy === 'vendor') {
+        const vendors = [...new Set(cart.map(c => c.vendor))].sort();
+        groups = vendors.map(v => ({ key: v, label: v, icon: 'ti-building', color: '#534AB7' }));
+      } else {
+        groups = GROUPS[_cartGroupBy];
+      }
+      bodyHtml = groups.map(g => {
+        const items = cart.filter(c =>
+          _cartGroupBy === 'sourcing' ? sourcingGroup(c) === g.key :
+          _cartGroupBy === 'status'   ? statusGroup(c) === g.key :
+          c.vendor === g.key
+        );
+        if (!items.length) return '';
+        const grpTotal = items.filter(c => !isReplaced(c)).reduce((s, c) => s + c.price * (c.qty || 1), 0);
+        return `<tbody>
+          <tr><td colspan="9" class="cart-group-hdr">
+            <i class="ti ${g.icon}" style="color:${g.color};font-size:12px;"></i>
+            ${g.label}
+            <span style="background:#F0ECE8;color:#7A7F8E;border-radius:999px;padding:1px 7px;font-size:10px;font-weight:700;">${items.length}</span>
+            <span style="margin-left:auto;font-size:11px;font-weight:600;color:#7A7F8E;">$${grpTotal.toFixed(2)}</span>
+          </td></tr>
+          ${items.map(itemRow).join('')}
+        </tbody>`;
+      }).join('');
+    }
+
+    container.innerHTML = `<table class="wod-cart-table">${theadHtml}${bodyHtml}</table>`;
 
     const totalRow = document.getElementById('wod-cart-total-row');
     if (totalRow) {
@@ -255,7 +323,13 @@ function render_wo_detail(el) {
 .warranty-badge:hover .wb-tip { display: block; }
 /* Cart */
 .cart-section { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
-.cart-section-header { padding: 14px 16px; border-bottom: 0.5px solid #F0ECE8; display: flex; align-items: center; justify-content: space-between; }
+.cart-section-header { padding: 10px 16px; border-bottom: 0.5px solid #F0ECE8; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.cart-grp-chip { background: none; border: 0.5px solid #E2DDD8; border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 500; color: #7A7F8E; cursor: pointer; font-family: inherit; white-space: nowrap; }
+.cart-grp-chip:hover { background: #F5F2EE; }
+.cart-grp-chip-active { background: #111318; border-color: #111318; color: #FFFFFF; }
+.cart-grp-chip-active:hover { background: #2A2D3A; }
+.cart-group-hdr { font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: #9CA3AF; padding: 7px 12px; background: #FAFAF8; border-top: 1px solid #E8E4DF; display: flex; align-items: center; gap: 7px; }
+.cart-group-hdr:first-child { border-top: none; }
 .cart-section-title { font-size: 14px; font-weight: 600; color: #111318; display: flex; align-items: center; gap: 8px; }
 .cart-badge { background: #F5A623; color: #1A1200; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 8px; }
 .add-parts-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #854F0B; background: #FAEEDA; border: none; border-radius: 7px; padding: 6px 12px; cursor: pointer; font-family: inherit; }
@@ -423,9 +497,17 @@ function render_wo_detail(el) {
             Active cart
             <span class="cart-badge" id="wod-cart-badge">${(Store.getWoCart(wo.id) || []).length}</span>
           </div>
-          <button class="add-parts-btn" onclick="sendPrompt('Open Parts Search scoped to WO #${wo.id}')">
-            <i class="ti ti-plus" style="font-size:12px;"></i> Add parts
-          </button>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="display:flex;align-items:center;gap:4px;">
+              <span style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;">Group by</span>
+              ${[['none','None'],['sourcing','Sourcing'],['status','Status'],['vendor','Vendor']].map(([v,l]) => `
+                <button id="cart-grp-${v}" class="cart-grp-chip${_cartGroupBy===v?' cart-grp-chip-active':''}" onclick="wodSetGroupBy('${v}')">${l}</button>
+              `).join('')}
+            </div>
+            <button class="add-parts-btn" onclick="sendPrompt('Open Parts Search scoped to WO #${wo.id}')">
+              <i class="ti ti-plus" style="font-size:12px;"></i> Add parts
+            </button>
+          </div>
         </div>
         <div id="wod-cart-body"></div>
         <div class="cart-total-row" id="wod-cart-total-row" style="display:none;"></div>
@@ -458,6 +540,15 @@ function render_wo_detail(el) {
 
   renderCart();
   renderSubmittedOrders();
+
+  // Group-by chip handler
+  window.wodSetGroupBy = function(val) {
+    _cartGroupBy = val;
+    document.querySelectorAll('.cart-grp-chip').forEach(btn => {
+      btn.classList.toggle('cart-grp-chip-active', btn.id === 'cart-grp-' + val);
+    });
+    renderCart();
+  };
 
   // Status select
   const statusSel = document.getElementById('wod-status-select');
