@@ -2,8 +2,6 @@ function render_wo_list(el) {
   const _user = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
   const _isSupervisor = _user && _user.role === 'supervisor';
   const CURRENT_USER = _user ? _user.shortName : 'James W.';
-  const _terms = (typeof Store !== 'undefined' && Store.getOrderTerms) ? Store.getOrderTerms() : { singular:'Work Order', plural:'Work Orders', short:'WO', newBtn:'New WO', idCol:'WO #' };
-  const _useWO = (typeof Store !== 'undefined' && Store.getOrgConfig) ? Store.getOrgConfig().useWorkOrders : true;
   let _currentFilter = 'all';
   let _searchQuery = '';
 
@@ -19,27 +17,16 @@ function render_wo_list(el) {
     'KY-007': { make: 'Caterpillar', model: '308 Mini Excavator',serial: 'CAT308-00512'    },
   };
 
-  const WO_TYPE_META = _useWO ? {
+  // WO types = equipment repair / PM; general order types = stock / other
+  // isWorkOrder(wo) determines whether a record carries a WO designation
+  function isWorkOrder(wo) { return wo.woType === 'equipment' || wo.woType === 'pm'; }
+
+  const TYPE_META = {
     equipment: { label: 'Repair',  color: '#185FA5', bg: '#E6F1FB' },
     pm:        { label: 'PM',      color: '#0F6E56', bg: '#E1F5EE' },
     stock:     { label: 'Stock',   color: '#534AB7', bg: '#EEEDFE' },
-    other:     { label: 'Other',   color: '#6B7280', bg: '#F3F4F6' },
-  } : {
-    equipment: { label: 'Equipment', color: '#185FA5', bg: '#E6F1FB' },
-    pm:        { label: 'Maint.',    color: '#0F6E56', bg: '#E1F5EE' },
-    stock:     { label: 'Stock',     color: '#534AB7', bg: '#EEEDFE' },
-    other:     { label: 'General',   color: '#6B7280', bg: '#F3F4F6' },
+    other:     { label: 'General', color: '#6B7280', bg: '#F3F4F6' },
   };
-
-  const ORDER_TYPE_OPTIONS = _useWO
-    ? `<option value="equipment">Equipment Repair</option>
-       <option value="pm">Scheduled PM</option>
-       <option value="stock">Stock Order</option>
-       <option value="other">Other</option>`
-    : `<option value="equipment">Equipment Service</option>
-       <option value="pm">Maintenance</option>
-       <option value="stock">Stock / Parts Request</option>
-       <option value="other">General Order</option>`;
 
   function machineIcon(machine, woType) {
     if (woType === 'stock') return 'ti-package';
@@ -52,7 +39,7 @@ function render_wo_list(el) {
   }
 
   function typePill(woType) {
-    const t = WO_TYPE_META[woType] || WO_TYPE_META.other;
+    const t = TYPE_META[woType] || TYPE_META.other;
     return `<span class="wol-type-pill" style="background:${t.bg};color:${t.color};">${t.label}</span>`;
   }
 
@@ -87,19 +74,20 @@ function render_wo_list(el) {
     : '100px 80px 1fr 110px 110px 80px 50px';
 
   function renderRows(wos) {
-    if (!wos.length) return `<div class="wol-empty">No ${_terms.plural.toLowerCase()} found.</div>`;
+    if (!wos.length) return '<div class="wol-empty">No orders found.</div>';
     return wos.map(wo => `
       <div class="wol-row" style="grid-template-columns:${_cols};" onclick="sendPrompt('Show me the Work Order detail view for WO #${wo.id}')">
         <div class="wol-td">
           <span class="wol-wo-id">#${wo.id}</span>
           ${wo.externalId ? `<div style="font-size:10px;color:#9CA3AF;margin-top:2px;">${wo.externalId}</div>` : ''}
+          ${isWorkOrder(wo) ? '<div style="font-size:9px;font-weight:700;letter-spacing:.6px;color:#C8A04A;text-transform:uppercase;margin-top:1px;">WO</div>' : ''}
         </div>
         <div class="wol-td">${typePill(wo.woType)}</div>
         <div class="wol-td">
           <div class="wol-machine">
             <div class="wol-machine-icon"><i class="ti ${machineIcon(wo.machine, wo.woType)}"></i></div>
             <div>
-              <div class="wol-machine-name">${wo.woType === 'stock' ? 'Stock Order' : `${wo.machine} · ${wo.asset}`}</div>
+              <div class="wol-machine-name">${(wo.woType === 'stock' || wo.woType === 'other') ? (wo.issue || 'General Order') : `${wo.machine} · ${wo.asset}`}</div>
               <div class="wol-machine-issue">${wo.issue}</div>
             </div>
           </div>
@@ -210,8 +198,10 @@ function render_wo_list(el) {
 .modal-field-error { font-size: 11px; color: #A32D2D; margin-top: 3px; display: none; }
 .modal-form-hint { font-size: 11px; color: #9CA3AF; margin-top: 3px; }
 .nwo-autofill-banner { font-size: 11px; color: #0F6E56; background: #E1F5EE; border-radius: 6px; padding: 5px 9px; margin-top: 4px; display: none; }
+.wol-type-pick-card { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 20px 14px; background: #FAFAF9; border: 1.5px solid #E8E4DF; border-radius: 12px; cursor: pointer; transition: border-color 0.12s, background 0.12s; font-family: inherit; width: 100%; }
+.wol-type-pick-card:hover { border-color: #F5A623; background: #FFFBF2; }
 </style>
-<h2 class="sr-only">Work Orders</h2>
+<h2 class="sr-only">Orders</h2>
 <div class="shell">
   ${buildSidebar('wo')}
   <div class="main">
@@ -222,18 +212,18 @@ function render_wo_list(el) {
     <div class="wol-content">
       <div class="wol-header">
         <div>
-          <div class="wol-title">${_isSupervisor ? `All ${_terms.plural}` : `My ${_terms.plural}`}</div>
+          <div class="wol-title">${_isSupervisor ? 'All Orders' : 'My Orders'}</div>
           <div class="wol-subtitle">${(Store.getCurrentLocation()||{name:'—'}).name} · <span id="wol-sum-active">0</span> active</div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <input class="wol-search" type="text" placeholder="Search ${_terms.short}, machine, asset…" id="wol-search-input"/>
+          <input class="wol-search" type="text" placeholder="Search orders, machine, asset…" id="wol-search-input"/>
           <div class="wol-filters" id="wol-filters">
             <div class="wol-filter-pill active" data-filter="all">All</div>
             <div class="wol-filter-pill" data-filter="active">Active</div>
             <div class="wol-filter-pill" data-filter="pending">Pending</div>
             <div class="wol-filter-pill" data-filter="closed">Closed</div>
           </div>
-          <button class="wol-new-btn" id="wol-new-btn"><i class="ti ti-plus" style="font-size:14px;"></i> ${_terms.newBtn}</button>
+          <button class="wol-new-btn" id="wol-new-btn"><i class="ti ti-plus" style="font-size:14px;"></i> New Order</button>
         </div>
       </div>
 
@@ -258,7 +248,7 @@ function render_wo_list(el) {
 
       <div class="wol-table">
         <div class="wol-thead" style="grid-template-columns:${_cols};">
-          <div class="wol-th">${_terms.idCol}</div>
+          <div class="wol-th">Order #</div>
           <div class="wol-th">Type</div>
           <div class="wol-th">Machine / Issue</div>
           ${_isSupervisor ? '<div class="wol-th">Assignee</div>' : ''}
@@ -290,13 +280,16 @@ function render_wo_list(el) {
     reRenderTable();
   });
 
-  document.getElementById('wol-new-btn').addEventListener('click', function() {
+  const ASSIGNEES = ['James W.','Marcus T.','Lena R.','Darius K.','Priya N.'];
+
+  function openWoForm() {
     const formHtml = `
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div class="modal-form-field" style="grid-column:1/-1;">
-          <label class="modal-form-label">${_terms.singular} Type *</label>
+          <label class="modal-form-label">Work Order Type *</label>
           <select class="modal-form-select" id="nwo-type">
-            ${ORDER_TYPE_OPTIONS}
+            <option value="equipment">Equipment Repair</option>
+            <option value="pm">Scheduled PM</option>
           </select>
         </div>
       </div>
@@ -320,8 +313,8 @@ function render_wo_list(el) {
         </div>
       </div>
       <div class="modal-form-field">
-        <label class="modal-form-label">Description / Issue *</label>
-        <input class="modal-form-input" id="nwo-issue" type="text" placeholder="Describe the fault, task, or order"/>
+        <label class="modal-form-label">Fault / Issue *</label>
+        <input class="modal-form-input" id="nwo-issue" type="text" placeholder="Describe the fault or maintenance task"/>
         <div class="modal-field-error" id="nwo-issue-err">Required</div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -334,81 +327,62 @@ function render_wo_list(el) {
           </select>
         </div>
         <div class="modal-form-field">
-          <label class="modal-form-label" id="nwo-due-label">Due Date *</label>
+          <label class="modal-form-label">Due Date *</label>
           <input class="modal-form-input" id="nwo-due" type="date"/>
           <div class="modal-field-error" id="nwo-due-err">Required</div>
         </div>
         <div class="modal-form-field">
           <label class="modal-form-label">Assignee</label>
           <select class="modal-form-select" id="nwo-assignee">
-            ${['James W.','Marcus T.','Lena R.','Darius K.','Priya N.'].map(n => `<option${n === CURRENT_USER ? ' selected' : ''}>${n}</option>`).join('')}
+            ${ASSIGNEES.map(n => `<option${n === CURRENT_USER ? ' selected' : ''}>${n}</option>`).join('')}
           </select>
         </div>
         <div class="modal-form-field">
-          <label class="modal-form-label" id="nwo-extid-label">${_terms.singular} ID * <span class="lbl-opt" style="font-size:10px;">(RentalMan / ERP)</span></label>
+          <label class="modal-form-label">Work Order ID * <span class="lbl-opt" style="font-size:10px;">(RentalMan / ERP)</span></label>
           <input class="modal-form-input" id="nwo-extid" type="text" placeholder="e.g. RM-10122"/>
           <div class="modal-field-error" id="nwo-extid-err">Required</div>
-          <div class="modal-form-hint" id="nwo-extid-hint" style="display:none;">Leave blank to auto-assign a system ID</div>
         </div>
       </div>`;
 
     Modal.show({
-      title: `New ${_terms.singular}`,
+      title: 'New Work Order',
       body: formHtml,
       actions: [
-        { label: 'Cancel', onClick: () => Modal.close() },
+        { label: 'Back', onClick: () => openTypePicker() },
         {
-          label: `Create ${_terms.singular}`, primary: true, onClick: () => {
-            const woType  = document.getElementById('nwo-type').value;
-            const issue   = document.getElementById('nwo-issue').value.trim();
-            const extId   = document.getElementById('nwo-extid').value.trim();
-            const dueRaw  = document.getElementById('nwo-due').value;
-
-            // Validate
-            const isEquipment = woType === 'equipment';
+          label: 'Create Work Order', primary: true, onClick: () => {
+            const woType = document.getElementById('nwo-type').value;
+            const issue  = document.getElementById('nwo-issue').value.trim();
+            const extId  = document.getElementById('nwo-extid').value.trim();
+            const dueRaw = document.getElementById('nwo-due').value;
+            const show   = (id, v) => { const e = document.getElementById(id); if (e) e.style.display = v ? 'block' : 'none'; };
             let valid = true;
-            const show = (id, v) => { const e = document.getElementById(id); if (e) e.style.display = v ? 'block' : 'none'; };
             show('nwo-issue-err', !issue); if (!issue) valid = false;
-            if (isEquipment) {
-              show('nwo-extid-err', !extId); if (!extId) valid = false;
-              show('nwo-due-err',   !dueRaw); if (!dueRaw) valid = false;
-            }
+            show('nwo-extid-err', !extId); if (!extId) valid = false;
+            show('nwo-due-err',   !dueRaw); if (!dueRaw) valid = false;
             if (!valid) return;
 
-            const nextId = Store.getWorkOrders('all').reduce((m, w) => Math.max(m, w.id), 100000) + 1;
-            const resolvedExtId = extId || `SE-${nextId}`;
-
-            const dueDate = dueRaw
-              ? new Date(dueRaw).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-              : '';
-
-            const asset  = document.getElementById('nwo-asset')?.value.trim() || '';
-            const make   = document.getElementById('nwo-make')?.value.trim() || '';
-            const model  = document.getElementById('nwo-model')?.value.trim() || '';
-            const serial = document.getElementById('nwo-serial')?.value.trim() || '';
+            const asset   = document.getElementById('nwo-asset')?.value.trim() || '';
+            const make    = document.getElementById('nwo-make')?.value.trim() || '';
+            const model   = document.getElementById('nwo-model')?.value.trim() || '';
+            const serial  = document.getElementById('nwo-serial')?.value.trim() || '';
             const machine = (make && model) ? `${make} ${model}` : asset || '';
+            const dueDate = new Date(dueRaw).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
-            Store.addWorkOrder({
-              woType, asset, make, model, serial, machine, issue, dueDate,
-              externalId: resolvedExtId,
-              priority:   document.getElementById('nwo-priority').value,
-              assignee:   document.getElementById('nwo-assignee').value,
-            });
-            Modal.close();
-            reRenderTable();
-            updateSummary();
+            Store.addWorkOrder({ woType, asset, make, model, serial, machine, issue, dueDate,
+              externalId: extId, priority: document.getElementById('nwo-priority').value,
+              assignee: document.getElementById('nwo-assignee').value });
+            Modal.close(); reRenderTable(); updateSummary();
           }
         }
       ]
     });
 
-    // Auto-populate on equipment # blur
     setTimeout(() => {
       const assetInput = document.getElementById('nwo-asset');
       if (!assetInput) return;
       assetInput.addEventListener('blur', function() {
-        const key = this.value.trim().toUpperCase();
-        const eq = EQUIPMENT_DB[key] || EQUIPMENT_DB[this.value.trim()];
+        const eq = EQUIPMENT_DB[this.value.trim().toUpperCase()] || EQUIPMENT_DB[this.value.trim()];
         if (!eq) return;
         document.getElementById('nwo-make').value   = eq.make;
         document.getElementById('nwo-model').value  = eq.model;
@@ -417,26 +391,102 @@ function render_wo_list(el) {
         banner.textContent = `Auto-filled from fleet: ${eq.make} ${eq.model} · ${eq.serial}`;
         banner.style.display = 'block';
       });
-
-      // Update required/optional state and hide equipment section for stock/other
-      document.getElementById('nwo-type').addEventListener('change', function() {
-        const isEquipment = this.value === 'equipment';
-        const section = document.getElementById('nwo-equipment-section');
-        section.style.display = (this.value === 'stock' || this.value === 'other') ? 'none' : 'grid';
-
-        const dueLabel   = document.getElementById('nwo-due-label');
-        const extIdLabel = document.getElementById('nwo-extid-label');
-        const extIdHint  = document.getElementById('nwo-extid-hint');
-
-        dueLabel.innerHTML   = isEquipment ? 'Due Date *' : 'Due Date <span class="lbl-opt">(optional)</span>';
-        extIdLabel.innerHTML = isEquipment
-          ? `${_terms.singular} ID * <span class="lbl-opt" style="font-size:10px;">(RentalMan / ERP)</span>`
-          : `${_terms.singular} ID <span class="lbl-opt" style="font-size:10px;">(RentalMan / ERP, optional)</span>`;
-        extIdHint.style.display = isEquipment ? 'none' : 'block';
-
-        document.getElementById('nwo-due-err').style.display   = 'none';
-        document.getElementById('nwo-extid-err').style.display = 'none';
-      });
     }, 50);
-  });
+  }
+
+  function openOrderForm() {
+    const formHtml = `
+      <div class="modal-form-field">
+        <label class="modal-form-label">Order Type *</label>
+        <select class="modal-form-select" id="nord-type">
+          <option value="stock">Stock / Parts Request</option>
+          <option value="other">General Order</option>
+        </select>
+      </div>
+      <div class="modal-form-field">
+        <label class="modal-form-label">Description *</label>
+        <input class="modal-form-input" id="nord-issue" type="text" placeholder="Describe what's needed"/>
+        <div class="modal-field-error" id="nord-issue-err">Required</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="modal-form-field">
+          <label class="modal-form-label">Priority</label>
+          <select class="modal-form-select" id="nord-priority">
+            <option value="high">High</option>
+            <option value="medium" selected>Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <div class="modal-form-field">
+          <label class="modal-form-label">Due Date <span class="lbl-opt">(optional)</span></label>
+          <input class="modal-form-input" id="nord-due" type="date"/>
+        </div>
+        <div class="modal-form-field">
+          <label class="modal-form-label">Assignee</label>
+          <select class="modal-form-select" id="nord-assignee">
+            ${ASSIGNEES.map(n => `<option${n === CURRENT_USER ? ' selected' : ''}>${n}</option>`).join('')}
+          </select>
+        </div>
+        <div class="modal-form-field">
+          <label class="modal-form-label">Reference ID <span class="lbl-opt">(optional)</span></label>
+          <input class="modal-form-input" id="nord-extid" type="text" placeholder="e.g. PO or ERP ref"/>
+        </div>
+      </div>`;
+
+    Modal.show({
+      title: 'New Order',
+      body: formHtml,
+      actions: [
+        { label: 'Back', onClick: () => openTypePicker() },
+        {
+          label: 'Create Order', primary: true, onClick: () => {
+            const issue = document.getElementById('nord-issue').value.trim();
+            const show  = (id, v) => { const e = document.getElementById(id); if (e) e.style.display = v ? 'block' : 'none'; };
+            show('nord-issue-err', !issue); if (!issue) return;
+
+            const dueRaw  = document.getElementById('nord-due').value;
+            const extId   = document.getElementById('nord-extid').value.trim();
+            const nextId  = Store.getWorkOrders('all').reduce((m, w) => Math.max(m, w.id), 100000) + 1;
+            const dueDate = dueRaw
+              ? new Date(dueRaw).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+              : '';
+
+            Store.addWorkOrder({ woType: document.getElementById('nord-type').value,
+              issue, dueDate, externalId: extId || `SE-${nextId}`,
+              priority: document.getElementById('nord-priority').value,
+              assignee: document.getElementById('nord-assignee').value,
+              machine: '', asset: '', make: '', model: '', serial: '' });
+            Modal.close(); reRenderTable(); updateSummary();
+          }
+        }
+      ]
+    });
+  }
+
+  function openTypePicker() {
+    Modal.show({
+      title: 'New Order',
+      body: `
+        <p style="font-size:13px;color:#5A5F6E;margin-bottom:16px;">What kind of order do you need to create?</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <button class="wol-type-pick-card" id="pick-wo">
+            <i class="ti ti-clipboard-list" style="font-size:22px;color:#185FA5;margin-bottom:8px;"></i>
+            <div style="font-size:13px;font-weight:700;color:#111318;">Work Order</div>
+            <div style="font-size:11px;color:#7A7F8E;margin-top:3px;">Equipment repair or scheduled PM linked to a WO ID</div>
+          </button>
+          <button class="wol-type-pick-card" id="pick-ord">
+            <i class="ti ti-shopping-cart" style="font-size:22px;color:#534AB7;margin-bottom:8px;"></i>
+            <div style="font-size:13px;font-weight:700;color:#111318;">Order</div>
+            <div style="font-size:11px;color:#7A7F8E;margin-top:3px;">Stock request, parts order, or general purchase</div>
+          </button>
+        </div>`,
+      actions: [{ label: 'Cancel', onClick: () => Modal.close() }]
+    });
+    setTimeout(() => {
+      document.getElementById('pick-wo')?.addEventListener('click', () => openWoForm());
+      document.getElementById('pick-ord')?.addEventListener('click', () => openOrderForm());
+    }, 50);
+  }
+
+  document.getElementById('wol-new-btn').addEventListener('click', () => openTypePicker());
 }
