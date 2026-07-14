@@ -100,7 +100,7 @@ function render_recommended(el) {
     + '.page-header{margin-bottom:20px;}'
     + '.page-title{font-size:20px;font-weight:700;color:#111318;letter-spacing:-0.3px;}'
     + '.page-title-sub{font-size:13px;color:#7A7F8E;margin-top:3px;}'
-    + '.parts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px;}'
+    + '.parts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:24px;}'
     + '.part-card{background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;}'
     + '.part-card:hover{border-color:#C8C3BC;}'
     + '.part-card-top{display:flex;align-items:flex-start;gap:10px;}'

@@ -154,7 +154,7 @@ function render_manuals(el) {
     + '.man-machine-chip.active{background:#FAEEDA;border-color:#F5A623;color:#854F0B;font-weight:600;}'
     + '.man-content-body{flex:1;padding:20px;overflow-y:auto;}'
     + '.man-section-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#9CA3AF;margin-bottom:12px;}'
-    + '.docs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:24px;}'
+    + '.docs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:24px;}'
     + '.doc-card{background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:14px;display:flex;gap:12px;cursor:pointer;transition:border-color 0.12s;}'
     + '.doc-card:hover{border-color:#C8C3BC;}'
     + '.doc-icon-wrap{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}'

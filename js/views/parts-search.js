@@ -1967,7 +1967,7 @@ function render_parts_search(el) {
       tagline: 'Aerial Work Platforms',
       color: '#F5A623',
       logo: `<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="48" rx="4" fill="#1E1E1E"/><text x="14" y="32" font-size="22" font-weight="800" font-family="Inter,sans-serif" fill="#F5A623" letter-spacing="-0.5">SKYJACK</text></svg>`,
-      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="120" fill="#1A1A1A"/><defs><linearGradient id="skj-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#1A1A1A"/><stop offset="100%" stop-color="#2A2210"/></linearGradient></defs><rect x="0" y="0" width="800" height="120" fill="url(#skj-grad)"/><text x="28" y="52" font-size="32" font-weight="800" font-family="Inter,sans-serif" fill="#F5A623" letter-spacing="-1">SKYJACK</text><text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#8A8878" letter-spacing="2">AERIAL WORK PLATFORMS</text><rect x="28" y="88" width="64" height="3" rx="1.5" fill="#F5A623"/></svg>`,
+      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMinYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="120" fill="#1A1A1A"/><defs><linearGradient id="skj-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#1A1A1A"/><stop offset="100%" stop-color="#2A2210"/></linearGradient></defs><rect x="0" y="0" width="800" height="120" fill="url(#skj-grad)"/><text x="28" y="52" font-size="32" font-weight="800" font-family="Inter,sans-serif" fill="#F5A623" letter-spacing="-1">SKYJACK</text><text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#8A8878" letter-spacing="2">AERIAL WORK PLATFORMS</text><rect x="28" y="88" width="64" height="3" rx="1.5" fill="#F5A623"/></svg>`,
       categories: [
         { icon:'ti-crane',    label:'Scissor Lifts',    sub:'SJIII, SJIV Series',     navModelId:'SKJ-SJIII3219', navComp:null },
         { icon:'ti-forklift', label:'Boom Lifts',       sub:'SJ45T, SJ66T',           navModelId:'SKJ-SJ45T',    navComp:null },
@@ -2000,7 +2000,7 @@ function render_parts_search(el) {
       tagline: 'Heavy Construction Equipment',
       color: '#F5A623',
       logo: `<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="48" rx="4" fill="#F5A623"/><text x="14" y="33" font-size="20" font-weight="900" font-family="Inter,sans-serif" fill="#1A1200" letter-spacing="-0.5">CAT</text><text x="60" y="33" font-size="11" font-weight="600" font-family="Inter,sans-serif" fill="#4A3600" letter-spacing="0.5">CATERPILLAR</text></svg>`,
-      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="120" fill="#1A0E00"/><defs><linearGradient id="cat-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#1A0E00"/><stop offset="100%" stop-color="#2A1800"/></linearGradient></defs><rect x="0" y="0" width="800" height="120" fill="url(#cat-grad)"/><text x="28" y="52" font-size="32" font-weight="900" font-family="Inter,sans-serif" fill="#F5A623" letter-spacing="-1">CAT</text><text x="110" y="52" font-size="18" font-weight="600" font-family="Inter,sans-serif" fill="#D4880A" letter-spacing="2">CATERPILLAR</text><text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#6A5A38" letter-spacing="2">HEAVY CONSTRUCTION EQUIPMENT</text><rect x="28" y="88" width="64" height="3" rx="1.5" fill="#F5A623"/></svg>`,
+      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMinYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="120" fill="#1A0E00"/><defs><linearGradient id="cat-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#1A0E00"/><stop offset="100%" stop-color="#2A1800"/></linearGradient></defs><rect x="0" y="0" width="800" height="120" fill="url(#cat-grad)"/><text x="28" y="52" font-size="32" font-weight="900" font-family="Inter,sans-serif" fill="#F5A623" letter-spacing="-1">CAT</text><text x="110" y="52" font-size="18" font-weight="600" font-family="Inter,sans-serif" fill="#D4880A" letter-spacing="2">CATERPILLAR</text><text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#6A5A38" letter-spacing="2">HEAVY CONSTRUCTION EQUIPMENT</text><rect x="28" y="88" width="64" height="3" rx="1.5" fill="#F5A623"/></svg>`,
       categories: [
         { icon:'ti-backhoe',   label:'Excavators',        sub:'320, 323, 308',        navModelId:'CAT-320',  navComp:null },
         { icon:'ti-bulldozer', label:'Mini Excavators',   sub:'308 Series',           navModelId:'CAT-308',  navComp:null },
@@ -2033,7 +2033,7 @@ function render_parts_search(el) {
       tagline: 'Material Handling Equipment',
       color: '#C8102E',
       logo: `<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="48" rx="4" fill="#C8102E"/><text x="14" y="33" font-size="18" font-weight="800" font-family="Inter,sans-serif" fill="#FFFFFF" letter-spacing="1">TOYOTA</text><text x="112" y="33" font-size="10" font-weight="500" font-family="Inter,sans-serif" fill="#FFAAAA" letter-spacing="0.5">FORKLIFTS</text></svg>`,
-      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="120" fill="#6B0618"/><defs><linearGradient id="toy-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#6B0618"/><stop offset="100%" stop-color="#3A0210"/></linearGradient></defs><rect x="0" y="0" width="800" height="120" fill="url(#toy-grad)"/><text x="28" y="52" font-size="28" font-weight="800" font-family="Inter,sans-serif" fill="#FFFFFF" letter-spacing="2">TOYOTA</text><text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#FFAAAA" letter-spacing="2">MATERIAL HANDLING EQUIPMENT</text><rect x="28" y="88" width="64" height="3" rx="1.5" fill="#C8102E"/></svg>`,
+      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMinYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="120" fill="#6B0618"/><defs><linearGradient id="toy-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#6B0618"/><stop offset="100%" stop-color="#3A0210"/></linearGradient></defs><rect x="0" y="0" width="800" height="120" fill="url(#toy-grad)"/><text x="28" y="52" font-size="28" font-weight="800" font-family="Inter,sans-serif" fill="#FFFFFF" letter-spacing="2">TOYOTA</text><text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#FFAAAA" letter-spacing="2">MATERIAL HANDLING EQUIPMENT</text><rect x="28" y="88" width="64" height="3" rx="1.5" fill="#C8102E"/></svg>`,
       categories: [
         { icon:'ti-forklift',  label:'IC Forklifts',      sub:'8FGU, 8FG Series',    navModelId:'TOY-8FGU25', navComp:null },
         { icon:'ti-battery-2', label:'Electric Forklifts', sub:'8FBET, 7FBEU Series', navModelId:'TOY-8FGU32', navComp:null },
@@ -2066,7 +2066,7 @@ function render_parts_search(el) {
       tagline: 'Compact Equipment',
       color: '#E87722',
       logo: `<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="48" rx="4" fill="#E87722"/><text x="14" y="33" font-size="20" font-weight="900" font-family="Inter,sans-serif" fill="#FFFFFF" letter-spacing="-0.5">BOBCAT</text></svg>`,
-      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="120" fill="#1A0A00"/><defs><linearGradient id="bob-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#1A0A00"/><stop offset="100%" stop-color="#2A1408"/></linearGradient></defs><rect x="0" y="0" width="800" height="120" fill="url(#bob-grad)"/><text x="28" y="52" font-size="32" font-weight="900" font-family="Inter,sans-serif" fill="#E87722" letter-spacing="-1">BOBCAT</text><text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#6A4A28" letter-spacing="2">COMPACT EQUIPMENT</text><rect x="28" y="88" width="64" height="3" rx="1.5" fill="#E87722"/></svg>`,
+      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMinYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="120" fill="#1A0A00"/><defs><linearGradient id="bob-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#1A0A00"/><stop offset="100%" stop-color="#2A1408"/></linearGradient></defs><rect x="0" y="0" width="800" height="120" fill="url(#bob-grad)"/><text x="28" y="52" font-size="32" font-weight="900" font-family="Inter,sans-serif" fill="#E87722" letter-spacing="-1">BOBCAT</text><text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#6A4A28" letter-spacing="2">COMPACT EQUIPMENT</text><rect x="28" y="88" width="64" height="3" rx="1.5" fill="#E87722"/></svg>`,
       categories: [
         { icon:'ti-bulldozer', label:'Skid-Steer Loaders',    sub:'S650, S750, S850',    navModelId:'BOB-S650', navComp:null },
         { icon:'ti-tractor',   label:'Compact Track Loaders', sub:'T590, T650',          navModelId:'BOB-S770', navComp:null },
@@ -2215,14 +2215,14 @@ function render_parts_search(el) {
 .vtoggle-btn.active{background:#FFFFFF;color:#111318;box-shadow:0 1px 2px rgba(0,0,0,.06);}
 .eq-chip{display:inline-flex;align-items:center;gap:4px;background:#F5F2EE;border:0.5px solid #E2DDD8;border-radius:5px;padding:2px 7px;font-size:11px;color:#5A5F6E;}
 .sec-label{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#9CA3AF;margin-bottom:10px;margin-top:16px;}
-.supplier-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px;}
+.supplier-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:18px;}
 .supplier-card{background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:11px;padding:16px;cursor:pointer;}
 .supplier-card:hover{border-color:#C8C3BC;}
 .sc-icon{font-size:22px;color:#C8C3BC;margin-bottom:8px;}
 .sc-name{font-size:14px;font-weight:700;color:#111318;margin-bottom:3px;}
 .sc-meta{font-size:11px;color:#9CA3AF;margin-bottom:4px;}
 .sc-models{font-size:11px;color:#5A5F6E;}
-.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px;}
 .m-card,.c-card{background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:14px;cursor:pointer;}
 .m-card:hover,.c-card:hover{border-color:#C8C3BC;}
 .m-card-name,.c-card-name{font-size:13px;font-weight:600;color:#111318;margin-bottom:3px;}
@@ -2307,13 +2307,13 @@ function render_parts_search(el) {
 .slp-main{flex:1;min-width:0;}
 .slp-side{width:240px;min-width:240px;display:flex;flex-direction:column;gap:14px;flex-shrink:0;}
 .slp-section-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#9CA3AF;margin-bottom:10px;}
-.slp-cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.slp-cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;}
 .slp-cat-tile{background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:14px 12px;cursor:pointer;}
 .slp-cat-tile:hover{border-color:#C8C3BC;background:#FAFAF8;}
 .slp-cat-icon{font-size:20px;margin-bottom:6px;}
 .slp-cat-label{font-size:12px;font-weight:600;color:#111318;margin-bottom:2px;}
 .slp-cat-sub{font-size:10px;color:#9CA3AF;}
-.slp-action-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.slp-action-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;}
 .slp-action-tile{background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:14px 10px;text-align:center;cursor:pointer;}
 .slp-action-tile:hover{border-color:#C8C3BC;background:#FAFAF8;}
 .slp-info-card{background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:16px;}
