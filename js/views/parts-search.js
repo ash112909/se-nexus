@@ -2343,7 +2343,7 @@ function render_parts_search(el) {
 </style>
 <h2 class="sr-only">Parts search</h2>
 <div class="shell">
-  ${buildSidebar('parts')}
+  ${buildSidebar('parts', { impersonating: _impersonating, impersonatingFleet: _impersonatingFleet })}
   <div class="main" style="display:flex;flex-direction:column;overflow:hidden;">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">

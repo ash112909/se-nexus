@@ -1,9 +1,65 @@
-function buildSidebar(activeItem) {
-  const loc = (typeof Store !== 'undefined' && Store.getCurrentLocation) ? Store.getCurrentLocation() : null;
-  const locName = loc ? loc.name : 'Mid-County Rental';
-  const user = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
+function buildSidebar(activeItem, opts) {
+  opts = opts || {};
+  const loc  = (typeof Store !== 'undefined' && Store.getCurrentLocation) ? Store.getCurrentLocation() : null;
+  const user = (typeof Store !== 'undefined' && Store.getCurrentUser)     ? Store.getCurrentUser()     : null;
   const role = user ? user.role : 'mechanic';
+
+  // ── Impersonation-locked sidebar ──────────────────────────────────────────
+  if (opts.impersonating) {
+    const fleetName = opts.impersonatingFleet || 'Fleet';
+    return `
+  <div class="sidebar">
+    <div class="sb-fleet">
+      <div class="sb-fleet-icon" style="background:#FFF7ED;">
+        <i class="ti ti-eye" style="font-size:14px;color:#854F0B;"></i>
+      </div>
+      <div>
+        <div class="sb-fleet-name" style="font-size:12px;">${fleetName}</div>
+        <div class="sb-fleet-sub">Impersonation view</div>
+      </div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-section-label">Viewing as fleet</div>
+      <div class="sb-item active"><i class="ti ti-search"></i> Search parts</div>
+    </div>
+    <div style="margin-top:auto;padding:12px 10px;border-top:1px solid #2A2A2A;">
+      <div class="sb-item" onclick="Router.navigate('supplier-portal')" style="color:#F5A623;">
+        <i class="ti ti-arrow-left"></i> Exit impersonation
+      </div>
+    </div>
+  </div>`;
+  }
+
+  // ── Supplier sidebar ──────────────────────────────────────────────────────
+  if (role === 'supplier') {
+    const supplierId   = (user.supplierIds || [])[0] || 'SKJ';
+    const NAMES        = { SKJ:'Skyjack', CAT:'Caterpillar', TOY:'Toyota', BOB:'Bobcat' };
+    const supplierName = NAMES[supplierId] || supplierId;
+    const pending      = (typeof Store !== 'undefined' && Store.getPriceRequests)
+                         ? Store.getPriceRequests(supplierId).filter(r => r.status === 'pending').length : 0;
+    return `
+  <div class="sidebar">
+    <div class="sb-fleet">
+      <div class="sb-fleet-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 13L9 5L15 13" stroke="#1A1200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="14" r="1.8" fill="#1A1200"/></svg>
+      </div>
+      <div>
+        <div class="sb-fleet-name">${supplierName}</div>
+        <div class="sb-fleet-sub">Supplier Portal</div>
+      </div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-section-label">Portal</div>
+      <div class="sb-item ${activeItem==='sp-fleets'?'active':''}"   data-sp-tab="fleets"><i class="ti ti-building-warehouse"></i> My Fleets</div>
+      <div class="sb-item ${activeItem==='sp-requests'?'active':''}" data-sp-tab="requests"><i class="ti ti-tag"></i> Price Requests ${pending > 0 ? `<span class="sb-badge">${pending}</span>` : ''}</div>
+      <div class="sb-item ${activeItem==='sp-content'?'active':''}"  data-sp-tab="content"><i class="ti ti-pencil"></i> Post Content</div>
+    </div>
+  </div>`;
+  }
+
+  // ── Fleet sidebar (mechanic / supervisor) ─────────────────────────────────
   const isSupervisor = role === 'supervisor';
+  const locName      = loc ? loc.name : 'Mid-County Rental';
   return `
   <div class="sidebar">
     <div class="sb-fleet">
@@ -52,12 +108,16 @@ function buildBanners() {
 }
 
 function buildTopbarRight() {
-  const loc = (typeof Store !== 'undefined' && Store.getCurrentLocation) ? Store.getCurrentLocation() : null;
-  const locName = loc ? loc.name : 'Austin Branch';
-  const unread = (typeof Store !== 'undefined' && Store.getUnreadCount) ? Store.getUnreadCount() : 0;
-  const user = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
-  const avatar = user ? user.avatar : 'JW';
+  const loc      = (typeof Store !== 'undefined' && Store.getCurrentLocation) ? Store.getCurrentLocation() : null;
+  const user     = (typeof Store !== 'undefined' && Store.getCurrentUser)     ? Store.getCurrentUser()     : null;
+  const role     = user ? user.role : 'mechanic';
+  const unread   = (typeof Store !== 'undefined' && Store.getUnreadCount) ? Store.getUnreadCount() : 0;
+  const avatar   = user ? user.avatar   : 'JW';
   const shortName = user ? user.shortName : 'James W.';
+  // Suppliers show their company; fleet users show their location
+  const subLine  = role === 'supplier'
+    ? (user.email || 'Supplier')
+    : (loc ? loc.name : 'Austin Branch');
   return `<div class="topbar-right">
     <button class="topbar-icon-btn" id="up-btn-notif" onclick="UserPanel.openNotifications()" title="Notifications">
       <i class="ti ti-bell"></i>
@@ -68,7 +128,7 @@ function buildTopbarRight() {
       <div class="tp-avatar">${avatar}</div>
       <div class="tp-info">
         <div class="tp-name">${shortName}</div>
-        <div class="tp-loc">${locName}</div>
+        <div class="tp-loc">${subLine}</div>
       </div>
       <i class="ti ti-selector" style="font-size:12px;color:#5C6070;flex-shrink:0;"></i>
     </button>
