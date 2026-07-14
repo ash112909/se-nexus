@@ -2566,41 +2566,44 @@ function render_parts_search(el) {
     document.getElementById('ps-center').innerHTML = `
     <div class="slp-scroll">
       <div class="slp-banner" style="position:relative;overflow:hidden;border-radius:0;">${pr.bannerSvg || ''}</div>
-      <div class="slp-body">
-        <div class="slp-main">
-          ${activeWos.length ? `
-          <div class="slp-section-label">Active Work Orders (${activeWos.length})</div>
-          <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;overflow:hidden;margin-bottom:22px;">
-            <table class="slp-wo-table">
-              <thead><tr><th>WO #</th><th>Machine</th><th>Asset</th><th>Description</th><th>Status</th><th></th></tr></thead>
-              <tbody>${woRows}</tbody>
-            </table>
-          </div>` : ''}
+      <div class="slp-body" style="flex-direction:column;">
+        ${activeWos.length ? `
+        <div class="slp-section-label">Active Work Orders (${activeWos.length})</div>
+        <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;overflow:hidden;margin-bottom:22px;">
+          <table class="slp-wo-table">
+            <thead><tr><th>WO #</th><th>Machine</th><th>Asset</th><th>Description</th><th>Status</th><th></th></tr></thead>
+            <tbody>${woRows}</tbody>
+          </table>
+        </div>` : ''}
 
-          <div class="slp-section-label">Product Families</div>
-          <div class="slp-cat-grid">${categoryTiles}</div>
+        <div class="slp-section-label">Product Families</div>
+        <div class="slp-cat-grid">${categoryTiles}</div>
 
-          <div class="slp-section-label" style="margin-top:22px;">Actions</div>
-          <div class="slp-action-grid">${actionTiles}</div>
+        <div class="slp-section-label" style="margin-top:22px;">Actions</div>
+        <div class="slp-action-grid">${actionTiles}</div>
 
-          <div class="slp-section-label" style="margin-top:22px;">Models (${s.models.length})</div>
-          <div class="card-grid" style="margin-bottom:0;">${modelCards}</div>
-        </div>
-
-        <div class="slp-side">
-          <div class="slp-info-card">
-            <div class="slp-info-title">${pr.displayName || s.name}</div>
-            <div class="slp-info-tag">${pr.tagline || ''}</div>
-            <p class="slp-info-desc">${pr.description || ''}</p>
-            <div class="slp-feat-list">${featureList}</div>
-          </div>
-          ${newsList ? `<div class="slp-news-card">
-            <div class="slp-news-hdr">${pr.displayName || s.name} News and Info</div>
-            <div class="slp-news-body">${newsList}</div>
-          </div>` : ''}
-        </div>
+        <div class="slp-section-label" style="margin-top:22px;">Models (${s.models.length})</div>
+        <div class="card-grid" style="margin-bottom:0;">${modelCards}</div>
       </div>
     </div>`;
+
+    // Put supplier info + news into the right detail panel
+    const detailPanel = document.getElementById('ps-detail');
+    if (detailPanel) {
+      detailPanel.style.display = 'flex';
+      detailPanel.innerHTML = `<div style="padding:16px;display:flex;flex-direction:column;gap:12px;">
+        <div class="slp-info-card" style="border:none;padding:0;">
+          <div class="slp-info-title">${pr.displayName || s.name}</div>
+          <div class="slp-info-tag">${pr.tagline || ''}</div>
+          <p class="slp-info-desc">${pr.description || ''}</p>
+          <div class="slp-feat-list">${featureList}</div>
+        </div>
+        ${newsList ? `<div class="slp-news-card">
+          <div class="slp-news-hdr">${pr.displayName || s.name} News</div>
+          <div class="slp-news-body">${newsList}</div>
+        </div>` : ''}
+      </div>`;
+    }
   }
 
   function renderModel() {
@@ -2768,7 +2771,11 @@ function render_parts_search(el) {
   // ── Detail panel ──────────────────────────────────────────────────────────────
   function renderDetail() {
     const panel=document.getElementById('ps-detail'); if(!panel) return;
-    if (!_sel) { panel.style.display='none'; return; }
+    if (!_sel) {
+      // Keep supplier info panel visible on supplier landing page
+      if (_nav.supplierId && !_nav.modelId) return;
+      panel.style.display='none'; return;
+    }
     const p=fp(_sel); if(!p) { panel.style.display='none'; return; }
     panel.style.display='flex';
     const iC=isInCart(p.id);
@@ -2913,13 +2920,7 @@ function render_parts_search(el) {
     renderAll();
   };
 
-  function renderAll() {
-    // Hide tree panel on supplier landing (no model selected) so the full-width banner shows cleanly
-    const treePanel = document.getElementById('ps-tree');
-    const onSupplierLanding = _nav.supplierId && !_nav.modelId && !(_searchMode==='keyword' && _searchQuery.trim());
-    if (treePanel) treePanel.style.display = onSupplierLanding ? 'none' : '';
-    renderTree(); renderCenter(); renderDetail(); renderBreadcrumb();
-  }
+  function renderAll() { renderTree(); renderCenter(); renderDetail(); renderBreadcrumb(); }
 
   // ── Init ──────────────────────────────────────────────────────────────────────
   renderSearchBar();
