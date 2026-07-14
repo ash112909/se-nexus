@@ -127,18 +127,11 @@ const UserPanel = (() => {
     const user = Store.getCurrentUser();
     const avatar = user ? user.avatar : 'JW';
     const name = user ? user.displayName : 'James Whitfield';
-    const roleLabel = user && user.role === 'supervisor' ? 'Fleet Supervisor' : 'Fleet Mechanic';
+    const roleLabel = user && user.role === 'supplier' ? 'Supplier Representative'
+                    : user && user.role === 'supervisor' ? 'Fleet Supervisor' : 'Fleet Mechanic';
 
-    p.innerHTML = `
-      <div class="up-panel-arrow"></div>
-      <div class="up-profile-hdr">
-        <div class="up-profile-avatar">${avatar}</div>
-        <div>
-          <div class="up-profile-name">${escHtml(name)}</div>
-          <div class="up-profile-role">${roleLabel}</div>
-        </div>
-      </div>
-      <div class="up-panel-divider"></div>
+    const isSupplier = user && user.role === 'supplier';
+    const locationSection = isSupplier ? '' : `
       <div class="up-panel-section-label">Branch / Location</div>
       ${user && user.role === 'supervisor' ? `
         <div class="up-loc-row ${!loc ? 'active' : ''}" onclick="UserPanel._switchLocation(null)">
@@ -158,7 +151,19 @@ const UserPanel = (() => {
           </div>
           ${loc && loc.id===l.id ? '<i class="ti ti-check" style="color:#F5A623;font-size:13px;flex-shrink:0;"></i>' : ''}
         </div>`).join('')}
+      <div class="up-panel-divider"></div>`;
+
+    p.innerHTML = `
+      <div class="up-panel-arrow"></div>
+      <div class="up-profile-hdr">
+        <div class="up-profile-avatar">${avatar}</div>
+        <div>
+          <div class="up-profile-name">${escHtml(name)}</div>
+          <div class="up-profile-role">${roleLabel}</div>
+        </div>
+      </div>
       <div class="up-panel-divider"></div>
+      ${locationSection}
       <div class="up-panel-action" onclick="UserPanel._signOut()"><i class="ti ti-logout"></i> Sign out</div>`;
 
     positionPanel(p, 'profile');

@@ -214,6 +214,232 @@ function render_supplier_portal(el) {
     });
   }
 
+  function renderHome() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Home';
+    const pending = Store.getPriceRequests(_supplierId).filter(r => r.status === 'pending').length;
+    const myArticles = (Store.getCmsArticles ? Store.getCmsArticles('published') : []).filter(a => a.supplierId === _supplierId);
+    const recentReqs = Store.getPriceRequests(_supplierId).slice(0, 3);
+    document.getElementById('sp-content').innerHTML = `
+      <div class="sp-page-title">Welcome back, ${_user.displayName.split(' ')[0]}</div>
+      <div class="sp-page-sub">Here's a summary of your supplier activity.</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:28px;">
+        <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:18px;">
+          <div style="font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;">Onboarded Fleets</div>
+          <div style="font-size:28px;font-weight:700;color:#111318;">${_fleets.length}</div>
+        </div>
+        <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:18px;">
+          <div style="font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;">Open Price Requests</div>
+          <div style="font-size:28px;font-weight:700;color:${pending > 0 ? '#854F0B' : '#111318'};">${pending}</div>
+        </div>
+        <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:18px;">
+          <div style="font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;">Content Published</div>
+          <div style="font-size:28px;font-weight:700;color:#111318;">${myArticles.length}</div>
+        </div>
+        <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:18px;">
+          <div style="font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;">Total Requests</div>
+          <div style="font-size:28px;font-weight:700;color:#111318;">${Store.getPriceRequests(_supplierId).length}</div>
+        </div>
+      </div>
+      ${recentReqs.length ? `
+      <div style="font-size:14px;font-weight:700;color:#111318;margin-bottom:12px;">Recent Price Requests</div>
+      <div class="sp-table" style="margin-bottom:24px;">
+        ${recentReqs.map(r => {
+          const s = PR_STATUS[r.status] || PR_STATUS.pending;
+          return `<div class="sp-table-row" style="grid-template-columns:1fr 110px 130px 80px;">
+            <div class="sp-table-td">
+              <div style="font-weight:500;color:#111318;">${r.partDesc}</div>
+              <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">${r.partNum} · ${r.fleetName}</div>
+            </div>
+            <div class="sp-table-td" style="font-size:12px;color:#7A7F8E;">${r.requestedDate}</div>
+            <div class="sp-table-td"><span class="sp-status-pill" style="background:${s.bg};color:${s.color};">${s.label}</span></div>
+            <div class="sp-table-td"><button class="sp-btn sp-btn-ghost" onclick="spRespondToRequest('${r.id}')">Respond</button></div>
+          </div>`;
+        }).join('')}
+      </div>` : ''}
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="sp-btn sp-btn-primary" onclick="document.querySelector('.sb-item[data-sp-tab=fleets]').click()"><i class="ti ti-building-warehouse" style="font-size:12px;"></i> View My Fleets</button>
+        <button class="sp-btn sp-btn-ghost" onclick="document.querySelector('.sb-item[data-sp-tab=content]').click()"><i class="ti ti-pencil" style="font-size:12px;"></i> Post Content</button>
+      </div>`;
+  }
+
+  function renderAnalytics() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Analytics';
+    const allReqs = Store.getPriceRequests(_supplierId);
+    const byFleet = {};
+    _fleets.forEach(f => { byFleet[f.fleetName] = { pending: 0, quoted: 0, rejected: 0, needs_info: 0 }; });
+    allReqs.forEach(r => {
+      if (!byFleet[r.fleetName]) byFleet[r.fleetName] = { pending: 0, quoted: 0, rejected: 0, needs_info: 0 };
+      byFleet[r.fleetName][r.status] = (byFleet[r.fleetName][r.status] || 0) + 1;
+    });
+    const myArticles = (Store.getCmsArticles ? Store.getCmsArticles('published') : []).filter(a => a.supplierId === _supplierId);
+    const maxOrders = Math.max(..._fleets.map(f => f.activeOrders), 1);
+
+    document.getElementById('sp-content').innerHTML = `
+      <div class="sp-page-title">Analytics</div>
+      <div class="sp-page-sub">Activity across your onboarded fleets.</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;">
+        <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:20px;">
+          <div style="font-size:13px;font-weight:700;color:#111318;margin-bottom:16px;">Price Requests by Fleet</div>
+          ${Object.entries(byFleet).filter(([,v]) => (v.pending+v.quoted+v.rejected+v.needs_info) > 0).map(([name, v]) => {
+            const total = v.pending + v.quoted + v.rejected + v.needs_info;
+            return `<div style="margin-bottom:12px;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <span style="font-size:12px;color:#3A3D4A;">${name}</span>
+                <span style="font-size:12px;font-weight:600;color:#111318;">${total}</span>
+              </div>
+              <div style="height:6px;background:#F0ECE8;border-radius:3px;overflow:hidden;">
+                <div style="height:100%;width:${Math.round(v.quoted/Math.max(total,1)*100)}%;background:#0F6E56;float:left;"></div>
+                <div style="height:100%;width:${Math.round(v.pending/Math.max(total,1)*100)}%;background:#F5A623;float:left;"></div>
+                <div style="height:100%;width:${Math.round(v.needs_info/Math.max(total,1)*100)}%;background:#534AB7;float:left;"></div>
+              </div>
+            </div>`;
+          }).join('') || '<div style="color:#9CA3AF;font-size:13px;">No requests yet.</div>'}
+          <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
+            <span style="font-size:11px;color:#0F6E56;display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;background:#0F6E56;border-radius:2px;display:inline-block;"></span>Quoted</span>
+            <span style="font-size:11px;color:#854F0B;display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;background:#F5A623;border-radius:2px;display:inline-block;"></span>Pending</span>
+            <span style="font-size:11px;color:#534AB7;display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;background:#534AB7;border-radius:2px;display:inline-block;"></span>More info</span>
+          </div>
+        </div>
+
+        <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:20px;">
+          <div style="font-size:13px;font-weight:700;color:#111318;margin-bottom:16px;">Active Orders by Fleet</div>
+          ${_fleets.map(f => `
+            <div style="margin-bottom:12px;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <span style="font-size:12px;color:#3A3D4A;">${f.fleetName}</span>
+                <span style="font-size:12px;font-weight:600;color:#111318;">${f.activeOrders}</span>
+              </div>
+              <div style="height:6px;background:#F0ECE8;border-radius:3px;overflow:hidden;">
+                <div style="height:100%;width:${Math.round(f.activeOrders/maxOrders*100)}%;background:#F5A623;border-radius:3px;"></div>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:20px;max-width:520px;">
+        <div style="font-size:13px;font-weight:700;color:#111318;margin-bottom:14px;">Content Summary</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+          ${['bulletin','news','safety','promo'].map(type => {
+            const count = myArticles.filter(a => a.subtype === type || a.type === type).length;
+            const labels = { bulletin:'Service Bulletins', news:'Product News', safety:'Safety Notices', promo:'Promotions' };
+            return count > 0 ? `<div style="background:#F5F2EE;border-radius:8px;padding:12px;">
+              <div style="font-size:20px;font-weight:700;color:#111318;">${count}</div>
+              <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">${labels[type]}</div>
+            </div>` : '';
+          }).join('')}
+          ${myArticles.length === 0 ? '<div style="color:#9CA3AF;font-size:13px;grid-column:1/-1;">No content published yet.</div>' : ''}
+        </div>
+      </div>`;
+  }
+
+  function renderManuals() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Manuals & Docs';
+    const myArticles = (Store.getCmsArticles ? Store.getCmsArticles('published') : []).filter(a => a.supplierId === _supplierId);
+    const SUPPLIER_NAMES = { SKJ: 'Skyjack', CAT: 'Caterpillar', TOY: 'Toyota', BOB: 'Bobcat' };
+    const supplierName = SUPPLIER_NAMES[_supplierId] || _supplierId;
+
+    const DEMO_DOCS = [
+      { title: 'SJIII 3219 Service Manual', type: 'Manual', rev: 'Rev G', date: 'Mar 2026', size: '14.2 MB', icon: 'ti-book' },
+      { title: 'SJIII 4632 Parts Catalog', type: 'Parts Catalog', rev: 'Rev D', date: 'Jan 2026', size: '8.7 MB', icon: 'ti-list-details' },
+      { title: 'SJ45T Boom Lift — Operator Guide', type: 'Operator Guide', rev: 'Rev B', date: 'Apr 2026', size: '5.1 MB', icon: 'ti-file-description' },
+      { title: 'Hydraulic System Troubleshooting Guide', type: 'Tech Note', rev: 'Rev A', date: 'Feb 2026', size: '2.3 MB', icon: 'ti-tool' },
+      { title: 'Annual PM Checklist — Scissor Series', type: 'Checklist', rev: 'Rev C', date: 'Dec 2025', size: '0.8 MB', icon: 'ti-clipboard-check' },
+    ];
+
+    document.getElementById('sp-content').innerHTML = `
+      <div class="sp-page-title">Manuals &amp; Docs</div>
+      <div class="sp-page-sub">${supplierName} technical documentation and published content.</div>
+
+      <div style="font-size:13px;font-weight:700;color:#111318;margin-bottom:12px;">Technical Documents</div>
+      <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;overflow:hidden;margin-bottom:28px;">
+        ${DEMO_DOCS.map((d, i) => `
+          <div style="display:flex;align-items:center;gap:14px;padding:14px 18px;${i < DEMO_DOCS.length-1 ? 'border-bottom:0.5px solid #F5F2EE;' : ''}">
+            <div style="width:36px;height:36px;background:#FAEEDA;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="ti ${d.icon}" style="font-size:16px;color:#854F0B;"></i>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:600;color:#111318;">${d.title}</div>
+              <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">${d.type} · ${d.rev} · Updated ${d.date} · ${d.size}</div>
+            </div>
+            <button class="sp-btn sp-btn-ghost"><i class="ti ti-download" style="font-size:12px;"></i> Download</button>
+          </div>`).join('')}
+      </div>
+
+      <div style="font-size:13px;font-weight:700;color:#111318;margin-bottom:12px;">Published Content</div>
+      ${myArticles.length ? `
+      <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;overflow:hidden;">
+        ${myArticles.map((a, i) => {
+          const typeColors = { bulletin:'#854F0B', news:'#185FA5', safety:'#B91C1C', promo:'#0F6E56' };
+          const typeBgs =   { bulletin:'#FAEEDA', news:'#DBEAFE', safety:'#FEE2E2', promo:'#D1FAE5' };
+          const t = a.subtype || a.type || 'bulletin';
+          return `<div style="display:flex;align-items:flex-start;gap:14px;padding:14px 18px;${i < myArticles.length-1 ? 'border-bottom:0.5px solid #F5F2EE;' : ''}">
+            <div style="margin-top:2px;">
+              <span style="font-size:10px;font-weight:700;background:${typeBgs[t]||'#FAEEDA'};color:${typeColors[t]||'#854F0B'};border-radius:4px;padding:2px 7px;white-space:nowrap;">${t.toUpperCase()}</span>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:600;color:#111318;">${a.title}</div>
+              ${a.body ? `<div style="font-size:12px;color:#7A7F8E;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:480px;">${a.body}</div>` : ''}
+              <div style="font-size:11px;color:#B0AAA3;margin-top:4px;">${a.date || ''} · Posted to ${a.targetFleet === 'all' ? 'all fleets' : a.targetFleet}</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>` : '<div style="color:#9CA3AF;font-size:13px;">No published content yet. Use Post Content to publish your first article.</div>'}`;
+  }
+
+  function renderNews() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'News & Updates';
+    const myArticles = (Store.getCmsArticles ? Store.getCmsArticles('published') : []).filter(a => a.supplierId === _supplierId);
+    const SUPPLIER_NAMES = { SKJ: 'Skyjack', CAT: 'Caterpillar', TOY: 'Toyota', BOB: 'Bobcat' };
+    const supplierName = SUPPLIER_NAMES[_supplierId] || _supplierId;
+
+    const PLATFORM_NEWS = [
+      { date: 'Jul 10, 2026', type: 'platform', title: 'SmartEquip v4.2 — Supplier Analytics Dashboard', body: 'Suppliers now have access to a dedicated analytics tab with fleet-level price request tracking and content engagement metrics.', tag: 'Platform Update' },
+      { date: 'Jun 28, 2026', type: 'platform', title: 'Price Request response SLA reporting now live', body: 'Average response times are now tracked and visible in your analytics. Fleet customers can view supplier responsiveness scores.', tag: 'Platform Update' },
+      { date: 'Jun 15, 2026', type: 'platform', title: 'New: Target specific fleets when posting content', body: 'You can now select individual fleets as targets when posting bulletins or product news, rather than broadcasting to all.', tag: 'Feature' },
+      { date: 'May 30, 2026', type: 'platform', title: 'Supplier onboarding: 3 new fleets added this month', body: 'H&E Equipment Services, Maxim Crane Works, and Neff Rental have been added to the SmartEquip network.', tag: 'Network Update' },
+    ];
+
+    const TYPE_COLORS = { bulletin:'#854F0B', news:'#185FA5', safety:'#B91C1C', promo:'#0F6E56', platform:'#534AB7' };
+    const TYPE_BGS    = { bulletin:'#FAEEDA', news:'#DBEAFE', safety:'#FEE2E2', promo:'#D1FAE5', platform:'#EDE9FE' };
+
+    function newsCard(item, tag, type) {
+      const c = TYPE_COLORS[type] || '#374151';
+      const b = TYPE_BGS[type] || '#F9FAFB';
+      return `<div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:10px;font-weight:700;background:${b};color:${c};border-radius:4px;padding:2px 7px;">${tag}</span>
+          <span style="font-size:11px;color:#9CA3AF;">${item.date}</span>
+        </div>
+        <div style="font-size:14px;font-weight:700;color:#111318;">${item.title}</div>
+        <div style="font-size:13px;color:#5A5F6E;line-height:1.6;">${item.body}</div>
+      </div>`;
+    }
+
+    document.getElementById('sp-content').innerHTML = `
+      <div class="sp-page-title">News &amp; Updates</div>
+      <div class="sp-page-sub">SmartEquip platform updates and your published content.</div>
+
+      ${myArticles.length ? `
+      <div style="font-size:13px;font-weight:700;color:#111318;margin-bottom:12px;">${supplierName} — Your Content</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;margin-bottom:28px;">
+        ${myArticles.map(a => {
+          const t = a.subtype || a.type || 'bulletin';
+          const labels = { bulletin:'Service Bulletin', news:'Product News', safety:'Safety Notice', promo:'Promotion' };
+          return newsCard({ date: a.date || '', title: a.title, body: a.body || '' }, labels[t] || t, t);
+        }).join('')}
+      </div>` : ''}
+
+      <div style="font-size:13px;font-weight:700;color:#111318;margin-bottom:12px;">SmartEquip Platform Updates</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;">
+        ${PLATFORM_NEWS.map(n => newsCard(n, n.tag, 'platform')).join('')}
+      </div>`;
+  }
+
   // ── Impersonation ────────────────────────────────────────────────────────────
 
   window.spImpersonate = function(fleetId, fleetName) {
@@ -307,14 +533,18 @@ function render_supplier_portal(el) {
     el.querySelectorAll('.sb-item[data-sp-tab]').forEach(item => {
       item.classList.toggle('active', item.dataset.spTab === tab);
     });
-    if (tab === 'fleets')   renderFleets();
-    if (tab === 'requests') renderRequests();
-    if (tab === 'content')  renderContent();
+    if (tab === 'home')      renderHome();
+    if (tab === 'fleets')    renderFleets();
+    if (tab === 'requests')  renderRequests();
+    if (tab === 'content')   renderContent();
+    if (tab === 'manuals')   renderManuals();
+    if (tab === 'news')      renderNews();
+    if (tab === 'analytics') renderAnalytics();
   }
 
   el.querySelectorAll('.sb-item[data-sp-tab]').forEach(item => {
     item.addEventListener('click', () => setTab(item.dataset.spTab));
   });
 
-  setTab('fleets');
+  setTab('home');
 }
