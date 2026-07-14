@@ -2566,7 +2566,7 @@ function render_parts_search(el) {
     document.getElementById('ps-center').innerHTML = `
     <div class="slp-scroll">
       <div class="slp-banner" style="position:relative;overflow:hidden;border-radius:0;">${pr.bannerSvg || ''}</div>
-      <div class="slp-body" style="flex-direction:column;">
+      <div class="slp-body" style="flex-direction:column;align-items:stretch;">
         ${activeWos.length ? `
         <div class="slp-section-label">Active Work Orders (${activeWos.length})</div>
         <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;overflow:hidden;margin-bottom:22px;">
