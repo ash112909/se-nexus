@@ -1,5 +1,5 @@
 const Store = (() => {
-  const LS_KEY = 'se-nexus-v7';
+  const LS_KEY = 'se-nexus-v8';
 
   const DEFAULT_PARTS = [
     // ── Skyjack — SJIII 3219 / shared ────────────────────────────────────────
@@ -845,7 +845,12 @@ const Store = (() => {
   let _currentUser = null;
   try {
     const saved = localStorage.getItem('se-nexus-user');
-    if (saved) _currentUser = JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Validate saved user still exists in USERS (catches stale sessions after user changes)
+      if (USERS.find(u => u.id === parsed.id)) _currentUser = parsed;
+      else localStorage.removeItem('se-nexus-user');
+    }
   } catch(e) {}
 
   function getUsers() { return USERS; }
