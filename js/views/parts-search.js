@@ -2,6 +2,8 @@ function render_parts_search(el) {
   const _woId = Router.context && Router.context.woId;
   const _wo = _woId ? Store.getWorkOrder(_woId) : null;
   const _ctxSupplierId = Router.context && Router.context.supplierId;
+  const _impersonating = Router.context && Router.context.impersonating;
+  const _impersonatingFleet = Router.context && Router.context.impersonatingFleet;
 
   const CATALOG = [
     { id:'SKJ', name:'Skyjack', icon:'ti-crane', models:[
@@ -2352,6 +2354,7 @@ function render_parts_search(el) {
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
       ${buildTopbarRight()}
     </div>
+    ${_impersonating ? `<div style="background:#FFF7ED;border-bottom:2px solid #F5A623;padding:9px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:500;color:#854F0B;flex-shrink:0;"><i class="ti ti-eye" style="font-size:13px;"></i> Viewing as <strong style="margin:0 3px;">${_impersonatingFleet || 'fleet'}</strong> — you are seeing this supplier page as this fleet would see it.<button onclick="Router.navigate('supplier-portal')" style="margin-left:auto;background:#1E1E1E;color:#FFFFFF;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;">Exit impersonation</button></div>` : ''}
     ${_wo ? `<div class="wo-ribbon"><div class="wr-item"><i class="ti ti-shopping-cart" style="color:#F5A623;"></i> Adding to <strong>WO #${_wo.id}</strong></div><span class="wr-sep">·</span><div class="wr-item"><strong>${_wo.machine}</strong></div><span class="wr-sep">·</span><div class="wr-item"><strong>${_wo.asset}</strong></div><button onclick="sendPrompt('Work Order detail WO #${_wo.id}')" style="margin-left:auto;background:none;border:1px solid #3C4052;border-radius:6px;padding:4px 11px;font-size:11px;color:#8A8FA8;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;"><i class="ti ti-arrow-left" style="font-size:11px;"></i> Back to WO</button></div>` : ''}
     <div class="ps-search-area">
       <div class="search-mode-row" id="ps-mode-row"></div>

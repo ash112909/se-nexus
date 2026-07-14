@@ -18,6 +18,7 @@ const Router = (() => {
     'analytics': 'view-analytics',
     'cms': 'view-cms',
     'supplier': 'view-supplier',
+    'supplier-portal': 'view-supplier-portal',
   };
 
   let _context = {};

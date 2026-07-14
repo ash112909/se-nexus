@@ -187,6 +187,12 @@ function render_login(el) {
 
     Store.setCurrentUser(user);
 
+    // Suppliers go to their own portal
+    if (user.role === 'supplier') {
+      Router.navigate('supplier-portal');
+      return;
+    }
+
     // Supervisors start with no location filter (all locations view)
     if (user.role === 'supervisor') {
       Store.setCurrentLocation(null);
@@ -228,8 +234,10 @@ function render_login(el) {
     Router.navigate('home');
   };
 
-  // Auto-login if session already has a user + location
-  if (Store.getCurrentUser() && Store.getCurrentLocation()) {
-    Router.navigate('home');
+  // Auto-login if session already has a user
+  const _autoUser = Store.getCurrentUser();
+  if (_autoUser) {
+    if (_autoUser.role === 'supplier') Router.navigate('supplier-portal');
+    else if (Store.getCurrentLocation()) Router.navigate('home');
   }
 }

@@ -787,7 +787,60 @@ const Store = (() => {
       defaultLocationId: 'austin',
       avatar: 'SM',
     },
+    {
+      id: 'user-alex-c',
+      username: 'alex.chen',
+      password: 'SKJ-rep-01',
+      displayName: 'Alex Chen',
+      shortName: 'Alex C.',
+      role: 'supplier',
+      supplierIds: ['SKJ'],
+      email: 'alex.chen@skyjack.com',
+      phone: '(416) 555-0210',
+      avatar: 'AC',
+    },
   ];
+
+  // Fleets each supplier is onboarded to (supplier-visible relationships only)
+  const SUPPLIER_FLEET_RELATIONSHIPS = {
+    SKJ: [
+      { fleetId: 'mcr',  fleetName: 'Mid-County Rental', locations: 3, city: 'Austin, TX',   activeOrders: 4, logoText: 'MCR' },
+      { fleetId: 'boels', fleetName: 'Boels Rental',     locations: 12, city: 'Dallas, TX',  activeOrders: 8, logoText: 'BLS' },
+      { fleetId: 'sunbelt', fleetName: 'Sunbelt Rentals', locations: 6, city: 'Houston, TX', activeOrders: 2, logoText: 'SBR' },
+    ],
+  };
+
+  // Price requests — created by fleet, responded to by supplier
+  const _priceRequests = [
+    { id:'pr-001', partNum:'SKJ-HYD-999', partDesc:'Custom hydraulic manifold block — SJIII series',
+      supplierId:'SKJ', fleetId:'mcr', fleetName:'Mid-County Rental',
+      requestedBy:'James W.', requestedDate:'Jul 10, 2026', qty:1, notes:'Need for WO #100094 — not in current catalog',
+      status:'pending', response:null },
+    { id:'pr-002', partNum:'SKJ-ELC-477', partDesc:'Control board assembly — SJ45T Boom',
+      supplierId:'SKJ', fleetId:'mcr', fleetName:'Mid-County Rental',
+      requestedBy:'Marcus T.', requestedDate:'Jul 8, 2026', qty:2, notes:'',
+      status:'needs_info', response:{ message:'Can you confirm the serial number of the unit? Multiple variants exist for this model year.' } },
+    { id:'pr-003', partNum:'SKJ-STR-104', partDesc:'Steering cylinder seal kit',
+      supplierId:'SKJ', fleetId:'boels', fleetName:'Boels Rental',
+      requestedBy:'D. Kowalski', requestedDate:'Jul 5, 2026', qty:4, notes:'Bulk order for fleet PM',
+      status:'quoted', response:{ price: 38.50, message:'Available. Lead time 3–5 business days.' } },
+  ];
+
+  function getSupplierFleets(supplierId) {
+    return SUPPLIER_FLEET_RELATIONSHIPS[supplierId] || [];
+  }
+  function getPriceRequests(supplierId) {
+    return _priceRequests.filter(r => r.supplierId === supplierId);
+  }
+  function addPriceRequest(fields) {
+    const id = 'pr-' + String(_priceRequests.length + 1).padStart(3, '0');
+    _priceRequests.push({ id, status: 'pending', response: null, ...fields });
+    return id;
+  }
+  function respondToPriceRequest(id, response) {
+    const r = _priceRequests.find(x => x.id === id);
+    if (r) { r.status = response.status; r.response = response; }
+  }
 
   let _currentUser = null;
   try {
@@ -965,6 +1018,7 @@ const Store = (() => {
     getUsers, authenticate, setCurrentUser, getCurrentUser, logout,
     getLocations, getCurrentLocation, setCurrentLocation,
     getOrgConfig, getOrderTerms,
+    getSupplierFleets, getPriceRequests, addPriceRequest, respondToPriceRequest,
     getNotifications, markNotificationRead, markAllNotificationsRead, getUnreadCount,
     getCmsArticles, getCmsArticle, saveCmsArticle, deleteCmsArticle, getActiveBanners, dismissBanner,
     reset,
