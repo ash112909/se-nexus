@@ -804,9 +804,14 @@ const Store = (() => {
   // Fleets each supplier is onboarded to (supplier-visible relationships only)
   const SUPPLIER_FLEET_RELATIONSHIPS = {
     SKJ: [
-      { fleetId: 'mcr',  fleetName: 'Mid-County Rental', locations: 3, city: 'Austin, TX',   activeOrders: 4, logoText: 'MCR' },
-      { fleetId: 'boels', fleetName: 'Boels Rental',     locations: 12, city: 'Dallas, TX',  activeOrders: 8, logoText: 'BLS' },
-      { fleetId: 'sunbelt', fleetName: 'Sunbelt Rentals', locations: 6, city: 'Houston, TX', activeOrders: 2, logoText: 'SBR' },
+      { fleetId: 'mcr',       fleetName: 'Mid-County Rental',   locations: 3,  city: 'Austin, TX',      activeOrders: 4,  logoText: 'MCR' },
+      { fleetId: 'boels',     fleetName: 'Boels Rental',        locations: 12, city: 'Dallas, TX',       activeOrders: 8,  logoText: 'BLS' },
+      { fleetId: 'sunbelt',   fleetName: 'Sunbelt Rentals',     locations: 6,  city: 'Houston, TX',      activeOrders: 2,  logoText: 'SBR' },
+      { fleetId: 'unitedrent', fleetName: 'United Rentals',     locations: 22, city: 'Atlanta, GA',      activeOrders: 14, logoText: 'URI' },
+      { fleetId: 'ahern',     fleetName: 'Ahern Rentals',       locations: 9,  city: 'Las Vegas, NV',    activeOrders: 5,  logoText: 'AHR' },
+      { fleetId: 'neff',      fleetName: 'Neff Corporation',    locations: 5,  city: 'Miami, FL',        activeOrders: 3,  logoText: 'NEF' },
+      { fleetId: 'maxim',     fleetName: 'Maxim Crane Works',   locations: 4,  city: 'Pittsburgh, PA',   activeOrders: 7,  logoText: 'MCW' },
+      { fleetId: 'h&e',       fleetName: 'H&E Equipment',       locations: 11, city: 'Baton Rouge, LA',  activeOrders: 6,  logoText: 'HE'  },
     ],
   };
 

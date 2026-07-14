@@ -1,4 +1,5 @@
 function render_parts_search(el) {
+  const _user = Store.getCurrentUser();
   const _woId = Router.context && Router.context.woId;
   const _wo = _woId ? Store.getWorkOrder(_woId) : null;
   const _ctxSupplierId = Router.context && Router.context.supplierId;
@@ -2424,8 +2425,15 @@ function render_parts_search(el) {
     const panel = document.getElementById('ps-tree');
     if (!panel) return;
     const isRoot = !_nav.supplierId;
-    let h = `<div class="tree-root-node ${isRoot?'active':''}" onclick="psNavTo(null,null,null,null)"><i class="ti ti-package" style="font-size:13px;"></i> All parts <span class="tree-count">${ALL_PARTS.length}</span></div>`;
-    for (const s of CATALOG) {
+    // When impersonating, supplier only sees their own catalog entry
+    const _visibleCatalog = _impersonating
+      ? CATALOG.filter(s => (_user && (_user.supplierIds||[]).includes(s.id)))
+      : CATALOG;
+    const _visiblePartCount = _impersonating
+      ? [...new Set(_visibleCatalog.flatMap(s=>s.models.flatMap(m=>m.components.flatMap(c=>c.subs.flatMap(sub=>sub.partIds)))))].length
+      : ALL_PARTS.length;
+    let h = `<div class="tree-root-node ${isRoot?'active':''}" onclick="psNavTo(null,null,null,null)"><i class="ti ti-package" style="font-size:13px;"></i> All parts <span class="tree-count">${_visiblePartCount}</span></div>`;
+    for (const s of _visibleCatalog) {
       const sExp = _expanded.has(s.id);
       const sActive = _nav.supplierId===s.id && !_nav.modelId;
       const sCount = [...new Set(s.models.flatMap(m=>m.components.flatMap(c=>c.subs.flatMap(sub=>sub.partIds))))].length;
