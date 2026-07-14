@@ -2,6 +2,8 @@ function render_wo_list(el) {
   const _user = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
   const _isSupervisor = _user && _user.role === 'supervisor';
   const CURRENT_USER = _user ? _user.shortName : 'James W.';
+  const _terms = (typeof Store !== 'undefined' && Store.getOrderTerms) ? Store.getOrderTerms() : { singular:'Work Order', plural:'Work Orders', short:'WO', newBtn:'New WO', idCol:'WO #' };
+  const _useWO = (typeof Store !== 'undefined' && Store.getOrgConfig) ? Store.getOrgConfig().useWorkOrders : true;
   let _currentFilter = 'all';
   let _searchQuery = '';
 
@@ -17,12 +19,27 @@ function render_wo_list(el) {
     'KY-007': { make: 'Caterpillar', model: '308 Mini Excavator',serial: 'CAT308-00512'    },
   };
 
-  const WO_TYPE_META = {
+  const WO_TYPE_META = _useWO ? {
     equipment: { label: 'Repair',  color: '#185FA5', bg: '#E6F1FB' },
     pm:        { label: 'PM',      color: '#0F6E56', bg: '#E1F5EE' },
     stock:     { label: 'Stock',   color: '#534AB7', bg: '#EEEDFE' },
     other:     { label: 'Other',   color: '#6B7280', bg: '#F3F4F6' },
+  } : {
+    equipment: { label: 'Equipment', color: '#185FA5', bg: '#E6F1FB' },
+    pm:        { label: 'Maint.',    color: '#0F6E56', bg: '#E1F5EE' },
+    stock:     { label: 'Stock',     color: '#534AB7', bg: '#EEEDFE' },
+    other:     { label: 'General',   color: '#6B7280', bg: '#F3F4F6' },
   };
+
+  const ORDER_TYPE_OPTIONS = _useWO
+    ? `<option value="equipment">Equipment Repair</option>
+       <option value="pm">Scheduled PM</option>
+       <option value="stock">Stock Order</option>
+       <option value="other">Other</option>`
+    : `<option value="equipment">Equipment Service</option>
+       <option value="pm">Maintenance</option>
+       <option value="stock">Stock / Parts Request</option>
+       <option value="other">General Order</option>`;
 
   function machineIcon(machine, woType) {
     if (woType === 'stock') return 'ti-package';
@@ -70,7 +87,7 @@ function render_wo_list(el) {
     : '100px 80px 1fr 110px 110px 80px 50px';
 
   function renderRows(wos) {
-    if (!wos.length) return '<div class="wol-empty">No work orders found.</div>';
+    if (!wos.length) return `<div class="wol-empty">No ${_terms.plural.toLowerCase()} found.</div>`;
     return wos.map(wo => `
       <div class="wol-row" style="grid-template-columns:${_cols};" onclick="sendPrompt('Show me the Work Order detail view for WO #${wo.id}')">
         <div class="wol-td">
@@ -205,18 +222,18 @@ function render_wo_list(el) {
     <div class="wol-content">
       <div class="wol-header">
         <div>
-          <div class="wol-title">${_isSupervisor ? 'All Work Orders' : 'My Work Orders'}</div>
+          <div class="wol-title">${_isSupervisor ? `All ${_terms.plural}` : `My ${_terms.plural}`}</div>
           <div class="wol-subtitle">${(Store.getCurrentLocation()||{name:'—'}).name} · <span id="wol-sum-active">0</span> active</div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <input class="wol-search" type="text" placeholder="Search WO, machine, asset…" id="wol-search-input"/>
+          <input class="wol-search" type="text" placeholder="Search ${_terms.short}, machine, asset…" id="wol-search-input"/>
           <div class="wol-filters" id="wol-filters">
             <div class="wol-filter-pill active" data-filter="all">All</div>
             <div class="wol-filter-pill" data-filter="active">Active</div>
             <div class="wol-filter-pill" data-filter="pending">Pending</div>
             <div class="wol-filter-pill" data-filter="closed">Closed</div>
           </div>
-          <button class="wol-new-btn" id="wol-new-btn"><i class="ti ti-plus" style="font-size:14px;"></i> New WO</button>
+          <button class="wol-new-btn" id="wol-new-btn"><i class="ti ti-plus" style="font-size:14px;"></i> ${_terms.newBtn}</button>
         </div>
       </div>
 
@@ -241,7 +258,7 @@ function render_wo_list(el) {
 
       <div class="wol-table">
         <div class="wol-thead" style="grid-template-columns:${_cols};">
-          <div class="wol-th">WO #</div>
+          <div class="wol-th">${_terms.idCol}</div>
           <div class="wol-th">Type</div>
           <div class="wol-th">Machine / Issue</div>
           ${_isSupervisor ? '<div class="wol-th">Assignee</div>' : ''}
@@ -277,12 +294,9 @@ function render_wo_list(el) {
     const formHtml = `
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div class="modal-form-field" style="grid-column:1/-1;">
-          <label class="modal-form-label">WO Type *</label>
+          <label class="modal-form-label">${_terms.singular} Type *</label>
           <select class="modal-form-select" id="nwo-type">
-            <option value="equipment">Equipment Repair</option>
-            <option value="pm">Scheduled PM</option>
-            <option value="stock">Stock Order</option>
-            <option value="other">Other</option>
+            ${ORDER_TYPE_OPTIONS}
           </select>
         </div>
       </div>
@@ -331,7 +345,7 @@ function render_wo_list(el) {
           </select>
         </div>
         <div class="modal-form-field">
-          <label class="modal-form-label" id="nwo-extid-label">Work Order ID * <span class="lbl-opt" style="font-size:10px;">(RentalMan / ERP)</span></label>
+          <label class="modal-form-label" id="nwo-extid-label">${_terms.singular} ID * <span class="lbl-opt" style="font-size:10px;">(RentalMan / ERP)</span></label>
           <input class="modal-form-input" id="nwo-extid" type="text" placeholder="e.g. RM-10122"/>
           <div class="modal-field-error" id="nwo-extid-err">Required</div>
           <div class="modal-form-hint" id="nwo-extid-hint" style="display:none;">Leave blank to auto-assign a system ID</div>
@@ -339,12 +353,12 @@ function render_wo_list(el) {
       </div>`;
 
     Modal.show({
-      title: 'New Work Order',
+      title: `New ${_terms.singular}`,
       body: formHtml,
       actions: [
         { label: 'Cancel', onClick: () => Modal.close() },
         {
-          label: 'Create WO', primary: true, onClick: () => {
+          label: `Create ${_terms.singular}`, primary: true, onClick: () => {
             const woType  = document.getElementById('nwo-type').value;
             const issue   = document.getElementById('nwo-issue').value.trim();
             const extId   = document.getElementById('nwo-extid').value.trim();
@@ -416,8 +430,8 @@ function render_wo_list(el) {
 
         dueLabel.innerHTML   = isEquipment ? 'Due Date *' : 'Due Date <span class="lbl-opt">(optional)</span>';
         extIdLabel.innerHTML = isEquipment
-          ? 'Work Order ID * <span class="lbl-opt" style="font-size:10px;">(RentalMan / ERP)</span>'
-          : 'Work Order ID <span class="lbl-opt" style="font-size:10px;">(RentalMan / ERP, optional)</span>';
+          ? `${_terms.singular} ID * <span class="lbl-opt" style="font-size:10px;">(RentalMan / ERP)</span>`
+          : `${_terms.singular} ID <span class="lbl-opt" style="font-size:10px;">(RentalMan / ERP, optional)</span>`;
         extIdHint.style.display = isEquipment ? 'none' : 'block';
 
         document.getElementById('nwo-due-err').style.display   = 'none';

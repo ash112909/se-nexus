@@ -828,6 +828,22 @@ const Store = (() => {
     } catch(e) {}
   }
 
+  // --- Org Config ---
+  // useWorkOrders: false for orgs like Boels that track by general order, not WO
+  const ORG_CONFIG = {
+    useWorkOrders: true,
+    // Derived label helpers read from this flag — do not set manually
+  };
+
+  function getOrgConfig() { return ORG_CONFIG; }
+
+  function getOrderTerms() {
+    if (ORG_CONFIG.useWorkOrders) {
+      return { singular: 'Work Order', plural: 'Work Orders', short: 'WO', newBtn: 'New WO', idCol: 'WO #' };
+    }
+    return { singular: 'Order', plural: 'Orders', short: 'Order', newBtn: 'New Order', idCol: 'Order #' };
+  }
+
   // --- CMS Content ---
   const DEFAULT_CMS_ARTICLES = [
     {
@@ -948,6 +964,7 @@ const Store = (() => {
     getParts, getManuals,
     getUsers, authenticate, setCurrentUser, getCurrentUser, logout,
     getLocations, getCurrentLocation, setCurrentLocation,
+    getOrgConfig, getOrderTerms,
     getNotifications, markNotificationRead, markAllNotificationsRead, getUnreadCount,
     getCmsArticles, getCmsArticle, saveCmsArticle, deleteCmsArticle, getActiveBanners, dismissBanner,
     reset,

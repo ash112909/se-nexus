@@ -4,6 +4,7 @@ function buildSidebar(activeItem) {
   const user = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
   const role = user ? user.role : 'mechanic';
   const isSupervisor = role === 'supervisor';
+  const _terms = (typeof Store !== 'undefined' && Store.getOrderTerms) ? Store.getOrderTerms() : { plural: 'Work Orders' };
   return `
   <div class="sidebar">
     <div class="sb-fleet">
@@ -19,7 +20,7 @@ function buildSidebar(activeItem) {
       <div class="sb-section-label">${isSupervisor ? 'Operations' : 'My work'}</div>
       <div class="sb-item ${activeItem==='home'?'active':''}" onclick="Router.navigate('home')"><i class="ti ti-home"></i> Home</div>
       <div class="sb-item ${activeItem==='dashboard'?'active':''}" onclick="sendPrompt('Go back to dashboard')"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
-      <div class="sb-item ${activeItem==='wo'?'active':''}" onclick="sendPrompt('Open work orders list')"><i class="ti ti-clipboard-list"></i> Work orders <span class="sb-badge">2</span></div>
+      <div class="sb-item ${activeItem==='wo'?'active':''}" onclick="sendPrompt('Open work orders list')"><i class="ti ti-clipboard-list"></i> ${_terms.plural} <span class="sb-badge">2</span></div>
       <div class="sb-item ${activeItem==='order-history'?'active':''}" onclick="sendPrompt('Open order history')"><i class="ti ti-history"></i> Order history</div>
       ${isSupervisor ? `
       <div class="sb-item ${activeItem==='approvals'?'active':''}" onclick="sendPrompt('Open approvals')"><i class="ti ti-circle-check"></i> Approvals</div>
