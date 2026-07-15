@@ -299,7 +299,7 @@ function render_supplier_portal(el) {
       </div>` : ''}
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button class="sp-btn sp-btn-primary" onclick="document.querySelector('.sb-item[data-sp-tab=fleets]').click()"><i class="ti ti-building-warehouse" style="font-size:12px;"></i> View My Fleets</button>
-        <button class="sp-btn sp-btn-ghost" onclick="document.querySelector('.sb-item[data-sp-tab=content]').click()"><i class="ti ti-pencil" style="font-size:12px;"></i> Post Content</button>
+        <button class="sp-btn sp-btn-ghost" onclick="document.querySelector('.sb-item[data-sp-tab=content]').click()"><i class="ti ti-pencil" style="font-size:12px;"></i> My Content</button>
       </div>`;
   }
 
@@ -372,358 +372,616 @@ function render_supplier_portal(el) {
       </div>`;
   }
 
-  // Content tab state
-  let _spContentMode = 'broadcast'; // 'broadcast' | 'partpage'
+  // ── Supplier content management state ────────────────────────────────────
+  let _spcView = 'list';     // 'list' | 'editor'
+  let _spcEditId = null;     // null = new
+  let _spcFilter = 'all';    // 'all' | 'published' | 'draft' | 'scheduled' | 'expired'
+  let _spcSearch = '';
+  let _spcAiMode = null;
   let _spPtSelectedPartId = null;
   let _spPtExpandedCats = new Set();
 
+  const SP_CONTENT_TYPES = {
+    bulletin: { label:'Service Bulletin', icon:'ti-alert-triangle', color:'#854F0B', bg:'#FAEEDA' },
+    news:     { label:'Product News',     icon:'ti-news',           color:'#534AB7', bg:'#EEEDFE' },
+    safety:   { label:'Safety Notice',    icon:'ti-alert-octagon',  color:'#B91C1C', bg:'#FEE2E2' },
+    promo:    { label:'Promotion',        icon:'ti-tag',            color:'#0F6E56', bg:'#E1F5EE' },
+    training: { label:'Training',         icon:'ti-certificate',    color:'#5B21B6', bg:'#EDE9FE' },
+    pricing:  { label:'Pricing Update',   icon:'ti-coin',           color:'#6B7280', bg:'#F3F4F6' },
+  };
+  const SP_CONTENT_SUBTYPES = {
+    bulletin: ['Mandatory','Advisory','Recall'],
+    news:     ['Product Launch','Feature Update','Availability'],
+    safety:   ['Compliance','Hazard','PPE','Procedure'],
+    promo:    ['Seasonal','Volume Discount','New Customer'],
+    training: ['Required','Optional','Certification'],
+    pricing:  ['Increase','Decrease','Promotional'],
+  };
+  const SP_PRIORITIES = [
+    { value:'critical', label:'Critical', color:'#B91C1C', bg:'#FEE2E2' },
+    { value:'high',     label:'High',     color:'#C2410C', bg:'#FFF7ED' },
+    { value:'medium',   label:'Medium',   color:'#B45309', bg:'#FFFBEB' },
+    { value:'low',      label:'Low',      color:'#6B7280', bg:'#F9FAFB' },
+  ];
+  const SP_LANGUAGES = [
+    { value:'en', label:'English' },
+    { value:'es', label:'Spanish (Español)' },
+    { value:'fr', label:'French (Français)' },
+    { value:'pt', label:'Portuguese (Português)' },
+  ];
+  const SP_AI_REWRITES = {
+    rewrite: t => t + '\n\n[AI enhanced: improved clarity and professional tone.]',
+    simplify: t => t.split(/[.!?]+/).filter(s=>s.trim().length>10).slice(0,3).map(s=>s.trim()).join('. ') + '.\n\n[AI simplified: reduced to key points.]',
+    translate_es: t => '[Traducción al Español]\n\n' + t.split(' ').map(w => {
+      const map = { required:'requerido',inspection:'inspección',safety:'seguridad',all:'todos',before:'antes de',must:'debe',complete:'completar',operators:'operadores',units:'unidades',please:'por favor',and:'y',the:'el' };
+      const c = w.toLowerCase().replace(/[^a-z]/g,''); return map[c] ? w.replace(c,map[c]) : w;
+    }).join(' '),
+  };
+
+  function escSpc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
   function renderContent() {
     const titleEl = document.getElementById('sp-topbar-title');
-    if (titleEl) titleEl.textContent = 'Post Content';
-    document.getElementById('sp-content').innerHTML = `
+    if (titleEl) titleEl.textContent = 'Content';
+
+    const contentEl = document.getElementById('sp-content');
+    contentEl.innerHTML = `
 <style>
-.spc-mode-row { display:flex; gap:8px; margin-bottom:20px; }
-.spc-mode-btn { height:36px; padding:0 16px; border-radius:8px; font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; border:1.5px solid #E2DDD8; background:#FFFFFF; color:#5A5F6E; transition:all .15s; display:inline-flex; align-items:center; gap:7px; }
-.spc-mode-btn.active { background:#111318; color:#FFFFFF; border-color:#111318; }
-.spc-mode-btn:hover:not(.active) { border-color:#9CA3AF; }
-.spc-layout { display:grid; grid-template-columns:260px 1fr; gap:16px; align-items:start; }
-.spc-tree-panel { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
-.spc-tree-search-wrap { position:relative; padding:12px; border-bottom:0.5px solid #F0ECE8; }
-.spc-tree-search-icon { position:absolute; left:22px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:14px; pointer-events:none; }
-.spc-tree-search { width:100%; height:32px; background:#F5F2EE; border:1px solid #E2DDD8; border-radius:7px; padding:0 10px 0 32px; font-size:12px; font-family:inherit; color:#111318; outline:none; }
-.spc-tree-search:focus { border-color:#F5A623; background:#FFFFFF; }
-.spc-tree-body { max-height:460px; overflow-y:auto; padding:8px 0; }
-.spc-cat-hdr { display:flex; align-items:center; gap:7px; padding:6px 14px; cursor:pointer; font-size:11px; font-weight:700; color:#5A5F6E; letter-spacing:.3px; text-transform:uppercase; }
+/* ── Supplier CMS shared ─── */
+.spc-btn-primary { display:inline-flex; align-items:center; gap:6px; padding:7px 16px; background:#111318; color:#FFFFFF; border:none; border-radius:8px; font-size:12px; font-weight:600; font-family:inherit; cursor:pointer; }
+.spc-btn-primary:hover { background:#2A2D3A; }
+.spc-btn-ghost { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; background:#FFFFFF; color:#3A3D4A; border:0.5px solid #E2DDD8; border-radius:8px; font-size:12px; font-weight:500; font-family:inherit; cursor:pointer; }
+.spc-btn-ghost:hover { background:#F5F2EE; }
+.spc-btn-danger { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; background:#FEE2E2; color:#B91C1C; border:none; border-radius:8px; font-size:12px; font-weight:600; font-family:inherit; cursor:pointer; }
+.spc-btn-danger:hover { background:#FCA5A5; }
+/* ── List view ─── */
+.spc-list-hdr { padding:16px 0 12px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.spc-list-title { font-size:17px; font-weight:700; color:#111318; }
+.spc-list-sub { font-size:12px; color:#9CA3AF; margin-top:2px; }
+.spc-filter-bar { display:flex; align-items:center; gap:8px; padding:0 0 12px; border-bottom:0.5px solid #E8E4DF; flex-wrap:wrap; }
+.spc-ftab { padding:5px 13px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:0.5px solid transparent; color:#5A5F6E; transition:all .15s; }
+.spc-ftab.active { background:#111318; color:#FFFFFF; }
+.spc-ftab:hover:not(.active) { background:#F5F2EE; }
+.spc-count { font-size:10px; font-weight:700; background:#F0ECE8; color:#5A5F6E; border-radius:10px; padding:1px 6px; margin-left:3px; }
+.spc-search-wrap { position:relative; margin-bottom:12px; max-width:400px; }
+.spc-search-icon { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:15px; pointer-events:none; }
+.spc-search-input { width:100%; height:36px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:9px; padding:0 12px 0 34px; font-size:13px; font-family:inherit; color:#111318; outline:none; }
+.spc-search-input:focus { border-color:#F5A623; background:#FFFFFF; }
+.spc-row { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; padding:14px 16px; display:flex; align-items:flex-start; gap:14px; cursor:pointer; transition:border-color .15s; margin-bottom:8px; }
+.spc-row:hover { border-color:#C8C3BC; }
+.spc-row-icon { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.spc-row-body { flex:1; min-width:0; }
+.spc-row-title { font-size:13px; font-weight:600; color:#111318; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.spc-row-meta { font-size:11px; color:#9CA3AF; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.spc-row-actions { display:flex; gap:6px; flex-shrink:0; }
+.spc-chip { display:inline-flex; align-items:center; gap:3px; padding:2px 7px; border-radius:6px; font-size:10px; font-weight:600; }
+.spc-status-published { background:#D1FAE5; color:#065F46; }
+.spc-status-draft     { background:#F0ECE8; color:#5A5F6E; }
+.spc-status-scheduled { background:#DBEAFE; color:#1D4ED8; }
+.spc-status-expired   { background:#FEE2E2; color:#B91C1C; }
+/* ── Editor ─── */
+.spc-editor-grid { display:grid; grid-template-columns:1fr 320px; gap:18px; align-items:start; padding-bottom:40px; }
+.spc-panel { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
+.spc-panel-hdr { padding:11px 16px; border-bottom:0.5px solid #F0ECE8; font-size:12px; font-weight:600; color:#111318; display:flex; align-items:center; gap:6px; }
+.spc-panel-body { padding:16px; display:flex; flex-direction:column; gap:13px; }
+.spc-field { display:flex; flex-direction:column; gap:5px; }
+.spc-label { font-size:11px; font-weight:600; color:#5A5F6E; text-transform:uppercase; letter-spacing:.6px; }
+.spc-input { width:100%; padding:8px 10px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:13px; font-family:inherit; color:#111318; outline:none; background:#FFFFFF; }
+.spc-input:focus { border-color:#F5A623; }
+.spc-textarea { width:100%; padding:10px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:13px; font-family:inherit; color:#111318; outline:none; resize:vertical; min-height:130px; line-height:1.6; background:#FFFFFF; }
+.spc-textarea:focus { border-color:#F5A623; }
+.spc-select { width:100%; padding:8px 10px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:13px; font-family:inherit; color:#111318; outline:none; background:#FFFFFF; cursor:pointer; }
+.spc-select:focus { border-color:#F5A623; }
+.spc-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.spc-check-list { display:flex; flex-direction:column; gap:7px; padding:10px; background:#FAFAF9; border:1px solid #E8E4DF; border-radius:7px; }
+.spc-check-item { display:flex; align-items:center; gap:8px; font-size:13px; color:#3A3D4A; cursor:pointer; }
+.spc-check-item input { accent-color:#F5A623; }
+.spc-post-opt { display:flex; align-items:center; gap:8px; padding:8px 10px; border:0.5px solid #E2DDD8; border-radius:8px; cursor:pointer; font-size:12px; color:#3A3D4A; transition:all .15s; }
+.spc-post-opt.selected { border-color:#F5A623; background:#FAEEDA; color:#854F0B; font-weight:600; }
+.spc-post-opt input { accent-color:#F5A623; display:none; }
+.spc-ai-btn { display:flex; align-items:center; gap:7px; padding:8px 12px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:12px; font-weight:500; font-family:inherit; cursor:pointer; background:#FFFFFF; color:#3A3D4A; transition:all .15s; width:100%; }
+.spc-ai-btn:hover { background:#F5F2EE; border-color:#C8C3BC; }
+.spc-ai-btn .ai-icon { width:22px; height:22px; border-radius:6px; background:#111318; color:#F5A623; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; }
+.spc-ai-preview { background:#F5F2EE; border:0.5px solid #E2DDD8; border-radius:8px; padding:12px; font-size:12px; color:#3A3D4A; line-height:1.6; margin-top:2px; white-space:pre-wrap; }
+.spc-action-bar { display:flex; align-items:center; gap:8px; padding:14px 0 0; border-top:0.5px solid #E8E4DF; margin-top:4px; }
+/* ── Part tree (in editor) ─── */
+.spc-tree-panel { background:#FAFAF9; border:0.5px solid #E8E4DF; border-radius:8px; overflow:hidden; margin-top:4px; }
+.spc-tree-search-wrap { position:relative; padding:10px; border-bottom:0.5px solid #F0ECE8; }
+.spc-tree-search-icon { position:absolute; left:20px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:13px; pointer-events:none; }
+.spc-tree-search { width:100%; height:30px; background:#FFFFFF; border:1px solid #E2DDD8; border-radius:7px; padding:0 8px 0 28px; font-size:12px; font-family:inherit; color:#111318; outline:none; }
+.spc-tree-search:focus { border-color:#F5A623; }
+.spc-tree-body { max-height:280px; overflow-y:auto; padding:6px 0; }
+.spc-cat-hdr { display:flex; align-items:center; gap:6px; padding:5px 12px; cursor:pointer; font-size:10px; font-weight:700; color:#5A5F6E; letter-spacing:.3px; text-transform:uppercase; }
 .spc-cat-hdr:hover { background:#F5F2EE; }
-.spc-cat-chevron { font-size:10px; color:#B0AAA3; margin-left:auto; transition:transform .15s; }
+.spc-cat-chevron { font-size:9px; color:#B0AAA3; margin-left:auto; transition:transform .15s; }
 .spc-cat-chevron.open { transform:rotate(90deg); }
-.spc-part-item { display:flex; flex-direction:column; padding:6px 14px 6px 30px; cursor:pointer; border-left:2px solid transparent; transition:all .12s; }
-.spc-part-item:hover { background:#FAFAF9; border-left-color:#E2DDD8; }
+.spc-part-item { display:flex; flex-direction:column; padding:5px 12px 5px 26px; cursor:pointer; border-left:2px solid transparent; }
+.spc-part-item:hover { background:#F5F2EE; border-left-color:#E2DDD8; }
 .spc-part-item.selected { background:#FAEEDA; border-left-color:#F5A623; }
 .spc-part-pnum { font-size:10px; font-weight:700; color:#9CA3AF; font-family:monospace; }
 .spc-part-item.selected .spc-part-pnum { color:#854F0B; }
-.spc-part-desc { font-size:11px; font-weight:500; color:#3A3D4A; line-height:1.35; margin-top:1px; }
+.spc-part-desc { font-size:11px; font-weight:500; color:#3A3D4A; line-height:1.3; }
 .spc-part-item.selected .spc-part-desc { color:#111318; }
-.spc-compose-panel { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; padding:20px; }
-.spc-selected-banner { background:#FAEEDA; border:1px solid #F5A623; border-radius:8px; padding:10px 13px; margin-bottom:16px; display:flex; align-items:center; gap:9px; }
-.spc-selected-pnum { font-size:11px; font-weight:700; color:#854F0B; font-family:monospace; }
-.spc-selected-desc { font-size:12px; color:#3A3D4A; font-weight:500; }
-.spc-empty-state { padding:40px 20px; text-align:center; color:#B0AAA3; font-size:12px; }
-.spc-empty-icon { font-size:28px; display:block; margin-bottom:8px; }
+.spc-selected-banner { background:#FAEEDA; border:1px solid #F5C97A; border-radius:7px; padding:8px 11px; display:flex; align-items:center; gap:8px; margin-top:6px; }
+.spc-banner-pnum { font-size:10px; font-weight:700; color:#854F0B; font-family:monospace; }
+.spc-banner-desc { font-size:11px; color:#3A3D4A; margin-top:1px; }
 </style>
-      <div class="sp-page-title">Post Content</div>
-      <div class="sp-page-sub">Publish news, bulletins, or product updates to your fleet customers.</div>
-      <div class="spc-mode-row">
-        <button class="spc-mode-btn ${_spContentMode==='broadcast'?'active':''}" onclick="spSetContentMode('broadcast')"><i class="ti ti-speakerphone" style="font-size:13px;"></i> Broadcast to fleets</button>
-        <button class="spc-mode-btn ${_spContentMode==='partpage'?'active':''}" onclick="spSetContentMode('partpage')"><i class="ti ti-tag" style="font-size:13px;"></i> Part page message</button>
-      </div>
-      <div id="spc-mode-body"></div>`;
+<div id="spc-body" style="padding:0 28px 28px;"></div>`;
 
-    window.spSetContentMode = function(mode) {
-      _spContentMode = mode;
-      _spPtSelectedPartId = null;
-      document.querySelectorAll('.spc-mode-btn').forEach(b => b.classList.toggle('active', b.textContent.trim().startsWith(mode === 'broadcast' ? 'Broadcast' : 'Part')));
-      renderContentModeBody();
-    };
+    window.spCmsGoList = function() { _spcView = 'list'; _spcEditId = null; _spPtSelectedPartId = null; renderContent(); };
+    window.spCmsNewArticle = function() { _spcView = 'editor'; _spcEditId = null; _spPtSelectedPartId = null; renderContent(); };
+    window.spCmsEditArticle = function(id) { _spcView = 'editor'; _spcEditId = id; _spPtSelectedPartId = null; renderContent(); };
+    window.spCmsSetFilter = function(f) { _spcFilter = f; renderSpcList(); };
 
-    window.spTogglePtCat = function(cat) {
-      if (_spPtExpandedCats.has(cat)) { _spPtExpandedCats.delete(cat); } else { _spPtExpandedCats.add(cat); }
-      renderPartTree();
-    };
-
-    window.spSelectPtPart = function(partId) {
-      _spPtSelectedPartId = partId;
-      renderPartTree();
-      renderPartComposeArea();
-    };
-
-    renderContentModeBody();
+    if (_spcView === 'editor') renderSpcEditor();
+    else renderSpcList();
   }
 
-  function renderContentModeBody() {
-    const body = document.getElementById('spc-mode-body');
+  function renderSpcList() {
+    const body = document.getElementById('spc-body');
     if (!body) return;
-    if (_spContentMode === 'broadcast') {
-      renderBroadcastForm(body);
-    } else {
-      renderPartPageForm(body);
+    const now = new Date();
+    const myArticles = (Store.getCmsArticles ? Store.getCmsArticles('all') : []).filter(a => a.supplierId === _supplierId);
+    function getStatus(a) {
+      if (a.status === 'draft') return 'draft';
+      if (a.status === 'scheduled') return 'scheduled';
+      if (a.expiryDate && new Date(a.expiryDate) < now) return 'expired';
+      return 'published';
     }
+    const counts = { all: myArticles.length, published:0, draft:0, scheduled:0, expired:0 };
+    myArticles.forEach(a => { const s = getStatus(a); if (counts[s] !== undefined) counts[s]++; });
+    const q = _spcSearch.toLowerCase().trim();
+    const filtered = myArticles
+      .filter(a => _spcFilter === 'all' || getStatus(a) === _spcFilter)
+      .filter(a => !q || a.title.toLowerCase().includes(q) || (a.body||'').toLowerCase().includes(q) || (a.subtype||'').toLowerCase().includes(q));
+
+    body.innerHTML = `
+      <div class="spc-list-hdr">
+        <div>
+          <div class="spc-list-title">My Content</div>
+          <div class="spc-list-sub">Manage your published articles, bulletins, and part messages</div>
+        </div>
+        <button class="spc-btn-primary" onclick="spCmsNewArticle()"><i class="ti ti-plus"></i> New article</button>
+      </div>
+      <div class="spc-search-wrap">
+        <i class="ti ti-search spc-search-icon"></i>
+        <input class="spc-search-input" id="spc-search-input" type="text" placeholder="Search your content…" value="${escSpc(_spcSearch)}"/>
+      </div>
+      <div class="spc-filter-bar">
+        ${[['all','All'],['published','Published'],['draft','Draft'],['scheduled','Scheduled'],['expired','Expired']].map(([v,l]) =>
+          `<div class="spc-ftab ${_spcFilter===v?'active':''}" onclick="spCmsSetFilter('${v}')">${l}<span class="spc-count">${counts[v]||0}</span></div>`
+        ).join('')}
+      </div>
+      <div id="spc-list-rows">
+        ${filtered.length === 0 ? `<div style="text-align:center;padding:48px;color:#9CA3AF;font-size:13px;">${q ? 'No articles match your search.' : 'No ' + (_spcFilter !== 'all' ? _spcFilter + ' ' : '') + 'articles yet. <button class="spc-btn-primary" style="margin-left:8px;" onclick="spCmsNewArticle()"><i class="ti ti-plus"></i> New article</button>'}</div>` :
+          filtered.map(a => {
+            const status = getStatus(a);
+            const tm = SP_CONTENT_TYPES[a.subtype] || SP_CONTENT_TYPES[a.type] || SP_CONTENT_TYPES.bulletin;
+            const pri = SP_PRIORITIES.find(p => p.value === a.priority) || SP_PRIORITIES[3];
+            const partLabel = a.showOnPartPage && a.targetPartDesc ? `<span class="spc-chip" style="background:#EEEDFE;color:#534AB7;"><i class="ti ti-tag" style="font-size:9px;"></i> ${a.targetPartDesc.slice(0,30)}…</span>` : '';
+            return `<div class="spc-row" onclick="spCmsEditArticle('${a.id}')">
+              <div class="spc-row-icon" style="background:${tm.bg};color:${tm.color};"><i class="ti ${tm.icon}"></i></div>
+              <div class="spc-row-body">
+                <div class="spc-row-title">${a.title}</div>
+                <div class="spc-row-meta">
+                  <span class="spc-chip spc-status-${status}">${status.charAt(0).toUpperCase()+status.slice(1)}</span>
+                  <span class="spc-chip" style="background:${pri.bg};color:${pri.color};">${pri.label}</span>
+                  <span class="spc-chip" style="background:${tm.bg};color:${tm.color};"><i class="ti ${tm.icon}" style="font-size:10px;"></i> ${tm.label}</span>
+                  ${partLabel}
+                  ${a.showOnOrders ? `<span class="spc-chip" style="background:#E6F1FB;color:#185FA5;"><i class="ti ti-shopping-cart" style="font-size:9px;"></i> Orders</span>` : ''}
+                  <span>${a.date || a.postedDate || ''}</span>
+                  ${a.expiryDate ? `<span>Expires ${a.expiryDate}</span>` : ''}
+                </div>
+              </div>
+              <div class="spc-row-actions" onclick="event.stopPropagation()">
+                <button class="spc-btn-ghost" style="padding:5px 9px;" onclick="spCmsEditArticle('${a.id}')"><i class="ti ti-pencil"></i></button>
+                <button class="spc-btn-danger" style="padding:5px 9px;" onclick="spCmsDeleteArticle('${a.id}')"><i class="ti ti-trash"></i></button>
+              </div>
+            </div>`;
+          }).join('')}
+      </div>`;
+
+    document.getElementById('spc-search-input').addEventListener('input', function() {
+      _spcSearch = this.value;
+      renderSpcList();
+    });
+
+    window.spCmsDeleteArticle = function(id) {
+      Modal.show({
+        title: 'Delete article',
+        body: '<p style="font-size:13px;color:#5A5F6E;">This will permanently remove the article. This cannot be undone.</p>',
+        actions: [
+          { label: 'Delete', style:'danger', onClick: () => { Store.deleteCmsArticle(id); Modal.close(); renderSpcList(); } },
+          { label: 'Cancel', onClick: () => Modal.close() },
+        ],
+      });
+    };
   }
 
-  function renderBroadcastForm(container) {
+  function renderSpcEditor() {
+    const body = document.getElementById('spc-body');
+    if (!body) return;
+
+    const existing = _spcEditId ? (Store.getCmsArticle ? Store.getCmsArticle(_spcEditId) : null) : null;
+    const today = new Date().toISOString().slice(0,10);
+    const a = existing || {
+      id: 'cms-sup-' + Date.now(),
+      type: 'bulletin', subtype: 'bulletin',
+      priority: 'low', status: 'draft', postAs: 'news',
+      title: '', summary: '', body: '',
+      postedDate: today, expiryDate: '', language: 'en',
+      tags: [], targetFleet: 'all',
+      showOnOrders: false, showOnPartPage: false,
+      targetPartNum: '', targetPartDesc: '',
+      supplierId: _supplierId, vendorName: _supplierName,
+    };
+
+    // Build part tree for part-page targeting
+    const myParts = Store.getParts('', '').filter(p => p.vendor === _supplierName);
+    const partCats = {};
+    myParts.forEach(p => {
+      const cat = p.category || 'General';
+      if (!partCats[cat]) partCats[cat] = [];
+      partCats[cat].push(p);
+    });
+
+    // Restore selected part from article
+    if (a.targetPartNum && !_spPtSelectedPartId) {
+      _spPtSelectedPartId = a.targetPartNum;
+    }
+
+    const fleetAllChecked = !a.targetFleet || a.targetFleet === 'all';
+    const fleetSelected = fleetAllChecked ? new Set() : new Set((a.targetFleet||'').split(','));
+
     const fleetOpts = [
-      `<label class="sp-fleet-check" id="sp-fc-all-wrap"><input type="checkbox" id="sp-fc-all" value="all" checked/> All onboarded fleets</label>`,
-      ...(_fleets.map(f => `<label class="sp-fleet-check sp-fc-individual"><input type="checkbox" class="sp-fc-fleet" value="${f.fleetId}" disabled checked/> ${f.fleetName}</label>`))
+      `<label class="spc-check-item" id="spc-fc-all-wrap"><input type="checkbox" id="spc-fc-all" value="all" ${fleetAllChecked?'checked':''}/> All onboarded fleets</label>`,
+      ..._fleets.map(f => `<label class="spc-check-item spc-fc-individual"><input type="checkbox" class="spc-fc-fleet" value="${f.fleetId}" ${fleetAllChecked||fleetSelected.has(f.fleetId)?'checked':''} ${fleetAllChecked?'disabled':''}/> ${f.fleetName}</label>`)
     ].join('');
-    container.innerHTML = `
-      <div class="sp-compose-card">
-        <div class="sp-compose-field">
-          <label class="sp-compose-label">Content type</label>
-          <select class="sp-compose-select" id="sp-ctype">
-            <option value="bulletin">Service bulletin</option>
-            <option value="news">Product news</option>
-            <option value="safety">Safety notice</option>
-            <option value="promo">Promotion</option>
-          </select>
-        </div>
-        <div class="sp-compose-field">
-          <label class="sp-compose-label">Title *</label>
-          <input class="sp-compose-input" id="sp-ctitle" type="text" placeholder="e.g. SJIII 3219 hydraulic seal kit now available"/>
-          <div id="sp-ctitle-err" style="font-size:11px;color:#A32D2D;margin-top:3px;display:none;">Required</div>
-        </div>
-        <div class="sp-compose-field">
-          <label class="sp-compose-label">Body *</label>
-          <textarea class="sp-compose-textarea" id="sp-cbody" placeholder="Write your content here…"></textarea>
-          <div id="sp-cbody-err" style="font-size:11px;color:#A32D2D;margin-top:3px;display:none;">Required</div>
-        </div>
-        <div class="sp-compose-field">
-          <label class="sp-compose-label">Post to</label>
-          <div class="sp-fleet-check-row">${fleetOpts}</div>
-        </div>
-        <div class="sp-compose-field">
-          <label class="sp-compose-label">Placement <span style="font-weight:400;color:#9CA3AF;font-size:11px;">— where this content appears</span></label>
-          <div class="sp-fleet-check-row">
-            <label class="sp-fleet-check"><input type="checkbox" id="sp-place-news" checked/> Fleet news feed</label>
-            <label class="sp-fleet-check"><input type="checkbox" id="sp-place-orders"/> Order confirmation &amp; history pages</label>
+
+    const typeOpts = Object.entries(SP_CONTENT_TYPES).map(([v,t]) =>
+      `<option value="${v}" ${(a.subtype||a.type)===v?'selected':''}>${t.label}</option>`).join('');
+    const subTypeKey = a.subtype || a.type || 'bulletin';
+    const subtypeOpts = (SP_CONTENT_SUBTYPES[subTypeKey]||[]).map(s =>
+      `<option value="${s}" ${a.subtype===s?'selected':''}>${s}</option>`).join('');
+
+    const selectedPart = _spPtSelectedPartId ? myParts.find(p => p.id === _spPtSelectedPartId) : null;
+
+    body.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;padding:16px 0 14px;">
+        <button class="spc-btn-ghost" onclick="spCmsGoList()"><i class="ti ti-arrow-left"></i> My content</button>
+        <div style="font-size:16px;font-weight:700;color:#111318;">${_spcEditId ? 'Edit article' : 'New article'}</div>
+      </div>
+      <div class="spc-editor-grid">
+
+        <!-- Left: content -->
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="spc-panel">
+            <div class="spc-panel-hdr"><i class="ti ti-article" style="color:#9CA3AF;"></i> Article content</div>
+            <div class="spc-panel-body">
+              <div class="spc-field">
+                <label class="spc-label">Title *</label>
+                <input class="spc-input" id="spc-f-title" placeholder="Clear, specific headline" value="${escSpc(a.title)}"/>
+              </div>
+              <div class="spc-field">
+                <label class="spc-label">Summary / teaser</label>
+                <input class="spc-input" id="spc-f-summary" placeholder="One-sentence description shown in the news feed" value="${escSpc(a.summary||'')}"/>
+              </div>
+              <div class="spc-field">
+                <label class="spc-label">Body *</label>
+                <textarea class="spc-textarea" id="spc-f-body" rows="8" placeholder="Full article content…">${escSpc(a.body)}</textarea>
+              </div>
+              <div class="spc-field">
+                <label class="spc-label">Tags <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9CA3AF;">(comma-separated)</span></label>
+                <input class="spc-input" id="spc-f-tags" placeholder="e.g. hydraulics, safety, skyjack" value="${escSpc((a.tags||[]).join(', '))}"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- Placement -->
+          <div class="spc-panel">
+            <div class="spc-panel-hdr"><i class="ti ti-layout-distribute-vertical" style="color:#9CA3AF;"></i> Placement</div>
+            <div class="spc-panel-body">
+              <div class="spc-field">
+                <label class="spc-label">Where this content appears</label>
+                <div class="spc-check-list">
+                  <label class="spc-check-item"><input type="checkbox" id="spc-place-news" ${a.postAs!=='banner'||!a.showOnOrders&&!a.showOnPartPage?'checked':''}/> Fleet news feed</label>
+                  <label class="spc-check-item"><input type="checkbox" id="spc-place-orders" ${a.showOnOrders?'checked':''}/> Order confirmation &amp; history pages</label>
+                  <label class="spc-check-item"><input type="checkbox" id="spc-place-part" ${a.showOnPartPage?'checked':''}  onchange="spCmsTogglePartTree(this.checked)"/> Part page message</label>
+                </div>
+              </div>
+              <div id="spc-part-tree-section" style="${a.showOnPartPage?'':'display:none;'}">
+                <label class="spc-label" style="margin-bottom:6px;display:block;">Target part <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9CA3AF;">— select from your catalog</span></label>
+                ${selectedPart ? `<div class="spc-selected-banner"><i class="ti ti-tag" style="font-size:13px;color:#854F0B;flex-shrink:0;"></i><div><div class="spc-banner-pnum">${selectedPart.partNum}</div><div class="spc-banner-desc">${selectedPart.description}</div></div><button class="spc-btn-ghost" style="margin-left:auto;padding:3px 8px;font-size:11px;" onclick="spCmsClearPart()">✕ Clear</button></div>` : ''}
+                <div class="spc-tree-panel">
+                  <div class="spc-tree-search-wrap">
+                    <i class="ti ti-search spc-tree-search-icon"></i>
+                    <input class="spc-tree-search" id="spc-pt-search" type="text" placeholder="Search parts…"/>
+                  </div>
+                  <div class="spc-tree-body" id="spc-pt-tree"></div>
+                </div>
+              </div>
+              <div class="spc-field">
+                <label class="spc-label">Post as</label>
+                <div style="display:flex;flex-direction:column;gap:5px;">
+                  <label class="spc-post-opt ${a.postAs==='news'||!a.postAs?'selected':''}" onclick="spcSelectPostAs('news')"><input type="radio" name="spc-post-as" value="news" ${a.postAs==='news'||!a.postAs?'checked':''}/><i class="ti ti-news" style="font-size:14px;color:#9CA3AF;"></i> News &amp; updates feed only</label>
+                  <label class="spc-post-opt ${a.postAs==='banner'?'selected':''}" onclick="spcSelectPostAs('banner')"><input type="radio" name="spc-post-as" value="banner" ${a.postAs==='banner'?'checked':''}/><i class="ti ti-speakerphone" style="font-size:14px;color:#9CA3AF;"></i> Site-wide banner only</label>
+                  <label class="spc-post-opt ${a.postAs==='both'?'selected':''}" onclick="spcSelectPostAs('both')"><input type="radio" name="spc-post-as" value="both" ${a.postAs==='both'?'checked':''}/><i class="ti ti-layout-board" style="font-size:14px;color:#9CA3AF;"></i> News feed + banner</label>
+                </div>
+              </div>
+              <div id="spc-banner-opts" style="${a.postAs==='news'||!a.postAs?'display:none;':''}">
+                <div class="spc-field">
+                  <label class="spc-label">Banner text</label>
+                  <input class="spc-input" id="spc-f-banner-text" placeholder="Short message shown in the banner" value="${escSpc(a.bannerText||a.summary||'')}"/>
+                </div>
+                <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5A5F6E;margin-top:6px;cursor:pointer;">
+                  <input type="checkbox" id="spc-f-dismissible" ${a.bannerDismissible!==false?'checked':''}/> Users can dismiss banner
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI tools -->
+          <div class="spc-panel">
+            <div class="spc-panel-hdr"><i class="ti ti-sparkles" style="color:#F5A623;"></i> AI writing tools</div>
+            <div class="spc-panel-body" style="gap:8px;">
+              <button class="spc-ai-btn" onclick="spcAiAction('rewrite')"><div class="ai-icon"><i class="ti ti-wand"></i></div><div><div style="font-weight:600;">Rewrite &amp; improve</div><div style="font-size:10px;color:#9CA3AF;">Enhance clarity and professional tone</div></div></button>
+              <button class="spc-ai-btn" onclick="spcAiAction('simplify')"><div class="ai-icon"><i class="ti ti-list-check"></i></div><div><div style="font-weight:600;">Simplify</div><div style="font-size:10px;color:#9CA3AF;">Reduce to key action items</div></div></button>
+              <button class="spc-ai-btn" onclick="spcAiAction('translate')"><div class="ai-icon"><i class="ti ti-language"></i></div><div><div style="font-weight:600;">Translate</div><div style="font-size:10px;color:#9CA3AF;">Convert to selected language</div></div></button>
+              <div id="spc-ai-preview-area" style="display:none;">
+                <div class="spc-ai-preview" id="spc-ai-preview-text"></div>
+                <div style="display:flex;gap:6px;margin-top:8px;">
+                  <button class="spc-btn-primary" style="font-size:11px;padding:5px 11px;" onclick="spcAiApply()"><i class="ti ti-check"></i> Apply</button>
+                  <button class="spc-btn-ghost" style="font-size:11px;padding:5px 11px;" onclick="spcAiDismiss()">Discard</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="spc-action-bar">
+            <button class="spc-btn-ghost" onclick="spCmsGoList()"><i class="ti ti-arrow-left"></i> Cancel</button>
+            <div style="flex:1;"></div>
+            <button class="spc-btn-ghost" onclick="spcSaveDraft()"><i class="ti ti-device-floppy"></i> Save draft</button>
+            <button class="spc-btn-ghost" onclick="spcSchedule()"><i class="ti ti-calendar-event"></i> Schedule</button>
+            <button class="spc-btn-primary" onclick="spcPublish()"><i class="ti ti-send"></i> Publish now</button>
           </div>
         </div>
-        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px;">
-          <button class="sp-btn sp-btn-ghost" onclick="document.getElementById('sp-ctitle').value='';document.getElementById('sp-cbody').value='';">Clear</button>
-          <button class="sp-btn sp-btn-primary" id="sp-publish-btn"><i class="ti ti-send" style="font-size:12px;"></i> Publish</button>
-        </div>
-        <div id="sp-publish-confirm" style="margin-top:12px;font-size:12px;color:#0F6E56;display:none;">
-          <i class="ti ti-circle-check"></i> Content published successfully.
+
+        <!-- Right: settings -->
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="spc-panel">
+            <div class="spc-panel-hdr"><i class="ti ti-tags" style="color:#9CA3AF;"></i> Classification</div>
+            <div class="spc-panel-body">
+              <div class="spc-field">
+                <label class="spc-label">Content type</label>
+                <select class="spc-select" id="spc-f-type" onchange="spcTypeChange(this.value)">
+                  ${typeOpts}
+                </select>
+              </div>
+              <div class="spc-field">
+                <label class="spc-label">Sub-type</label>
+                <select class="spc-select" id="spc-f-subtype">${subtypeOpts}</select>
+              </div>
+              <div class="spc-field">
+                <label class="spc-label">Priority</label>
+                <select class="spc-select" id="spc-f-priority">
+                  ${SP_PRIORITIES.map(p => `<option value="${p.value}" ${a.priority===p.value?'selected':''}>${p.label}</option>`).join('')}
+                </select>
+              </div>
+              <div class="spc-row-2">
+                <div class="spc-field">
+                  <label class="spc-label">Publish date</label>
+                  <input class="spc-input" type="date" id="spc-f-date" value="${a.postedDate||today}"/>
+                </div>
+                <div class="spc-field">
+                  <label class="spc-label">Expiry date</label>
+                  <input class="spc-input" type="date" id="spc-f-expiry" value="${a.expiryDate||''}"/>
+                </div>
+              </div>
+              <div class="spc-field">
+                <label class="spc-label">Language</label>
+                <select class="spc-select" id="spc-f-language">
+                  ${SP_LANGUAGES.map(l => `<option value="${l.value}" ${(a.language||'en')===l.value?'selected':''}>${l.label}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="spc-panel">
+            <div class="spc-panel-hdr"><i class="ti ti-send" style="color:#9CA3AF;"></i> Distribution</div>
+            <div class="spc-panel-body">
+              <div class="spc-field">
+                <label class="spc-label">Post to fleets</label>
+                <div class="spc-check-list">${fleetOpts}</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>`;
 
-    document.getElementById('sp-fc-all').addEventListener('change', function() {
-      const fleetBoxes = document.querySelectorAll('.sp-fc-fleet');
-      if (this.checked) {
-        fleetBoxes.forEach(cb => { cb.checked = true; cb.disabled = true; });
-      } else {
-        fleetBoxes.forEach(cb => { cb.checked = false; cb.disabled = false; });
-      }
-    });
-    document.querySelectorAll('.sp-fc-fleet').forEach(cb => {
+    // Fleet checkbox logic
+    const fcAll = document.getElementById('spc-fc-all');
+    if (fcAll) {
+      fcAll.addEventListener('change', function() {
+        document.querySelectorAll('.spc-fc-fleet').forEach(cb => { cb.checked = this.checked; cb.disabled = this.checked; });
+      });
+    }
+    document.querySelectorAll('.spc-fc-fleet').forEach(cb => {
       cb.addEventListener('change', function() {
-        const all = document.querySelectorAll('.sp-fc-fleet');
-        const checked = document.querySelectorAll('.sp-fc-fleet:checked');
+        const all = document.querySelectorAll('.spc-fc-fleet');
+        const checked = document.querySelectorAll('.spc-fc-fleet:checked');
         if (checked.length === all.length) {
-          document.getElementById('sp-fc-all').checked = true;
-          all.forEach(c => { c.checked = true; c.disabled = true; });
+          if (fcAll) { fcAll.checked = true; all.forEach(c => { c.checked = true; c.disabled = true; }); }
         }
       });
     });
 
-    document.getElementById('sp-publish-btn').addEventListener('click', function() {
-      const title = document.getElementById('sp-ctitle').value.trim();
-      const body  = document.getElementById('sp-cbody').value.trim();
-      document.getElementById('sp-ctitle-err').style.display = title ? 'none' : 'block';
-      document.getElementById('sp-cbody-err').style.display  = body  ? 'none' : 'block';
-      if (!title || !body) return;
-
-      const allChecked = document.getElementById('sp-fc-all').checked;
-      const selectedFleets = allChecked
-        ? ['all']
-        : [...document.querySelectorAll('.sp-fc-fleet:checked')].map(cb => cb.value);
-      const target = allChecked ? 'all' : (selectedFleets.length === 1 ? selectedFleets[0] : selectedFleets.join(','));
-      const showOnOrders = !!(document.getElementById('sp-place-orders') || {}).checked;
-      Store.saveCmsArticle({
-        id: 'cms-sup-' + Date.now(),
-        type: 'bulletin',
-        subtype: document.getElementById('sp-ctype').value,
-        status: 'published',
-        postAs: 'news',
-        title,
-        body,
-        author: _user.displayName,
-        supplierId: _supplierId,
-        vendorName: _supplierName,
-        targetFleet: target,
-        showOnOrders,
-        date: 'Jul 2026',
-        priority: 'low',
-        locations: [target === 'all' ? 'all' : target],
-      });
-
-      document.getElementById('sp-ctitle').value = '';
-      document.getElementById('sp-cbody').value = '';
-      document.getElementById('sp-publish-confirm').style.display = 'block';
-      setTimeout(() => {
-        const c = document.getElementById('sp-publish-confirm');
-        if (c) c.style.display = 'none';
-      }, 3500);
-    });
-  }
-
-  function renderPartPageForm(container) {
-    // Build part tree from supplier's parts, grouped by category
-    const myParts = Store.getParts('', '').filter(p => p.vendor === _supplierName);
-    const cats = {};
-    myParts.forEach(p => {
-      const cat = p.category || 'General';
-      if (!cats[cat]) cats[cat] = [];
-      cats[cat].push(p);
-    });
-
-    if (!myParts.length) {
-      container.innerHTML = `<div style="padding:40px;text-align:center;color:#9CA3AF;font-size:13px;">No parts found for ${_supplierName} in the catalog.</div>`;
-      return;
-    }
-
-    container.innerHTML = `
-      <div class="spc-layout">
-        <div class="spc-tree-panel">
-          <div class="spc-tree-search-wrap">
-            <i class="ti ti-search spc-tree-search-icon"></i>
-            <input class="spc-tree-search" id="spc-tree-search" type="text" placeholder="Search parts…"/>
-          </div>
-          <div class="spc-tree-body" id="spc-tree-body"></div>
-        </div>
-        <div id="spc-compose-area">
-          <div class="spc-empty-state">
-            <i class="ti ti-tag spc-empty-icon"></i>
-            Select a part from the tree to write a message that will appear on that part's detail page.
-          </div>
-        </div>
-      </div>`;
-
+    // Part tree rendering
     let _ptSearch = '';
-
-    function renderPartTree() {
-      const treeBody = document.getElementById('spc-tree-body');
-      if (!treeBody) return;
+    function renderSpcPartTree() {
+      const treeEl = document.getElementById('spc-pt-tree');
+      if (!treeEl) return;
       const q = _ptSearch.toLowerCase().trim();
       let html = '';
-      Object.entries(cats).forEach(([cat, parts]) => {
+      Object.entries(partCats).forEach(([cat, parts]) => {
         const visible = q ? parts.filter(p => p.description.toLowerCase().includes(q) || p.partNum.toLowerCase().includes(q)) : parts;
         if (!visible.length) return;
-        const isOpen = _spPtExpandedCats.has(cat) || q;
+        const isOpen = _spPtExpandedCats.has(cat) || !!q;
         html += `<div class="spc-cat-hdr" onclick="spTogglePtCat('${cat.replace(/'/g,"\\'")}')">
-          <i class="ti ti-folder" style="font-size:13px;color:#9CA3AF;"></i>
-          <span>${cat}</span>
-          <span style="font-size:10px;font-weight:400;color:#B0AAA3;margin-left:4px;">${visible.length}</span>
-          ${!q ? `<i class="ti ti-chevron-right spc-cat-chevron ${isOpen?'open':''}"></i>` : ''}
+          <i class="ti ti-folder" style="font-size:11px;color:#B0AAA3;"></i><span>${cat}</span>
+          <span style="font-size:9px;color:#C0BAB3;margin-left:4px;">${visible.length}</span>
+          ${!q?`<i class="ti ti-chevron-right spc-cat-chevron ${isOpen?'open':''}"></i>`:''}
         </div>`;
         if (isOpen || q) {
           visible.forEach(p => {
             html += `<div class="spc-part-item ${_spPtSelectedPartId===p.id?'selected':''}" onclick="spSelectPtPart('${p.id}')">
-              <span class="spc-part-pnum">${p.partNum}</span>
-              <span class="spc-part-desc">${p.description}</span>
+              <span class="spc-part-pnum">${p.partNum}</span><span class="spc-part-desc">${p.description}</span>
             </div>`;
           });
         }
       });
-      if (!html) html = '<div style="padding:24px;text-align:center;color:#B0AAA3;font-size:12px;">No parts match your search.</div>';
-      treeBody.innerHTML = html;
+      if (!html) html = '<div style="padding:18px;text-align:center;color:#B0AAA3;font-size:11px;">No parts match.</div>';
+      treeEl.innerHTML = html;
     }
 
-    renderPartTree();
-
-    // expose inner renderPartTree to window.spTogglePtCat and window.spSelectPtPart
-    const origToggle = window.spTogglePtCat;
     window.spTogglePtCat = function(cat) {
       if (_spPtExpandedCats.has(cat)) { _spPtExpandedCats.delete(cat); } else { _spPtExpandedCats.add(cat); }
-      renderPartTree();
+      renderSpcPartTree();
     };
     window.spSelectPtPart = function(partId) {
       _spPtSelectedPartId = partId;
-      renderPartTree();
-      renderPartComposeArea();
+      renderSpcPartTree();
+      // Update the selected banner above tree
+      const section = document.getElementById('spc-part-tree-section');
+      if (section) {
+        const part = myParts.find(p => p.id === partId);
+        let bannerEl = section.querySelector('.spc-selected-banner');
+        if (!bannerEl) {
+          bannerEl = document.createElement('div');
+          section.insertBefore(bannerEl, section.querySelector('.spc-tree-panel'));
+        }
+        bannerEl.className = 'spc-selected-banner';
+        bannerEl.innerHTML = `<i class="ti ti-tag" style="font-size:13px;color:#854F0B;flex-shrink:0;"></i><div><div class="spc-banner-pnum">${part.partNum}</div><div class="spc-banner-desc">${part.description}</div></div><button class="spc-btn-ghost" style="margin-left:auto;padding:3px 8px;font-size:11px;" onclick="spCmsClearPart()">✕ Clear</button>`;
+      }
+    };
+    window.spCmsClearPart = function() {
+      _spPtSelectedPartId = null;
+      const section = document.getElementById('spc-part-tree-section');
+      if (section) { const b = section.querySelector('.spc-selected-banner'); if (b) b.remove(); }
+      renderSpcPartTree();
     };
 
-    document.getElementById('spc-tree-search').addEventListener('input', function() {
-      _ptSearch = this.value;
-      renderPartTree();
-    });
-
-    function renderPartComposeArea() {
-      const area = document.getElementById('spc-compose-area');
-      if (!area) return;
-      if (!_spPtSelectedPartId) {
-        area.innerHTML = `<div class="spc-empty-state"><i class="ti ti-tag spc-empty-icon"></i>Select a part from the tree to write a message that will appear on that part's detail page.</div>`;
-        return;
-      }
-      const part = myParts.find(p => p.id === _spPtSelectedPartId);
-      if (!part) return;
-
-      // Determine which fleets have this part from this supplier
-      // (All onboarded fleets are valid targets since supplier catalog is shared)
-      const fleetOpts = _fleets.map(f =>
-        `<label class="sp-fleet-check"><input type="checkbox" class="spc-pt-fleet" value="${f.fleetId}" checked/> ${f.fleetName}</label>`
-      ).join('');
-
-      area.innerHTML = `
-        <div class="spc-compose-panel">
-          <div class="spc-selected-banner">
-            <i class="ti ti-tag" style="font-size:14px;color:#854F0B;flex-shrink:0;"></i>
-            <div>
-              <div class="spc-selected-pnum">${part.partNum}</div>
-              <div class="spc-selected-desc">${part.description}</div>
-            </div>
-          </div>
-          <div class="sp-compose-field">
-            <label class="sp-compose-label">Message title *</label>
-            <input class="sp-compose-input" id="spc-pt-title" type="text" placeholder="e.g. Updated installation torque specs for this part"/>
-            <div id="spc-pt-title-err" style="font-size:11px;color:#A32D2D;margin-top:3px;display:none;">Required</div>
-          </div>
-          <div class="sp-compose-field">
-            <label class="sp-compose-label">Message body *</label>
-            <textarea class="sp-compose-textarea" id="spc-pt-body" placeholder="Details visible when a mechanic or supervisor views this part's item page…"></textarea>
-            <div id="spc-pt-body-err" style="font-size:11px;color:#A32D2D;margin-top:3px;display:none;">Required</div>
-          </div>
-          <div class="sp-compose-field">
-            <label class="sp-compose-label">Visible to fleets</label>
-            <div class="sp-fleet-check-row" id="spc-pt-fleet-row">${fleetOpts}</div>
-          </div>
-          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px;">
-            <button class="sp-btn sp-btn-ghost" onclick="document.getElementById('spc-pt-title').value='';document.getElementById('spc-pt-body').value='';">Clear</button>
-            <button class="sp-btn sp-btn-primary" id="spc-pt-publish-btn"><i class="ti ti-send" style="font-size:12px;"></i> Publish to part page</button>
-          </div>
-          <div id="spc-pt-confirm" style="margin-top:12px;font-size:12px;color:#0F6E56;display:none;">
-            <i class="ti ti-circle-check"></i> Message published to part page.
-          </div>
-        </div>`;
-
-      document.getElementById('spc-pt-publish-btn').addEventListener('click', function() {
-        const title = document.getElementById('spc-pt-title').value.trim();
-        const body  = document.getElementById('spc-pt-body').value.trim();
-        document.getElementById('spc-pt-title-err').style.display = title ? 'none' : 'block';
-        document.getElementById('spc-pt-body-err').style.display  = body  ? 'none' : 'block';
-        if (!title || !body) return;
-
-        const selectedFleets = [...document.querySelectorAll('.spc-pt-fleet:checked')].map(cb => cb.value);
-        const target = selectedFleets.length === _fleets.length ? 'all' : selectedFleets.join(',');
-
-        Store.saveCmsArticle({
-          id: 'cms-sup-pt-' + Date.now(),
-          type: 'bulletin',
-          subtype: 'advisory',
-          status: 'published',
-          postAs: 'news',
-          title,
-          body,
-          author: _user.displayName,
-          supplierId: _supplierId,
-          vendorName: _supplierName,
-          targetFleet: target,
-          showOnPartPage: true,
-          targetPartNum: part.id,
-          targetPartDesc: part.description,
-          date: 'Jul 2026',
-          priority: 'low',
-          locations: [target === 'all' ? 'all' : selectedFleets[0] || 'all'],
-        });
-
-        document.getElementById('spc-pt-title').value = '';
-        document.getElementById('spc-pt-body').value = '';
-        document.getElementById('spc-pt-confirm').style.display = 'block';
-        setTimeout(() => {
-          const c = document.getElementById('spc-pt-confirm');
-          if (c) c.style.display = 'none';
-        }, 3500);
-      });
+    const ptSearchEl = document.getElementById('spc-pt-search');
+    if (ptSearchEl) {
+      ptSearchEl.addEventListener('input', function() { _ptSearch = this.value; renderSpcPartTree(); });
     }
+    if (a.showOnPartPage) renderSpcPartTree();
+
+    window.spCmsTogglePartTree = function(show) {
+      const sec = document.getElementById('spc-part-tree-section');
+      if (sec) sec.style.display = show ? '' : 'none';
+      if (show) renderSpcPartTree();
+      else { _spPtSelectedPartId = null; }
+    };
+
+    window.spcSelectPostAs = function(val) {
+      document.querySelectorAll('.spc-post-opt').forEach(el => el.classList.toggle('selected', el.querySelector('input').value === val));
+      const bOpts = document.getElementById('spc-banner-opts');
+      if (bOpts) bOpts.style.display = val === 'news' ? 'none' : '';
+    };
+
+    window.spcTypeChange = function(type) {
+      const st = document.getElementById('spc-f-subtype');
+      if (st) st.innerHTML = (SP_CONTENT_SUBTYPES[type]||[]).map(s=>`<option>${s}</option>`).join('');
+    };
+
+    window.spcAiAction = function(action) {
+      const bodyEl = document.getElementById('spc-f-body');
+      if (!bodyEl || !bodyEl.value.trim()) { alert('Add body content first.'); return; }
+      _spcAiMode = action;
+      let result;
+      if (action === 'translate') {
+        const lang = (document.getElementById('spc-f-language')||{}).value || 'en';
+        result = lang === 'es' ? SP_AI_REWRITES.translate_es(bodyEl.value)
+               : lang === 'en' ? bodyEl.value + '\n\n[Content is already in English.]'
+               : `[Translation to ${lang.toUpperCase()} would appear here.]\n\n` + bodyEl.value;
+      } else {
+        result = SP_AI_REWRITES[action](bodyEl.value);
+      }
+      const preview = document.getElementById('spc-ai-preview-text');
+      const area = document.getElementById('spc-ai-preview-area');
+      if (preview) preview.textContent = result;
+      if (area) area.style.display = '';
+    };
+    window.spcAiApply = function() {
+      const b = document.getElementById('spc-f-body'), p = document.getElementById('spc-ai-preview-text');
+      if (b && p) b.value = p.textContent;
+      spcAiDismiss();
+    };
+    window.spcAiDismiss = function() {
+      const area = document.getElementById('spc-ai-preview-area');
+      if (area) area.style.display = 'none';
+      _spcAiMode = null;
+    };
+
+    function spcCollectForm(status) {
+      const g = id => (document.getElementById(id)||{}).value || '';
+      const title = g('spc-f-title').trim();
+      if (!title) { alert('Title is required.'); return null; }
+      const bodyVal = g('spc-f-body').trim();
+      if (!bodyVal) { alert('Body content is required.'); return null; }
+      const postAs = (document.querySelector('.spc-post-opt.selected input')||{}).value || 'news';
+      const allChecked = !!(document.getElementById('spc-fc-all')||{}).checked;
+      const selectedFleets = allChecked ? ['all'] : [...document.querySelectorAll('.spc-fc-fleet:checked')].map(cb=>cb.value);
+      const target = allChecked ? 'all' : (selectedFleets.length===1 ? selectedFleets[0] : selectedFleets.join(','));
+      const showOnOrders = !!(document.getElementById('spc-place-orders')||{}).checked;
+      const showOnPartPage = !!(document.getElementById('spc-place-part')||{}).checked;
+      const typeVal = g('spc-f-type');
+      const sub = g('spc-f-subtype');
+      const postedDate = g('spc-f-date') || today;
+      return {
+        id: existing ? existing.id : ('cms-sup-' + Date.now()),
+        type: typeVal, subtype: sub || typeVal,
+        priority: g('spc-f-priority') || 'low',
+        status, postAs,
+        title, summary: g('spc-f-summary'), body: bodyVal,
+        author: _user.displayName,
+        poster: _user.displayName,
+        supplierId: _supplierId,
+        vendorName: _supplierName,
+        targetFleet: target,
+        showOnOrders,
+        showOnPartPage,
+        targetPartNum: showOnPartPage ? (_spPtSelectedPartId || '') : '',
+        targetPartDesc: showOnPartPage && _spPtSelectedPartId ? (myParts.find(p=>p.id===_spPtSelectedPartId)||{}).description||'' : '',
+        postedDate, date: postedDate,
+        expiryDate: g('spc-f-expiry'),
+        language: g('spc-f-language') || 'en',
+        tags: g('spc-f-tags').split(',').map(t=>t.trim()).filter(Boolean),
+        locations: [target === 'all' ? 'all' : (selectedFleets[0]||'all')],
+        banner: postAs !== 'news',
+        bannerDismissible: (document.getElementById('spc-f-dismissible')||{}).checked !== false,
+        bannerText: g('spc-f-banner-text'),
+      };
+    }
+
+    window.spcSaveDraft = function() {
+      const art = spcCollectForm('draft');
+      if (!art) return;
+      Store.saveCmsArticle(art);
+      _spcView = 'list'; _spcEditId = null; renderContent();
+    };
+    window.spcPublish = function() {
+      const art = spcCollectForm('published');
+      if (!art) return;
+      Store.saveCmsArticle(art);
+      _spcView = 'list'; _spcEditId = null; renderContent();
+    };
+    window.spcSchedule = function() {
+      const art = spcCollectForm('scheduled');
+      if (!art) return;
+      Store.saveCmsArticle(art);
+      _spcView = 'list'; _spcEditId = null; renderContent();
+    };
   }
 
   // ── Manuals ──────────────────────────────────────────────────────────────────
@@ -1581,8 +1839,11 @@ function render_supplier_portal(el) {
 
     const contentEl = document.getElementById('sp-content');
     const fullHeight = ['manuals', 'news', 'analytics'].includes(tab);
+    const scrollPad = ['content'].includes(tab);
     if (fullHeight) {
       contentEl.style.cssText = 'flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0;';
+    } else if (scrollPad) {
+      contentEl.style.cssText = 'flex:1;overflow-y:auto;padding:0;';
     } else {
       contentEl.style.cssText = 'flex:1;overflow-y:auto;padding:28px;';
     }
