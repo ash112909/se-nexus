@@ -10,7 +10,7 @@ function render_supplier_portal(el) {
 
   // Analytics state (persists across tab switches)
   let _spPeriod = '30D';
-  let _spFleetId = null; // null = all
+  let _spFleetIds = null; // null = all; Set<fleetId> = specific selection
 
   // Manuals state
   let _spManType = null; // null = all
@@ -376,8 +376,8 @@ function render_supplier_portal(el) {
     const titleEl = document.getElementById('sp-topbar-title');
     if (titleEl) titleEl.textContent = 'Post Content';
     const fleetOpts = [
-      `<label class="sp-fleet-check"><input type="radio" name="sp-fleet-target" value="all" checked/> All onboarded fleets</label>`,
-      ...(_fleets.map(f => `<label class="sp-fleet-check"><input type="radio" name="sp-fleet-target" value="${f.fleetId}"/> ${f.fleetName} only</label>`))
+      `<label class="sp-fleet-check" id="sp-fc-all-wrap"><input type="checkbox" id="sp-fc-all" value="all" checked/> All onboarded fleets</label>`,
+      ...(_fleets.map(f => `<label class="sp-fleet-check sp-fc-individual"><input type="checkbox" class="sp-fc-fleet" value="${f.fleetId}" disabled checked/> ${f.fleetName}</label>`))
     ].join('');
     document.getElementById('sp-content').innerHTML = `
       <div class="sp-page-title">Post Content</div>
@@ -415,6 +415,27 @@ function render_supplier_portal(el) {
         </div>
       </div>`;
 
+    // "All fleets" checkbox toggles individual fleet checkboxes
+    document.getElementById('sp-fc-all').addEventListener('change', function() {
+      const fleetBoxes = document.querySelectorAll('.sp-fc-fleet');
+      if (this.checked) {
+        fleetBoxes.forEach(cb => { cb.checked = true; cb.disabled = true; });
+      } else {
+        fleetBoxes.forEach(cb => { cb.checked = false; cb.disabled = false; });
+      }
+    });
+    // If all individual fleets get checked, revert to "All" mode
+    document.querySelectorAll('.sp-fc-fleet').forEach(cb => {
+      cb.addEventListener('change', function() {
+        const all = document.querySelectorAll('.sp-fc-fleet');
+        const checked = document.querySelectorAll('.sp-fc-fleet:checked');
+        if (checked.length === all.length) {
+          document.getElementById('sp-fc-all').checked = true;
+          all.forEach(c => { c.checked = true; c.disabled = true; });
+        }
+      });
+    });
+
     document.getElementById('sp-publish-btn').addEventListener('click', function() {
       const title = document.getElementById('sp-ctitle').value.trim();
       const body  = document.getElementById('sp-cbody').value.trim();
@@ -422,7 +443,11 @@ function render_supplier_portal(el) {
       document.getElementById('sp-cbody-err').style.display  = body  ? 'none' : 'block';
       if (!title || !body) return;
 
-      const target = document.querySelector('input[name="sp-fleet-target"]:checked')?.value || 'all';
+      const allChecked = document.getElementById('sp-fc-all').checked;
+      const selectedFleets = allChecked
+        ? ['all']
+        : [...document.querySelectorAll('.sp-fc-fleet:checked')].map(cb => cb.value);
+      const target = allChecked ? 'all' : (selectedFleets.length === 1 ? selectedFleets[0] : selectedFleets.join(','));
       Store.saveCmsArticle({
         id: 'cms-sup-' + Date.now(),
         type: document.getElementById('sp-ctype').value === 'bulletin' ? 'bulletin' : 'bulletin',
@@ -865,13 +890,13 @@ function render_supplier_portal(el) {
 
   function renderFleetPills() {
     const FLEET_COLORS = ['#F5A623','#185FA5','#3B6D11','#534AB7','#A32D2D'];
-    const allActive = !_spFleetId;
-    return `<div class="an-loc-pill ${allActive?'active':''}" onclick="spAnSetFleet(null)" style="${allActive?'background:#111318;color:#FFFFFF;border-color:#111318;':''}">
+    const allActive = !_spFleetIds;
+    return `<div class="an-loc-pill ${allActive?'active':''}" onclick="spAnToggleAllFleets()" style="${allActive?'background:#111318;color:#FFFFFF;border-color:#111318;':''}">
         <i class="ti ti-stack-2" style="font-size:11px;"></i> All fleets
       </div>
       ${_fleets.map((f, i) => {
-        const active = _spFleetId === f.fleetId;
-        return `<div class="an-loc-pill ${active?'active':''}" onclick="spAnSetFleet('${f.fleetId}')" style="${active?`background:#FAEEDA;color:#854F0B;border-color:#F5C97A;`:''}">
+        const active = !_spFleetIds || _spFleetIds.has(f.fleetId);
+        return `<div class="an-loc-pill ${active?'active':''}" onclick="spAnToggleFleet('${f.fleetId}')" style="${active?`background:#FAEEDA;color:#854F0B;border-color:#F5C97A;`:''}">
           <div class="an-loc-dot" style="background:${FLEET_COLORS[i%FLEET_COLORS.length]};"></div>
           ${f.fleetName.split(' ')[0]}
         </div>`;
@@ -886,8 +911,29 @@ function render_supplier_portal(el) {
     renderSpAnalyticsContent();
   };
 
-  window.spAnSetFleet = function(fleetId) {
-    _spFleetId = fleetId;
+  window.spAnToggleAllFleets = function() {
+    _spFleetIds = null; // null = all selected
+    const pillsEl = document.getElementById('sp-an-fleet-pills');
+    if (pillsEl) pillsEl.innerHTML = renderFleetPills();
+    renderSpAnalyticsContent();
+  };
+
+  window.spAnToggleFleet = function(fleetId) {
+    if (!_spFleetIds) {
+      // Currently all selected — deselect all except this one
+      _spFleetIds = new Set([fleetId]);
+    } else if (_spFleetIds.has(fleetId)) {
+      if (_spFleetIds.size === 1) {
+        // Last one — reset to all
+        _spFleetIds = null;
+      } else {
+        _spFleetIds.delete(fleetId);
+      }
+    } else {
+      _spFleetIds.add(fleetId);
+      // If all are now selected, reset to null (all)
+      if (_spFleetIds.size === _fleets.length) _spFleetIds = null;
+    }
     const pillsEl = document.getElementById('sp-an-fleet-pills');
     if (pillsEl) pillsEl.innerHTML = renderFleetPills();
     renderSpAnalyticsContent();
@@ -898,8 +944,8 @@ function render_supplier_portal(el) {
     if (!body) return;
 
     const allReqs = Store.getPriceRequests(_supplierId);
-    const filteredReqs = _spFleetId ? allReqs.filter(r => r.fleetId === _spFleetId) : allReqs;
-    const filteredFleets = _spFleetId ? _fleets.filter(f => f.fleetId === _spFleetId) : _fleets;
+    const filteredReqs = _spFleetIds ? allReqs.filter(r => _spFleetIds.has(r.fleetId)) : allReqs;
+    const filteredFleets = _spFleetIds ? _fleets.filter(f => _spFleetIds.has(f.fleetId)) : _fleets;
     const myArticles = (Store.getCmsArticles ? Store.getCmsArticles('published') : []).filter(a => a.supplierId === _supplierId);
 
     // KPI calculations
@@ -1057,7 +1103,7 @@ function render_supplier_portal(el) {
       <div class="an-card" style="grid-column:1/2;">
         <div class="an-card-hdr">
           <div class="an-card-title"><i class="ti ti-trending-up" style="font-size:13px;color:#F5A623;"></i> Price request trend</div>
-          <span class="an-card-sub">${_spFleetId ? filteredFleets[0]?.fleetName : 'All fleets'} · ${_spPeriod}</span>
+          <span class="an-card-sub">${!_spFleetIds ? 'All fleets' : filteredFleets.map(f=>f.fleetName.split(' ')[0]).join(', ')} · ${_spPeriod}</span>
         </div>
         <div class="an-card-body">
           <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
