@@ -406,6 +406,13 @@ function render_supplier_portal(el) {
           <label class="sp-compose-label">Post to</label>
           <div class="sp-fleet-check-row">${fleetOpts}</div>
         </div>
+        <div class="sp-compose-field">
+          <label class="sp-compose-label">Placement <span style="font-weight:400;color:#9CA3AF;font-size:11px;">— where this content appears</span></label>
+          <div class="sp-fleet-check-row">
+            <label class="sp-fleet-check"><input type="checkbox" id="sp-place-news" checked/> Fleet news feed</label>
+            <label class="sp-fleet-check"><input type="checkbox" id="sp-place-orders"/> Order confirmation &amp; history pages</label>
+          </div>
+        </div>
         <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px;">
           <button class="sp-btn sp-btn-ghost" onclick="document.getElementById('sp-ctitle').value='';document.getElementById('sp-cbody').value='';">Clear</button>
           <button class="sp-btn sp-btn-primary" id="sp-publish-btn"><i class="ti ti-send" style="font-size:12px;"></i> Publish</button>
@@ -448,6 +455,7 @@ function render_supplier_portal(el) {
         ? ['all']
         : [...document.querySelectorAll('.sp-fc-fleet:checked')].map(cb => cb.value);
       const target = allChecked ? 'all' : (selectedFleets.length === 1 ? selectedFleets[0] : selectedFleets.join(','));
+      const showOnOrders = !!(document.getElementById('sp-place-orders') || {}).checked;
       Store.saveCmsArticle({
         id: 'cms-sup-' + Date.now(),
         type: document.getElementById('sp-ctype').value === 'bulletin' ? 'bulletin' : 'bulletin',
@@ -458,7 +466,9 @@ function render_supplier_portal(el) {
         body,
         author: _user.displayName,
         supplierId: _supplierId,
+        vendorName: _supplierName,
         targetFleet: target,
+        showOnOrders,
         date: 'Jul 2026',
         priority: 'low',
         locations: [target === 'all' ? 'all' : target],

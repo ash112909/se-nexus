@@ -58,6 +58,28 @@ function render_order_review(el) {
   function subtotal() { return _items.reduce((s, c) => s + c.price * (c.qty || 1), 0); }
   function totalWeight() { return _items.reduce((s, c) => s + (c.weight || 0) * (c.qty || 1), 0); }
 
+  function renderSupplierMessages() {
+    if (!Store.getCmsArticles) return '';
+    const vendors = [...new Set(_items.map(c => c.vendor).filter(Boolean))];
+    const msgs = Store.getCmsArticles('published').filter(a => a.showOnOrders && a.vendorName && vendors.includes(a.vendorName));
+    if (!msgs.length) return '';
+    return `<div class="or-card">
+      <div class="or-card-header">
+        <div class="or-card-title"><i class="ti ti-speakerphone" style="font-size:15px;color:#534AB7;"></i> Messages from your supplier${msgs.length !== 1 ? 's' : ''}</div>
+      </div>
+      <div class="or-card-body" style="display:flex;flex-direction:column;gap:10px;">
+        ${msgs.map(a => `<div style="background:#F5F2EE;border-radius:9px;padding:12px 14px;border-left:3px solid #534AB7;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+            <span style="font-size:11px;font-weight:700;color:#534AB7;text-transform:uppercase;letter-spacing:.6px;">${a.vendorName}</span>
+            <span style="font-size:10px;color:#9CA3AF;">${a.date || ''}</span>
+          </div>
+          <div style="font-size:13px;font-weight:600;color:#111318;margin-bottom:3px;">${a.title}</div>
+          <div style="font-size:12px;color:#5A5F6E;line-height:1.55;">${a.body ? a.body.slice(0, 300) + (a.body.length > 300 ? '…' : '') : ''}</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }
+
   function renderItemsTable() {
     return `<table class="or-table">
       <thead><tr>
@@ -215,6 +237,8 @@ function render_order_review(el) {
             ${renderItemsTable()}
           </div>
         </div>
+
+        ${renderSupplierMessages()}
 
         <!-- Ship To / Bill To -->
         <div class="or-card">

@@ -119,6 +119,22 @@ function render_order_history(el) {
         </table>
         <div class="oh-items-total">Total <strong>$${(+o.amount).toFixed(2)}</strong></div>
       </div>` : ''}
+      ${(() => {
+        if (!Store.getCmsArticles) return '';
+        const vendor = o.vendor || '';
+        const msgs = Store.getCmsArticles('published').filter(a => a.showOnOrders && a.vendorName === vendor);
+        if (!msgs.length) return '';
+        return `<div style="padding:14px 24px;border-top:0.5px solid #E8E4DF;">
+          <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#534AB7;margin-bottom:10px;display:flex;align-items:center;gap:6px;"><i class="ti ti-speakerphone" style="font-size:13px;"></i> Supplier messages</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            ${msgs.map(a => `<div style="background:#F5F2EE;border-radius:8px;padding:11px 13px;border-left:3px solid #534AB7;">
+              <div style="font-size:11px;font-weight:700;color:#534AB7;margin-bottom:3px;">${a.vendorName}<span style="font-weight:400;color:#9CA3AF;margin-left:8px;">${a.date || ''}</span></div>
+              <div style="font-size:12px;font-weight:600;color:#111318;margin-bottom:3px;">${a.title}</div>
+              <div style="font-size:12px;color:#5A5F6E;line-height:1.5;">${a.body ? a.body.slice(0,250)+(a.body.length>250?'…':'') : ''}</div>
+            </div>`).join('')}
+          </div>
+        </div>`;
+      })()}
       <div class="oh-comments">
         <div class="oh-comments-label">Comments</div>
         <input class="oh-comment-input" type="text" placeholder="Add a comment…"/>
