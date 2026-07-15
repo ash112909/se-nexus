@@ -1,8 +1,11 @@
 // ── CMS state ──────────────────────────────────────────────────────────────
-let _cmsTab = 'list';       // 'list' | 'edit'
+let _cmsTab = 'list';       // 'list' | 'edit' | 'part-notes'
 let _cmsEditId = null;      // null = new article
 let _cmsListFilter = 'all'; // 'all' | 'published' | 'draft' | 'scheduled'
 let _cmsAiMode = null;      // null | 'rewrite' | 'simplify' | 'translate'
+let _cmsPtSelectedPartId = null;
+let _cmsPtExpandedCats = new Set();
+let _cmsPtExpandedVendors = new Set();
 
 const CMS_TYPES = {
   bulletin: { label:'Service Bulletin', icon:'ti-alert-triangle', color:'#854F0B', bg:'#FAEEDA' },
@@ -142,7 +145,7 @@ function render_cms(el) {
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
         <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('dashboard')">Dashboard</a>
         <span style="color:#3C4052;">/</span>
-        ${_cmsTab === 'edit' ? `<a style="color:#5C6070;cursor:pointer;" onclick="cmsGoList()">Content mgmt</a><span style="color:#3C4052;">/</span><span style="color:#FFFFFF;font-weight:500;">${_cmsEditId ? 'Edit article' : 'New article'}</span>` : `<span style="color:#FFFFFF;font-weight:500;">Content mgmt</span>`}
+        ${_cmsTab === 'edit' ? `<a style="color:#5C6070;cursor:pointer;" onclick="cmsGoList()">Content mgmt</a><span style="color:#3C4052;">/</span><span style="color:#FFFFFF;font-weight:500;">${_cmsEditId ? 'Edit article' : 'New article'}</span>` : _cmsTab === 'part-notes' ? `<a style="color:#5C6070;cursor:pointer;" onclick="cmsGoList()">Content mgmt</a><span style="color:#3C4052;">/</span><span style="color:#FFFFFF;font-weight:500;">Part notes</span>` : `<span style="color:#FFFFFF;font-weight:500;">Content mgmt</span>`}
       </div>
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
       ${buildTopbarRight()}
@@ -152,6 +155,7 @@ function render_cms(el) {
 </div>`;
 
   if (_cmsTab === 'edit') cmsRenderEditor();
+  else if (_cmsTab === 'part-notes') cmsRenderPartNotes();
   else cmsRenderList();
 }
 
@@ -180,7 +184,10 @@ function cmsRenderList() {
         <div class="cms-hdr-title">Content Management</div>
         <div class="cms-hdr-sub">Manage fleet news, notices, and site-wide banners</div>
       </div>
-      <button class="cms-btn-primary" onclick="cmsNewArticle()"><i class="ti ti-plus"></i> New article</button>
+      <div style="display:flex;gap:8px;">
+        <button class="cms-btn-ghost" onclick="cmsGoPartNotes()"><i class="ti ti-tag"></i> Part notes</button>
+        <button class="cms-btn-primary" onclick="cmsNewArticle()"><i class="ti ti-plus"></i> New article</button>
+      </div>
     </div>
     <div class="cms-filter-bar">
       ${[['all','All'],['published','Published'],['draft','Draft'],['scheduled','Scheduled'],['expired','Expired']].map(([v,l]) =>
@@ -412,6 +419,7 @@ window.cmsGoList = function() { _cmsTab = 'list'; _cmsEditId = null; Router.navi
 window.cmsSetFilter = function(f) { _cmsListFilter = f; cmsRenderList(); };
 window.cmsNewArticle = function() { _cmsTab = 'edit'; _cmsEditId = null; Router.navigate('cms'); };
 window.cmsEditArticle = function(id) { _cmsTab = 'edit'; _cmsEditId = id; Router.navigate('cms'); };
+window.cmsGoPartNotes = function() { _cmsTab = 'part-notes'; _cmsPtSelectedPartId = null; Router.navigate('cms'); };
 
 window.cmsDeleteArticle = function(id) {
   Modal.show({
@@ -548,6 +556,265 @@ function cmsCollectForm(status) {
     bannerDismissible: (document.getElementById('cms-f-dismissible')||{}).checked !== false,
     bannerText: g('cms-f-banner-text'),
   };
+}
+
+// ── Part Notes view ────────────────────────────────────────────────────────
+function cmsRenderPartNotes() {
+  const body = document.getElementById('cms-content-body');
+  if (!body) return;
+
+  const VENDOR_NAMES = ['Skyjack', 'Caterpillar', 'Toyota', 'Bobcat'];
+  const allParts = Store.getParts('', '');
+
+  // Group by vendor → category
+  const byVendor = {};
+  VENDOR_NAMES.forEach(v => { byVendor[v] = {}; });
+  allParts.forEach(p => {
+    const v = p.vendor;
+    if (!byVendor[v]) return;
+    const cat = p.category || 'General';
+    if (!byVendor[v][cat]) byVendor[v][cat] = [];
+    byVendor[v][cat].push(p);
+  });
+
+  body.innerHTML = `
+<style>
+.cpn-layout { display:grid; grid-template-columns:280px 1fr; gap:0; height:100%; min-height:0; overflow:hidden; }
+.cpn-tree { border-right:0.5px solid #E8E4DF; display:flex; flex-direction:column; overflow:hidden; }
+.cpn-tree-hdr { padding:14px 18px 10px; border-bottom:0.5px solid #F0ECE8; flex-shrink:0; }
+.cpn-tree-title { font-size:13px; font-weight:700; color:#111318; margin-bottom:8px; }
+.cpn-tree-search-wrap { position:relative; }
+.cpn-tree-search-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:14px; pointer-events:none; }
+.cpn-tree-search { width:100%; height:32px; background:#F5F2EE; border:1px solid #E2DDD8; border-radius:7px; padding:0 10px 0 30px; font-size:12px; font-family:inherit; color:#111318; outline:none; }
+.cpn-tree-search:focus { border-color:#F5A623; background:#FFFFFF; }
+.cpn-tree-body { flex:1; overflow-y:auto; padding:8px 0; }
+.cpn-vendor-hdr { display:flex; align-items:center; gap:7px; padding:7px 14px; cursor:pointer; font-size:12px; font-weight:700; color:#3A3D4A; }
+.cpn-vendor-hdr:hover { background:#F5F2EE; }
+.cpn-vendor-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.cpn-vendor-chevron { font-size:10px; color:#B0AAA3; margin-left:auto; transition:transform .15s; }
+.cpn-vendor-chevron.open { transform:rotate(90deg); }
+.cpn-cat-hdr { display:flex; align-items:center; gap:6px; padding:5px 14px 5px 28px; cursor:pointer; font-size:10px; font-weight:600; color:#7A7F8E; letter-spacing:.5px; text-transform:uppercase; }
+.cpn-cat-hdr:hover { background:#FAFAF9; }
+.cpn-cat-chevron { font-size:9px; color:#C0BAB3; margin-left:auto; transition:transform .15s; }
+.cpn-cat-chevron.open { transform:rotate(90deg); }
+.cpn-part-item { display:flex; flex-direction:column; padding:5px 14px 5px 38px; cursor:pointer; border-left:2px solid transparent; }
+.cpn-part-item:hover { background:#FAFAF9; border-left-color:#E2DDD8; }
+.cpn-part-item.selected { background:#FAEEDA; border-left-color:#F5A623; }
+.cpn-part-pnum { font-size:10px; font-weight:700; color:#9CA3AF; font-family:monospace; }
+.cpn-part-item.selected .cpn-part-pnum { color:#854F0B; }
+.cpn-part-desc { font-size:11px; font-weight:500; color:#3A3D4A; line-height:1.3; margin-top:1px; }
+.cpn-part-item.selected .cpn-part-desc { color:#111318; }
+.cpn-main { display:flex; flex-direction:column; overflow:hidden; }
+.cpn-main-inner { flex:1; overflow-y:auto; padding:20px 24px 40px; }
+.cpn-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:300px; color:#B0AAA3; font-size:13px; gap:8px; }
+.cpn-empty-icon { font-size:32px; }
+.cpn-notes-area { display:flex; flex-direction:column; gap:16px; }
+.cpn-part-banner { background:#F5F2EE; border-radius:10px; padding:12px 14px; display:flex; align-items:center; gap:10px; margin-bottom:4px; }
+.cpn-part-banner-pnum { font-size:11px; font-weight:700; color:#534AB7; font-family:monospace; }
+.cpn-part-banner-desc { font-size:13px; font-weight:600; color:#111318; margin-top:1px; }
+.cpn-existing { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:10px; padding:13px; }
+.cpn-existing-hdr { font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9CA3AF; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+.cpn-note-card { background:#F5F2EE; border-radius:8px; padding:10px 12px; margin-bottom:8px; border-left:2px solid #534AB7; }
+.cpn-note-card.fleet-note { border-left-color:#3B6D11; background:#EAF3DE; }
+.cpn-note-meta { display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+.cpn-note-vendor { font-size:10px; font-weight:700; color:#534AB7; }
+.cpn-note-card.fleet-note .cpn-note-vendor { color:#3B6D11; }
+.cpn-note-date { font-size:10px; color:#B0AAA3; }
+.cpn-note-title { font-size:12px; font-weight:600; color:#111318; margin-bottom:3px; }
+.cpn-note-body { font-size:11px; color:#5A5F6E; line-height:1.5; }
+.cpn-compose { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:10px; overflow:hidden; }
+.cpn-compose-hdr { padding:11px 14px; border-bottom:0.5px solid #F0ECE8; font-size:12px; font-weight:600; color:#111318; display:flex; align-items:center; gap:6px; }
+.cpn-compose-body { padding:14px; display:flex; flex-direction:column; gap:12px; }
+.cpn-label { font-size:11px; font-weight:600; color:#5A5F6E; margin-bottom:4px; display:block; }
+.cpn-input { width:100%; height:34px; border:0.5px solid #E2DDD8; border-radius:7px; padding:0 10px; font-size:12px; font-family:inherit; color:#111318; outline:none; background:#FFFFFF; }
+.cpn-input:focus { border-color:#F5A623; }
+.cpn-textarea { width:100%; min-height:90px; border:0.5px solid #E2DDD8; border-radius:7px; padding:9px 10px; font-size:12px; font-family:inherit; color:#111318; outline:none; resize:vertical; background:#FFFFFF; }
+.cpn-textarea:focus { border-color:#F5A623; }
+</style>
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 24px 10px;flex-shrink:0;">
+      <button class="cms-btn-ghost" onclick="cmsGoList()"><i class="ti ti-arrow-left"></i> Back to articles</button>
+      <div style="font-size:16px;font-weight:700;color:#111318;margin-left:4px;">Part Notes</div>
+      <div style="font-size:12px;color:#9CA3AF;margin-top:1px;">Add fleet-internal notes to specific parts</div>
+    </div>
+    <div class="cpn-layout" style="flex:1;min-height:0;">
+      <div class="cpn-tree">
+        <div class="cpn-tree-hdr">
+          <div class="cpn-tree-search-wrap">
+            <i class="ti ti-search cpn-tree-search-icon"></i>
+            <input class="cpn-tree-search" id="cpn-search" type="text" placeholder="Search parts…"/>
+          </div>
+        </div>
+        <div class="cpn-tree-body" id="cpn-tree-body"></div>
+      </div>
+      <div class="cpn-main">
+        <div class="cpn-main-inner" id="cpn-main-body">
+          <div class="cpn-empty">
+            <i class="ti ti-tag cpn-empty-icon"></i>
+            Select a part to view or add fleet notes.
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  const VENDOR_COLORS = { Skyjack:'#F5A623', Caterpillar:'#C2410C', Toyota:'#185FA5', Bobcat:'#534AB7' };
+  let _cpnSearch = '';
+
+  function renderCpnTree() {
+    const treeBody = document.getElementById('cpn-tree-body');
+    if (!treeBody) return;
+    const q = _cpnSearch.toLowerCase().trim();
+    let html = '';
+    VENDOR_NAMES.forEach(v => {
+      const cats = byVendor[v];
+      if (!cats || !Object.keys(cats).length) return;
+      const vOpen = _cmsPtExpandedVendors.has(v) || q;
+      const vColor = VENDOR_COLORS[v] || '#9CA3AF';
+      html += `<div class="cpn-vendor-hdr" onclick="cpnToggleVendor('${v}')">
+        <div class="cpn-vendor-dot" style="background:${vColor};"></div>
+        <span>${v}</span>
+        ${!q ? `<i class="ti ti-chevron-right cpn-vendor-chevron ${vOpen?'open':''}"></i>` : ''}
+      </div>`;
+      if (vOpen) {
+        Object.entries(cats).forEach(([cat, parts]) => {
+          const visible = q ? parts.filter(p => p.description.toLowerCase().includes(q) || p.partNum.toLowerCase().includes(q)) : parts;
+          if (!visible.length) return;
+          const cKey = v + ':' + cat;
+          const cOpen = _cmsPtExpandedCats.has(cKey) || q;
+          html += `<div class="cpn-cat-hdr" onclick="cpnToggleCat('${cKey.replace(/'/g,"\\'")}')">
+            <i class="ti ti-folder" style="font-size:11px;color:#B0AAA3;"></i>
+            <span>${cat}</span>
+            <span style="font-size:9px;font-weight:400;color:#C0BAB3;margin-left:3px;">${visible.length}</span>
+            ${!q ? `<i class="ti ti-chevron-right cpn-cat-chevron ${cOpen?'open':''}"></i>` : ''}
+          </div>`;
+          if (cOpen) {
+            visible.forEach(p => {
+              html += `<div class="cpn-part-item ${_cmsPtSelectedPartId===p.id?'selected':''}" onclick="cpnSelectPart('${p.id}')">
+                <span class="cpn-part-pnum">${p.partNum}</span>
+                <span class="cpn-part-desc">${p.description}</span>
+              </div>`;
+            });
+          }
+        });
+      }
+    });
+    if (!html) html = '<div style="padding:24px;text-align:center;color:#B0AAA3;font-size:12px;">No parts match.</div>';
+    treeBody.innerHTML = html;
+  }
+
+  function renderCpnMain() {
+    const mainBody = document.getElementById('cpn-main-body');
+    if (!mainBody) return;
+    if (!_cmsPtSelectedPartId) {
+      mainBody.innerHTML = '<div class="cpn-empty"><i class="ti ti-tag cpn-empty-icon"></i>Select a part to view or add fleet notes.</div>';
+      return;
+    }
+    const part = allParts.find(p => p.id === _cmsPtSelectedPartId);
+    if (!part) return;
+
+    const existingNotes = (Store.getCmsArticles ? Store.getCmsArticles('published') : []).filter(a => a.showOnPartPage && a.targetPartNum === _cmsPtSelectedPartId);
+
+    mainBody.innerHTML = `
+      <div class="cpn-notes-area">
+        <div class="cpn-part-banner">
+          <i class="ti ti-tag" style="font-size:15px;color:#534AB7;flex-shrink:0;"></i>
+          <div>
+            <div class="cpn-part-banner-pnum">${part.partNum}</div>
+            <div class="cpn-part-banner-desc">${part.description}</div>
+          </div>
+          <div style="margin-left:auto;font-size:11px;color:#9CA3AF;">${part.vendor}</div>
+        </div>
+        ${existingNotes.length ? `
+        <div class="cpn-existing">
+          <div class="cpn-existing-hdr"><i class="ti ti-notes" style="font-size:12px;"></i> Existing notes (${existingNotes.length})</div>
+          ${existingNotes.map(a => {
+            const isFleet = !!a.fleetNote;
+            return `<div class="cpn-note-card ${isFleet?'fleet-note':''}">
+              <div class="cpn-note-meta">
+                <span class="cpn-note-vendor">${a.vendorName || (isFleet ? 'Fleet' : 'Supplier')}</span>
+                <span style="font-size:9px;color:#D0CBB4;">&bull;</span>
+                <span class="cpn-note-date">${a.date || ''}</span>
+              </div>
+              <div class="cpn-note-title">${a.title}</div>
+              <div class="cpn-note-body">${a.body ? a.body.slice(0,200) + (a.body.length>200?'…':'') : ''}</div>
+            </div>`;
+          }).join('')}
+        </div>` : ''}
+        <div class="cpn-compose">
+          <div class="cpn-compose-hdr"><i class="ti ti-pencil" style="font-size:13px;color:#9CA3AF;"></i> Add fleet note</div>
+          <div class="cpn-compose-body">
+            <div>
+              <label class="cpn-label">Note title *</label>
+              <input class="cpn-input" id="cpn-note-title" type="text" placeholder="e.g. Only use OEM seal kit on this model"/>
+              <div id="cpn-note-title-err" style="font-size:11px;color:#A32D2D;margin-top:3px;display:none;">Required</div>
+            </div>
+            <div>
+              <label class="cpn-label">Note body *</label>
+              <textarea class="cpn-textarea" id="cpn-note-body" placeholder="Internal fleet note visible to mechanics viewing this part's page…"></textarea>
+              <div id="cpn-note-body-err" style="font-size:11px;color:#A32D2D;margin-top:3px;display:none;">Required</div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:8px;">
+              <button class="cms-btn-ghost" onclick="document.getElementById('cpn-note-title').value='';document.getElementById('cpn-note-body').value='';">Clear</button>
+              <button class="cms-btn-primary" id="cpn-save-note-btn"><i class="ti ti-send"></i> Save note</button>
+            </div>
+            <div id="cpn-note-confirm" style="font-size:12px;color:#0F6E56;display:none;"><i class="ti ti-circle-check"></i> Note saved and visible on part page.</div>
+          </div>
+        </div>
+      </div>`;
+
+    document.getElementById('cpn-save-note-btn').addEventListener('click', function() {
+      const title = document.getElementById('cpn-note-title').value.trim();
+      const body  = document.getElementById('cpn-note-body').value.trim();
+      document.getElementById('cpn-note-title-err').style.display = title ? 'none' : 'block';
+      document.getElementById('cpn-note-body-err').style.display  = body  ? 'none' : 'block';
+      if (!title || !body) return;
+      const _user = Store.getCurrentUser();
+      Store.saveCmsArticle({
+        id: 'cms-fleet-note-' + Date.now(),
+        type: 'notice',
+        subtype: 'fleet-part-note',
+        status: 'published',
+        postAs: 'news',
+        title,
+        body,
+        author: (_user || {}).displayName || '',
+        poster: (_user || {}).shortName || '',
+        showOnPartPage: true,
+        targetPartNum: _cmsPtSelectedPartId,
+        targetPartDesc: part.description,
+        fleetNote: true,
+        date: 'Jul 2026',
+        priority: 'low',
+        locations: ['all'],
+      });
+      document.getElementById('cpn-note-title').value = '';
+      document.getElementById('cpn-note-body').value = '';
+      const confirmEl = document.getElementById('cpn-note-confirm');
+      if (confirmEl) { confirmEl.style.display = 'block'; setTimeout(() => { if (confirmEl) confirmEl.style.display = 'none'; }, 3000); }
+      // Re-render to show the new note in the existing list
+      renderCpnMain();
+    });
+  }
+
+  window.cpnToggleVendor = function(v) {
+    if (_cmsPtExpandedVendors.has(v)) { _cmsPtExpandedVendors.delete(v); } else { _cmsPtExpandedVendors.add(v); }
+    renderCpnTree();
+  };
+  window.cpnToggleCat = function(key) {
+    if (_cmsPtExpandedCats.has(key)) { _cmsPtExpandedCats.delete(key); } else { _cmsPtExpandedCats.add(key); }
+    renderCpnTree();
+  };
+  window.cpnSelectPart = function(partId) {
+    _cmsPtSelectedPartId = partId;
+    renderCpnTree();
+    renderCpnMain();
+  };
+
+  renderCpnTree();
+
+  document.getElementById('cpn-search').addEventListener('input', function() {
+    _cpnSearch = this.value;
+    renderCpnTree();
+  });
 }
 
 // Action bar rendered outside the scrollable content

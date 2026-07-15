@@ -372,16 +372,90 @@ function render_supplier_portal(el) {
       </div>`;
   }
 
+  // Content tab state
+  let _spContentMode = 'broadcast'; // 'broadcast' | 'partpage'
+  let _spPtSelectedPartId = null;
+  let _spPtExpandedCats = new Set();
+
   function renderContent() {
     const titleEl = document.getElementById('sp-topbar-title');
     if (titleEl) titleEl.textContent = 'Post Content';
+    document.getElementById('sp-content').innerHTML = `
+<style>
+.spc-mode-row { display:flex; gap:8px; margin-bottom:20px; }
+.spc-mode-btn { height:36px; padding:0 16px; border-radius:8px; font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; border:1.5px solid #E2DDD8; background:#FFFFFF; color:#5A5F6E; transition:all .15s; display:inline-flex; align-items:center; gap:7px; }
+.spc-mode-btn.active { background:#111318; color:#FFFFFF; border-color:#111318; }
+.spc-mode-btn:hover:not(.active) { border-color:#9CA3AF; }
+.spc-layout { display:grid; grid-template-columns:260px 1fr; gap:16px; align-items:start; }
+.spc-tree-panel { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
+.spc-tree-search-wrap { position:relative; padding:12px; border-bottom:0.5px solid #F0ECE8; }
+.spc-tree-search-icon { position:absolute; left:22px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:14px; pointer-events:none; }
+.spc-tree-search { width:100%; height:32px; background:#F5F2EE; border:1px solid #E2DDD8; border-radius:7px; padding:0 10px 0 32px; font-size:12px; font-family:inherit; color:#111318; outline:none; }
+.spc-tree-search:focus { border-color:#F5A623; background:#FFFFFF; }
+.spc-tree-body { max-height:460px; overflow-y:auto; padding:8px 0; }
+.spc-cat-hdr { display:flex; align-items:center; gap:7px; padding:6px 14px; cursor:pointer; font-size:11px; font-weight:700; color:#5A5F6E; letter-spacing:.3px; text-transform:uppercase; }
+.spc-cat-hdr:hover { background:#F5F2EE; }
+.spc-cat-chevron { font-size:10px; color:#B0AAA3; margin-left:auto; transition:transform .15s; }
+.spc-cat-chevron.open { transform:rotate(90deg); }
+.spc-part-item { display:flex; flex-direction:column; padding:6px 14px 6px 30px; cursor:pointer; border-left:2px solid transparent; transition:all .12s; }
+.spc-part-item:hover { background:#FAFAF9; border-left-color:#E2DDD8; }
+.spc-part-item.selected { background:#FAEEDA; border-left-color:#F5A623; }
+.spc-part-pnum { font-size:10px; font-weight:700; color:#9CA3AF; font-family:monospace; }
+.spc-part-item.selected .spc-part-pnum { color:#854F0B; }
+.spc-part-desc { font-size:11px; font-weight:500; color:#3A3D4A; line-height:1.35; margin-top:1px; }
+.spc-part-item.selected .spc-part-desc { color:#111318; }
+.spc-compose-panel { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; padding:20px; }
+.spc-selected-banner { background:#FAEEDA; border:1px solid #F5A623; border-radius:8px; padding:10px 13px; margin-bottom:16px; display:flex; align-items:center; gap:9px; }
+.spc-selected-pnum { font-size:11px; font-weight:700; color:#854F0B; font-family:monospace; }
+.spc-selected-desc { font-size:12px; color:#3A3D4A; font-weight:500; }
+.spc-empty-state { padding:40px 20px; text-align:center; color:#B0AAA3; font-size:12px; }
+.spc-empty-icon { font-size:28px; display:block; margin-bottom:8px; }
+</style>
+      <div class="sp-page-title">Post Content</div>
+      <div class="sp-page-sub">Publish news, bulletins, or product updates to your fleet customers.</div>
+      <div class="spc-mode-row">
+        <button class="spc-mode-btn ${_spContentMode==='broadcast'?'active':''}" onclick="spSetContentMode('broadcast')"><i class="ti ti-speakerphone" style="font-size:13px;"></i> Broadcast to fleets</button>
+        <button class="spc-mode-btn ${_spContentMode==='partpage'?'active':''}" onclick="spSetContentMode('partpage')"><i class="ti ti-tag" style="font-size:13px;"></i> Part page message</button>
+      </div>
+      <div id="spc-mode-body"></div>`;
+
+    window.spSetContentMode = function(mode) {
+      _spContentMode = mode;
+      _spPtSelectedPartId = null;
+      document.querySelectorAll('.spc-mode-btn').forEach(b => b.classList.toggle('active', b.textContent.trim().startsWith(mode === 'broadcast' ? 'Broadcast' : 'Part')));
+      renderContentModeBody();
+    };
+
+    window.spTogglePtCat = function(cat) {
+      if (_spPtExpandedCats.has(cat)) { _spPtExpandedCats.delete(cat); } else { _spPtExpandedCats.add(cat); }
+      renderPartTree();
+    };
+
+    window.spSelectPtPart = function(partId) {
+      _spPtSelectedPartId = partId;
+      renderPartTree();
+      renderPartComposeArea();
+    };
+
+    renderContentModeBody();
+  }
+
+  function renderContentModeBody() {
+    const body = document.getElementById('spc-mode-body');
+    if (!body) return;
+    if (_spContentMode === 'broadcast') {
+      renderBroadcastForm(body);
+    } else {
+      renderPartPageForm(body);
+    }
+  }
+
+  function renderBroadcastForm(container) {
     const fleetOpts = [
       `<label class="sp-fleet-check" id="sp-fc-all-wrap"><input type="checkbox" id="sp-fc-all" value="all" checked/> All onboarded fleets</label>`,
       ...(_fleets.map(f => `<label class="sp-fleet-check sp-fc-individual"><input type="checkbox" class="sp-fc-fleet" value="${f.fleetId}" disabled checked/> ${f.fleetName}</label>`))
     ].join('');
-    document.getElementById('sp-content').innerHTML = `
-      <div class="sp-page-title">Post Content</div>
-      <div class="sp-page-sub">Publish news, bulletins, or product updates to your fleet customers.</div>
+    container.innerHTML = `
       <div class="sp-compose-card">
         <div class="sp-compose-field">
           <label class="sp-compose-label">Content type</label>
@@ -422,7 +496,6 @@ function render_supplier_portal(el) {
         </div>
       </div>`;
 
-    // "All fleets" checkbox toggles individual fleet checkboxes
     document.getElementById('sp-fc-all').addEventListener('change', function() {
       const fleetBoxes = document.querySelectorAll('.sp-fc-fleet');
       if (this.checked) {
@@ -431,7 +504,6 @@ function render_supplier_portal(el) {
         fleetBoxes.forEach(cb => { cb.checked = false; cb.disabled = false; });
       }
     });
-    // If all individual fleets get checked, revert to "All" mode
     document.querySelectorAll('.sp-fc-fleet').forEach(cb => {
       cb.addEventListener('change', function() {
         const all = document.querySelectorAll('.sp-fc-fleet');
@@ -458,7 +530,7 @@ function render_supplier_portal(el) {
       const showOnOrders = !!(document.getElementById('sp-place-orders') || {}).checked;
       Store.saveCmsArticle({
         id: 'cms-sup-' + Date.now(),
-        type: document.getElementById('sp-ctype').value === 'bulletin' ? 'bulletin' : 'bulletin',
+        type: 'bulletin',
         subtype: document.getElementById('sp-ctype').value,
         status: 'published',
         postAs: 'news',
@@ -482,6 +554,176 @@ function render_supplier_portal(el) {
         if (c) c.style.display = 'none';
       }, 3500);
     });
+  }
+
+  function renderPartPageForm(container) {
+    // Build part tree from supplier's parts, grouped by category
+    const myParts = Store.getParts('', '').filter(p => p.vendor === _supplierName);
+    const cats = {};
+    myParts.forEach(p => {
+      const cat = p.category || 'General';
+      if (!cats[cat]) cats[cat] = [];
+      cats[cat].push(p);
+    });
+
+    if (!myParts.length) {
+      container.innerHTML = `<div style="padding:40px;text-align:center;color:#9CA3AF;font-size:13px;">No parts found for ${_supplierName} in the catalog.</div>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="spc-layout">
+        <div class="spc-tree-panel">
+          <div class="spc-tree-search-wrap">
+            <i class="ti ti-search spc-tree-search-icon"></i>
+            <input class="spc-tree-search" id="spc-tree-search" type="text" placeholder="Search parts…"/>
+          </div>
+          <div class="spc-tree-body" id="spc-tree-body"></div>
+        </div>
+        <div id="spc-compose-area">
+          <div class="spc-empty-state">
+            <i class="ti ti-tag spc-empty-icon"></i>
+            Select a part from the tree to write a message that will appear on that part's detail page.
+          </div>
+        </div>
+      </div>`;
+
+    let _ptSearch = '';
+
+    function renderPartTree() {
+      const treeBody = document.getElementById('spc-tree-body');
+      if (!treeBody) return;
+      const q = _ptSearch.toLowerCase().trim();
+      let html = '';
+      Object.entries(cats).forEach(([cat, parts]) => {
+        const visible = q ? parts.filter(p => p.description.toLowerCase().includes(q) || p.partNum.toLowerCase().includes(q)) : parts;
+        if (!visible.length) return;
+        const isOpen = _spPtExpandedCats.has(cat) || q;
+        html += `<div class="spc-cat-hdr" onclick="spTogglePtCat('${cat.replace(/'/g,"\\'")}')">
+          <i class="ti ti-folder" style="font-size:13px;color:#9CA3AF;"></i>
+          <span>${cat}</span>
+          <span style="font-size:10px;font-weight:400;color:#B0AAA3;margin-left:4px;">${visible.length}</span>
+          ${!q ? `<i class="ti ti-chevron-right spc-cat-chevron ${isOpen?'open':''}"></i>` : ''}
+        </div>`;
+        if (isOpen || q) {
+          visible.forEach(p => {
+            html += `<div class="spc-part-item ${_spPtSelectedPartId===p.id?'selected':''}" onclick="spSelectPtPart('${p.id}')">
+              <span class="spc-part-pnum">${p.partNum}</span>
+              <span class="spc-part-desc">${p.description}</span>
+            </div>`;
+          });
+        }
+      });
+      if (!html) html = '<div style="padding:24px;text-align:center;color:#B0AAA3;font-size:12px;">No parts match your search.</div>';
+      treeBody.innerHTML = html;
+    }
+
+    renderPartTree();
+
+    // expose inner renderPartTree to window.spTogglePtCat and window.spSelectPtPart
+    const origToggle = window.spTogglePtCat;
+    window.spTogglePtCat = function(cat) {
+      if (_spPtExpandedCats.has(cat)) { _spPtExpandedCats.delete(cat); } else { _spPtExpandedCats.add(cat); }
+      renderPartTree();
+    };
+    window.spSelectPtPart = function(partId) {
+      _spPtSelectedPartId = partId;
+      renderPartTree();
+      renderPartComposeArea();
+    };
+
+    document.getElementById('spc-tree-search').addEventListener('input', function() {
+      _ptSearch = this.value;
+      renderPartTree();
+    });
+
+    function renderPartComposeArea() {
+      const area = document.getElementById('spc-compose-area');
+      if (!area) return;
+      if (!_spPtSelectedPartId) {
+        area.innerHTML = `<div class="spc-empty-state"><i class="ti ti-tag spc-empty-icon"></i>Select a part from the tree to write a message that will appear on that part's detail page.</div>`;
+        return;
+      }
+      const part = myParts.find(p => p.id === _spPtSelectedPartId);
+      if (!part) return;
+
+      // Determine which fleets have this part from this supplier
+      // (All onboarded fleets are valid targets since supplier catalog is shared)
+      const fleetOpts = _fleets.map(f =>
+        `<label class="sp-fleet-check"><input type="checkbox" class="spc-pt-fleet" value="${f.fleetId}" checked/> ${f.fleetName}</label>`
+      ).join('');
+
+      area.innerHTML = `
+        <div class="spc-compose-panel">
+          <div class="spc-selected-banner">
+            <i class="ti ti-tag" style="font-size:14px;color:#854F0B;flex-shrink:0;"></i>
+            <div>
+              <div class="spc-selected-pnum">${part.partNum}</div>
+              <div class="spc-selected-desc">${part.description}</div>
+            </div>
+          </div>
+          <div class="sp-compose-field">
+            <label class="sp-compose-label">Message title *</label>
+            <input class="sp-compose-input" id="spc-pt-title" type="text" placeholder="e.g. Updated installation torque specs for this part"/>
+            <div id="spc-pt-title-err" style="font-size:11px;color:#A32D2D;margin-top:3px;display:none;">Required</div>
+          </div>
+          <div class="sp-compose-field">
+            <label class="sp-compose-label">Message body *</label>
+            <textarea class="sp-compose-textarea" id="spc-pt-body" placeholder="Details visible when a mechanic or supervisor views this part's item page…"></textarea>
+            <div id="spc-pt-body-err" style="font-size:11px;color:#A32D2D;margin-top:3px;display:none;">Required</div>
+          </div>
+          <div class="sp-compose-field">
+            <label class="sp-compose-label">Visible to fleets</label>
+            <div class="sp-fleet-check-row" id="spc-pt-fleet-row">${fleetOpts}</div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px;">
+            <button class="sp-btn sp-btn-ghost" onclick="document.getElementById('spc-pt-title').value='';document.getElementById('spc-pt-body').value='';">Clear</button>
+            <button class="sp-btn sp-btn-primary" id="spc-pt-publish-btn"><i class="ti ti-send" style="font-size:12px;"></i> Publish to part page</button>
+          </div>
+          <div id="spc-pt-confirm" style="margin-top:12px;font-size:12px;color:#0F6E56;display:none;">
+            <i class="ti ti-circle-check"></i> Message published to part page.
+          </div>
+        </div>`;
+
+      document.getElementById('spc-pt-publish-btn').addEventListener('click', function() {
+        const title = document.getElementById('spc-pt-title').value.trim();
+        const body  = document.getElementById('spc-pt-body').value.trim();
+        document.getElementById('spc-pt-title-err').style.display = title ? 'none' : 'block';
+        document.getElementById('spc-pt-body-err').style.display  = body  ? 'none' : 'block';
+        if (!title || !body) return;
+
+        const selectedFleets = [...document.querySelectorAll('.spc-pt-fleet:checked')].map(cb => cb.value);
+        const target = selectedFleets.length === _fleets.length ? 'all' : selectedFleets.join(',');
+
+        Store.saveCmsArticle({
+          id: 'cms-sup-pt-' + Date.now(),
+          type: 'bulletin',
+          subtype: 'advisory',
+          status: 'published',
+          postAs: 'news',
+          title,
+          body,
+          author: _user.displayName,
+          supplierId: _supplierId,
+          vendorName: _supplierName,
+          targetFleet: target,
+          showOnPartPage: true,
+          targetPartNum: part.id,
+          targetPartDesc: part.description,
+          date: 'Jul 2026',
+          priority: 'low',
+          locations: [target === 'all' ? 'all' : selectedFleets[0] || 'all'],
+        });
+
+        document.getElementById('spc-pt-title').value = '';
+        document.getElementById('spc-pt-body').value = '';
+        document.getElementById('spc-pt-confirm').style.display = 'block';
+        setTimeout(() => {
+          const c = document.getElementById('spc-pt-confirm');
+          if (c) c.style.display = 'none';
+        }, 3500);
+      });
+    }
   }
 
   // ── Manuals ──────────────────────────────────────────────────────────────────
