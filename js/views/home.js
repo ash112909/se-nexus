@@ -130,7 +130,7 @@ function render_home(el) {
     <!-- Welcome bar -->
     <div class="home-welcome">
       <div class="hw-brand">
-        <img src="smartequiplogo.jpeg" style="height:28px;width:auto;object-fit:contain;display:block;mix-blend-mode:screen;"/>
+        <img src="smartequiplogo.jpeg" style="height:32px;width:auto;object-fit:contain;display:block;border-radius:4px;"/>
       </div>
       <div class="hw-sep"></div>
       <div>
