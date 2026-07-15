@@ -9,14 +9,9 @@ function buildSidebar(activeItem, opts) {
     const fleetName = opts.impersonatingFleet || 'Fleet';
     return `
   <div class="sidebar">
-    <div class="sb-fleet">
-      <div class="sb-fleet-icon" style="background:#FFFFFF;padding:3px;">
-        <img src="smartequiplogo.avif" style="width:22px;height:22px;object-fit:contain;display:block;"/>
-      </div>
-      <div>
-        <div class="sb-fleet-name" style="font-size:12px;">${fleetName}</div>
-        <div class="sb-fleet-sub">Impersonation view</div>
-      </div>
+    <div class="sb-logo-area">
+      <img src="smartequiplogo.avif" class="sb-logo-img"/>
+      <div class="sb-logo-sub">${fleetName} · Impersonation view</div>
     </div>
     <div class="sb-nav">
       <div class="sb-section-label">Viewing as fleet</div>
@@ -39,14 +34,9 @@ function buildSidebar(activeItem, opts) {
                          ? Store.getPriceRequests(supplierId).filter(r => r.status === 'pending').length : 0;
     return `
   <div class="sidebar">
-    <div class="sb-fleet">
-      <div class="sb-fleet-icon" style="background:#FFFFFF;padding:3px;">
-        <img src="smartequiplogo.avif" style="width:22px;height:22px;object-fit:contain;display:block;"/>
-      </div>
-      <div>
-        <div class="sb-fleet-name">${supplierName}</div>
-        <div class="sb-fleet-sub">Supplier Portal</div>
-      </div>
+    <div class="sb-logo-area">
+      <img src="smartequiplogo.avif" class="sb-logo-img"/>
+      <div class="sb-logo-sub">${supplierName} · Supplier Portal</div>
     </div>
     <div class="sb-nav">
       <div class="sb-section-label">Portal</div>
@@ -68,14 +58,9 @@ function buildSidebar(activeItem, opts) {
   const locName      = loc ? loc.name : 'Mid-County Rental';
   return `
   <div class="sidebar">
-    <div class="sb-fleet">
-      <div class="sb-fleet-icon" style="background:#FFFFFF;padding:3px;">
-        <img src="smartequiplogo.avif" style="width:22px;height:22px;object-fit:contain;display:block;"/>
-      </div>
-      <div>
-        <div class="sb-fleet-name">Mid-County Rental</div>
-        <div class="sb-fleet-sub">${locName}</div>
-      </div>
+    <div class="sb-logo-area">
+      <img src="smartequiplogo.avif" class="sb-logo-img"/>
+      <div class="sb-logo-sub">Mid-County Rental · ${locName}</div>
     </div>
     <div class="sb-nav">
       <div class="sb-section-label">${isSupervisor ? 'Operations' : 'My work'}</div>

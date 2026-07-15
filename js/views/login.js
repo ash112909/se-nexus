@@ -59,12 +59,9 @@ function render_login(el) {
     <div class="login-glow"></div>
     <div class="fleet-logo-area">
       <div class="fleet-logo-lockup">
-        <div class="fleet-logo-icon" style="background:#FFFFFF;padding:6px;">
-          <img src="smartequiplogo.avif" style="width:40px;height:40px;object-fit:contain;display:block;"/>
-        </div>
+        <img src="smartequiplogo.avif" style="height:48px;width:auto;object-fit:contain;display:block;"/>
         <div class="fleet-name">
-          <div class="fleet-name-primary">SmartEquip</div>
-          <div class="fleet-name-secondary">Mid-County Rental</div>
+          <div class="fleet-name-secondary" style="margin-top:4px;">Mid-County Rental</div>
         </div>
       </div>
     </div>
