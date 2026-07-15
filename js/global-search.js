@@ -121,6 +121,7 @@ const GlobalSearch = (() => {
   function renderResults() {
     const list = document.getElementById('gs-results');
     if (!list) return;
+    const vaEl = document.getElementById('gs-view-all');
     if (!_query.trim()) {
       list.innerHTML = `<div class="gs-empty">
         <div style="font-size:12px;font-weight:600;color:#3A3D4A;margin-bottom:12px;">Jump to</div>
@@ -129,14 +130,17 @@ const GlobalSearch = (() => {
         ).join('')}</div>
         <div style="font-size:11px;color:#B0AAA3;margin-top:16px;text-align:center;">Type to search parts, work orders, manuals, orders, and more</div>
       </div>`;
+      if (vaEl) vaEl.style.display = 'none';
       return;
     }
 
     _results = buildResults(_query);
     if (!_results.length) {
       list.innerHTML = `<div style="padding:32px;text-align:center;font-size:13px;color:#9CA3AF;">No results for "${_query}"</div>`;
+      if (vaEl) vaEl.style.display = 'none';
       return;
     }
+    if (vaEl) { vaEl.style.display = 'inline'; vaEl.textContent = `View all ${_results.length}+ results →`; }
 
     // Group by section
     const sections = {};
@@ -263,6 +267,7 @@ const GlobalSearch = (() => {
           <span class="gs-footer-key"><kbd>↑</kbd><kbd>↓</kbd> Navigate</span>
           <span class="gs-footer-key"><kbd>↵</kbd> Select</span>
           <span class="gs-footer-key"><kbd>Esc</kbd> Close</span>
+          <span id="gs-view-all" style="margin-left:auto;display:none;font-size:11px;color:#854F0B;font-weight:600;cursor:pointer;" onclick="GlobalSearch.viewAll()">View all results →</span>
         </div>
       </div>`;
     document.body.appendChild(overlay);
@@ -281,7 +286,16 @@ const GlobalSearch = (() => {
       if (e.key === 'Escape') { e.preventDefault(); close(); }
       else if (e.key === 'ArrowDown') { e.preventDefault(); moveSelection(1); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); moveSelection(-1); }
-      else if (e.key === 'Enter') { e.preventDefault(); pick(_selIdx); }
+      else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (_query.trim() && _results.length === 0) {
+          close(); Router.navigate('search-results', { query: _query });
+        } else if (_query.trim() && _selIdx === 0 && !_results[0]) {
+          close(); Router.navigate('search-results', { query: _query });
+        } else {
+          pick(_selIdx);
+        }
+      }
     });
 
     // Global keyboard shortcut
@@ -294,7 +308,13 @@ const GlobalSearch = (() => {
     });
   }
 
-  return { init, open, close, pick };
+  function viewAll() {
+    const q = _query;
+    close();
+    Router.navigate('search-results', { query: q });
+  }
+
+  return { init, open, close, pick, viewAll };
 })();
 
 window.GlobalSearch = GlobalSearch;
