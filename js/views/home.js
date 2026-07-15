@@ -130,12 +130,12 @@ function render_home(el) {
     <!-- Welcome bar -->
     <div class="home-welcome">
       <div class="hw-brand">
-        <div class="hw-mark">
-          <svg width="20" height="20" viewBox="0 0 22 22" fill="none"><path d="M4 16L11 6L18 16" stroke="#1A1200" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="17.5" r="2.2" fill="#1A1200"/></svg>
+        <div class="hw-mark" style="background:#FFFFFF;border-radius:8px;padding:3px;display:flex;align-items:center;justify-content:center;">
+          <img src="smartequiplogo.avif" style="width:28px;height:28px;object-fit:contain;display:block;"/>
         </div>
         <div>
-          <div class="hw-name">Mid-County Rental</div>
-          <div class="hw-sub">Powered by SmartEquip</div>
+          <div class="hw-name">SmartEquip</div>
+          <div class="hw-sub">Mid-County Rental</div>
         </div>
       </div>
       <div class="hw-sep"></div>

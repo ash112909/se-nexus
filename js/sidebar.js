@@ -10,8 +10,8 @@ function buildSidebar(activeItem, opts) {
     return `
   <div class="sidebar">
     <div class="sb-fleet">
-      <div class="sb-fleet-icon" style="background:#FFF7ED;">
-        <i class="ti ti-eye" style="font-size:14px;color:#854F0B;"></i>
+      <div class="sb-fleet-icon" style="background:#FFFFFF;padding:3px;">
+        <img src="smartequiplogo.avif" style="width:22px;height:22px;object-fit:contain;display:block;"/>
       </div>
       <div>
         <div class="sb-fleet-name" style="font-size:12px;">${fleetName}</div>
@@ -40,8 +40,8 @@ function buildSidebar(activeItem, opts) {
     return `
   <div class="sidebar">
     <div class="sb-fleet">
-      <div class="sb-fleet-icon">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 13L9 5L15 13" stroke="#1A1200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="14" r="1.8" fill="#1A1200"/></svg>
+      <div class="sb-fleet-icon" style="background:#FFFFFF;padding:3px;">
+        <img src="smartequiplogo.avif" style="width:22px;height:22px;object-fit:contain;display:block;"/>
       </div>
       <div>
         <div class="sb-fleet-name">${supplierName}</div>
@@ -69,8 +69,8 @@ function buildSidebar(activeItem, opts) {
   return `
   <div class="sidebar">
     <div class="sb-fleet">
-      <div class="sb-fleet-icon">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 13L9 5L15 13" stroke="#1A1200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="14" r="1.8" fill="#1A1200"/></svg>
+      <div class="sb-fleet-icon" style="background:#FFFFFF;padding:3px;">
+        <img src="smartequiplogo.avif" style="width:22px;height:22px;object-fit:contain;display:block;"/>
       </div>
       <div>
         <div class="sb-fleet-name">Mid-County Rental</div>

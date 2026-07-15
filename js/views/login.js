@@ -59,15 +59,12 @@ function render_login(el) {
     <div class="login-glow"></div>
     <div class="fleet-logo-area">
       <div class="fleet-logo-lockup">
-        <div class="fleet-logo-icon">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <path d="M6 20 L14 8 L22 20" stroke="#1A1200" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="14" cy="21" r="2.5" fill="#1A1200"/>
-          </svg>
+        <div class="fleet-logo-icon" style="background:#FFFFFF;padding:6px;">
+          <img src="smartequiplogo.avif" style="width:40px;height:40px;object-fit:contain;display:block;"/>
         </div>
         <div class="fleet-name">
-          <div class="fleet-name-primary">Mid-County Rental</div>
-          <div class="fleet-name-secondary">&amp; Sales</div>
+          <div class="fleet-name-primary">SmartEquip</div>
+          <div class="fleet-name-secondary">Mid-County Rental</div>
         </div>
       </div>
     </div>
