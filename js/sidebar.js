@@ -10,7 +10,7 @@ function buildSidebar(activeItem, opts) {
     return `
   <div class="sidebar">
     <div class="sb-logo-area">
-      <img src="smartequiplogo.jpeg" class="sb-logo-img"/>
+      <img src="smartequiplogo.png" class="sb-logo-img"/>
       <div class="sb-logo-sub">${fleetName} · Impersonation view</div>
     </div>
     <div class="sb-nav">
@@ -35,7 +35,7 @@ function buildSidebar(activeItem, opts) {
     return `
   <div class="sidebar">
     <div class="sb-logo-area">
-      <img src="smartequiplogo.jpeg" class="sb-logo-img"/>
+      <img src="smartequiplogo.png" class="sb-logo-img"/>
       <div class="sb-logo-sub">${supplierName} · Supplier Portal</div>
     </div>
     <div class="sb-nav">
@@ -59,7 +59,7 @@ function buildSidebar(activeItem, opts) {
   return `
   <div class="sidebar">
     <div class="sb-logo-area">
-      <img src="smartequiplogo.jpeg" class="sb-logo-img"/>
+      <img src="smartequiplogo.png" class="sb-logo-img"/>
       <div class="sb-logo-sub">Mid-County Rental · ${locName}</div>
     </div>
     <div class="sb-nav">
