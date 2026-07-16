@@ -3,12 +3,17 @@ function buildSidebar(activeItem, opts) {
   const loc  = (typeof Store !== 'undefined' && Store.getCurrentLocation) ? Store.getCurrentLocation() : null;
   const user = (typeof Store !== 'undefined' && Store.getCurrentUser)     ? Store.getCurrentUser()     : null;
   const role = user ? user.role : 'mechanic';
+  const pinned = (typeof localStorage !== 'undefined' && localStorage.getItem('sb-pinned') === '1');
+  const pinCls = pinned ? ' sb-pinned' : '';
+  const pinIcon = pinned ? 'ti-pin-filled' : 'ti-pin';
+  const pinLabel = pinned ? 'Pinned' : 'Pin sidebar';
 
   // ── Impersonation-locked sidebar ──────────────────────────────────────────
   if (opts.impersonating) {
     const fleetName = opts.impersonatingFleet || 'Fleet';
     return `
-  <div class="sidebar">
+  <div class="sb-wrap">
+  <div class="sidebar${pinCls}">
     <div class="sb-logo-area">
       <img src="smartequiplogo.png" class="sb-logo-img"/>
       <div class="sb-logo-sub">${fleetName} · Impersonation view</div>
@@ -17,11 +22,13 @@ function buildSidebar(activeItem, opts) {
       <div class="sb-section-label">Viewing as fleet</div>
       <div class="sb-item active"><i class="ti ti-search"></i> Search parts</div>
     </div>
-    <div style="margin-top:auto;padding:12px 10px;border-top:1px solid #2A2A2A;">
-      <div class="sb-item" onclick="Router.navigate('supplier-portal')" style="color:#F5A623;">
+    <div style="margin-top:auto;">
+      <div class="sb-item" onclick="Router.navigate('supplier-portal')" style="color:#F5A623;border-top:1px solid #2A2A2A;">
         <i class="ti ti-arrow-left"></i> Exit impersonation
       </div>
+      <div class="sb-pin-row" id="sb-pin-btn"><i class="ti ${pinIcon}"></i><span class="sb-pin-label">${pinLabel}</span></div>
     </div>
+  </div>
   </div>`;
   }
 
@@ -33,7 +40,8 @@ function buildSidebar(activeItem, opts) {
     const pending      = (typeof Store !== 'undefined' && Store.getPriceRequests)
                          ? Store.getPriceRequests(supplierId).filter(r => r.status === 'pending').length : 0;
     return `
-  <div class="sidebar">
+  <div class="sb-wrap">
+  <div class="sidebar${pinCls}">
     <div class="sb-logo-area">
       <img src="smartequiplogo.png" class="sb-logo-img"/>
       <div class="sb-logo-sub">${supplierName} · Supplier Portal</div>
@@ -50,6 +58,8 @@ function buildSidebar(activeItem, opts) {
       <div class="sb-section-label">Reports</div>
       <div class="sb-item ${activeItem==='sp-analytics'?'active':''}" data-sp-tab="analytics"><i class="ti ti-chart-bar"></i> Analytics</div>
     </div>
+    <div class="sb-pin-row" id="sb-pin-btn"><i class="ti ${pinIcon}"></i><span class="sb-pin-label">${pinLabel}</span></div>
+  </div>
   </div>`;
   }
 
@@ -57,7 +67,8 @@ function buildSidebar(activeItem, opts) {
   const isSupervisor = role === 'supervisor';
   const locName      = loc ? loc.name : 'Mid-County Rental';
   return `
-  <div class="sidebar">
+  <div class="sb-wrap">
+  <div class="sidebar${pinCls}">
     <div class="sb-logo-area">
       <img src="smartequiplogo.png" class="sb-logo-img"/>
       <div class="sb-logo-sub">Mid-County Rental · ${locName}</div>
@@ -81,8 +92,27 @@ function buildSidebar(activeItem, opts) {
       <div class="sb-item ${activeItem==='diagnostics'?'active':''}" onclick="sendPrompt('Open diagnostic assistant')"><i class="ti ti-tool"></i> Diagnostics</div>
       <div class="sb-item ${activeItem==='news'?'active':''}" onclick="sendPrompt('Open news and updates')"><i class="ti ti-news"></i> News &amp; updates</div>
     </div>
+    <div class="sb-pin-row" id="sb-pin-btn"><i class="ti ${pinIcon}"></i><span class="sb-pin-label">${pinLabel}</span></div>
+  </div>
   </div>`;
 }
+
+// ── Pin toggle — event delegation, runs once ──────────────────────────────
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('#sb-pin-btn');
+  if (!btn) return;
+  const sb = document.querySelector('.sidebar');
+  if (!sb) return;
+  const nowPinned = sb.classList.toggle('sb-pinned');
+  localStorage.setItem('sb-pinned', nowPinned ? '1' : '');
+  const icon = btn.querySelector('i');
+  if (icon) icon.className = 'ti ' + (nowPinned ? 'ti-pin-filled' : 'ti-pin');
+  const lbl = btn.querySelector('.sb-pin-label');
+  if (lbl) lbl.textContent = nowPinned ? 'Pinned' : 'Pin sidebar';
+  // When pinning, switch sidebar from absolute to relative so it pushes content
+  const wrap = document.querySelector('.sb-wrap');
+  if (wrap) wrap.style.width = nowPinned ? '220px' : '56px';
+});
 
 function buildBanners() {
   if (typeof Store === 'undefined' || !Store.getActiveBanners) return '';
@@ -105,7 +135,6 @@ function buildTopbarRight() {
   const unread   = (typeof Store !== 'undefined' && Store.getUnreadCount) ? Store.getUnreadCount() : 0;
   const avatar   = user ? user.avatar   : 'JW';
   const shortName = user ? user.shortName : 'James W.';
-  // Suppliers show their company; fleet users show their location
   const subLine  = role === 'supplier'
     ? (user.email || 'Supplier')
     : (loc ? loc.name : 'Austin Branch');
