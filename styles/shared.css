@@ -1,11 +1,12 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 .shell { display: flex; width: 100%; min-height: 100vh; background: #F5F2EE; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; }
 
-/* ── Sidebar wrapper holds space; sidebar itself overlays when expanded ── */
-.sb-wrap { width: 56px; min-width: 56px; flex-shrink: 0; position: relative; z-index: 300; }
+/* ── Sidebar wrapper holds space; sidebar overlays on hover, pushes on pin ── */
+.sb-wrap { width: 56px; min-width: 56px; flex-shrink: 0; position: relative; z-index: 300; transition: width 0.2s cubic-bezier(0.4,0,0.2,1); }
+.sb-wrap.sb-pinned { width: 220px; min-width: 220px; }
 .sidebar { position: absolute; top: 0; left: 0; bottom: 0; min-height: 100vh; width: 56px; background: #1E1E1E; display: flex; flex-direction: column; overflow: hidden; transition: width 0.2s cubic-bezier(0.4,0,0.2,1), box-shadow 0.2s; }
-.sb-wrap:hover .sidebar, .sidebar.sb-pinned { width: 220px; box-shadow: 4px 0 28px rgba(0,0,0,.35); }
-.sidebar.sb-pinned { position: relative; box-shadow: none; }
+.sb-wrap:hover .sidebar { width: 220px; box-shadow: 4px 0 28px rgba(0,0,0,.35); }
+.sidebar.sb-pinned { width: 220px; box-shadow: none; }
 
 /* All sidebar text must not wrap during transition */
 .sb-logo-area, .sb-logo-sub, .sb-fleet-name, .sb-fleet-sub,

@@ -4,7 +4,8 @@ function buildSidebar(activeItem, opts) {
   const user = (typeof Store !== 'undefined' && Store.getCurrentUser)     ? Store.getCurrentUser()     : null;
   const role = user ? user.role : 'mechanic';
   const pinned = (typeof localStorage !== 'undefined' && localStorage.getItem('sb-pinned') === '1');
-  const pinCls = pinned ? ' sb-pinned' : '';
+  const wrapCls = pinned ? ' sb-pinned' : '';
+  const pinCls  = pinned ? ' sb-pinned' : '';
   const pinIcon = pinned ? 'ti-pin-filled' : 'ti-pin';
   const pinLabel = pinned ? 'Pinned' : 'Pin sidebar';
 
@@ -12,7 +13,7 @@ function buildSidebar(activeItem, opts) {
   if (opts.impersonating) {
     const fleetName = opts.impersonatingFleet || 'Fleet';
     return `
-  <div class="sb-wrap">
+  <div class="sb-wrap${wrapCls}">
   <div class="sidebar${pinCls}">
     <div class="sb-logo-area">
       <img src="smartequiplogo.png" class="sb-logo-img"/>
@@ -40,7 +41,7 @@ function buildSidebar(activeItem, opts) {
     const pending      = (typeof Store !== 'undefined' && Store.getPriceRequests)
                          ? Store.getPriceRequests(supplierId).filter(r => r.status === 'pending').length : 0;
     return `
-  <div class="sb-wrap">
+  <div class="sb-wrap${wrapCls}">
   <div class="sidebar${pinCls}">
     <div class="sb-logo-area">
       <img src="smartequiplogo.png" class="sb-logo-img"/>
@@ -67,7 +68,7 @@ function buildSidebar(activeItem, opts) {
   const isSupervisor = role === 'supervisor';
   const locName      = loc ? loc.name : 'Mid-County Rental';
   return `
-  <div class="sb-wrap">
+  <div class="sb-wrap${wrapCls}">
   <div class="sidebar${pinCls}">
     <div class="sb-logo-area">
       <img src="smartequiplogo.png" class="sb-logo-img"/>
@@ -101,17 +102,16 @@ function buildSidebar(activeItem, opts) {
 document.addEventListener('click', function(e) {
   const btn = e.target.closest('#sb-pin-btn');
   if (!btn) return;
-  const sb = document.querySelector('.sidebar');
-  if (!sb) return;
+  const sb   = document.querySelector('.sidebar');
+  const wrap = document.querySelector('.sb-wrap');
+  if (!sb || !wrap) return;
   const nowPinned = sb.classList.toggle('sb-pinned');
+  wrap.classList.toggle('sb-pinned', nowPinned);
   localStorage.setItem('sb-pinned', nowPinned ? '1' : '');
   const icon = btn.querySelector('i');
   if (icon) icon.className = 'ti ' + (nowPinned ? 'ti-pin-filled' : 'ti-pin');
   const lbl = btn.querySelector('.sb-pin-label');
   if (lbl) lbl.textContent = nowPinned ? 'Pinned' : 'Pin sidebar';
-  // When pinning, switch sidebar from absolute to relative so it pushes content
-  const wrap = document.querySelector('.sb-wrap');
-  if (wrap) wrap.style.width = nowPinned ? '220px' : '56px';
 });
 
 function buildBanners() {
