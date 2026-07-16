@@ -3,10 +3,8 @@
 
 /* ── Sidebar wrapper holds space; sidebar overlays on hover, pushes on pin ── */
 .sb-wrap { width: 56px; min-width: 56px; flex-shrink: 0; position: relative; z-index: 300; transition: width 0.2s cubic-bezier(0.4,0,0.2,1); }
-.sb-wrap.sb-pinned { width: 220px; min-width: 220px; }
 .sidebar { position: absolute; top: 0; left: 0; bottom: 0; min-height: 100vh; width: 56px; background: #1E1E1E; display: flex; flex-direction: column; overflow: hidden; transition: width 0.2s cubic-bezier(0.4,0,0.2,1), box-shadow 0.2s; }
 .sb-wrap:hover .sidebar { width: 220px; box-shadow: 4px 0 28px rgba(0,0,0,.35); }
-.sidebar.sb-pinned { width: 220px; box-shadow: none; }
 
 /* All sidebar text must not wrap during transition */
 .sb-logo-area, .sb-logo-sub, .sb-fleet-name, .sb-fleet-sub,
@@ -16,13 +14,14 @@
 .sb-logo-area, .sb-section-label, .sb-lbl, .sb-pin-label {
   opacity: 0; pointer-events: none; transition: opacity 0.15s;
 }
-/* Expanded (hover or pinned): reveal labels */
+/* Hover: reveal labels */
 .sb-wrap:hover .sb-logo-area, .sb-wrap:hover .sb-section-label,
-.sb-wrap:hover .sb-lbl, .sb-wrap:hover .sb-pin-label,
-.sb-wrap.sb-pinned .sb-logo-area, .sb-wrap.sb-pinned .sb-section-label,
-.sb-wrap.sb-pinned .sb-lbl, .sb-wrap.sb-pinned .sb-pin-label {
-  opacity: 1; pointer-events: auto;
-}
+.sb-wrap:hover .sb-lbl, .sb-wrap:hover .sb-pin-label { opacity: 1; pointer-events: auto; }
+/* Pinned (driven by body attribute — survives navigation) */
+body[data-sb-pinned] .sb-wrap { width: 220px; min-width: 220px; }
+body[data-sb-pinned] .sidebar { width: 220px; box-shadow: none; }
+body[data-sb-pinned] .sb-logo-area, body[data-sb-pinned] .sb-section-label,
+body[data-sb-pinned] .sb-lbl, body[data-sb-pinned] .sb-pin-label { opacity: 1; pointer-events: auto; }
 
 .sb-fleet { padding: 20px 18px 16px; border-bottom: 1px solid #2A2A2A; display: flex; align-items: center; gap: 10px; }
 .sb-fleet-icon { width: 32px; height: 32px; background: #F5A623; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }

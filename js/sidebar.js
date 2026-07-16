@@ -98,15 +98,18 @@ function buildSidebar(activeItem, opts) {
   </div>`;
 }
 
+// ── Restore pin state on load ─────────────────────────────────────────────
+if (localStorage.getItem('sb-pinned') === '1') {
+  document.body.setAttribute('data-sb-pinned', '1');
+}
+
 // ── Pin toggle — event delegation, runs once ──────────────────────────────
 document.addEventListener('click', function(e) {
   const btn = e.target.closest('#sb-pin-btn');
   if (!btn) return;
-  const sb   = document.querySelector('.sidebar');
-  const wrap = document.querySelector('.sb-wrap');
-  if (!sb || !wrap) return;
-  const nowPinned = sb.classList.toggle('sb-pinned');
-  wrap.classList.toggle('sb-pinned', nowPinned);
+  const nowPinned = !document.body.hasAttribute('data-sb-pinned');
+  if (nowPinned) document.body.setAttribute('data-sb-pinned', '1');
+  else document.body.removeAttribute('data-sb-pinned');
   localStorage.setItem('sb-pinned', nowPinned ? '1' : '');
   const icon = btn.querySelector('i');
   if (icon) icon.className = 'ti ' + (nowPinned ? 'ti-pin-filled' : 'ti-pin');
