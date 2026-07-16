@@ -1,7 +1,7 @@
 function render_manuals(el) {
   var _searchQuery = '';
   var _vendorFilter = (Router.context && Router.context.vendor) || null;
-  var _machineFilter = 'All';
+  var _machineFilter = new Set(); // empty = all
 
   var VENDORS = ['Skyjack', 'Caterpillar', 'Toyota', 'Bobcat'];
 
@@ -26,7 +26,7 @@ function render_manuals(el) {
   function getFiltered() {
     return Store.getManuals(_searchQuery).filter(function(m) {
       if (_vendorFilter && m.vendor !== _vendorFilter) return false;
-      if (_machineFilter !== 'All' && m.machine !== _machineFilter) return false;
+      if (_machineFilter.size > 0 && !_machineFilter.has(m.machine)) return false;
       return true;
     });
   }
@@ -94,7 +94,7 @@ function render_manuals(el) {
     list.querySelectorAll('.man-vendor-item').forEach(function(item) {
       item.addEventListener('click', function() {
         _vendorFilter = this.dataset.vendor || null;
-        _machineFilter = 'All';
+        _machineFilter = new Set();
         renderVendorList();
         renderMachineChips();
         renderGrid();
@@ -105,27 +105,58 @@ function render_manuals(el) {
   function renderMachineChips() {
     var row = document.getElementById('man-machine-chips');
     if (!row) return;
-    if (!_vendorFilter) {
-      row.style.display = 'none';
-      return;
-    }
     var machines = getMachinesForVendor(_vendorFilter);
-    if (machines.length <= 1) {
+    if (!_vendorFilter || machines.length <= 1) {
       row.style.display = 'none';
       return;
     }
     row.style.display = 'flex';
-    var chips = [{ label: 'All', value: 'All' }].concat(machines.map(function(m) { return { label: m, value: m }; }));
-    row.innerHTML = chips.map(function(c) {
-      var isActive = _machineFilter === c.value;
-      return '<button class="man-machine-chip' + (isActive ? ' active' : '') + '" data-machine="' + c.value + '">' + c.label + '</button>';
-    }).join('');
-    row.querySelectorAll('.man-machine-chip').forEach(function(chip) {
-      chip.addEventListener('click', function() {
-        _machineFilter = this.dataset.machine;
+    var selCount = _machineFilter.size;
+    var pillLabel = selCount === 0 ? 'All models' : selCount === 1 ? Array.from(_machineFilter)[0] : selCount + ' models';
+    row.innerHTML = '<div style="position:relative;">'
+      + '<button class="man-machine-chip' + (selCount > 0 ? ' active' : '') + '" id="man-model-pill" style="display:flex;align-items:center;gap:5px;">'
+      + '<i class="ti ti-adjustments-horizontal" style="font-size:12px;"></i>' + pillLabel
+      + '<i class="ti ti-chevron-down" style="font-size:10px;opacity:0.6;"></i></button>'
+      + '<div id="man-model-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;z-index:200;background:#FFFFFF;border:0.5px solid #E2DDD8;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.1);min-width:200px;padding:6px 0;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 12px 4px;border-bottom:0.5px solid #F0ECE8;margin-bottom:2px;">'
+      + '<span style="font-size:10px;font-weight:600;color:#9CA3AF;letter-spacing:1px;text-transform:uppercase;">Models</span>'
+      + '<button id="man-model-clear" style="font-size:10px;color:#C08A1A;font-weight:500;background:none;border:none;cursor:pointer;font-family:inherit;padding:0;">Clear</button></div>'
+      + machines.map(function(m) {
+          var checked = _machineFilter.has(m);
+          return '<label style="display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;font-size:12px;color:#111318;" onmouseover="this.style.background=\'#FAFAF8\'" onmouseout="this.style.background=\'\'">'
+            + '<input type="checkbox" data-model="' + m + '"' + (checked ? ' checked' : '') + ' style="accent-color:#F5A623;cursor:pointer;"/>' + m + '</label>';
+        }).join('')
+      + '</div></div>';
+
+    document.getElementById('man-model-pill').addEventListener('click', function(e) {
+      e.stopPropagation();
+      var dd = document.getElementById('man-model-dropdown');
+      dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById('man-model-clear').addEventListener('click', function(e) {
+      e.stopPropagation();
+      _machineFilter = new Set();
+      renderMachineChips();
+      renderGrid();
+    });
+
+    row.querySelectorAll('input[data-model]').forEach(function(cb) {
+      cb.addEventListener('change', function(e) {
+        e.stopPropagation();
+        if (this.checked) _machineFilter.add(this.dataset.model);
+        else _machineFilter.delete(this.dataset.model);
         renderMachineChips();
         renderGrid();
       });
+    });
+
+    document.addEventListener('click', function closeDropdown(e) {
+      var dd = document.getElementById('man-model-dropdown');
+      if (!dd) { document.removeEventListener('click', closeDropdown); return; }
+      if (!dd.contains(e.target) && e.target.id !== 'man-model-pill') {
+        dd.style.display = 'none';
+      }
     });
   }
 
@@ -199,7 +230,7 @@ function render_manuals(el) {
 
   window.manClearVendor = function() {
     _vendorFilter = null;
-    _machineFilter = 'All';
+    _machineFilter = new Set();
     renderVendorList();
     renderMachineChips();
     renderGrid();

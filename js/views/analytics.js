@@ -270,10 +270,10 @@ function anRenderContent() {
 
   // synthetic averages
   const avgDaysToClose = (2.4 + selLocs.length * 0.3).toFixed(1);
-  const ftfRate = Math.round(78 + selLocs.length * 2);
+  const overnightPct = Math.round(31 + selLocs.length * 3);
+  const overnightPrior = Math.round(overnightPct * (0.88 + Math.random() * 0.2));
   const pendingApprovalCount = 3 + selLocs.length;
   const pendingApprovalValue = 1840 + selLocs.length * 620;
-  const localPullRate = Math.round(22 + selLocs.length * 3);
 
   // ── Mechanic spend (synthetic by mechanic) ─────────────────────────────
   const MECHANICS = [
@@ -416,9 +416,9 @@ function anRenderContent() {
       <div class="an-kpi-delta down">${fmt(pendingApprovalValue)} at risk</div>
     </div>
     <div class="an-kpi">
-      <div class="an-kpi-val">${ftfRate}%</div>
-      <div class="an-kpi-label">First-time fix rate</div>
-      <div class="an-kpi-delta ${ftfRate >= 80 ? 'up' : 'down'}">${localPullRate}% local inventory pulls</div>
+      <div class="an-kpi-val">${overnightPct}%</div>
+      <div class="an-kpi-label">Orders shipped overnight</div>
+      <div class="an-kpi-delta ${overnightPct >= overnightPrior ? 'down' : 'up'}">${overnightPct >= overnightPrior ? '↑' : '↓'} ${Math.abs(overnightPct - overnightPrior)}pp vs prior · ${overnightPct >= 40 ? 'review sourcing' : 'on target'}</div>
     </div>
   </div>
 
@@ -588,7 +588,7 @@ function anRenderContent() {
             <div class="an-donut-val">${Math.round(filteredWOs.length * t.pct / 100)} WOs</div>
           </div>`).join('')}
         <div style="margin-top:12px;padding-top:10px;border-top:0.5px solid #F0ECE8;display:flex;gap:20px;">
-          <div><div style="font-size:18px;font-weight:700;color:#111318;">${ftfRate}%</div><div style="font-size:10px;color:#9CA3AF;">First-time fix rate</div></div>
+          <div><div style="font-size:18px;font-weight:700;color:${overnightPct>=40?'#A32D2D':'#111318'};">${overnightPct}%</div><div style="font-size:10px;color:#9CA3AF;">Shipped overnight</div></div>
           <div><div style="font-size:18px;font-weight:700;color:#111318;">${avgDaysToClose}d</div><div style="font-size:10px;color:#9CA3AF;">Avg days to close</div></div>
           <div><div style="font-size:18px;font-weight:700;color:${overdueWOs>0?'#A32D2D':'#3B6D11'};">${overdueWOs}</div><div style="font-size:10px;color:#9CA3AF;">Overdue</div></div>
         </div>
