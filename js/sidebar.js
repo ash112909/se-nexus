@@ -21,11 +21,11 @@ function buildSidebar(activeItem, opts) {
     </div>
     <div class="sb-nav">
       <div class="sb-section-label">Viewing as fleet</div>
-      <div class="sb-item active"><i class="ti ti-search"></i> Search parts</div>
+      <div class="sb-item active"><i class="ti ti-search"></i><span class="sb-lbl"> Search parts</span></div>
     </div>
     <div style="margin-top:auto;">
       <div class="sb-item" onclick="Router.navigate('supplier-portal')" style="color:#F5A623;border-top:1px solid #2A2A2A;">
-        <i class="ti ti-arrow-left"></i> Exit impersonation
+        <i class="ti ti-arrow-left"></i><span class="sb-lbl"> Exit impersonation</span>
       </div>
       <div class="sb-pin-row" id="sb-pin-btn"><i class="ti ${pinIcon}"></i><span class="sb-pin-label">${pinLabel}</span></div>
     </div>
@@ -49,15 +49,15 @@ function buildSidebar(activeItem, opts) {
     </div>
     <div class="sb-nav">
       <div class="sb-section-label">Portal</div>
-      <div class="sb-item ${activeItem==='sp-home'?'active':''}"     data-sp-tab="home"><i class="ti ti-home"></i> Home</div>
-      <div class="sb-item ${activeItem==='sp-fleets'?'active':''}"   data-sp-tab="fleets"><i class="ti ti-building-warehouse"></i> My Fleets</div>
-      <div class="sb-item ${activeItem==='sp-requests'?'active':''}" data-sp-tab="requests"><i class="ti ti-tag"></i> Price Requests ${pending > 0 ? `<span class="sb-badge">${pending}</span>` : ''}</div>
-      <div class="sb-item ${activeItem==='sp-content'?'active':''}"  data-sp-tab="content"><i class="ti ti-pencil"></i> Content</div>
+      <div class="sb-item ${activeItem==='sp-home'?'active':''}"     data-sp-tab="home"><i class="ti ti-home"></i><span class="sb-lbl"> Home</span></div>
+      <div class="sb-item ${activeItem==='sp-fleets'?'active':''}"   data-sp-tab="fleets"><i class="ti ti-building-warehouse"></i><span class="sb-lbl"> My Fleets</span></div>
+      <div class="sb-item ${activeItem==='sp-requests'?'active':''}" data-sp-tab="requests"><i class="ti ti-tag"></i><span class="sb-lbl"> Price Requests ${pending > 0 ? `<span class="sb-badge">${pending}</span>` : ''}</span></div>
+      <div class="sb-item ${activeItem==='sp-content'?'active':''}"  data-sp-tab="content"><i class="ti ti-pencil"></i><span class="sb-lbl"> Content</span></div>
       <div class="sb-section-label">Knowledge</div>
-      <div class="sb-item ${activeItem==='sp-manuals'?'active':''}"  data-sp-tab="manuals"><i class="ti ti-book"></i> Manuals &amp; Docs</div>
-      <div class="sb-item ${activeItem==='sp-news'?'active':''}"     data-sp-tab="news"><i class="ti ti-news"></i> News &amp; Updates</div>
+      <div class="sb-item ${activeItem==='sp-manuals'?'active':''}"  data-sp-tab="manuals"><i class="ti ti-book"></i><span class="sb-lbl"> Manuals &amp; Docs</span></div>
+      <div class="sb-item ${activeItem==='sp-news'?'active':''}"     data-sp-tab="news"><i class="ti ti-news"></i><span class="sb-lbl"> News &amp; Updates</span></div>
       <div class="sb-section-label">Reports</div>
-      <div class="sb-item ${activeItem==='sp-analytics'?'active':''}" data-sp-tab="analytics"><i class="ti ti-chart-bar"></i> Analytics</div>
+      <div class="sb-item ${activeItem==='sp-analytics'?'active':''}" data-sp-tab="analytics"><i class="ti ti-chart-bar"></i><span class="sb-lbl"> Analytics</span></div>
     </div>
     <div class="sb-pin-row" id="sb-pin-btn"><i class="ti ${pinIcon}"></i><span class="sb-pin-label">${pinLabel}</span></div>
   </div>
@@ -76,22 +76,22 @@ function buildSidebar(activeItem, opts) {
     </div>
     <div class="sb-nav">
       <div class="sb-section-label">${isSupervisor ? 'Operations' : 'My work'}</div>
-      <div class="sb-item ${activeItem==='home'?'active':''}" onclick="Router.navigate('home')"><i class="ti ti-home"></i> Home</div>
-      <div class="sb-item ${activeItem==='dashboard'?'active':''}" onclick="sendPrompt('Go back to dashboard')"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
-      <div class="sb-item ${activeItem==='wo'?'active':''}" onclick="sendPrompt('Open work orders list')"><i class="ti ti-clipboard-list"></i> Orders <span class="sb-badge">2</span></div>
-      <div class="sb-item ${activeItem==='order-history'?'active':''}" onclick="sendPrompt('Open order history')"><i class="ti ti-history"></i> Order history</div>
+      <div class="sb-item ${activeItem==='home'?'active':''}" onclick="Router.navigate('home')"><i class="ti ti-home"></i><span class="sb-lbl"> Home</span></div>
+      <div class="sb-item ${activeItem==='dashboard'?'active':''}" onclick="sendPrompt('Go back to dashboard')"><i class="ti ti-layout-dashboard"></i><span class="sb-lbl"> Dashboard</span></div>
+      <div class="sb-item ${activeItem==='wo'?'active':''}" onclick="sendPrompt('Open work orders list')"><i class="ti ti-clipboard-list"></i><span class="sb-lbl"> Orders <span class="sb-badge">2</span></span></div>
+      <div class="sb-item ${activeItem==='order-history'?'active':''}" onclick="sendPrompt('Open order history')"><i class="ti ti-history"></i><span class="sb-lbl"> Order history</span></div>
       ${isSupervisor ? `
-      <div class="sb-item ${activeItem==='approvals'?'active':''}" onclick="sendPrompt('Open approvals')"><i class="ti ti-circle-check"></i> Approvals</div>
-      <div class="sb-item ${activeItem==='analytics'?'active':''}" onclick="sendPrompt('Open analytics')"><i class="ti ti-chart-bar"></i> Analytics</div>
-      <div class="sb-item ${activeItem==='cms'?'active':''}" onclick="Router.navigate('cms')"><i class="ti ti-pencil"></i> Content mgmt</div>
+      <div class="sb-item ${activeItem==='approvals'?'active':''}" onclick="sendPrompt('Open approvals')"><i class="ti ti-circle-check"></i><span class="sb-lbl"> Approvals</span></div>
+      <div class="sb-item ${activeItem==='analytics'?'active':''}" onclick="sendPrompt('Open analytics')"><i class="ti ti-chart-bar"></i><span class="sb-lbl"> Analytics</span></div>
+      <div class="sb-item ${activeItem==='cms'?'active':''}" onclick="Router.navigate('cms')"><i class="ti ti-pencil"></i><span class="sb-lbl"> Content mgmt</span></div>
       ` : ''}
       <div class="sb-section-label">Parts</div>
-      <div class="sb-item ${activeItem==='parts'?'active':''}" onclick="sendPrompt('Open Parts Search scoped to WO #100094, Skyjack SJIII 3219 — diagram view, hydraulic lift cylinder')"><i class="ti ti-search"></i> Search parts</div>
-      <div class="sb-item ${activeItem==='recommended'?'active':''}" onclick="sendPrompt('Open recommended parts')"><i class="ti ti-star"></i> Recommended</div>
+      <div class="sb-item ${activeItem==='parts'?'active':''}" onclick="sendPrompt('Open Parts Search scoped to WO #100094, Skyjack SJIII 3219 — diagram view, hydraulic lift cylinder')"><i class="ti ti-search"></i><span class="sb-lbl"> Search parts</span></div>
+      <div class="sb-item ${activeItem==='recommended'?'active':''}" onclick="sendPrompt('Open recommended parts')"><i class="ti ti-star"></i><span class="sb-lbl"> Recommended</span></div>
       <div class="sb-section-label">Knowledge</div>
-      <div class="sb-item ${activeItem==='manuals'?'active':''}" onclick="sendPrompt('Open manuals and docs')"><i class="ti ti-book"></i> Manuals &amp; docs</div>
-      <div class="sb-item ${activeItem==='diagnostics'?'active':''}" onclick="sendPrompt('Open diagnostic assistant')"><i class="ti ti-tool"></i> Diagnostics</div>
-      <div class="sb-item ${activeItem==='news'?'active':''}" onclick="sendPrompt('Open news and updates')"><i class="ti ti-news"></i> News &amp; updates</div>
+      <div class="sb-item ${activeItem==='manuals'?'active':''}" onclick="sendPrompt('Open manuals and docs')"><i class="ti ti-book"></i><span class="sb-lbl"> Manuals &amp; docs</span></div>
+      <div class="sb-item ${activeItem==='diagnostics'?'active':''}" onclick="sendPrompt('Open diagnostic assistant')"><i class="ti ti-tool"></i><span class="sb-lbl"> Diagnostics</span></div>
+      <div class="sb-item ${activeItem==='news'?'active':''}" onclick="sendPrompt('Open news and updates')"><i class="ti ti-news"></i><span class="sb-lbl"> News &amp; updates</span></div>
     </div>
     <div class="sb-pin-row" id="sb-pin-btn"><i class="ti ${pinIcon}"></i><span class="sb-pin-label">${pinLabel}</span></div>
   </div>

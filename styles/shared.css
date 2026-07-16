@@ -12,6 +12,18 @@
 .sb-logo-area, .sb-logo-sub, .sb-fleet-name, .sb-fleet-sub,
 .sb-section-label, .sb-item, .sb-pin-row { white-space: nowrap; }
 
+/* Collapsed: hide everything except icons */
+.sb-logo-area, .sb-section-label, .sb-lbl, .sb-pin-label {
+  opacity: 0; pointer-events: none; transition: opacity 0.15s;
+}
+/* Expanded (hover or pinned): reveal labels */
+.sb-wrap:hover .sb-logo-area, .sb-wrap:hover .sb-section-label,
+.sb-wrap:hover .sb-lbl, .sb-wrap:hover .sb-pin-label,
+.sb-wrap.sb-pinned .sb-logo-area, .sb-wrap.sb-pinned .sb-section-label,
+.sb-wrap.sb-pinned .sb-lbl, .sb-wrap.sb-pinned .sb-pin-label {
+  opacity: 1; pointer-events: auto;
+}
+
 .sb-fleet { padding: 20px 18px 16px; border-bottom: 1px solid #2A2A2A; display: flex; align-items: center; gap: 10px; }
 .sb-fleet-icon { width: 32px; height: 32px; background: #F5A623; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .sb-fleet-name { font-size: 12px; font-weight: 600; color: #FFFFFF; line-height: 1.3; }
