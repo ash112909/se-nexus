@@ -4,7 +4,7 @@ function render_diagnostics(el) {
     { role: 'ai', text: 'For the Cat 320 Excavator track tension issue on FL-017: right-side track tension should be measured at the idler using a tape measure. Spec is 300–320mm sag midspan. If out of spec, adjust via the grease fitting on the recoil cylinder — add grease to tighten, release valve to loosen. Do not exceed 3 pumps without re-measuring. Torque on track bolts: 560 Nm (413 ft·lb).' },
     { role: 'ai', text: 'Mast chain elongation on the Toyota 8FGU25 (FL-031): measure chain pitch using a pitch gauge or 300mm rule — compare 12 links against the wear limit table in Service Manual Section 6.3. Typical wear limit is 3% elongation. If exceeded, replace both chains as a set — part number TOY-MCH-114. Also inspect chain anchors and sheaves during this service.' },
     { role: 'ai', text: 'Bobcat S650 quick coupler leak (FL-008): disconnect and inspect the coupler O-ring and backup ring — part BOB-QC-520 seal kit covers both. Confirm the coupler is fully locked before pressurizing. Leak at the face seal indicates O-ring failure; leak at the body indicates cracked housing. Torque on coupler lock pin: 68 Nm.' },
-    { role: 'ai', text: 'Parts availability for your current WOs: SKJ-103100 (hydraulic lift cylinder seal kit) and SKJ-103278 (pressure relief valve) are in stock and en route for WO #100094. SKJ-107732 (pump seal kit) is backordered with ETA Jun 26. For Cat 320 track work, CAT-TRK-7201 (track adjuster grease cylinder) is in stock.' },
+    { role: 'ai', text: 'Parts availability for your current orders: SKJ-103100 (hydraulic lift cylinder seal kit) and SKJ-103278 (pressure relief valve) are in stock and en route for Order #100094. SKJ-107732 (pump seal kit) is backordered with ETA Jun 26. For Cat 320 track work, CAT-TRK-7201 (track adjuster grease cylinder) is in stock.' },
   ];
 
   let _responseIndex = 0;
@@ -130,7 +130,7 @@ function render_diagnostics(el) {
       `<div class="ctx-option ${_ctx.type==='wo' && _ctx.woId===w.id ? 'selected' : ''}" onclick="diagSetCtx('wo',${w.id})">
         <i class="ti ti-clipboard-list" style="color:#F5A623;font-size:14px;flex-shrink:0;"></i>
         <div style="flex:1;min-width:0;">
-          <div style="font-size:12px;font-weight:600;color:#111318;">WO #${w.id} — ${w.machine}</div>
+          <div style="font-size:12px;font-weight:600;color:#111318;">Order #${w.id} — ${w.machine}</div>
           <div style="font-size:11px;color:#9CA3AF;">${w.asset} · ${w.status}</div>
         </div>
         ${_ctx.type==='wo' && _ctx.woId===w.id ? '<i class="ti ti-check" style="color:#F5A623;font-size:13px;"></i>' : ''}
@@ -148,8 +148,8 @@ function render_diagnostics(el) {
           ${_ctx.type==='none' ? '<i class="ti ti-check" style="color:#8A8FA8;font-size:13px;"></i>' : ''}
         </div>
 
-        <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#9CA3AF;margin:10px 0 2px;">Work Orders</div>
-        ${woOptions || '<div style="font-size:12px;color:#9CA3AF;padding:6px 0;">No active work orders.</div>'}
+        <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#9CA3AF;margin:10px 0 2px;">Orders</div>
+        ${woOptions || '<div style="font-size:12px;color:#9CA3AF;padding:6px 0;">No active orders.</div>'}
 
         <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#9CA3AF;margin:10px 0 2px;">Parts search</div>
         <div class="ctx-option ${_ctx.type==='parts' ? 'selected' : ''}" onclick="diagSetCtx('parts')">

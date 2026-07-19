@@ -3,23 +3,23 @@ function render_recommended(el) {
   // ── Reason map: why each part is recommended ───────────────────────────────
   // woId present → add to that WO's cart; absent → prompt WO creation
   var PART_REASONS = {
-    'SKJ-103100':  { type: 'wo',        woId: 100094, badge: 'Active WO #100094',       icon: 'ti-tool',           text: 'Hydraulic fault repair on FL-094 (SJIII 3219) — lift cylinder seal kit not yet in WO cart.' },
-    'SKJ-103278':  { type: 'wo',        woId: 100094, badge: 'Active WO #100094',       icon: 'ti-tool',           text: 'Pressure relief valve flagged in HYD-04 diagnostic — commonly replaced alongside seal kit.' },
-    'SKJ-103601':  { type: 'wo',        woId: 100094, badge: 'Active WO #100094',       icon: 'ti-tool',           text: 'Bleed screw kit required to re-prime hydraulic circuit after cylinder seal replacement.' },
-    'SKJ-HF046-1G':{ type: 'wo',        woId: 100094, badge: 'Active WO #100094',       icon: 'ti-tool',           text: 'Hydraulic fluid top-off required after seal work on FL-094. ISO 46 specified by Skyjack.' },
-    'SKJ-104880':  { type: 'wo',        woId: 100094, badge: 'Active WO #100094',       icon: 'ti-tool',           text: 'Return-line filter should be replaced during any hydraulic seal service to prevent contamination.' },
+    'SKJ-103100':  { type: 'wo',        woId: 100094, badge: 'Order #100094',       icon: 'ti-tool',           text: 'Hydraulic fault repair on FL-094 (SJIII 3219) — lift cylinder seal kit not yet in order cart.' },
+    'SKJ-103278':  { type: 'wo',        woId: 100094, badge: 'Order #100094',       icon: 'ti-tool',           text: 'Pressure relief valve flagged in HYD-04 diagnostic — commonly replaced alongside seal kit.' },
+    'SKJ-103601':  { type: 'wo',        woId: 100094, badge: 'Order #100094',       icon: 'ti-tool',           text: 'Bleed screw kit required to re-prime hydraulic circuit after cylinder seal replacement.' },
+    'SKJ-HF046-1G':{ type: 'wo',        woId: 100094, badge: 'Order #100094',       icon: 'ti-tool',           text: 'Hydraulic fluid top-off required after seal work on FL-094. ISO 46 specified by Skyjack.' },
+    'SKJ-104880':  { type: 'wo',        woId: 100094, badge: 'Order #100094',       icon: 'ti-tool',           text: 'Return-line filter should be replaced during any hydraulic seal service to prevent contamination.' },
     'SKJ-HYD-201': { type: 'warranty',  asset: 'FL-094', machine: 'Skyjack SJIII 3219', badge: 'Warranty — exp. Sep 2027', icon: 'ti-shield-check',   text: 'FL-094 is under Skyjack warranty. Replace pump seals now to complete hydraulic repair under coverage.' },
     'SKJ-BAT-500': { type: 'scheduled', asset: 'FL-094', machine: 'Skyjack SJIII 3219', badge: '500-hr PM due',    icon: 'ti-calendar-event', text: 'FL-094 deep-cycle batteries are due for replacement at upcoming 500-hr service in ~18 days.' },
     'SKJ-PAD-601': { type: 'wear',      asset: 'FL-088', machine: 'Skyjack SJIII 4632', badge: 'Inspection flag',  icon: 'ti-alert-triangle', text: 'Wear pad wear noted during last PM on FL-088. Replace before next utilization cycle.' },
-    'SKJ-4632-SEA':{ type: 'wo',        woId: 100081, badge: 'Active WO #100081',       icon: 'ti-tool',           text: 'FL-088 (SJIII 4632) lift cylinder leaking — seal kit not yet added to active WO cart.' },
+    'SKJ-4632-SEA':{ type: 'wo',        woId: 100081, badge: 'Order #100081',       icon: 'ti-tool',           text: 'FL-088 (SJIII 4632) lift cylinder leaking — seal kit not yet added to order cart.' },
     'CAT-1R0716':  { type: 'scheduled', asset: 'FL-102', machine: 'Cat 320 Excavator',  badge: '250-hr service due',icon: 'ti-calendar-event', text: 'Cat 320 (FL-102) engine oil service is due within 2 weeks. OEM filter recommended.' },
-    'CAT-TRK-7201':{ type: 'wo',        woId: 100102, badge: 'Active WO #100102',       icon: 'ti-tool',           text: 'Track adjuster cylinder leaking grease on FL-102 — add before submitting WO parts order.' },
+    'CAT-TRK-7201':{ type: 'wo',        woId: 100102, badge: 'Order #100102',       icon: 'ti-tool',           text: 'Track adjuster cylinder leaking grease on FL-102 — add before submitting parts order.' },
     'CAT-ROL-7303':{ type: 'wear',      asset: 'FL-102', machine: 'Cat 320 Excavator',  badge: 'Inspection flag',  icon: 'ti-alert-triangle', text: 'Undercarriage inspection on FL-102 flagged bottom roller wear exceeding 30% threshold.' },
     'CAT-CYL-8005':{ type: 'warranty',  asset: 'FL-102', machine: 'Cat 320 Excavator',  badge: 'Warranty — active',icon: 'ti-shield-check',   text: 'Cat 320 (FL-102) boom cylinder seal replacement covered under active Cat warranty. Order now.' },
     'TOY-MCH-114': { type: 'scheduled', asset: 'FL-031', machine: 'Toyota 8FGU25',      badge: '2,000-hr mast service', icon: 'ti-calendar-event', text: 'Toyota 8FGU25 mast chain inspection interval approaching — chains showing elongation in last check.' },
-    'TOY-TLT-203': { type: 'wo',        woId: 100099, badge: 'Active WO #100099',       icon: 'ti-tool',           text: 'Tilt cylinder hydraulic leak reported on forklift FL-099 — seal kit not yet added to WO.' },
+    'TOY-TLT-203': { type: 'wo',        woId: 100099, badge: 'Order #100099',       icon: 'ti-tool',           text: 'Tilt cylinder hydraulic leak reported on forklift FL-099 — seal kit not yet added to order.' },
     'TOY-32-SEA':  { type: 'scheduled', asset: 'SM-004', machine: 'Toyota 8FGU32',      badge: '1,000-hr PM',      icon: 'ti-calendar-event', text: 'Toyota 8FGU32 lift cylinder seals are due at 1,000-hr PM scheduled for next month.' },
-    'BOB-QC-520':  { type: 'wo',        woId: 100096, badge: 'Active WO #100096',       icon: 'ti-tool',           text: 'Quick coupler hydraulic leak on Bobcat S650 (FL-096) — seal kit not in WO cart yet.' },
+    'BOB-QC-520':  { type: 'wo',        woId: 100096, badge: 'Order #100096',       icon: 'ti-tool',           text: 'Quick coupler hydraulic leak on Bobcat S650 (FL-096) — seal kit not in order cart yet.' },
   };
 
   var REASON_STYLES = {
@@ -87,39 +87,43 @@ function render_recommended(el) {
     var machineLabel = (r && r.machine) ? r.machine : 'this machine';
     var badgeLabel = (r && r.badge) ? r.badge : 'Recommended';
 
+    var inputStyle = 'width:100%;height:34px;border:1px solid #E2DDD8;border-radius:7px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;background:#FFFFFF;';
+    var labelStyle = 'display:block;font-size:11px;font-weight:600;color:#5A5F6E;margin-bottom:4px;';
+    var fieldStyle = 'margin-bottom:10px;';
+    var optStyle   = 'font-size:10px;font-weight:400;color:#9CA3AF;margin-left:4px;';
+
     Modal.show({
-      title: 'No active work order',
-      body: '<div style="display:flex;flex-direction:column;gap:14px;">'
-        + '<div style="display:flex;align-items:flex-start;gap:10px;padding:12px;background:#FFF8EC;border:0.5px solid #F5C97A;border-radius:10px;">'
-        + '<i class="ti ti-alert-triangle" style="font-size:18px;color:#854F0B;flex-shrink:0;margin-top:1px;"></i>'
-        + '<div><div style="font-size:13px;font-weight:600;color:#854F0B;margin-bottom:2px;">' + badgeLabel + '</div>'
-        + '<div style="font-size:12px;color:#7A5510;line-height:1.5;">Asset <strong>' + assetLabel + '</strong> (' + machineLabel + ') has no active work order. Create one to track this part properly, or add to a general order.</div>'
-        + '</div></div>'
-        + '<div style="font-size:12px;font-weight:600;color:#3A3D4A;">Part: ' + part.description + ' <span style="color:#9CA3AF;font-weight:400;">· ' + part.partNum + '</span></div>'
-        + '<div id="rec-new-wo-fields" style="display:none;border:0.5px solid #E2DDD8;border-radius:10px;padding:12px;background:#FAFAF8;">'
-        + '<div style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">New work order</div>'
-        + '<input id="rec-wo-machine" placeholder="Machine / model" style="width:100%;height:36px;border:1px solid #E2DDD8;border-radius:7px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px;box-sizing:border-box;" value="' + machineLabel + '"/>'
-        + '<input id="rec-wo-asset" placeholder="Asset ID" style="width:100%;height:36px;border:1px solid #E2DDD8;border-radius:7px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;margin-bottom:8px;box-sizing:border-box;" value="' + assetLabel + '"/>'
-        + '<input id="rec-wo-issue" placeholder="Issue / reason" style="width:100%;height:36px;border:1px solid #E2DDD8;border-radius:7px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;" value="' + (r && r.badge ? r.badge : '') + '"/>'
+      title: 'No active order',
+      body: '<div style="display:flex;flex-direction:column;gap:12px;">'
+        + '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#FFF8EC;border:0.5px solid #F5C97A;border-radius:9px;">'
+        + '<i class="ti ti-alert-triangle" style="font-size:16px;color:#854F0B;flex-shrink:0;margin-top:1px;"></i>'
+        + '<div style="font-size:12px;color:#7A5510;line-height:1.5;"><strong>' + assetLabel + '</strong>' + (machineLabel !== assetLabel ? ' (' + machineLabel + ')' : '') + ' has no active order. Create one to track this part, or add to a general order.</div>'
         + '</div>'
+        + '<div style="font-size:12px;font-weight:600;color:#3A3D4A;">Part: ' + part.description + ' <span style="color:#9CA3AF;font-weight:400;">· ' + part.partNum + ' · $' + part.price.toFixed(2) + '</span></div>'
+        + '<div style="border:0.5px solid #E2DDD8;border-radius:10px;padding:14px;background:#FAFAF8;">'
+        + '<div style="font-size:10px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px;">New order <span style="font-weight:400;letter-spacing:0;text-transform:none;">— all fields optional</span></div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+        + '<div style="' + fieldStyle + 'grid-column:1/-1;"><label style="' + labelStyle + '">Description / issue <span style="' + optStyle + '">optional</span></label><input id="rec-wo-issue" style="' + inputStyle + '" placeholder="e.g. 500-hr PM, hydraulic seal replacement…" value="' + (r && r.badge ? r.badge : '') + '"/></div>'
+        + '<div style="' + fieldStyle + '"><label style="' + labelStyle + '">Asset ID <span style="' + optStyle + '">optional</span></label><input id="rec-wo-asset" style="' + inputStyle + '" placeholder="e.g. FL-094" value="' + (assetLabel !== 'this asset' ? assetLabel : '') + '"/></div>'
+        + '<div style="' + fieldStyle + '"><label style="' + labelStyle + '">Machine / model <span style="' + optStyle + '">optional</span></label><input id="rec-wo-machine" style="' + inputStyle + '" placeholder="e.g. Skyjack SJIII 3219" value="' + (machineLabel !== 'this machine' ? machineLabel : '') + '"/></div>'
+        + '<div style="' + fieldStyle + '"><label style="' + labelStyle + '">Priority <span style="' + optStyle + '">optional</span></label><select id="rec-wo-priority" style="' + inputStyle + 'height:34px;"><option value="">— select —</option><option value="high">High</option><option value="medium" selected>Medium</option><option value="low">Low</option></select></div>'
+        + '<div style="' + fieldStyle + '"><label style="' + labelStyle + '">Due date <span style="' + optStyle + '">optional</span></label><input id="rec-wo-due" type="date" style="' + inputStyle + '"/></div>'
+        + '<div style="' + fieldStyle + 'grid-column:1/-1;"><label style="' + labelStyle + '">Order / ERP reference <span style="' + optStyle + '">optional</span></label><input id="rec-wo-extid" style="' + inputStyle + '" placeholder="e.g. RM-10122, PO-7890"/></div>'
+        + '</div></div>'
         + '</div>',
       actions: [
         {
-          label: 'Create work order & add',
+          label: 'Create order & add part',
           primary: true,
           onClick: function() {
-            var fieldsEl = document.getElementById('rec-new-wo-fields');
-            if (fieldsEl && fieldsEl.style.display === 'none') {
-              fieldsEl.style.display = 'block';
-              // Update button label
-              var btns = document.querySelectorAll('.modal-action-btn');
-              if (btns[1]) btns[1].textContent = 'Create & add part';
-              return; // stay open to let user fill fields
-            }
             var machine = (document.getElementById('rec-wo-machine') || {}).value || machineLabel;
             var asset   = (document.getElementById('rec-wo-asset') || {}).value || assetLabel;
             var issue   = (document.getElementById('rec-wo-issue') || {}).value || badgeLabel;
-            var newWo = Store.addWorkOrder({ machine: machine, asset: asset, issue: issue, woType: 'equipment' });
+            var priority = (document.getElementById('rec-wo-priority') || {}).value || 'medium';
+            var dueRaw  = (document.getElementById('rec-wo-due') || {}).value;
+            var extId   = (document.getElementById('rec-wo-extid') || {}).value;
+            var dueDate = dueRaw ? new Date(dueRaw).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+            var newWo = Store.addWorkOrder({ machine: machine, asset: asset, issue: issue, woType: 'equipment', priority: priority, dueDate: dueDate, externalId: extId });
             Store.addToWoCart(newWo.id, part);
             Modal.close();
             re_render();
@@ -376,7 +380,7 @@ function render_recommended(el) {
         + '<tfoot><tr><td colspan="2" style="padding:6px 10px;font-size:12px;font-weight:600;color:#111318;">Subtotal</td><td style="padding:6px 10px;font-size:13px;font-weight:700;color:#111318;text-align:right;">$' + total.toFixed(2) + '</td></tr></tfoot>'
         + '</table>'
         + (key !== 'general'
-          ? '<button onclick="recGoToWo(' + key + ');Modal.close();" style="margin-top:8px;padding:5px 12px;border-radius:7px;border:0.5px solid #E2DDD8;background:#FFFFFF;font-size:11px;font-weight:600;color:#111318;cursor:pointer;font-family:inherit;">Go to WO #' + key + ' <i class="ti ti-arrow-right" style="font-size:10px;"></i></button>'
+          ? '<button onclick="recGoToWo(' + key + ');Modal.close();" style="margin-top:8px;padding:5px 12px;border-radius:7px;border:0.5px solid #E2DDD8;background:#FFFFFF;font-size:11px;font-weight:600;color:#111318;cursor:pointer;font-family:inherit;">Go to Order #' + key + ' <i class="ti ti-arrow-right" style="font-size:10px;"></i></button>'
           : '')
         + '</div>';
     }).join('');

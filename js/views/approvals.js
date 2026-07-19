@@ -127,7 +127,7 @@ function render_approvals(el) {
           <div class="ap-detail-row"><span class="ap-detail-label">Bill to</span><span class="ap-detail-val">Mid-County Rental Corp</span></div>
         </div>
         <div class="ap-detail-section">
-          <div class="ap-detail-section-title">Work order</div>
+          <div class="ap-detail-section-title">Order</div>
           <div class="ap-detail-row"><span class="ap-detail-label">WO</span><span class="ap-detail-val">${o.wo}</span></div>
           <div class="ap-detail-row"><span class="ap-detail-label">Asset</span><span class="ap-detail-val">${o.asset}</span></div>
           <div class="ap-detail-row"><span class="ap-detail-label">Vendor</span><span class="ap-detail-val">${o.vendor}</span></div>
@@ -235,7 +235,7 @@ function render_approvals(el) {
       <div class="ap-header-bar">
         <div>
           <div class="ap-heading">Approvals</div>
-          <div style="font-size:12px;color:#7A7F8E;margin-top:2px;">Orders submitted from work orders that require your sign-off before they are sent to vendors.</div>
+          <div style="font-size:12px;color:#7A7F8E;margin-top:2px;">Parts orders that require your sign-off before they are sent to vendors.</div>
         </div>
         <span class="ap-pending-badge" id="ap-pending-badge">0 pending</span>
       </div>

@@ -93,7 +93,7 @@ function render_order_history(el) {
           <div class="oh-detail-row"><span class="oh-detail-label">Bill to</span><span class="oh-detail-val">Mid-County Rental Corp</span></div>
         </div>
         <div class="oh-detail-section">
-          <div class="oh-detail-section-title">Work order</div>
+          <div class="oh-detail-section-title">Order</div>
           <div class="oh-detail-row"><span class="oh-detail-label">WO</span><span class="oh-detail-val">${o.wo}</span></div>
           <div class="oh-detail-row"><span class="oh-detail-label">Asset</span><span class="oh-detail-val">${o.asset}</span></div>
           <div class="oh-detail-row"><span class="oh-detail-label">Vendor</span><span class="oh-detail-val">${o.vendor}</span></div>

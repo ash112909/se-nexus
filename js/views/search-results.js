@@ -9,7 +9,7 @@ function render_search_results(el) {
 
   const SECTION_META = {
     'Parts':           { icon: 'ti-package',        color: '#534AB7', bg: '#EEEDFE' },
-    'Work Orders':     { icon: 'ti-clipboard-list',  color: '#0F6E56', bg: '#E1F5EE' },
+    'Orders':          { icon: 'ti-clipboard-list',  color: '#0F6E56', bg: '#E1F5EE' },
     'Manuals':         { icon: 'ti-book',            color: '#185FA5', bg: '#E6F1FB' },
     'Orders':          { icon: 'ti-receipt',         color: '#854F0B', bg: '#FAEEDA' },
     'News & Bulletins':{ icon: 'ti-news',            color: '#B91C1C', bg: '#FEE2E2' },
@@ -83,7 +83,7 @@ function render_search_results(el) {
       wo.asset.toLowerCase().includes(ql) || wo.issue.toLowerCase().includes(ql) ||
       wo.status.toLowerCase().includes(ql) || wo.assignee.toLowerCase().includes(ql)
     ).forEach(wo => out.push({
-      section: 'Work Orders', icon: 'ti-clipboard-list',
+      section: 'Orders', icon: 'ti-clipboard-list',
       label: 'WO #' + wo.id + ' — ' + wo.machine,
       sub: wo.asset + ' · ' + wo.issue + ' · Assigned to ' + wo.assignee,
       badge: wo.status === 'active'
@@ -310,7 +310,7 @@ function render_search_results(el) {
     if (!body) return;
 
     if (!_query.trim()) {
-      body.innerHTML = `<div class="sr-no-query"><i class="ti ti-search"></i><div style="font-size:14px;font-weight:600;color:#3A3D4A;">Start typing to search</div><div style="font-size:12px;margin-top:4px;">Parts, work orders, orders, manuals, news, and more</div></div>`;
+      body.innerHTML = `<div class="sr-no-query"><i class="ti ti-search"></i><div style="font-size:14px;font-weight:600;color:#3A3D4A;">Start typing to search</div><div style="font-size:12px;margin-top:4px;">Parts, orders, manuals, news, and more</div></div>`;
       return;
     }
 

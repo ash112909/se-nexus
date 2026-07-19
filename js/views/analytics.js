@@ -338,9 +338,9 @@ function anRenderContent() {
 
   // ── Pending approvals ─────────────────────────────────────────────────────
   const APPROVALS_PREVIEW = [
-    { wo:'WO #100094', mech:'James W.', items:4, value:612, age:'2d' },
-    { wo:'WO #100110', mech:'Marcus T.', items:2, value:388, age:'4d' },
-    { wo:'WO #100102', mech:'Lena R.', items:3, value:840, age:'6h' },
+    { wo:'Order #100094', mech:'James W.', items:4, value:612, age:'2d' },
+    { wo:'Order #100110', mech:'Marcus T.', items:2, value:388, age:'4d' },
+    { wo:'Order #100102', mech:'Lena R.', items:3, value:840, age:'6h' },
   ].slice(0, pendingApprovalCount > 3 ? 3 : pendingApprovalCount);
 
   // ── Smart insights ────────────────────────────────────────────────────────
@@ -402,7 +402,7 @@ function anRenderContent() {
     </div>
     <div class="an-kpi">
       <div class="an-kpi-val">${openWOs.length + pendingWOs.length}</div>
-      <div class="an-kpi-label">Open work orders</div>
+      <div class="an-kpi-label">Open orders</div>
       <div class="an-kpi-delta ${highPriOpen > 0 ? 'down' : 'neutral'}">${highPriOpen > 0 ? `${highPriOpen} high priority` : 'None high priority'}</div>
     </div>
     <div class="an-kpi">
@@ -455,7 +455,7 @@ function anRenderContent() {
 
     <div class="an-card">
       <div class="an-card-hdr">
-        <div class="an-card-title"><i class="ti ti-clipboard-list" style="font-size:13px;color:#9CA3AF;"></i> WO health</div>
+        <div class="an-card-title"><i class="ti ti-clipboard-list" style="font-size:13px;color:#9CA3AF;"></i> Order health</div>
       </div>
       <div class="an-card-body" style="padding:10px 16px;">
         <div class="an-wo-stat">
@@ -572,8 +572,8 @@ function anRenderContent() {
   <div class="an-grid-2" style="margin-top:14px;">
     <div class="an-card">
       <div class="an-card-hdr">
-        <div class="an-card-title"><i class="ti ti-chart-donut" style="font-size:13px;color:#9CA3AF;"></i> Work order type mix</div>
-        <span class="an-card-sub">${filteredWOs.length} total WOs</span>
+        <div class="an-card-title"><i class="ti ti-chart-donut" style="font-size:13px;color:#9CA3AF;"></i> Order type mix</div>
+        <span class="an-card-sub">${filteredWOs.length} total orders</span>
       </div>
       <div class="an-card-body">
         <!-- Stacked bar -->
@@ -609,7 +609,7 @@ function anRenderContent() {
           <div class="an-appr-row">
             <div style="flex:1;min-width:0;">
               <div style="font-size:12px;font-weight:600;color:#111318;">${ap.wo}</div>
-              <div style="font-size:10px;color:#9CA3AF;">${ap.mech} · ${ap.items} items</div>
+              <div style="font-size:10px;color:#9CA3AF;">${ap.mech} · ${ap.items} line items</div>
             </div>
             <div style="font-size:10px;color:#9CA3AF;margin-right:10px;">Waiting ${ap.age}</div>
             <div style="font-size:12px;font-weight:700;color:#111318;">${fmt(ap.value)}</div>

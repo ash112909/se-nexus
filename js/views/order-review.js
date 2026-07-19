@@ -212,7 +212,7 @@ function render_order_review(el) {
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
         <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('dashboard')">Dashboard</a>
         <span style="color:#3C4052;">/</span>
-        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('Work orders')">Work orders</a>
+        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('Open orders list')">Orders</a>
         <span style="color:#3C4052;">/</span>
         <a style="color:#5C6070;cursor:pointer;" onclick="Router.navigate('wo-detail',{woId:${wo.id}})">WO #${wo.id}</a>
         <span style="color:#3C4052;">/</span>

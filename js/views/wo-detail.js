@@ -11,14 +11,14 @@ function render_wo_detail(el) {
   <div class="main">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
-        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('Work orders')">Work orders</a>
+        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('Open orders list')">Orders</a>
         <span>/</span><span style="color:#FFFFFF;">WO not found</span>
       </div>
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
       ${buildTopbarRight()}
     </div>
     <div style="padding:40px;color:#9CA3AF;font-size:14px;">
-      <p>Work order not found. <a style="color:#F5A623;cursor:pointer;" onclick="sendPrompt('Work orders')">Return to work orders list</a></p>
+      <p>Work order not found. <a style="color:#F5A623;cursor:pointer;" onclick="sendPrompt('Open orders list')">Return to orders</a></p>
     </div>
   </div>
 </div>`;
@@ -426,7 +426,7 @@ function render_wo_detail(el) {
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
         <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('dashboard')">Dashboard</a>
         <span style="color:#3C4052;">/</span>
-        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('Work orders')">Work orders</a>
+        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('Open orders list')">Orders</a>
         <span style="color:#3C4052;">/</span>
         <span style="color:#FFFFFF;font-weight:500;">WO #${wo.id}</span>
       </div>
@@ -451,7 +451,7 @@ function render_wo_detail(el) {
               <option value="closed" ${wo.status === 'closed' ? 'selected' : ''}>Closed</option>
             </select>
           </div>
-          <button class="btn-ghost" onclick="sendPrompt('Work orders')"><i class="ti ti-arrow-left" style="font-size:14px;"></i> Back</button>
+          <button class="btn-ghost" onclick="sendPrompt('Open orders list')"><i class="ti ti-arrow-left" style="font-size:14px;"></i> Back</button>
           ${wo.status !== 'closed' ? `<button class="btn-danger" id="wod-close-btn"><i class="ti ti-x" style="font-size:14px;"></i> Close WO</button>` : ''}
         </div>
       </div>
@@ -592,7 +592,7 @@ function render_wo_detail(el) {
     closeBtn.addEventListener('click', function() {
       Modal.confirm('Close Work Order #' + wo.id + '? This cannot be undone.', () => {
         Store.closeWorkOrder(wo.id);
-        sendPrompt('Work orders');
+        sendPrompt('Open orders list');
       });
     });
   }

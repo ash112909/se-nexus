@@ -78,7 +78,7 @@ function buildSidebar(activeItem, opts) {
       <div class="sb-section-label">${isSupervisor ? 'Operations' : 'My work'}</div>
       <div class="sb-item ${activeItem==='home'?'active':''}" onclick="Router.navigate('home')"><i class="ti ti-home"></i><span class="sb-lbl"> Home</span></div>
       <div class="sb-item ${activeItem==='dashboard'?'active':''}" onclick="sendPrompt('Go back to dashboard')"><i class="ti ti-layout-dashboard"></i><span class="sb-lbl"> Dashboard</span></div>
-      <div class="sb-item ${activeItem==='wo'?'active':''}" onclick="sendPrompt('Open work orders list')"><i class="ti ti-clipboard-list"></i><span class="sb-lbl"> Orders <span class="sb-badge">2</span></span></div>
+      <div class="sb-item ${activeItem==='wo'?'active':''}" onclick="sendPrompt('Open orders list')"><i class="ti ti-clipboard-list"></i><span class="sb-lbl"> Orders <span class="sb-badge">2</span></span></div>
       <div class="sb-item ${activeItem==='order-history'?'active':''}" onclick="sendPrompt('Open order history')"><i class="ti ti-history"></i><span class="sb-lbl"> Order history</span></div>
       ${isSupervisor ? `
       <div class="sb-item ${activeItem==='approvals'?'active':''}" onclick="sendPrompt('Open approvals')"><i class="ti ti-circle-check"></i><span class="sb-lbl"> Approvals</span></div>

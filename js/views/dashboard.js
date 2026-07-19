@@ -167,8 +167,8 @@ function render_dashboard(el) {
         </div>
         <i class="ti ti-arrow-right ai-arrow"></i>
       </div>
-      <div class="section-label">Active work orders</div>
-      ${activeWOs.length ? activeWOs.map((wo, i) => renderWOCard(wo, i)).join('') : '<div style="color:#9CA3AF;font-size:13px;padding:12px 0;">No active work orders.</div>'}
+      <div class="section-label">Active orders</div>
+      ${activeWOs.length ? activeWOs.map((wo, i) => renderWOCard(wo, i)).join('') : '<div style="color:#9CA3AF;font-size:13px;padding:12px 0;">No active orders.</div>'}
       <div style="margin-bottom:20px;"></div>
       <div class="section-label">Quick actions</div>
       <div class="grid-3">
@@ -216,7 +216,7 @@ function render_dashboard(el) {
         <div class="notif-item">
           <div class="notif-icon icon-green"><i class="ti ti-truck-delivery"></i></div>
           <div class="notif-body">
-            <div class="notif-title">Parts arriving today — WO #100094</div>
+            <div class="notif-title">Parts arriving today — Order #100094</div>
             <div class="notif-sub">3 items from Skyjack · Est. delivery by 2:00 PM</div>
           </div>
           <div class="notif-time">9:14 AM</div>
@@ -234,7 +234,7 @@ function render_dashboard(el) {
         <div class="notif-item">
           <div class="notif-icon icon-blue"><i class="ti ti-clipboard-check"></i></div>
           <div class="notif-body">
-            <div class="notif-title">WO #100102 assigned to you</div>
+            <div class="notif-title">Order #100102 assigned to you</div>
             <div class="notif-sub">Cat 320 Excavator FL-017 · Assigned by M. Torres (Lead)</div>
           </div>
           <div class="notif-time">Yesterday</div>

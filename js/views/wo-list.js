@@ -76,7 +76,7 @@ function render_wo_list(el) {
   function renderRows(wos) {
     if (!wos.length) return '<div class="wol-empty">No orders found.</div>';
     return wos.map(wo => `
-      <div class="wol-row" style="grid-template-columns:${_cols};" onclick="sendPrompt('Show me the Work Order detail view for WO #${wo.id}')">
+      <div class="wol-row" style="grid-template-columns:${_cols};" onclick="sendPrompt('Show me the order detail view for Order #${wo.id}')">
         <div class="wol-td">
           <span class="wol-wo-id">#${wo.id}</span>
           ${wo.externalId ? `<div style="font-size:10px;color:#9CA3AF;margin-top:2px;">${wo.externalId}</div>` : ''}
@@ -286,7 +286,7 @@ function render_wo_list(el) {
     const formHtml = `
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div class="modal-form-field" style="grid-column:1/-1;">
-          <label class="modal-form-label">Work Order Type *</label>
+          <label class="modal-form-label">Order Type *</label>
           <select class="modal-form-select" id="nwo-type">
             <option value="equipment">Equipment Repair</option>
             <option value="pm">Scheduled PM</option>
@@ -338,19 +338,19 @@ function render_wo_list(el) {
           </select>
         </div>
         <div class="modal-form-field">
-          <label class="modal-form-label">Work Order ID * <span class="lbl-opt" style="font-size:10px;">(RentalMan / ERP)</span></label>
+          <label class="modal-form-label">Order ID <span class="lbl-opt" style="font-size:10px;">(RentalMan / ERP — optional)</span></label>
           <input class="modal-form-input" id="nwo-extid" type="text" placeholder="e.g. RM-10122"/>
           <div class="modal-field-error" id="nwo-extid-err">Required</div>
         </div>
       </div>`;
 
     Modal.show({
-      title: 'New Work Order',
+      title: 'New Order',
       body: formHtml,
       actions: [
         { label: 'Back', onClick: () => openTypePicker() },
         {
-          label: 'Create Work Order', primary: true, onClick: () => {
+          label: 'Create Order', primary: true, onClick: () => {
             const woType = document.getElementById('nwo-type').value;
             const issue  = document.getElementById('nwo-issue').value.trim();
             const extId  = document.getElementById('nwo-extid').value.trim();
@@ -358,7 +358,6 @@ function render_wo_list(el) {
             const show   = (id, v) => { const e = document.getElementById(id); if (e) e.style.display = v ? 'block' : 'none'; };
             let valid = true;
             show('nwo-issue-err', !issue); if (!issue) valid = false;
-            show('nwo-extid-err', !extId); if (!extId) valid = false;
             show('nwo-due-err',   !dueRaw); if (!dueRaw) valid = false;
             if (!valid) return;
 
@@ -471,7 +470,7 @@ function render_wo_list(el) {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <button class="wol-type-pick-card" id="pick-wo">
             <i class="ti ti-clipboard-list" style="font-size:22px;color:#185FA5;margin-bottom:8px;"></i>
-            <div style="font-size:13px;font-weight:700;color:#111318;">Work Order</div>
+            <div style="font-size:13px;font-weight:700;color:#111318;">Order</div>
             <div style="font-size:11px;color:#7A7F8E;margin-top:3px;">Equipment repair or scheduled PM linked to a WO ID</div>
           </button>
           <button class="wol-type-pick-card" id="pick-ord">
