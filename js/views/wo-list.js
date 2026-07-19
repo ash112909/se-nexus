@@ -216,7 +216,7 @@ function render_wo_list(el) {
           <div class="wol-subtitle">${(Store.getCurrentLocation()||{name:'—'}).name} · <span id="wol-sum-active">0</span> active</div>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <input class="wol-search" type="text" placeholder="Search orders, machine, asset…" id="wol-search-input"/>
+          <input class="wol-search" type="text" placeholder="Search orders, machine…" id="wol-search-input"/>
           <div class="wol-filters" id="wol-filters">
             <div class="wol-filter-pill active" data-filter="all">All</div>
             <div class="wol-filter-pill" data-filter="active">Active</div>
