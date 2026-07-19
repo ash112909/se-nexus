@@ -430,6 +430,23 @@ function render_wo_list(el) {
         <div class="modal-field-error" id="nord-issue-err">Required</div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="modal-form-field" style="grid-column:1/-1;">
+          <label class="modal-form-label">Equipment # <span class="lbl-opt">(optional — auto-populates make, model, serial)</span></label>
+          <input class="modal-form-input" id="nord-asset" type="text" placeholder="e.g. FL-094"/>
+          <div class="nwo-autofill-banner" id="nord-autofill-msg"></div>
+        </div>
+        <div class="modal-form-field">
+          <label class="modal-form-label">Make <span class="lbl-opt">(optional)</span></label>
+          <input class="modal-form-input" id="nord-make" type="text" placeholder="e.g. Skyjack"/>
+        </div>
+        <div class="modal-form-field">
+          <label class="modal-form-label">Model <span class="lbl-opt">(optional)</span></label>
+          <input class="modal-form-input" id="nord-model" type="text" placeholder="e.g. SJIII 3219"/>
+        </div>
+        <div class="modal-form-field" style="grid-column:1/-1;">
+          <label class="modal-form-label">Serial # <span class="lbl-opt">(optional)</span></label>
+          <input class="modal-form-input" id="nord-serial" type="text" placeholder="e.g. SJ3219-00847"/>
+        </div>
         <div class="modal-form-field">
           <label class="modal-form-label">Priority</label>
           <select class="modal-form-select" id="nord-priority">
@@ -467,6 +484,11 @@ function render_wo_list(el) {
 
             const dueRaw  = document.getElementById('nord-due').value;
             const extId   = document.getElementById('nord-extid').value.trim();
+            const asset   = document.getElementById('nord-asset').value.trim();
+            const make    = document.getElementById('nord-make').value.trim();
+            const model   = document.getElementById('nord-model').value.trim();
+            const serial  = document.getElementById('nord-serial').value.trim();
+            const machine = (make && model) ? `${make} ${model}` : asset || '';
             const nextId  = Store.getWorkOrders('all').reduce((m, w) => Math.max(m, w.id), 100000) + 1;
             const dueDate = dueRaw
               ? new Date(dueRaw).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -476,12 +498,27 @@ function render_wo_list(el) {
               issue, dueDate, externalId: extId || `SE-${nextId}`,
               priority: document.getElementById('nord-priority').value,
               assignee: document.getElementById('nord-assignee').value,
-              machine: '', asset: '', make: '', model: '', serial: '' });
+              machine, asset, make, model, serial });
             Modal.close(); reRenderTable(); updateSummary();
           }
         }
       ]
     });
+
+    setTimeout(() => {
+      const assetInput = document.getElementById('nord-asset');
+      if (!assetInput) return;
+      assetInput.addEventListener('blur', function() {
+        const eq = EQUIPMENT_DB[this.value.trim().toUpperCase()] || EQUIPMENT_DB[this.value.trim()];
+        if (!eq) return;
+        document.getElementById('nord-make').value   = eq.make;
+        document.getElementById('nord-model').value  = eq.model;
+        document.getElementById('nord-serial').value = eq.serial;
+        const banner = document.getElementById('nord-autofill-msg');
+        banner.textContent = `Auto-filled from fleet: ${eq.make} ${eq.model} · ${eq.serial}`;
+        banner.style.display = 'block';
+      });
+    }, 50);
   }
 
   function openTypePicker() {
