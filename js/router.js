@@ -66,10 +66,10 @@ const Router = (() => {
     else if (p.includes('go to login') || p.includes('show login') || p === 'login') { navigate('login'); }
     else if (p.includes('order history')) { navigate('order-history'); }
     else if (p.includes('parts search') || p.includes('search parts') || p.includes('diagram')) { navigate('parts-search', woId ? { woId } : {}); }
-    else if ((p.includes('work order detail') || p.includes('wo #') || p.includes('wo detail')) && woId) {
+    else if ((p.includes('work order detail') || p.includes('wo #') || p.includes('wo detail') || p.includes('order detail') || p.includes('order #')) && woId) {
       navigate('wo-detail', { woId });
     }
-    else if (p.includes('work order') || p.includes('open wo') || p.includes('wo list')) { navigate('wo-list'); }
+    else if (p.includes('work order') || p.includes('open wo') || p.includes('wo list') || p.includes('orders list') || p.includes('open orders')) { navigate('wo-list'); }
     else if (p.includes('diagnostic')) { navigate('diagnostics'); }
     else if (p.includes('manual') || p.includes('doc')) { navigate('manuals'); }
     else if (p.includes('recommended')) { navigate('recommended'); }
