@@ -290,13 +290,16 @@ function render_wo_list(el) {
           <select class="modal-form-select" id="nwo-type">
             <option value="equipment">Equipment Repair</option>
             <option value="pm">Scheduled PM</option>
+            <option value="stock">Stock / Parts</option>
+            <option value="other">Other / General</option>
           </select>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="nwo-equipment-section">
         <div class="modal-form-field" style="grid-column:1/-1;">
-          <label class="modal-form-label">Equipment # <span class="lbl-opt">(auto-populates make, model, serial)</span></label>
+          <label class="modal-form-label" id="nwo-asset-lbl">Equipment # * <span class="lbl-opt">(auto-populates make, model, serial)</span></label>
           <input class="modal-form-input" id="nwo-asset" type="text" placeholder="e.g. FL-094"/>
+          <div class="modal-field-error" id="nwo-asset-err">Required</div>
           <div class="nwo-autofill-banner" id="nwo-autofill-msg"></div>
         </div>
         <div class="modal-form-field">
@@ -313,7 +316,7 @@ function render_wo_list(el) {
         </div>
       </div>
       <div class="modal-form-field">
-        <label class="modal-form-label">Fault / Issue *</label>
+        <label class="modal-form-label" id="nwo-issue-lbl">Fault / Issue *</label>
         <input class="modal-form-input" id="nwo-issue" type="text" placeholder="Describe the fault or maintenance task"/>
         <div class="modal-field-error" id="nwo-issue-err">Required</div>
       </div>
@@ -327,7 +330,7 @@ function render_wo_list(el) {
           </select>
         </div>
         <div class="modal-form-field">
-          <label class="modal-form-label">Due Date *</label>
+          <label class="modal-form-label" id="nwo-due-lbl">Due Date *</label>
           <input class="modal-form-input" id="nwo-due" type="date"/>
           <div class="modal-field-error" id="nwo-due-err">Required</div>
         </div>
@@ -340,7 +343,6 @@ function render_wo_list(el) {
         <div class="modal-form-field">
           <label class="modal-form-label">Order ID <span class="lbl-opt" style="font-size:10px;">(RentalMan / ERP — optional)</span></label>
           <input class="modal-form-input" id="nwo-extid" type="text" placeholder="e.g. RM-10122"/>
-          <div class="modal-field-error" id="nwo-extid-err">Required</div>
         </div>
       </div>`;
 
@@ -352,21 +354,25 @@ function render_wo_list(el) {
         {
           label: 'Create Order', primary: true, onClick: () => {
             const woType = document.getElementById('nwo-type').value;
+            const isWoType = woType === 'equipment' || woType === 'pm';
             const issue  = document.getElementById('nwo-issue').value.trim();
-            const extId  = document.getElementById('nwo-extid').value.trim();
+            const asset  = document.getElementById('nwo-asset').value.trim();
             const dueRaw = document.getElementById('nwo-due').value;
             const show   = (id, v) => { const e = document.getElementById(id); if (e) e.style.display = v ? 'block' : 'none'; };
             let valid = true;
-            show('nwo-issue-err', !issue); if (!issue) valid = false;
-            show('nwo-due-err',   !dueRaw); if (!dueRaw) valid = false;
+            if (isWoType) {
+              show('nwo-asset-err', !asset); if (!asset) valid = false;
+              show('nwo-issue-err', !issue); if (!issue) valid = false;
+              show('nwo-due-err',   !dueRaw); if (!dueRaw) valid = false;
+            }
             if (!valid) return;
 
-            const asset   = document.getElementById('nwo-asset')?.value.trim() || '';
             const make    = document.getElementById('nwo-make')?.value.trim() || '';
             const model   = document.getElementById('nwo-model')?.value.trim() || '';
             const serial  = document.getElementById('nwo-serial')?.value.trim() || '';
             const machine = (make && model) ? `${make} ${model}` : asset || '';
-            const dueDate = new Date(dueRaw).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const extId   = document.getElementById('nwo-extid').value.trim();
+            const dueDate = dueRaw ? new Date(dueRaw).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
 
             Store.addWorkOrder({ woType, asset, make, model, serial, machine, issue, dueDate,
               externalId: extId, priority: document.getElementById('nwo-priority').value,
@@ -378,6 +384,22 @@ function render_wo_list(el) {
     });
 
     setTimeout(() => {
+      function updateRequiredLabels() {
+        const woType = document.getElementById('nwo-type')?.value;
+        const isWoType = woType === 'equipment' || woType === 'pm';
+        const assetLbl = document.getElementById('nwo-asset-lbl');
+        const issueLbl = document.getElementById('nwo-issue-lbl');
+        const dueLbl   = document.getElementById('nwo-due-lbl');
+        if (assetLbl) assetLbl.innerHTML = isWoType
+          ? 'Equipment # * <span class="lbl-opt">(auto-populates make, model, serial)</span>'
+          : 'Equipment # <span class="lbl-opt">(optional — auto-populates make, model, serial)</span>';
+        if (issueLbl) issueLbl.textContent = isWoType ? 'Fault / Issue *' : 'Fault / Issue / Description';
+        if (dueLbl)   dueLbl.textContent   = isWoType ? 'Due Date *' : 'Due Date';
+      }
+
+      const typeSelect = document.getElementById('nwo-type');
+      if (typeSelect) typeSelect.addEventListener('change', updateRequiredLabels);
+
       const assetInput = document.getElementById('nwo-asset');
       if (!assetInput) return;
       assetInput.addEventListener('blur', function() {
