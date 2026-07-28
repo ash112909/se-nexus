@@ -350,25 +350,10 @@ function render_supplier_portal(el) {
     const allReqs = Store.getPriceRequests(_supplierId);
 
     // Build filter option lists
-    const fleets   = [...new Set(allReqs.map(r => r.fleetName))].sort();
+    const fleets    = [...new Set(allReqs.map(r => r.fleetName))].sort();
     const locations = [...new Set(allReqs.map(r => r.location).filter(Boolean))].sort();
 
-    // Apply filters
-    let reqs = allReqs.filter(r => {
-      if (_prFilter.fleet !== 'all' && r.fleetName !== _prFilter.fleet) return false;
-      if (_prFilter.status !== 'all' && r.status !== _prFilter.status) return false;
-      if (_prFilter.location !== 'all' && r.location !== _prFilter.location) return false;
-      if (_prFilter.user && !r.requestedBy.toLowerCase().includes(_prFilter.user.toLowerCase())) return false;
-      if (_prFilter.dateFrom) {
-        const from = new Date(_prFilter.dateFrom).getTime();
-        if (r.submittedAt < from) return false;
-      }
-      if (_prFilter.dateTo) {
-        const to = new Date(_prFilter.dateTo).getTime() + 86400000;
-        if (r.submittedAt > to) return false;
-      }
-      return true;
-    });
+    let reqs = _prFilteredReqs();
 
     const pending = allReqs.filter(r => r.status === 'pending').length;
 
@@ -436,7 +421,7 @@ function render_supplier_portal(el) {
     <option value="all">All locations</option>
     ${locations.map(l => `<option value="${l}" ${_prFilter.location===l?'selected':''}>${l}</option>`).join('')}
   </select>
-  <input class="pr-filter-input" id="pr-f-user" placeholder="Search by user…" value="${_prFilter.user}" oninput="spPrApplyFilter()" />
+  <input class="pr-filter-input" id="pr-f-user" placeholder="Search by user…" value="${_prFilter.user}" oninput="spPrFilterUser()" />
   <span style="font-size:12px;color:#9CA3AF;white-space:nowrap;">From</span>
   <input class="pr-filter-date" id="pr-f-from" type="date" value="${_prFilter.dateFrom}" onchange="spPrApplyFilter()" />
   <span style="font-size:12px;color:#9CA3AF;">to</span>
@@ -1969,14 +1954,37 @@ function render_supplier_portal(el) {
 
   // ── Price request global handlers ────────────────────────────────────────────
 
+  function _prFilteredReqs() {
+    return Store.getPriceRequests(_supplierId).filter(r => {
+      if (_prFilter.fleet !== 'all' && r.fleetName !== _prFilter.fleet) return false;
+      if (_prFilter.status !== 'all' && r.status !== _prFilter.status) return false;
+      if (_prFilter.location !== 'all' && r.location !== _prFilter.location) return false;
+      if (_prFilter.user && !r.requestedBy.toLowerCase().includes(_prFilter.user.toLowerCase())) return false;
+      if (_prFilter.dateFrom && r.submittedAt < new Date(_prFilter.dateFrom).getTime()) return false;
+      if (_prFilter.dateTo && r.submittedAt > new Date(_prFilter.dateTo).getTime() + 86400000) return false;
+      return true;
+    });
+  }
+
+  function _prRefreshTable() {
+    const wrap = document.getElementById('pr-list-wrap');
+    if (!wrap) return;
+    wrap.innerHTML = _renderPrTable(_prFilteredReqs());
+    if (_prDetailId) _renderPrDetail(_prDetailId);
+  }
+
   window.spPrApplyFilter = function() {
     _prFilter.fleet    = document.getElementById('pr-f-fleet')?.value    || 'all';
     _prFilter.status   = document.getElementById('pr-f-status')?.value   || 'all';
     _prFilter.location = document.getElementById('pr-f-location')?.value || 'all';
-    _prFilter.user     = document.getElementById('pr-f-user')?.value     || '';
     _prFilter.dateFrom = document.getElementById('pr-f-from')?.value     || '';
     _prFilter.dateTo   = document.getElementById('pr-f-to')?.value       || '';
-    renderRequests();
+    _prRefreshTable();
+  };
+
+  window.spPrFilterUser = function() {
+    _prFilter.user = document.getElementById('pr-f-user')?.value || '';
+    _prRefreshTable();
   };
 
   window.spPrClearFilters = function() {
@@ -1993,20 +2001,7 @@ function render_supplier_portal(el) {
       document.querySelectorAll('.pr-table-row').forEach(row => row.classList.remove('pr-row-open'));
     } else {
       _prDetailId = id;
-      // Re-render table to update chevrons + highlight
-      const allReqs = Store.getPriceRequests(_supplierId);
-      let reqs = allReqs.filter(r => {
-        if (_prFilter.fleet !== 'all' && r.fleetName !== _prFilter.fleet) return false;
-        if (_prFilter.status !== 'all' && r.status !== _prFilter.status) return false;
-        if (_prFilter.location !== 'all' && r.location !== _prFilter.location) return false;
-        if (_prFilter.user && !r.requestedBy.toLowerCase().includes(_prFilter.user.toLowerCase())) return false;
-        if (_prFilter.dateFrom && r.submittedAt < new Date(_prFilter.dateFrom).getTime()) return false;
-        if (_prFilter.dateTo && r.submittedAt > new Date(_prFilter.dateTo).getTime() + 86400000) return false;
-        return true;
-      });
-      const wrap = document.getElementById('pr-list-wrap');
-      if (wrap) wrap.innerHTML = _renderPrTable(reqs);
-      _renderPrDetail(id);
+      _prRefreshTable();
     }
   };
 
