@@ -818,17 +818,43 @@ const Store = (() => {
   // Price requests — created by fleet, responded to by supplier
   const _priceRequests = [
     { id:'pr-001', partNum:'SKJ-HYD-999', partDesc:'Custom hydraulic manifold block — SJIII series',
-      supplierId:'SKJ', fleetId:'mcr', fleetName:'Mid-County Rental',
-      requestedBy:'James W.', requestedDate:'Jul 10, 2026', qty:1, notes:'Need for WO #100094 — not in current catalog',
-      status:'pending', response:null },
+      supplierId:'SKJ', fleetId:'mcr', fleetName:'Mid-County Rental', location:'Phoenix, AZ',
+      requestedBy:'James W.', requestedDate:'Jul 10, 2026', submittedAt: new Date('2026-07-10').getTime(),
+      qty:1, notes:'Need for WO #100094 — not in current catalog',
+      status:'pending', response:null,
+      comments:[
+        { id:'c-001', author:'James W.', authorRole:'fleet', text:'This is blocking WO #100094 — machine is down. Please prioritize.', date:'Jul 10, 2026', ts: new Date('2026-07-10T10:22:00').getTime() },
+      ]
+    },
     { id:'pr-002', partNum:'SKJ-ELC-477', partDesc:'Control board assembly — SJ45T Boom',
-      supplierId:'SKJ', fleetId:'mcr', fleetName:'Mid-County Rental',
-      requestedBy:'Marcus T.', requestedDate:'Jul 8, 2026', qty:2, notes:'',
-      status:'needs_info', response:{ message:'Can you confirm the serial number of the unit? Multiple variants exist for this model year.' } },
+      supplierId:'SKJ', fleetId:'mcr', fleetName:'Mid-County Rental', location:'Phoenix, AZ',
+      requestedBy:'Marcus T.', requestedDate:'Jul 8, 2026', submittedAt: new Date('2026-07-08').getTime(),
+      qty:2, notes:'',
+      status:'needs_info', response:{ message:'Can you confirm the serial number of the unit? Multiple variants exist for this model year.' },
+      comments:[
+        { id:'c-002', author:'Alex Chen', authorRole:'supplier', text:'Can you confirm the serial number of the unit? Multiple variants exist for this model year.', date:'Jul 9, 2026', ts: new Date('2026-07-09T09:00:00').getTime() },
+      ]
+    },
     { id:'pr-003', partNum:'SKJ-STR-104', partDesc:'Steering cylinder seal kit',
-      supplierId:'SKJ', fleetId:'boels', fleetName:'Boels Rental',
-      requestedBy:'D. Kowalski', requestedDate:'Jul 5, 2026', qty:4, notes:'Bulk order for fleet PM',
-      status:'quoted', response:{ price: 38.50, message:'Available. Lead time 3–5 business days.' } },
+      supplierId:'SKJ', fleetId:'boels', fleetName:'Boels Rental', location:'Dallas, TX',
+      requestedBy:'D. Kowalski', requestedDate:'Jul 5, 2026', submittedAt: new Date('2026-07-05').getTime(),
+      qty:4, notes:'Bulk order for fleet PM',
+      status:'quoted', response:{ price: 38.50, message:'Available. Lead time 3–5 business days.' },
+      comments:[
+        { id:'c-003', author:'D. Kowalski', authorRole:'fleet', text:'Can you do $35 if we commit to 10 units per quarter?', date:'Jul 6, 2026', ts: new Date('2026-07-06T14:00:00').getTime() },
+        { id:'c-004', author:'Alex Chen', authorRole:'supplier', text:'Happy to discuss volume pricing — let me loop in our account team. Quoted price stands for this order. Lead time 3–5 business days.', date:'Jul 7, 2026', ts: new Date('2026-07-07T10:30:00').getTime() },
+      ]
+    },
+    { id:'pr-004', partNum:'SKJ-BRK-221', partDesc:'Brake caliper assembly — scissor lifts',
+      supplierId:'SKJ', fleetId:'sunbelt', fleetName:'Sunbelt Rentals', location:'Charlotte, NC',
+      requestedBy:'R. Flores', requestedDate:'Jul 12, 2026', submittedAt: new Date('2026-07-12').getTime(),
+      qty:6, notes:'Replacement for aging fleet — need best pricing on qty',
+      status:'pending', response:null, comments:[] },
+    { id:'pr-005', partNum:'SKJ-OIL-088', partDesc:'Hydraulic oil filter kit (5-pack)',
+      supplierId:'SKJ', fleetId:'unitedrent', fleetName:'United Rentals', location:'Atlanta, GA',
+      requestedBy:'T. Nguyen', requestedDate:'Jul 14, 2026', submittedAt: new Date('2026-07-14').getTime(),
+      qty:20, notes:'PM program quarterly order — price not in system',
+      status:'pending', response:null, comments:[] },
   ];
 
   function getSupplierFleets(supplierId) {
@@ -839,12 +865,25 @@ const Store = (() => {
   }
   function addPriceRequest(fields) {
     const id = 'pr-' + String(_priceRequests.length + 1).padStart(3, '0');
-    _priceRequests.push({ id, status: 'pending', response: null, ...fields });
+    _priceRequests.push({ id, status: 'pending', response: null, comments: [], submittedAt: Date.now(), ...fields });
     return id;
   }
   function respondToPriceRequest(id, response) {
     const r = _priceRequests.find(x => x.id === id);
     if (r) { r.status = response.status; r.response = response; }
+  }
+  function addPriceRequestComment(id, comment) {
+    const r = _priceRequests.find(x => x.id === id);
+    if (!r) return;
+    if (!r.comments) r.comments = [];
+    r.comments.push({
+      id: 'c-' + Date.now(),
+      author: comment.author,
+      authorRole: comment.authorRole || 'supplier',
+      text: comment.text,
+      date: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }),
+      ts: Date.now(),
+    });
   }
 
   let _currentUser = null;
@@ -1028,7 +1067,7 @@ const Store = (() => {
     getUsers, authenticate, setCurrentUser, getCurrentUser, logout,
     getLocations, getCurrentLocation, setCurrentLocation,
     getOrgConfig, getOrderTerms,
-    getSupplierFleets, getPriceRequests, addPriceRequest, respondToPriceRequest,
+    getSupplierFleets, getPriceRequests, addPriceRequest, respondToPriceRequest, addPriceRequestComment,
     getNotifications, markNotificationRead, markAllNotificationsRead, getUnreadCount,
     getCmsArticles, getCmsArticle, saveCmsArticle, deleteCmsArticle, getActiveBanners, dismissBanner,
     reset,

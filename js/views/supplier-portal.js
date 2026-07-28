@@ -337,39 +337,257 @@ function render_supplier_portal(el) {
       </div>`;
   }
 
+  // ── Price Requests state ─────────────────────────────────────────────────────
+  let _prFilter = { fleet: 'all', status: 'all', location: 'all', user: '', dateFrom: '', dateTo: '' };
+  let _prDetailId = null; // currently open detail panel
+
   function renderRequests() {
     const titleEl = document.getElementById('sp-topbar-title');
     if (titleEl) titleEl.textContent = 'Price Requests';
-    const reqs = Store.getPriceRequests(_supplierId);
-    document.getElementById('sp-content').innerHTML = `
-      <div class="sp-page-title">Price Requests</div>
-      <div class="sp-page-sub">${reqs.length} total · ${reqs.filter(r=>r.status==='pending').length} awaiting response</div>
-      <div class="sp-table">
-        <div class="sp-table-head">
-          <div class="sp-table-th">Part #</div>
-          <div class="sp-table-th">Description</div>
-          <div class="sp-table-th">Fleet</div>
-          <div class="sp-table-th">Requested by</div>
-          <div class="sp-table-th">Qty</div>
-          <div class="sp-table-th">Status</div>
-          <div></div>
-        </div>
-        ${reqs.length ? reqs.map(r => {
-          const s = PR_STATUS[r.status] || PR_STATUS.pending;
-          return `<div class="sp-table-row" style="grid-template-columns:120px 1fr 100px 120px 50px 130px 80px;">
-            <div class="sp-table-td"><span style="font-size:11px;font-weight:600;font-family:monospace;color:#111318;">${r.partNum}</span></div>
-            <div class="sp-table-td">
-              <div style="font-size:13px;color:#111318;font-weight:500;">${r.partDesc}</div>
-              ${r.notes ? `<div style="font-size:11px;color:#9CA3AF;margin-top:2px;">${r.notes}</div>` : ''}
+    const contentEl = document.getElementById('sp-content');
+    contentEl.style.cssText = 'flex:1;overflow-y:auto;padding:28px;';
+
+    const allReqs = Store.getPriceRequests(_supplierId);
+
+    // Build filter option lists
+    const fleets   = [...new Set(allReqs.map(r => r.fleetName))].sort();
+    const locations = [...new Set(allReqs.map(r => r.location).filter(Boolean))].sort();
+
+    // Apply filters
+    let reqs = allReqs.filter(r => {
+      if (_prFilter.fleet !== 'all' && r.fleetName !== _prFilter.fleet) return false;
+      if (_prFilter.status !== 'all' && r.status !== _prFilter.status) return false;
+      if (_prFilter.location !== 'all' && r.location !== _prFilter.location) return false;
+      if (_prFilter.user && !r.requestedBy.toLowerCase().includes(_prFilter.user.toLowerCase())) return false;
+      if (_prFilter.dateFrom) {
+        const from = new Date(_prFilter.dateFrom).getTime();
+        if (r.submittedAt < from) return false;
+      }
+      if (_prFilter.dateTo) {
+        const to = new Date(_prFilter.dateTo).getTime() + 86400000;
+        if (r.submittedAt > to) return false;
+      }
+      return true;
+    });
+
+    const pending = allReqs.filter(r => r.status === 'pending').length;
+
+    contentEl.innerHTML = `
+<style>
+.pr-filter-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+.pr-filter-select { height:32px; border:1px solid #E2E5EE; border-radius:7px; padding:0 10px; font-size:12px; color:#111318; background:#fff; cursor:pointer; }
+.pr-filter-input  { height:32px; border:1px solid #E2E5EE; border-radius:7px; padding:0 10px; font-size:12px; color:#111318; background:#fff; width:140px; }
+.pr-filter-input::placeholder { color:#B0B5C3; }
+.pr-filter-date   { height:32px; border:1px solid #E2E5EE; border-radius:7px; padding:0 8px; font-size:12px; color:#111318; background:#fff; }
+.pr-clear-btn { height:32px; padding:0 10px; border:none; border-radius:7px; background:transparent; font-size:12px; color:#7A7F8E; cursor:pointer; white-space:nowrap; }
+.pr-clear-btn:hover { background:#F5F2EE; color:#111318; }
+
+.pr-table { border:1px solid #E8E4DF; border-radius:10px; overflow:hidden; background:#fff; }
+.pr-table-head { display:grid; grid-template-columns:130px 1fr 140px 130px 56px 140px 46px 120px; background:#F9F8F7; border-bottom:1px solid #E8E4DF; }
+.pr-table-th { padding:9px 14px; font-size:11px; font-weight:600; color:#9CA3AF; letter-spacing:.5px; text-transform:uppercase; }
+.pr-table-row { display:grid; grid-template-columns:130px 1fr 140px 130px 56px 140px 46px 120px; border-bottom:1px solid #F0ECE8; cursor:pointer; transition:background .12s; }
+.pr-table-row:last-child { border-bottom:none; }
+.pr-table-row:hover { background:#FAFAF9; }
+.pr-table-row.pr-row-open { background:#F5F2EE; }
+.pr-table-td { padding:12px 14px; font-size:12px; color:#4B5268; display:flex; align-items:center; }
+
+.pr-detail-panel { border:1px solid #E8E4DF; border-radius:10px; overflow:hidden; background:#fff; margin-top:0; animation:prSlideIn .18s ease; }
+@keyframes prSlideIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+.pr-detail-header { padding:16px 20px; background:#F9F8F7; border-bottom:1px solid #E8E4DF; display:flex; align-items:flex-start; gap:16px; }
+.pr-detail-body { display:grid; grid-template-columns:1fr 320px; }
+.pr-detail-main { padding:20px; border-right:1px solid #F0ECE8; }
+.pr-detail-sidebar { padding:20px; }
+.pr-comment-list { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+.pr-comment { border-radius:8px; padding:11px 13px; }
+.pr-comment.supplier { background:#EAF3FC; }
+.pr-comment.fleet    { background:#F5F2EE; }
+.pr-comment-meta { font-size:11px; font-weight:600; color:#7A7F8E; margin-bottom:4px; display:flex; justify-content:space-between; }
+.pr-comment-text { font-size:13px; color:#111318; line-height:1.5; }
+.pr-compose { border:1px solid #E2E5EE; border-radius:8px; overflow:hidden; }
+.pr-compose-top { display:flex; gap:6px; padding:8px; border-bottom:1px solid #F0ECE8; background:#F9F8F7; }
+.pr-compose-tab { padding:4px 10px; border:none; border-radius:5px; font-size:12px; font-weight:500; cursor:pointer; background:transparent; color:#7A7F8E; }
+.pr-compose-tab.active { background:#fff; color:#111318; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+.pr-compose textarea { width:100%; border:none; outline:none; resize:none; padding:10px 12px; font-size:13px; font-family:inherit; color:#111318; background:#fff; height:80px; box-sizing:border-box; }
+.pr-compose-footer { padding:8px 10px; display:flex; align-items:center; justify-content:space-between; border-top:1px solid #F0ECE8; background:#F9F8F7; }
+.pr-not-resolvable-link { font-size:11px; color:#B0B5C3; background:none; border:none; cursor:pointer; padding:0; text-decoration:underline; }
+.pr-not-resolvable-link:hover { color:#5A5F6E; }
+</style>
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+  <div>
+    <div class="sp-page-title">Price Requests</div>
+    <div class="sp-page-sub">${allReqs.length} total · <strong>${pending}</strong> awaiting response</div>
+  </div>
+  <button class="sp-btn sp-btn-primary" onclick="spPrAddPrice()" style="display:flex;align-items:center;gap:6px;">
+    <i class="ti ti-plus" style="font-size:14px;"></i> Add Price
+  </button>
+</div>
+
+<div class="pr-filter-bar">
+  <select class="pr-filter-select" id="pr-f-fleet" onchange="spPrApplyFilter()">
+    <option value="all">All fleets</option>
+    ${fleets.map(f => `<option value="${f}" ${_prFilter.fleet===f?'selected':''}>${f}</option>`).join('')}
+  </select>
+  <select class="pr-filter-select" id="pr-f-status" onchange="spPrApplyFilter()">
+    <option value="all">All statuses</option>
+    ${Object.entries(PR_STATUS).map(([k,v]) => `<option value="${k}" ${_prFilter.status===k?'selected':''}>${v.label}</option>`).join('')}
+  </select>
+  <select class="pr-filter-select" id="pr-f-location" onchange="spPrApplyFilter()">
+    <option value="all">All locations</option>
+    ${locations.map(l => `<option value="${l}" ${_prFilter.location===l?'selected':''}>${l}</option>`).join('')}
+  </select>
+  <input class="pr-filter-input" id="pr-f-user" placeholder="Search by user…" value="${_prFilter.user}" oninput="spPrApplyFilter()" />
+  <span style="font-size:12px;color:#9CA3AF;white-space:nowrap;">From</span>
+  <input class="pr-filter-date" id="pr-f-from" type="date" value="${_prFilter.dateFrom}" onchange="spPrApplyFilter()" />
+  <span style="font-size:12px;color:#9CA3AF;">to</span>
+  <input class="pr-filter-date" id="pr-f-to" type="date" value="${_prFilter.dateTo}" onchange="spPrApplyFilter()" />
+  <button class="pr-clear-btn" onclick="spPrClearFilters()">Clear filters</button>
+</div>
+
+<div id="pr-list-wrap">
+  ${_renderPrTable(reqs)}
+</div>`;
+
+    // Re-open detail panel if one was open
+    if (_prDetailId) {
+      const stillExists = reqs.find(r => r.id === _prDetailId);
+      if (stillExists) _renderPrDetail(_prDetailId);
+      else _prDetailId = null;
+    }
+  }
+
+  function _renderPrTable(reqs) {
+    if (!reqs.length) return '<div style="padding:48px;text-align:center;color:#9CA3AF;font-size:13px;">No price requests match the current filters.</div>';
+    return `
+<div class="pr-table">
+  <div class="pr-table-head">
+    <div class="pr-table-th">Part #</div>
+    <div class="pr-table-th">Description</div>
+    <div class="pr-table-th">Fleet</div>
+    <div class="pr-table-th">Requested by</div>
+    <div class="pr-table-th">Qty</div>
+    <div class="pr-table-th">Status</div>
+    <div class="pr-table-th" title="Comments"></div>
+    <div class="pr-table-th"></div>
+  </div>
+  ${reqs.map(r => {
+    const s = PR_STATUS[r.status] || PR_STATUS.pending;
+    const cCount = (r.comments || []).length;
+    const isOpen = _prDetailId === r.id;
+    return `<div class="pr-table-row${isOpen?' pr-row-open':''}" onclick="spPrToggleDetail('${r.id}')">
+      <div class="pr-table-td"><span style="font-size:11px;font-weight:600;font-family:monospace;color:#111318;">${r.partNum}</span></div>
+      <div class="pr-table-td" style="flex-direction:column;align-items:flex-start;gap:2px;">
+        <span style="font-size:13px;color:#111318;font-weight:500;">${r.partDesc}</span>
+        ${r.notes ? `<span style="font-size:11px;color:#9CA3AF;">${r.notes}</span>` : ''}
+      </div>
+      <div class="pr-table-td" style="flex-direction:column;align-items:flex-start;gap:1px;">
+        <span>${r.fleetName}</span>
+        ${r.location ? `<span style="font-size:11px;color:#9CA3AF;">${r.location}</span>` : ''}
+      </div>
+      <div class="pr-table-td" style="flex-direction:column;align-items:flex-start;gap:1px;">
+        <span>${r.requestedBy}</span>
+        <span style="font-size:11px;color:#9CA3AF;">${r.requestedDate}</span>
+      </div>
+      <div class="pr-table-td">${r.qty}</div>
+      <div class="pr-table-td"><span class="sp-status-pill" style="background:${s.bg};color:${s.color};">${s.label}</span></div>
+      <div class="pr-table-td" style="justify-content:center;">
+        ${cCount ? `<span style="font-size:11px;color:#7A7F8E;display:flex;align-items:center;gap:3px;"><i class="ti ti-message" style="font-size:12px;"></i>${cCount}</span>` : ''}
+      </div>
+      <div class="pr-table-td" style="justify-content:flex-end;gap:6px;" onclick="event.stopPropagation()">
+        ${r.status === 'pending' || r.status === 'needs_info' ? `<button class="sp-btn sp-btn-primary" style="font-size:11px;padding:4px 10px;" onclick="spRespondToRequest('${r.id}')">Add Price</button>` : ''}
+        <i class="ti ti-chevron-${_prDetailId===r.id?'up':'down'}" style="font-size:14px;color:#9CA3AF;cursor:pointer;" onclick="spPrToggleDetail('${r.id}')"></i>
+      </div>
+    </div>`;
+  }).join('')}
+</div>`;
+  }
+
+  function _renderPrDetail(id) {
+    const allReqs = Store.getPriceRequests(_supplierId);
+    const r = allReqs.find(x => x.id === id);
+    if (!r) return;
+    const s = PR_STATUS[r.status] || PR_STATUS.pending;
+    const comments = r.comments || [];
+    const currentUser = Store.getCurrentUser();
+
+    // Insert detail panel after the table row in the list
+    const wrap = document.getElementById('pr-list-wrap');
+    if (!wrap) return;
+
+    // Remove existing detail panel
+    const existing = document.getElementById('pr-detail-panel');
+    if (existing) existing.remove();
+
+    const panel = document.createElement('div');
+    panel.id = 'pr-detail-panel';
+    panel.style.cssText = 'margin-top:2px;margin-bottom:8px;';
+    panel.innerHTML = `
+<div class="pr-detail-panel">
+  <div class="pr-detail-header">
+    <div style="flex:1;">
+      <div style="font-size:15px;font-weight:700;color:#111318;margin-bottom:2px;">${r.partDesc}</div>
+      <div style="font-size:12px;color:#7A7F8E;">${r.partNum} · Qty ${r.qty} · ${r.fleetName}${r.location ? ' · ' + r.location : ''}</div>
+      ${r.notes ? `<div style="font-size:12px;color:#7A7F8E;margin-top:4px;font-style:italic;">"${r.notes}"</div>` : ''}
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+      <span class="sp-status-pill" style="background:${s.bg};color:${s.color};">${s.label}</span>
+      ${r.status === 'pending' || r.status === 'needs_info'
+        ? `<button class="sp-btn sp-btn-primary" style="font-size:12px;" onclick="spRespondToRequest('${r.id}')">Add Price</button>`
+        : ''}
+      ${r.response && r.response.price ? `<div style="font-size:14px;font-weight:700;color:#0F6E56;">$${parseFloat(r.response.price).toFixed(2)} / unit</div>` : ''}
+    </div>
+  </div>
+  <div class="pr-detail-body">
+    <div class="pr-detail-main">
+      <div style="font-size:12px;font-weight:600;color:#9CA3AF;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;">Comments & thread</div>
+      <div class="pr-comment-list" id="pr-comment-list-${id}">
+        ${comments.length ? comments.map(c => `
+          <div class="pr-comment ${c.authorRole}">
+            <div class="pr-comment-meta">
+              <span>${c.author} ${c.authorRole === 'supplier' ? '· You' : '· Fleet'}</span>
+              <span>${c.date}</span>
             </div>
-            <div class="sp-table-td" style="font-size:12px;">${r.fleetName}</div>
-            <div class="sp-table-td" style="font-size:12px;">${r.requestedBy}<div style="font-size:10px;color:#9CA3AF;">${r.requestedDate}</div></div>
-            <div class="sp-table-td">${r.qty}</div>
-            <div class="sp-table-td"><span class="sp-status-pill" style="background:${s.bg};color:${s.color};">${s.label}</span></div>
-            <div class="sp-table-td"><button class="sp-btn sp-btn-ghost" onclick="spRespondToRequest('${r.id}')">Respond</button></div>
-          </div>`;
-        }).join('') : '<div style="padding:40px;text-align:center;color:#9CA3AF;font-size:13px;">No price requests yet.</div>'}
-      </div>`;
+            <div class="pr-comment-text">${c.text}</div>
+          </div>`).join('') : `<div style="font-size:13px;color:#B0B5C3;padding:8px 0;">No comments yet — start the conversation below.</div>`}
+      </div>
+      <div class="pr-compose">
+        <div class="pr-compose-top">
+          <button class="pr-compose-tab active" id="pr-tab-comment" onclick="spPrSwitchCompose('comment','${id}')">Comment</button>
+          <button class="pr-compose-tab" id="pr-tab-info" onclick="spPrSwitchCompose('info','${id}')">Request info</button>
+        </div>
+        <textarea id="pr-compose-text-${id}" placeholder="Add a comment or question for the fleet…"></textarea>
+        <div class="pr-compose-footer">
+          <button class="pr-not-resolvable-link" onclick="spPrMarkUnresolvable('${id}')">Mark as not resolvable</button>
+          <button class="sp-btn sp-btn-primary" style="font-size:12px;" onclick="spPrSendComment('${id}')">Send</button>
+        </div>
+      </div>
+    </div>
+    <div class="pr-detail-sidebar">
+      <div style="font-size:12px;font-weight:600;color:#9CA3AF;letter-spacing:.5px;text-transform:uppercase;margin-bottom:12px;">Request details</div>
+      ${[
+        ['Fleet', r.fleetName],
+        ['Location', r.location || '—'],
+        ['Requested by', r.requestedBy],
+        ['Date submitted', r.requestedDate],
+        ['Part number', r.partNum],
+        ['Qty requested', r.qty],
+        ['Status', s.label],
+      ].map(([label, val]) => `
+        <div style="margin-bottom:10px;">
+          <div style="font-size:11px;color:#9CA3AF;margin-bottom:2px;">${label}</div>
+          <div style="font-size:13px;color:#111318;font-weight:500;">${val}</div>
+        </div>`).join('')}
+      ${r.response && r.response.price ? `
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid #F0ECE8;">
+          <div style="font-size:11px;color:#9CA3AF;margin-bottom:2px;">Quoted price</div>
+          <div style="font-size:20px;font-weight:700;color:#0F6E56;">$${parseFloat(r.response.price).toFixed(2)}</div>
+          <div style="font-size:11px;color:#9CA3AF;">per unit</div>
+        </div>` : ''}
+    </div>
+  </div>
+</div>`;
+
+    wrap.appendChild(panel);
   }
 
   // ── Supplier content management state ────────────────────────────────────
@@ -1749,6 +1967,121 @@ function render_supplier_portal(el) {
     Router.navigate('parts-search', { supplierId: _supplierId, impersonating: true, impersonatingFleet: fleetName });
   };
 
+  // ── Price request global handlers ────────────────────────────────────────────
+
+  window.spPrApplyFilter = function() {
+    _prFilter.fleet    = document.getElementById('pr-f-fleet')?.value    || 'all';
+    _prFilter.status   = document.getElementById('pr-f-status')?.value   || 'all';
+    _prFilter.location = document.getElementById('pr-f-location')?.value || 'all';
+    _prFilter.user     = document.getElementById('pr-f-user')?.value     || '';
+    _prFilter.dateFrom = document.getElementById('pr-f-from')?.value     || '';
+    _prFilter.dateTo   = document.getElementById('pr-f-to')?.value       || '';
+    renderRequests();
+  };
+
+  window.spPrClearFilters = function() {
+    _prFilter = { fleet:'all', status:'all', location:'all', user:'', dateFrom:'', dateTo:'' };
+    renderRequests();
+  };
+
+  window.spPrToggleDetail = function(id) {
+    if (_prDetailId === id) {
+      _prDetailId = null;
+      const panel = document.getElementById('pr-detail-panel');
+      if (panel) panel.remove();
+      // Refresh row highlight
+      document.querySelectorAll('.pr-table-row').forEach(row => row.classList.remove('pr-row-open'));
+    } else {
+      _prDetailId = id;
+      // Re-render table to update chevrons + highlight
+      const allReqs = Store.getPriceRequests(_supplierId);
+      let reqs = allReqs.filter(r => {
+        if (_prFilter.fleet !== 'all' && r.fleetName !== _prFilter.fleet) return false;
+        if (_prFilter.status !== 'all' && r.status !== _prFilter.status) return false;
+        if (_prFilter.location !== 'all' && r.location !== _prFilter.location) return false;
+        if (_prFilter.user && !r.requestedBy.toLowerCase().includes(_prFilter.user.toLowerCase())) return false;
+        if (_prFilter.dateFrom && r.submittedAt < new Date(_prFilter.dateFrom).getTime()) return false;
+        if (_prFilter.dateTo && r.submittedAt > new Date(_prFilter.dateTo).getTime() + 86400000) return false;
+        return true;
+      });
+      const wrap = document.getElementById('pr-list-wrap');
+      if (wrap) wrap.innerHTML = _renderPrTable(reqs);
+      _renderPrDetail(id);
+    }
+  };
+
+  window.spPrSwitchCompose = function(tab, id) {
+    document.getElementById('pr-tab-comment')?.classList.toggle('active', tab === 'comment');
+    document.getElementById('pr-tab-info')?.classList.toggle('active', tab === 'info');
+    const ta = document.getElementById('pr-compose-text-' + id);
+    if (ta) ta.placeholder = tab === 'info'
+      ? 'Describe the information you need from the fleet to complete this request…'
+      : 'Add a comment or question for the fleet…';
+  };
+
+  window.spPrSendComment = function(id) {
+    const ta = document.getElementById('pr-compose-text-' + id);
+    const text = ta?.value?.trim();
+    if (!text) { if (ta) { ta.style.borderColor='#A32D2D'; setTimeout(()=>ta.style.borderColor='',1200); } return; }
+    const currentUser = Store.getCurrentUser();
+    Store.addPriceRequestComment(id, {
+      author: currentUser?.name || currentUser?.username || 'You',
+      authorRole: 'supplier',
+      text,
+    });
+    _prDetailId = id;
+    // Also mark as needs_info if it was pending and not already quoted
+    const reqs = Store.getPriceRequests(_supplierId);
+    const r = reqs.find(x => x.id === id);
+    if (r && r.status === 'pending') {
+      Store.respondToPriceRequest(id, { status: 'needs_info', message: text });
+    }
+    renderRequests();
+  };
+
+  window.spPrMarkUnresolvable = function(id) {
+    Modal.show({
+      title: 'Mark as not resolvable',
+      body: `
+        <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:12px 14px;margin-bottom:16px;">
+          <div style="font-size:13px;color:#7F1D1D;line-height:1.5;">Marking this request as not resolvable will close it and notify the fleet that you cannot fulfill it. This should be a last resort — consider requesting more information or providing an alternative part first.</div>
+        </div>
+        <div class="modal-form-field">
+          <label class="modal-form-label">Reason <span style="color:#A32D2D;">*</span></label>
+          <textarea class="modal-form-input" id="pr-unresolvable-reason" style="height:72px;resize:none;padding-top:8px;" placeholder="Explain why this request cannot be fulfilled…"></textarea>
+          <div id="pr-unresolvable-err" style="font-size:11px;color:#A32D2D;margin-top:3px;display:none;">A reason is required</div>
+        </div>`,
+      actions: [
+        { label: 'Go back', onClick: () => Modal.close() },
+        { label: 'Mark not resolvable', danger: true, onClick: () => {
+          const reason = document.getElementById('pr-unresolvable-reason')?.value?.trim();
+          if (!reason) { document.getElementById('pr-unresolvable-err').style.display='block'; return; }
+          Store.respondToPriceRequest(id, { status: 'rejected', message: reason });
+          Modal.close();
+          _prDetailId = null;
+          renderRequests();
+        }},
+      ]
+    });
+  };
+
+  window.spPrAddPrice = function() {
+    // Navigate to supplier catalog for price assignment
+    Modal.show({
+      title: 'Add pricing via catalog',
+      body: `
+        <div style="font-size:13px;color:#4B5268;line-height:1.6;margin-bottom:16px;">To assign pricing to a specific part, navigate to your parts catalog where you can set or update prices at the part level. Changes will reflect on future requests and fleet-visible pricing.</div>
+        <div style="background:#F5F2EE;border-radius:8px;padding:12px 14px;">
+          <div style="font-size:12px;font-weight:600;color:#111318;margin-bottom:4px;">Tip</div>
+          <div style="font-size:12px;color:#7A7F8E;">You can also respond directly to a specific price request from the list — use "Add Price" on the request row to provide an ad-hoc quote without updating the catalog.</div>
+        </div>`,
+      actions: [
+        { label: 'Cancel', onClick: () => Modal.close() },
+        { label: 'Open Catalog', primary: true, onClick: () => { Modal.close(); setTab('content'); } },
+      ]
+    });
+  };
+
   // ── Respond to price request ─────────────────────────────────────────────────
 
   window.spRespondToRequest = function(reqId) {
@@ -1800,7 +2133,19 @@ function render_supplier_portal(el) {
               price: type === 'quoted' ? price : null,
               message: msg,
             });
+            // Also add the response as a comment so it appears in the thread
+            if (msg || type === 'quoted') {
+              const currentUser = Store.getCurrentUser();
+              Store.addPriceRequestComment(reqId, {
+                author: currentUser?.name || currentUser?.username || 'You',
+                authorRole: 'supplier',
+                text: type === 'quoted'
+                  ? `Quoted at $${price.toFixed(2)}/unit.${msg ? ' ' + msg : ''}`
+                  : msg,
+              });
+            }
             Modal.close();
+            if (_prDetailId) _prDetailId = reqId;
             renderRequests();
           }
         }
