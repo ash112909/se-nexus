@@ -293,7 +293,7 @@ function render_supplier_portal(el) {
             </div>
             <div class="sp-table-td" style="font-size:12px;color:#7A7F8E;">${r.requestedDate}</div>
             <div class="sp-table-td"><span class="sp-status-pill" style="background:${s.bg};color:${s.color};">${s.label}</span></div>
-            <div class="sp-table-td"><button class="sp-btn sp-btn-ghost" onclick="spRespondToRequest('${r.id}')">Respond</button></div>
+            <div class="sp-table-td"><button class="sp-btn sp-btn-ghost" onclick="spPrOpenRequest('${r.id}')">View</button></div>
           </div>`;
         }).join('')}
       </div>` : ''}
@@ -1972,6 +1972,11 @@ function render_supplier_portal(el) {
     wrap.innerHTML = _renderPrTable(_prFilteredReqs());
     if (_prDetailId) _renderPrDetail(_prDetailId);
   }
+
+  window.spPrOpenRequest = function(id) {
+    _prDetailId = id;
+    setTab('requests');
+  };
 
   window.spPrApplyFilter = function() {
     _prFilter.fleet    = document.getElementById('pr-f-fleet')?.value    || 'all';
