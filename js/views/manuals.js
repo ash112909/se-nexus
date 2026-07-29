@@ -237,21 +237,59 @@ function render_manuals(el) {
   };
 
   var _targetManualId = Router.context && Router.context.manualId;
+  var _targetPdfPage  = Router.context && Router.context.pdfPage;
+  var _targetHighlight = Router.context && Router.context.highlight;
+  // If arriving from diagnostics with sectionId, find the Skyjack operating manual
+  if (!_targetManualId && _targetHighlight) {
+    var _sjManual = Store.getManuals('').find(function(x) { return x.pdfFile; });
+    if (_sjManual) _targetManualId = _sjManual.id;
+  }
   if (_targetManualId) {
     var _target = Store.getManuals('').find(function(x) { return x.id === _targetManualId; });
     if (_target) {
       setTimeout(function() {
         var card = document.querySelector('[data-manual-id="' + _targetManualId + '"]');
         if (card) { card.scrollIntoView({ behavior:'smooth', block:'center' }); card.style.borderColor = '#F5A623'; }
-        manViewManual(_targetManualId);
+        manViewManual(_targetManualId, _targetPdfPage);
       }, 80);
     }
   }
 
-  window.manViewManual = function(id) {
+  window.manViewManual = function(id, pdfPage) {
     var m = Store.getManuals('').find(function(x) { return x.id === id; });
     if (!m) return;
-    Modal.show({ title: 'Viewing: ' + m.title, body: '<div style="text-align:center;padding:20px;"><i class="ti ti-file-text" style="font-size:48px;color:#9CA3AF;"></i><p style="margin-top:12px;font-size:13px;color:#7A7F8E;">' + m.machine + ' · ' + m.type + ' Manual · ' + m.pages + ' pages</p><p style="font-size:12px;color:#B0AAA3;margin-top:6px;">Document viewer opened — ' + m.size + '</p></div>', actions: [{ label: 'Close', onClick: function() { Modal.close(); } }] });
+    var pdfSrc = m.pdfFile ? (m.pdfFile + (pdfPage ? '#page=' + pdfPage : '')) : null;
+    var body;
+    if (pdfSrc) {
+      body = '<style>'
+        + '.pdf-viewer-wrap{display:flex;flex-direction:column;flex:1;overflow:hidden;}'
+        + '.pdf-viewer-toolbar{background:#1A1A1A;padding:8px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}'
+        + '.pdf-viewer-meta{color:#9CA3AF;font-size:11px;flex:1;}'
+        + '.pdf-frame{flex:1;border:none;background:#525659;width:100%;}'
+        + '</style>'
+        + '<div class="pdf-viewer-wrap">'
+        + '<div class="pdf-viewer-toolbar">'
+        + '<i class="ti ti-book" style="color:#9CA3AF;font-size:13px;flex-shrink:0;"></i>'
+        + '<span class="pdf-viewer-meta">' + m.machine + ' · ' + m.type + ' Manual · ' + m.pages + ' pages</span>'
+        + (pdfPage ? '<span style="font-size:11px;color:#F5A623;display:flex;align-items:center;gap:4px;"><i class="ti ti-bookmark-filled" style="font-size:11px;"></i> Opened to page ' + pdfPage + '</span>' : '')
+        + '<a href="' + m.pdfFile + '" download style="font-size:11px;color:#9CA3AF;background:#2A2A2A;border:0.5px solid #3C4052;border-radius:5px;padding:4px 10px;text-decoration:none;display:flex;align-items:center;gap:4px;flex-shrink:0;"><i class="ti ti-download" style="font-size:11px;"></i> Download</a>'
+        + '</div>'
+        + '<iframe class="pdf-frame" src="' + pdfSrc + '" title="' + m.title + '"></iframe>'
+        + '</div>';
+    } else {
+      body = '<div style="text-align:center;padding:32px 20px;">'
+        + '<i class="ti ti-file-text" style="font-size:48px;color:#9CA3AF;"></i>'
+        + '<p style="margin-top:12px;font-size:13px;color:#7A7F8E;">' + m.machine + ' · ' + m.type + ' Manual · ' + m.pages + ' pages</p>'
+        + '<p style="font-size:12px;color:#B0AAA3;margin-top:6px;">' + m.size + '</p>'
+        + '</div>';
+    }
+    Modal.show({
+      title: m.title,
+      fullscreen: !!pdfSrc,
+      wide: !pdfSrc,
+      body: body,
+      actions: [{ label: 'Close', onClick: function() { Modal.close(); } }]
+    });
   };
 
   window.manDownloadManual = function(id) {

@@ -345,7 +345,8 @@ function render_diagnostics(el) {
   };
 
   window.diagOpenManual = function(sectionId, title) {
-    Router.navigate('manuals', { sectionId, highlight: title });
+    const sec = (window.SJ3219_SECTIONS || []).find(s => s.id === sectionId);
+    Router.navigate('manuals', { sectionId, pdfPage: sec ? sec.pdfPage : null, highlight: title });
   };
 
   // ── WO flows ──────────────────────────────────────────────────────────────

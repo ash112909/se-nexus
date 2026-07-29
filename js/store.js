@@ -91,7 +91,7 @@ const Store = (() => {
   const DEFAULT_MANUALS = [
     { id: 'man-1',  title: 'SJIII 3219 Service Manual — Hydraulic System',         machine: 'Skyjack SJIII 3219',     vendor: 'Skyjack',      type: 'Service',  year: 2019, pages: 312, size: '18 MB' },
     { id: 'man-2',  title: 'SJIII 3219 Parts Manual',                              machine: 'Skyjack SJIII 3219',     vendor: 'Skyjack',      type: 'Parts',    year: 2020, pages: 248, size: '24 MB' },
-    { id: 'man-3',  title: 'SJIII 3219 Operator Manual',                           machine: 'Skyjack SJIII 3219',     vendor: 'Skyjack',      type: 'Operator', year: 2021, pages: 96,  size: '8 MB'  },
+    { id: 'man-3',  title: 'SJIII Series Operating Manual (ANSI/CSA)',             machine: 'Skyjack SJIII 3219',     vendor: 'Skyjack',      type: 'Operator', year: 2008, pages: 93,  size: '16 MB', pdfFile: 'manuals/sjiii-operating-manual.pdf' },
     { id: 'man-4',  title: 'Service Bulletin SB-2847 — Lift Cylinder Seal Procedure', machine: 'Skyjack SJIII 3219', vendor: 'Skyjack',      type: 'Bulletin', year: 2026, pages: 4,   size: '1.2 MB'},
     { id: 'man-11', title: 'SJIII 4632 Service Manual — Hydraulic & Electrical',   machine: 'Skyjack SJIII 4632',     vendor: 'Skyjack',      type: 'Service',  year: 2021, pages: 288, size: '22 MB' },
     { id: 'man-12', title: 'SJIII 3219 Electrical System Manual',                  machine: 'Skyjack SJIII 3219',     vendor: 'Skyjack',      type: 'Service',  year: 2022, pages: 144, size: '11 MB' },

@@ -1,66 +1,81 @@
 // ── SJ III 3219 Diagnostic Knowledge Base ────────────────────────────────────
-// Simulates a processed operator + service manual for the Skyjack SJIII 3219
-// 19-ft electric scissor lift, 24V DC battery, single-stage lift cylinder.
+// Source: Skyjack SJIII Series Operating Manual (143857AD-A, Feb 2008)
+// Covers models 32xx, 46xx and 68xx — ANSI/CSA edition.
+// pdfPage = 1-indexed page number within the actual PDF file.
+// Manual page 6 and 55 are blank separators absent from the PDF, so:
+//   manual pages 7-54  → pdfPage = manualPage - 1
+//   manual pages 56-93 → pdfPage = manualPage - 2
+
+function manualPageToPdf(manualPage) {
+  if (manualPage <= 5) return manualPage;
+  if (manualPage <= 54) return manualPage - 1;
+  if (manualPage <= 93) return manualPage - 2;
+  return manualPage - 3; // p.95 → PDF 92
+}
 
 const SJ3219_SECTIONS = [
-  { id:'s1',    chapter:'1',   title:'Safety & Pre-Operation Checks',          page:1,   summary:'Personal protective equipment, lockout/tagout, pre-operation inspection checklist, load capacity table.' },
-  { id:'s2',    chapter:'2',   title:'Machine Specifications',                  page:8,   summary:'Platform height 19 ft, capacity 500 lb, 24V DC, drive speed 0–2.5 mph elevated, overall dimensions.' },
-  { id:'s3-1',  chapter:'3.1', title:'Hydraulic System Overview',               page:24,  summary:'System pressure 2,500–2,800 PSI normal. Relief valve set at 3,200 PSI. 2.5 gal ISO 46 AW fluid capacity.' },
-  { id:'s3-2',  chapter:'3.2', title:'Lift Cylinder — Inspection & Seals',      page:31,  summary:'Single-stage cylinder. Acceptable drift: <2 in/min at rated load. Seal replacement interval 3,000 hr. See SB-2847.' },
-  { id:'s3-3',  chapter:'3.3', title:'Hydraulic Pump',                          page:38,  summary:'Gear pump, 1.2 GPM at rated RPM. Replace if output pressure <2,000 PSI at rated RPM with good fluid.' },
-  { id:'s3-4',  chapter:'3.4', title:'Control Valve & Solenoids',               page:42,  summary:'24V DC solenoid-actuated directional valve. Coil resistance nominal 18–22 Ω. Replace spool if sticking persists after cleaning.' },
-  { id:'s3-5',  chapter:'3.5', title:'Pressure Relief Valve',                   page:47,  summary:'Factory set 3,200 PSI. Non-adjustable on SJIII 3219. Replace as assembly if reading outside 3,000–3,400 PSI.' },
-  { id:'s3-6',  chapter:'3.6', title:'Hydraulic Filter & Fluid',                page:50,  summary:'10-micron return-line filter. Replace every 250 hr or when bypass indicator extends. Drain and refill at 1,000 hr.' },
-  { id:'s4-1',  chapter:'4.1', title:'Battery System — 24V DC',                 page:55,  summary:'Four 6V 220 Ah deep-cycle batteries in series. Minimum charge voltage 22V. Specific gravity 1.265 fully charged.' },
-  { id:'s4-2',  chapter:'4.2', title:'Fault Codes — Master Reference',          page:62,  summary:'All HYD, ELC, and DRV fault codes with cause matrix and first-response actions.' },
-  { id:'s4-3',  chapter:'4.3', title:'Main Controller — Base Station',          page:71,  summary:'Self-diagnosing controller. LED blink pattern indicates fault class. Replace if fault persists after wiring inspection.' },
-  { id:'s4-4',  chapter:'4.4', title:'Platform Controller & Joystick',          page:78,  summary:'Module communicates over CAN bus. Inspect connector P4 for corrosion. Replacement requires calibration procedure (p.82).' },
-  { id:'s5-1',  chapter:'5.1', title:'Drive Motors & Brakes',                   page:88,  summary:'Brushless DC 24V drive motors. Spring-applied electromagnetic brakes release at >18V. Inspect brake gap 0.010–0.020".' },
-  { id:'s5-2',  chapter:'5.2', title:'Drive System — Wheels & Tires',           page:95,  summary:'Solid foam tires. No inflation required. Replace when tread wear indicator groove disappears.' },
-  { id:'s6-1',  chapter:'6.1', title:'Scissor Arms, Pins & Wear Pads',          page:102, summary:'Inspect pins for scoring or elongated holes. Replace wear pads when <1/4" thick. Lubricate all pins every 250 hr.' },
-  { id:'s7',    chapter:'7',   title:'Maintenance Schedule',                    page:114, summary:'Daily, 250 hr, 500 hr, 1,000 hr, and 3,000 hr service intervals with checklist.' },
-  { id:'sb2847',chapter:'SB',  title:'Service Bulletin SB-2847 — Lift Cylinder Seal Procedure', page:1, summary:'Revised seal installation sequence for SJIII 3219 serial SJ3219-00600 and later. Mandatory. Supersedes p.31 seal procedure.' },
+  // id, chapter, title, page (manual), pdfPage, summary
+  { id:'s1',     chapter:'1',        title:'Safety Rules & Pre-Operation',               page:8,  pdfPage:7,  summary:'Operator safety reminders, electrocution hazard (maintain 10 ft MSAD from power lines up to 50 kV), safety precautions, fall protection requirements.' },
+  { id:'s2.3',   chapter:'2.3',      title:'Major Assemblies — Base & Lift Mechanism',   page:15, pdfPage:14, summary:'SJIII 3219 base: hydraulic/electric tray, battery tray (four 6V batteries), front hydraulic motor-driven wheels, rear spring-applied hydraulic-release brake. Scissor assembly with single-stage lift cylinder.' },
+  { id:'s2.5',   chapter:'2.5',      title:'Component Identification',                    page:16, pdfPage:15, summary:'Emergency disconnect switch, tilt alarm (disables drive/lift when out-of-level), base control console, brake system, free-wheeling valve, battery charger, emergency lowering system, maintenance support, platform control console.' },
+  { id:'s2.5-4', chapter:'2.5-4',    title:'Brake System',                                page:17, pdfPage:16, summary:'Spring-applied hydraulic-release rear brake. Brake auto-reset valve plunger and brake hand pump. Must be manually disengaged before pushing, winching or towing — see Section 2.14-2.' },
+  { id:'s2.8',   chapter:'2.8',      title:'Visual & Daily Maintenance Inspections',      page:24, pdfPage:23, summary:'Full daily inspection: labels, electrical wiring (base-to-platform cables, battery tray harnesses), limit switches, hydraulic hoses/fittings/cylinders, all entrance/battery tray/hydraulic tray/platform/lifting mechanism items.' },
+  { id:'s2.8-6', chapter:'2.8-6',    title:'Battery Tray Inspection',                     page:26, pdfPage:25, summary:'Battery condition: check case for damage, clean terminals and cable ends, ensure all connections tight, check fluid level (plates must be covered by ≥½ inch of solution — add distilled water if needed), replace battery if damaged or not holding charge.' },
+  { id:'s2.8-7', chapter:'2.8-7',    title:'Hydraulic/Electric Tray Inspection',          page:28, pdfPage:27, summary:'Hydraulic tank: filler cap secure, no visible damage/leakage, oil level at or slightly above top mark on sight glass. Pump and motor: no loose parts or visible damage. Proportional and main manifolds: all fittings/hoses properly tightened, no hydraulic leakage, no loose wires. Tilt sensor secure.' },
+  { id:'s2.8-9', chapter:'2.8-9',    title:'Lifting Mechanism Inspection',                page:30, pdfPage:29, summary:'Scissor assembly: no visible damage, no deformation in weldments, all pins properly secured, cables/wires properly routed. Scissor bumpers: secure, no visible damage. Rollers: secure, path of travel free from dirt/obstructions. Lift cylinders: properly secured, no loose parts, no evidence of damage or hydraulic leakage.' },
+  { id:'s2.9',   chapter:'2.9',      title:'Function Tests',                               page:31, pdfPage:30, summary:'Pre-service tests required before each use: emergency disconnect switch, base control enable and raise/lower, emergency lowering, free-wheeling. Platform: emergency stop, enable trigger, steering, driving, brakes, platform raise/lower, horn. Pothole sensor, speed limit at elevation, tilt sensor (alarm at ~10°).' },
+  { id:'s2.10',  chapter:'2.10',     title:'Start Operation',                              page:38, pdfPage:37, summary:'Operating sequence: (1) visual and daily maintenance inspections, (2) function tests, (3) jobsite inspection. Raise/lower from base or platform console. Drive and steer. Elevated drive speed is automatically reduced above ~7 ft and disabled above tilt-out condition.' },
+  { id:'s2.14',  chapter:'2.14',     title:'Winching, Towing & Brake Release',            page:48, pdfPage:47, summary:'To release free-wheeling valve: turn counterclockwise to fully open, push/pull aerial platform, close clockwise for normal operation. Manual brake release: pin brakes — brake auto-reset valve and hand pump; disc brakes — separate procedure. Reapply brakes after towing.' },
+  { id:'s2.15',  chapter:'2.15',     title:'Emergency Lowering Procedure',                page:50, pdfPage:49, summary:'For emergency or electrical system failure: locate holding valve manual override knob at base of each lift cylinder, depress and turn counterclockwise. Pull out and hold emergency lowering valve on hydraulic/electric tray to lower platform. Restore: depress and turn override knob clockwise.' },
+  { id:'s2.16',  chapter:'2.16',     title:'Maintenance Support Procedure',               page:51, pdfPage:50, summary:'Required whenever performing work within the lifting mechanism. Raise platform, swing maintenance support down to vertical, lower until support contacts labeled cross bar. Turn disconnect switch off. Never work under raised platform without maintenance support deployed.' },
+  { id:'s2.17',  chapter:'2.17',     title:'Battery Maintenance & Charging',              page:52, pdfPage:51, summary:'Battery service: check case, fluid level (cover plates by ≥½ inch), clean terminals, tighten connections, replace damaged batteries. Charger: automatic start within 4-6 seconds, LED charging state (1 LED blinking = 0-50%, 2 LEDs = 50-75%, 3 LEDs = 75-100%, all solid = complete).' },
+  { id:'t2.3',   chapter:'Table 2.3','title':'SJIII 3219 Specifications',                  page:58, pdfPage:56, summary:'Model 3219: weight 2,580 lb (1,170 kg), width 39 in (0.99 m), platform height 19 ft (5.8 m), working height 25 ft (7.6 m). Lift time: 20 sec (no load), 25 sec (rated load). Drive speed: 2.4 mph stowed, 0.64 mph elevated. Solid rubber tires 16×5×12.' },
+  { id:'t2.5',   chapter:'Table 2.5','title':'Maximum Platform Capacities',                page:62, pdfPage:60, summary:'SJIII 3219 platform capacities: 500 lb total / 250 lb extension (1-person). 600 lb total / 250 lb extension (max, with extension). Do not exceed rated load. Load must be evenly distributed.' },
+  { id:'t2.6',   chapter:'Table 2.6','title':'Maintenance & Inspection Schedule',          page:63, pdfPage:61, summary:'Daily (every use): all visual and function test items. Every 3 months or 150 hours: deeper inspection items. Yearly: annual owner inspection record (decal on scissor assembly must be updated). Do not operate if annual inspection is more than 13 months old.' },
+  { id:'t2.7',   chapter:'Table 2.7','title':"Operator's Daily Checklist",                 page:64, pdfPage:62, summary:'Daily inspection form. Mark each item Pass / Fail / Repaired / N-A. Covers all visual inspection items and function tests. Complete before each shift. Retain records.' },
 ];
 
+// Fault codes reference real operator's manual sections for first-response steps.
+// Detailed service procedures are in the Skyjack Service Manual (separate document).
 const SJ3219_FAULT_CODES = {
-  'HYD-01': { title:'Low system pressure (<1,800 PSI)', section:'s3-1', severity:'high',
-    causes:['Worn pump (check output pressure at Port A)','Relief valve set too low or leaking by','Internal cylinder bypass — seals','Low fluid level'],
+  'HYD-01': { title:'Low system pressure / no lift function', section:'s2.8-7', severity:'high',
+    causes:['Low hydraulic fluid level — check sight glass on tank (should be at or above top mark)','Hydraulic pump wear or failure','Relief valve stuck open or set too low','Internal cylinder seal bypass'],
     parts:['SKJ-103278','SKJ-103100','SKJ-HYD-200','SKJ-HF046-1G','SKJ-104880'] },
-  'HYD-02': { title:'Hydraulic filter bypass indicator extended', section:'s3-6', severity:'medium',
-    causes:['Filter element saturated — overdue replacement','Cold fluid not yet warmed (normal at startup below 40°F)','Filter housing O-ring leak'],
-    parts:['SKJ-104880','SKJ-HF046-1G'] },
-  'HYD-03': { title:'Lift cylinder drift >2 in/min at rated load', section:'s3-2', severity:'high',
-    causes:['Worn cylinder internal seals (rod seal, piston seal)','Control valve not fully closing','Check valve leak-by'],
+  'HYD-02': { title:'Hydraulic fluid leak — external', section:'s2.8-7', severity:'high',
+    causes:['Cylinder rod seal wear — oil tracking down rod','Hose fitting loose or damaged — inspect all JIC connections','Filter housing O-ring leak','Pump shaft seal failure — oil at pump drive end'],
+    parts:['SKJ-103100','SKJ-103445','SKJ-104880','SKJ-HYD-201'] },
+  'HYD-03': { title:'Lift cylinder drift — platform sinking', section:'s2.8-9', severity:'high',
+    causes:['Worn cylinder internal seals (rod seal or piston seal)','Control valve not fully closing when de-energized','Check valve leak-by in lift circuit'],
     parts:['SKJ-103100','SKJ-103445','SKJ-103512','SKJ-CHK-302'] },
-  'HYD-04': { title:'No lift function — platform will not elevate', section:'s3-4', severity:'critical',
-    causes:['Solenoid valve coil failure (check 24V signal at connector C6)','Pump output failure — low pressure at Port A','Control valve spool sticking','Low fluid level'],
+  'HYD-04': { title:'No lift function — platform will not elevate', section:'s2.8-7', severity:'critical',
+    causes:['Hydraulic fluid level low — check sight glass first','Solenoid valve coil failure','Pump output failure','Control valve spool sticking'],
     parts:['SKJ-SOL-301','SKJ-103278','SKJ-HYD-200','SKJ-HYD-201','SKJ-HF046-1G','SKJ-103601'] },
-  'HYD-05': { title:'Slow lift speed — platform elevates but slowly', section:'s3-3', severity:'medium',
-    causes:['Pump wear — reduced volumetric efficiency','High fluid viscosity (wrong grade or cold)','Partial solenoid restriction','Filter bypass open — unfiltered flow'],
+  'HYD-05': { title:'Slow lift — platform elevates but slowly', section:'s2.8-7', severity:'medium',
+    causes:['Hydraulic fluid level low or fluid wrong grade/cold','Pump wear — reduced volumetric efficiency','Partial solenoid restriction or debris on spool','Filter bypass indicator extended — replace filter'],
     parts:['SKJ-HYD-201','SKJ-104880','SKJ-HF046-1G','SKJ-HYD-200'] },
-  'ELC-01': { title:'Low battery voltage (<22V under load)', section:'s4-1', severity:'high',
-    causes:['Batteries undercharged — insufficient charge time','Failed cell in one battery (check individual battery voltages)','Charger fault','Excessive parasitic draw'],
+  'ELC-01': { title:'Low battery / no power', section:'s2.17', severity:'high',
+    causes:['Batteries insufficiently charged — charge overnight (check LED state indicators on charger)','Failed cell — one 6V battery pulling bank below 24V','Charger fault — not starting or not completing cycle','Battery fluid level low — reduced capacity'],
     parts:['SKJ-BAT-500','SKJ-CHR-501'] },
-  'ELC-02': { title:'Main controller fault — base station', section:'s4-3', severity:'high',
-    causes:['Loose or corroded wiring at connectors J1–J4','Moisture ingress','Controller board failure after short circuit'],
+  'ELC-02': { title:'Main controller / base station fault', section:'s2.5', severity:'high',
+    causes:['Loose or corroded wiring at base controller connectors — check color-coded harness connections','Moisture ingress in electrical panel','Controller board failure'],
     parts:['SKJ-CTL-502'] },
-  'ELC-03': { title:'Platform controller / joystick fault', section:'s4-4', severity:'high',
-    causes:['Corroded connector P4 (most common)','CAN bus communication error','Joystick module internal failure'],
+  'ELC-03': { title:'Platform controller / joystick fault', section:'s2.5', severity:'high',
+    causes:['Corroded connector at platform control console — most common cause','CAN bus communication error — inspect base-to-platform cable','Joystick module internal failure'],
     parts:['SKJ-JOY-503'] },
-  'ELC-04': { title:'Emergency stop circuit active', section:'s4-2', severity:'medium',
-    causes:['E-stop button not fully reset (twist to release)','Wiring fault in E-stop loop','Platform E-stop vs base E-stop conflict'],
+  'ELC-04': { title:'Emergency stop circuit active — all functions disabled', section:'s2.9', severity:'medium',
+    causes:['E-stop button not fully reset — twist to release (both base and platform)','Wiring fault in E-stop loop','Key switch in off position on platform console'],
     parts:[] },
-  'ELC-05': { title:'Drive brake fault — brake not releasing or engaging', section:'s5-1', severity:'high',
-    causes:['Limit switch on descent safety bar misaligned','Brake solenoid coil failure (check 24V signal)','Brake gap out of spec (spec: 0.010–0.020")'],
+  'ELC-05': { title:'Drive brake fault — brake not releasing or engaging', section:'s2.5-4', severity:'high',
+    causes:['Brake not manually released — see free-wheeling valve and brake release procedure (2.14-2)','Brake solenoid coil failure — brake will not release electrically','Pothole protection device not fully deployed — drive disabled as interlock'],
     parts:['SKJ-LIM-504'] },
-  'DRV-01': { title:'Drive motor fault', section:'s5-1', severity:'high',
-    causes:['Motor winding resistance out of spec','Controller output stage fault — check PWM signal','Broken drive axle or seized hub'],
+  'DRV-01': { title:'Drive motor fault / wheels not turning', section:'s2.8', severity:'high',
+    causes:['Emergency stop not fully released on both consoles','Battery voltage too low under drive load','Brake not releasing — check free-wheeling valve and brake solenoid','Drive motor winding failure or seized hub'],
     parts:['SKJ-MTR-400','SKJ-HUB-401'] },
-  'DRV-02': { title:'Drive brake not releasing', section:'s5-1', severity:'high',
-    causes:['Brake solenoid voltage <18V','Brake gap too tight — brake dragging','Solenoid coil open circuit'],
+  'DRV-02': { title:'Drive brake not releasing', section:'s2.14', severity:'high',
+    causes:['Free-wheeling valve still closed — must turn counterclockwise to open for manual towing','Brake hand pump needs actuating (pin brake system)','Brake solenoid not receiving voltage'],
     parts:['SKJ-LIM-504','SKJ-MTR-400'] },
-  'DRV-03': { title:'Drive function disabled at elevation', section:'s5-1', severity:'low',
-    causes:['Normal interlock: drive speed reduces above 25% platform height and disables above ~6 ft','Elevation sensor fault if triggered at ground level'],
+  'DRV-03': { title:'Drive disabled at elevation — normal interlock', section:'s2.10', severity:'low',
+    causes:['Normal operation: drive speed reduces automatically above ~7 ft and disables above tilt alarm threshold','Tilt alarm active — machine is out of level, lower platform and reposition on level surface','Pothole protection device not fully extended — drive interlock active'],
     parts:[] },
 };
 
@@ -72,7 +87,7 @@ const SJ3219_SYMPTOMS = [
     id:'no-lift',
     keywords:["won't elevate","won't raise","not lifting","can't raise","platform won't rise","won't go up","no lift","not going up","won't lift","won't elevate","doesnt elevate","doesn't elevate","can't elevate","platform stuck","stuck down","elevator stuck"],
     faultCodes:['HYD-04'],
-    sections:['s3-1','s3-4','s3-3'],
+    sections:['s2.8-7','s2.9','s2.8'],
     parts:['SKJ-SOL-301','SKJ-103278','SKJ-HYD-200','SKJ-HYD-201','SKJ-HF046-1G'],
     severity:'critical',
     diagnosis:`The SJIII 3219 "no lift" condition is most commonly caused by one of four things, in order of likelihood:
@@ -98,7 +113,7 @@ const SJ3219_SYMPTOMS = [
     id:'slow-lift',
     keywords:["slow lift","lifts slowly","slow elevation","weak lift","slow to raise","takes forever to raise","sluggish lift","slow rise","rising slowly","platform slow"],
     faultCodes:['HYD-05'],
-    sections:['s3-3','s3-6','s3-1'],
+    sections:['s2.8-7','t2.3','s2.8'],
     parts:['SKJ-HYD-201','SKJ-104880','SKJ-HF046-1G'],
     severity:'medium',
     diagnosis:`Slow lift on the SJIII 3219 usually means reduced pump volumetric efficiency or restriction in the hydraulic circuit.
@@ -121,7 +136,7 @@ const SJ3219_SYMPTOMS = [
     id:'cylinder-drift',
     keywords:["platform drifting","platform dropping","sinking","drift","platform drops","lowers on its own","descends on its own","slow descent","platform creeping down","platform creeps","won't hold height","losing height"],
     faultCodes:['HYD-03'],
-    sections:['s3-2','s3-4'],
+    sections:['s2.8-9','s2.8-7'],
     parts:['SKJ-103100','SKJ-103445','SKJ-103512','SKJ-CHK-302'],
     severity:'high',
     diagnosis:`Platform drift on the SJIII 3219 is a significant safety concern. Acceptable maximum drift is **2 inches per minute** at rated load (500 lb). Anything beyond that requires immediate investigation.
@@ -145,8 +160,8 @@ const SJ3219_SYMPTOMS = [
   {
     id:'hydraulic-leak',
     keywords:["hydraulic leak","oil leak","fluid leak","leaking hydraulic","hydraulic fluid leaking","dripping oil","oil on floor","puddle under","hydraulic fluid on","wet around cylinder","oil around"],
-    faultCodes:['HYD-01','HYD-03'],
-    sections:['s3-2','s3-6','s3-1'],
+    faultCodes:['HYD-01','HYD-02'],
+    sections:['s2.8-7','s2.8-9','s2.8'],
     parts:['SKJ-103100','SKJ-103445','SKJ-103512','SKJ-HF046-1G'],
     severity:'high',
     diagnosis:`External hydraulic leaks on the SJIII 3219 require immediate attention — fluid on the ground is both an environmental and slip hazard, and loss of fluid will cause HYD-01 (low pressure) if uncorrected.
@@ -170,7 +185,7 @@ const SJ3219_SYMPTOMS = [
     id:'wont-drive',
     keywords:["won't drive","can't drive","not driving","drive not working","won't move","can't move","drive fault","drv","drive motor","wheels not turning","not moving"],
     faultCodes:['DRV-01','DRV-02','ELC-05'],
-    sections:['s5-1','s4-2'],
+    sections:['s2.9','s2.5-4','s2.14'],
     parts:['SKJ-MTR-400','SKJ-LIM-504'],
     severity:'high',
     diagnosis:`Drive failure on the SJIII 3219 is usually either a brake release issue or a motor/controller fault.
@@ -195,7 +210,7 @@ const SJ3219_SYMPTOMS = [
     id:'battery-electrical',
     keywords:["battery","batteries","low power","won't charge","not charging","charger","battery dead","low battery","electrical","elc","no power","power issue","controller","main controller","platform controller"],
     faultCodes:['ELC-01','ELC-02','ELC-03'],
-    sections:['s4-1','s4-3','s4-4'],
+    sections:['s2.17','s2.8-6','s2.5'],
     parts:['SKJ-BAT-500','SKJ-CHR-501','SKJ-CTL-502','SKJ-JOY-503'],
     severity:'high',
     diagnosis:`Battery and electrical faults on the SJIII 3219 span three systems: the battery bank, the base controller, and the platform controller.
@@ -222,7 +237,7 @@ Communicates over CAN bus. The most common fault is connector P4 corrosion. Clea
     id:'maintenance',
     keywords:["service","maintenance","service interval","when to replace","when should i","pm","preventive maintenance","scheduled maintenance","schedule","how often","hours","inspection","lubricate","grease","oil change"],
     faultCodes:[],
-    sections:['s7','s3-6','s3-2','s6-1'],
+    sections:['t2.6','s2.8','s2.16','t2.7'],
     parts:['SKJ-104880','SKJ-HF046-1G','SKJ-103100','SKJ-PAD-601'],
     severity:'low',
     diagnosis:`SJIII 3219 Maintenance Schedule — Key Intervals:
@@ -247,7 +262,7 @@ Lift cylinder seal replacement — mandatory. Follow Service Bulletin SB-2847 pr
     id:'wear-pads-pins',
     keywords:["wear pad","wear pads","scissor pin","scissor arm","arm pin","binding","grinding","squeaking","noise","structural","wobble","platform wobbly","lateral movement"],
     faultCodes:[],
-    sections:['s6-1','s7'],
+    sections:['s2.8-9','t2.6'],
     parts:['SKJ-PAD-601','SKJ-PIN-600'],
     severity:'medium',
     diagnosis:`Scissor arm wear pads and pins are the most commonly overlooked wear items on the SJIII 3219.
@@ -389,3 +404,5 @@ function diagGenerateResponse(userMessage, ctx) {
 window.SJ3219_SECTIONS = SJ3219_SECTIONS;
 window.SJ3219_FAULT_CODES = SJ3219_FAULT_CODES;
 window.diagGenerateResponse = diagGenerateResponse;
+window.manualPageToPdf = manualPageToPdf;
+window.SJIII_MANUAL_PDF = 'manuals/sjiii-operating-manual.pdf';
