@@ -346,7 +346,30 @@ function render_diagnostics(el) {
 
   window.diagOpenManual = function(sectionId, title) {
     const sec = (window.SJ3219_SECTIONS || []).find(s => s.id === sectionId);
-    Router.navigate('manuals', { sectionId, pdfPage: sec ? sec.pdfPage : null, highlight: title });
+    const pdfPage = sec ? sec.pdfPage : null;
+    const pdfFile = window.SJIII_MANUAL_PDF || 'manuals/sjiii-operating-manual.pdf';
+    const pdfSrc = pdfFile + (pdfPage ? '#page=' + pdfPage : '');
+    const manPage = sec ? sec.page : null;
+    Modal.show({
+      title: title || 'Manual Reference',
+      fullscreen: true,
+      body: '<style>'
+        + '.pdf-viewer-wrap{display:flex;flex-direction:column;flex:1;overflow:hidden;}'
+        + '.pdf-viewer-toolbar{background:#1A1A1A;padding:8px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}'
+        + '.pdf-viewer-meta{color:#9CA3AF;font-size:11px;flex:1;}'
+        + '.pdf-frame{flex:1;border:none;background:#525659;width:100%;}'
+        + '</style>'
+        + '<div class="pdf-viewer-wrap">'
+        + '<div class="pdf-viewer-toolbar">'
+        + '<i class="ti ti-book" style="color:#9CA3AF;font-size:13px;flex-shrink:0;"></i>'
+        + '<span class="pdf-viewer-meta">Skyjack SJIII Series Operating Manual (ANSI/CSA) · 93 pages</span>'
+        + (manPage ? '<span style="font-size:11px;color:#F5A623;display:flex;align-items:center;gap:4px;"><i class="ti ti-bookmark-filled" style="font-size:11px;"></i> Page ' + manPage + '</span>' : '')
+        + '<a href="' + pdfFile + '" download style="font-size:11px;color:#9CA3AF;background:#2A2A2A;border:0.5px solid #3C4052;border-radius:5px;padding:4px 10px;text-decoration:none;display:flex;align-items:center;gap:4px;flex-shrink:0;"><i class="ti ti-download" style="font-size:11px;"></i> Download</a>'
+        + '</div>'
+        + '<iframe class="pdf-frame" src="' + pdfSrc + '" title="' + (title || 'Manual') + '"></iframe>'
+        + '</div>',
+      actions: [{ label: 'Close', onClick: () => Modal.close() }]
+    });
   };
 
   // ── WO flows ──────────────────────────────────────────────────────────────
