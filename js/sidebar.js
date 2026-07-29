@@ -64,6 +64,29 @@ function buildSidebar(activeItem, opts) {
   </div>`;
   }
 
+  // ── Fleet Admin sidebar ───────────────────────────────────────────────────
+  if (role === 'fleet_admin') {
+    return `
+  <div class="sb-wrap${wrapCls}">
+  <div class="sidebar${pinCls}">
+    <div class="sb-logo-area">
+      <img src="smartequiplogo.png" class="sb-logo-img"/>
+      <div class="sb-logo-sub">Mid-County Rental · Admin</div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-section-label">Administration</div>
+      <div class="sb-item ${activeItem==='fa-home'?'active':''}"    data-fa-tab="home"><i class="ti ti-home"></i><span class="sb-lbl"> Home</span></div>
+      <div class="sb-item ${activeItem==='fa-users'?'active':''}"   data-fa-tab="users"><i class="ti ti-users"></i><span class="sb-lbl"> Users</span></div>
+      <div class="sb-item ${activeItem==='fa-features'?'active':''}" data-fa-tab="features"><i class="ti ti-toggle-right"></i><span class="sb-lbl"> Features</span></div>
+      <div class="sb-section-label">Fleet</div>
+      <div class="sb-item ${activeItem==='fa-locations'?'active':''}" data-fa-tab="locations"><i class="ti ti-map-pin"></i><span class="sb-lbl"> Locations</span></div>
+      <div class="sb-item ${activeItem==='fa-activity'?'active':''}"  data-fa-tab="activity"><i class="ti ti-activity"></i><span class="sb-lbl"> Activity Log</span></div>
+    </div>
+    <div class="sb-pin-row" id="sb-pin-btn"><i class="ti ${pinIcon}"></i><span class="sb-pin-label">${pinLabel}</span></div>
+  </div>
+  </div>`;
+  }
+
   // ── Fleet sidebar (mechanic / supervisor) ─────────────────────────────────
   const isSupervisor = role === 'supervisor';
   const locName      = loc ? loc.name : 'Mid-County Rental';
@@ -140,6 +163,8 @@ function buildTopbarRight() {
   const shortName = user ? user.shortName : 'James W.';
   const subLine  = role === 'supplier'
     ? (user.email || 'Supplier')
+    : role === 'fleet_admin'
+    ? 'Fleet Administrator'
     : (loc ? loc.name : 'Austin Branch');
   return `<div class="topbar-right">
     <button class="topbar-icon-btn" id="up-btn-notif" onclick="UserPanel.openNotifications()" title="Notifications">

@@ -799,6 +799,17 @@ const Store = (() => {
       phone: '(416) 555-0210',
       avatar: 'AC',
     },
+    {
+      id: 'user-admin',
+      username: 'admin',
+      password: 'MCR-admin-01',
+      displayName: 'Admin User',
+      shortName: 'Admin',
+      role: 'fleet_admin',
+      email: 'admin@midcountyrental.com',
+      phone: '(512) 555-0100',
+      avatar: 'AD',
+    },
   ];
 
   // Fleets each supplier is onboarded to (supplier-visible relationships only)
@@ -814,6 +825,108 @@ const Store = (() => {
       { fleetId: 'h&e',       fleetName: 'H&E Equipment',       locations: 11, city: 'Baton Rouge, LA',  activeOrders: 6,  logoText: 'HE'  },
     ],
   };
+
+  // ── Fleet admin: managed users and feature flags ───────────────────────────
+  // Features that can be toggled per role or per individual user
+  const MANAGED_FEATURES = [
+    { id: 'analytics',    label: 'Analytics',          icon: 'ti-chart-bar',       description: 'Access to the analytics dashboard and fleet reporting.' },
+    { id: 'cms',          label: 'Content Management', icon: 'ti-pencil',           description: 'Create and publish service bulletins, news, and parts notes.' },
+    { id: 'diagnostics',  label: 'Diagnostics Chat',   icon: 'ti-tool',             description: 'AI-powered diagnostic assistant for troubleshooting.' },
+    { id: 'approvals',    label: 'Order Approvals',    icon: 'ti-circle-check',     description: 'Approve, edit, or return purchase orders submitted by techs.' },
+    { id: 'recommended',  label: 'Recommended Parts',  icon: 'ti-star',             description: 'View AI-curated recommended parts based on fleet history.' },
+    { id: 'news',         label: 'News & Updates',     icon: 'ti-news',             description: 'Access supplier news, bulletins, and product updates.' },
+    { id: 'manuals',      label: 'Manuals & Docs',     icon: 'ti-book',             description: 'Browse and download machine manuals and technical docs.' },
+    { id: 'order_history',label: 'Order History',      icon: 'ti-history',          description: 'View historical parts orders across the fleet.' },
+  ];
+
+  // Default feature sets per role (true = enabled by default)
+  const _roleFeatures = {
+    mechanic: {
+      analytics: false, cms: false, diagnostics: true, approvals: false,
+      recommended: true, news: true, manuals: true, order_history: true,
+    },
+    supervisor: {
+      analytics: true, cms: true, diagnostics: true, approvals: true,
+      recommended: true, news: true, manuals: true, order_history: true,
+    },
+  };
+
+  // Per-user feature overrides: { userId: { featureId: true|false } }
+  // null means "follow role default"
+  const _userFeatureOverrides = {};
+
+  // Managed users list (fleet users only — not supplier, not admin)
+  const _managedUsers = [
+    {
+      id: 'user-james-w', username: 'james.w', displayName: 'James Whitfield',
+      shortName: 'James W.', role: 'mechanic', avatar: 'JW',
+      email: 'james.w@midcountyrental.com', phone: '(512) 555-0182',
+      location: 'Austin Branch', status: 'active', lastSeen: 'Jul 28, 2026',
+    },
+    {
+      id: 'user-sarah-m', username: 'sarah.m', displayName: 'Sarah Martinez',
+      shortName: 'Sarah M.', role: 'supervisor', avatar: 'SM',
+      email: 'sarah.m@midcountyrental.com', phone: '(512) 555-0140',
+      location: 'Austin Branch', status: 'active', lastSeen: 'Jul 29, 2026',
+    },
+    {
+      id: 'user-marcus-t', username: 'marcus.t', displayName: 'Marcus Taylor',
+      shortName: 'Marcus T.', role: 'mechanic', avatar: 'MT',
+      email: 'marcus.t@midcountyrental.com', phone: '(512) 555-0193',
+      location: 'San Marcos Branch', status: 'active', lastSeen: 'Jul 27, 2026',
+    },
+    {
+      id: 'user-d-kowalski', username: 'd.kowalski', displayName: 'Dana Kowalski',
+      shortName: 'D. Kowalski', role: 'mechanic', avatar: 'DK',
+      email: 'd.kowalski@midcountyrental.com', phone: '(512) 555-0177',
+      location: 'Kyle Branch', status: 'active', lastSeen: 'Jul 25, 2026',
+    },
+    {
+      id: 'user-r-flores', username: 'r.flores', displayName: 'Rosa Flores',
+      shortName: 'R. Flores', role: 'supervisor', avatar: 'RF',
+      email: 'r.flores@midcountyrental.com', phone: '(512) 555-0155',
+      location: 'San Marcos Branch', status: 'active', lastSeen: 'Jul 29, 2026',
+    },
+    {
+      id: 'user-t-nguyen', username: 't.nguyen', displayName: 'Thanh Nguyen',
+      shortName: 'T. Nguyen', role: 'mechanic', avatar: 'TN',
+      email: 't.nguyen@midcountyrental.com', phone: '(512) 555-0168',
+      location: 'Austin Branch', status: 'inactive', lastSeen: 'Jul 10, 2026',
+    },
+  ];
+
+  function getManagedUsers() { return _managedUsers; }
+  function getManagedFeatures() { return MANAGED_FEATURES; }
+  function getRoleFeatures(role) { return { ...(_roleFeatures[role] || {}) }; }
+  function setRoleFeature(role, featureId, enabled) {
+    if (!_roleFeatures[role]) _roleFeatures[role] = {};
+    _roleFeatures[role][featureId] = enabled;
+  }
+  function getUserFeatureOverrides(userId) { return { ...(_userFeatureOverrides[userId] || {}) }; }
+  function setUserFeatureOverride(userId, featureId, value) {
+    // value: true | false | null (null = clear override, follow role)
+    if (!_userFeatureOverrides[userId]) _userFeatureOverrides[userId] = {};
+    if (value === null) delete _userFeatureOverrides[userId][featureId];
+    else _userFeatureOverrides[userId][featureId] = value;
+  }
+  function getEffectiveFeatures(userId) {
+    const u = _managedUsers.find(x => x.id === userId);
+    if (!u) return {};
+    const roleDefaults = getRoleFeatures(u.role);
+    const overrides = _userFeatureOverrides[userId] || {};
+    const result = { ...roleDefaults };
+    for (const [k, v] of Object.entries(overrides)) result[k] = v;
+    return result;
+  }
+  function addManagedUser(fields) {
+    const id = 'user-' + fields.username.replace(/\./g, '-') + '-' + Date.now();
+    _managedUsers.push({ id, status: 'active', lastSeen: 'Never', ...fields });
+    return id;
+  }
+  function updateManagedUser(id, fields) {
+    const u = _managedUsers.find(x => x.id === id);
+    if (u) Object.assign(u, fields);
+  }
 
   // Price requests — created by fleet, responded to by supplier
   const _priceRequests = [
@@ -1067,6 +1180,9 @@ const Store = (() => {
     getUsers, authenticate, setCurrentUser, getCurrentUser, logout,
     getLocations, getCurrentLocation, setCurrentLocation,
     getOrgConfig, getOrderTerms,
+    getManagedUsers, getManagedFeatures, getRoleFeatures, setRoleFeature,
+    getUserFeatureOverrides, setUserFeatureOverride, getEffectiveFeatures,
+    addManagedUser, updateManagedUser,
     getSupplierFleets, getPriceRequests, addPriceRequest, respondToPriceRequest, addPriceRequestComment,
     getNotifications, markNotificationRead, markAllNotificationsRead, getUnreadCount,
     getCmsArticles, getCmsArticle, saveCmsArticle, deleteCmsArticle, getActiveBanners, dismissBanner,

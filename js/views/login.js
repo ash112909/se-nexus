@@ -187,6 +187,12 @@ function render_login(el) {
       return;
     }
 
+    // Fleet admins go to the admin portal
+    if (user.role === 'fleet_admin') {
+      Router.navigate('fleet-admin');
+      return;
+    }
+
     // Supervisors start with no location filter (all locations view)
     if (user.role === 'supervisor') {
       Store.setCurrentLocation(null);
