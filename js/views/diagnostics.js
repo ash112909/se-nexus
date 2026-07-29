@@ -4,6 +4,65 @@ function render_diagnostics(el) {
     ? { type: 'wo', woId: Router.context.woId }
     : { type: 'none' };
 
+  // Session management
+  function renderSessions() {
+    const panel = document.getElementById('diag-sessions-panel');
+    if (!panel) return;
+    const sessions = Store.getDiagSessions();
+    const active = Store.getActiveDiagSession();
+    const activeId = active ? active.id : null;
+    panel.innerHTML = `
+      <div class="ds-header">
+        <button class="ds-new-btn" onclick="diagNewChat()"><i class="ti ti-plus" style="font-size:12px;"></i> New chat</button>
+      </div>
+      <div class="ds-list">
+        ${sessions.length === 0 ? `<div style="padding:12px 10px;font-size:11px;color:#6C7082;text-align:center;">No previous chats</div>` : ''}
+        ${sessions.map(s => `
+          <div class="ds-item ${s.id === activeId ? 'ds-item-active' : ''}" onclick="diagSwitchSession('${s.id}')">
+            <div class="ds-item-title">${escHtml(s.title)}</div>
+            <div class="ds-item-foot">
+              <span class="ds-item-time">${_relTime(s.createdAt)}</span>
+              <button class="ds-item-del" onclick="event.stopPropagation();diagDeleteSession('${s.id}')" title="Delete"><i class="ti ti-trash" style="font-size:10px;"></i></button>
+            </div>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  function _relTime(ts) {
+    const diff = Date.now() - ts;
+    if (diff < 60000) return 'just now';
+    if (diff < 3600000) return Math.floor(diff/60000) + 'm ago';
+    if (diff < 86400000) return Math.floor(diff/3600000) + 'h ago';
+    return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  window.diagNewChat = function() {
+    Store.createDiagSession('New chat');
+    renderSessions();
+    renderMessages();
+    renderContextBar();
+    document.getElementById('diag-chat-input')?.focus();
+  };
+
+  window.diagSwitchSession = function(id) {
+    Store.setActiveDiagSession(id);
+    renderSessions();
+    renderMessages();
+  };
+
+  window.diagDeleteSession = function(id) {
+    const sessions = Store.getDiagSessions();
+    if (sessions.length <= 1 && sessions[0]?.id === id) {
+      Store.deleteDiagSession(id);
+      renderSessions();
+      renderMessages();
+      return;
+    }
+    Store.deleteDiagSession(id);
+    renderSessions();
+    renderMessages();
+  };
+
   // Cart: [{ partNo, qty, desc, price }]
   let _diagCart = [];
   let _cartOpen = false;
@@ -294,6 +353,7 @@ function render_diagnostics(el) {
     if (!text) return;
     Store.addDiagnosticMessage({ role: 'user', text, ctx: Object.assign({}, _ctx) });
     inp.value = '';
+    renderSessions();
     renderMessages();
     setTimeout(function() {
       const resp = diagGenerateResponse(text, _ctx);
@@ -374,67 +434,38 @@ function render_diagnostics(el) {
 
   // ── WO flows ──────────────────────────────────────────────────────────────
   window.diagCreateWO = function() {
-    const machines = ['Skyjack SJIII 3219 (SJ3219-00847)','Cat 320 Excavator','Toyota 8FGU25'];
-    const priorities = ['low','normal','high','critical'];
-    Modal.show({
-      title: 'Create work order from cart',
-      body: `<div style="display:flex;flex-direction:column;gap:14px;">
-        <div>
-          <label class="modal-label">Machine</label>
-          <select id="diag-wo-machine" class="modal-select">
-            ${machines.map(m=>`<option value="${m}" ${m.startsWith('Skyjack')?'selected':''}>${m}</option>`).join('')}
-          </select>
-        </div>
-        <div>
-          <label class="modal-label">Issue description</label>
-          <textarea id="diag-wo-desc" class="modal-textarea" rows="3" placeholder="Briefly describe the fault or work needed…"></textarea>
-        </div>
-        <div>
-          <label class="modal-label">Priority</label>
-          <select id="diag-wo-priority" class="modal-select">
-            ${priorities.map(p=>`<option value="${p}" ${p==='high'?'selected':''}>${p.charAt(0).toUpperCase()+p.slice(1)}</option>`).join('')}
-          </select>
-        </div>
-        <div style="background:#F5F2EE;border-radius:8px;padding:10px 12px;font-size:12px;color:#7A7F8E;">
-          <strong style="color:#3A3D4A;">Parts to include (${_diagCart.length}):</strong><br>
-          ${_diagCart.map(i=>`${i.partNo} ×${i.qty}`).join(', ')}
-        </div>
-      </div>
-      <style>
-        .modal-label{font-size:11px;font-weight:600;color:#5C6070;display:block;margin-bottom:4px;}
-        .modal-select{width:100%;padding:8px 10px;border:1px solid #E2DDD8;border-radius:8px;font-size:13px;font-family:inherit;background:#FAFAF8;outline:none;}
-        .modal-textarea{width:100%;padding:8px 10px;border:1px solid #E2DDD8;border-radius:8px;font-size:13px;font-family:inherit;background:#FAFAF8;outline:none;resize:vertical;box-sizing:border-box;}
-      </style>`,
-      actions: [
-        { label: 'Cancel', onClick: () => Modal.close() },
-        { label: 'Create Work Order', primary: true, onClick: () => {
-          const machine = document.getElementById('diag-wo-machine').value;
-          const desc    = document.getElementById('diag-wo-desc').value.trim() || 'Diagnostic finding from AI assistant';
-          const priority= document.getElementById('diag-wo-priority').value;
-          const newWO = Store.addWorkOrder({
-            machine, priority, description: desc,
-            cart: _diagCart.map(i => ({ partNo: i.partNo, qty: i.qty, desc: i.desc, price: i.price })),
-          });
-          Modal.close();
-          _diagCart = [];
-          _cartOpen = false;
-          renderCart();
-          renderCartBadge();
-          renderMessages();
-          Modal.show({
-            title: 'Work order created',
-            body: `<div style="text-align:center;padding:12px 0;">
-              <div style="font-size:28px;margin-bottom:8px;">✓</div>
-              <div style="font-size:14px;font-weight:600;margin-bottom:4px;">Work Order #${newWO.id} created</div>
-              <div style="font-size:13px;color:#7A7F8E;">${machine} · ${priority.charAt(0).toUpperCase()+priority.slice(1)} priority</div>
-            </div>`,
-            actions: [
-              { label: 'Close', onClick: () => Modal.close() },
-              { label: 'View order', primary: true, onClick: () => { Modal.close(); sendPrompt('Open orders list'); } }
-            ]
-          });
-        }}
-      ]
+    if (typeof window.openNewWOModal !== 'function') {
+      Modal.show({ title: 'Error', body: '<p style="font-size:13px;color:#7A7F8E;">Work order form not available. Please navigate to Orders first.</p>',
+        actions: [{ label: 'Close', onClick: () => Modal.close() }] });
+      return;
+    }
+    const cartSnapshot = _diagCart.map(i => ({ partNo: i.partNo, qty: i.qty, desc: i.desc, price: i.price }));
+    window.openNewWOModal({
+      asset: 'FL-094',
+      make: 'Skyjack',
+      model: 'SJIII 3219',
+      serial: 'SJ3219-00847',
+      issue: 'Diagnostic finding from AI assistant',
+      cart: cartSnapshot,
+      onCreated: function(newWO) {
+        _diagCart = [];
+        _cartOpen = false;
+        renderCart();
+        renderCartBadge();
+        renderMessages();
+        Modal.show({
+          title: 'Work order created',
+          body: `<div style="text-align:center;padding:12px 0;">
+            <div style="font-size:32px;margin-bottom:8px;color:#15803D;">✓</div>
+            <div style="font-size:14px;font-weight:600;color:#111318;margin-bottom:4px;">Work Order #${newWO.id} created</div>
+            <div style="font-size:13px;color:#7A7F8E;">Skyjack SJIII 3219 · parts attached</div>
+          </div>`,
+          actions: [
+            { label: 'Close', onClick: () => Modal.close() },
+            { label: 'View orders', primary: true, onClick: () => { Modal.close(); sendPrompt('Open orders list'); } }
+          ]
+        });
+      }
     });
   };
 
@@ -533,6 +564,22 @@ function render_diagnostics(el) {
 /* ── Diagnostic layout ──────────────────────────────────────── */
 .diag-layout{flex:1;display:flex;min-height:0;overflow:hidden;}
 .diag-main{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
+/* Sessions sidebar */
+#diag-sessions-panel{width:210px;flex-shrink:0;border-right:0.5px solid #252525;background:#141418;display:flex;flex-direction:column;overflow:hidden;}
+.ds-header{padding:10px 10px 8px;border-bottom:0.5px solid #252525;flex-shrink:0;}
+.ds-new-btn{width:100%;background:#2A2A32;border:0.5px solid #3C4052;border-radius:7px;padding:7px 10px;font-size:12px;font-weight:600;color:#C8CADF;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;}
+.ds-new-btn:hover{background:#353545;color:#FFF;}
+.ds-list{flex:1;overflow-y:auto;padding:6px 6px;}
+.ds-item{padding:8px 10px;border-radius:7px;cursor:pointer;margin-bottom:2px;}
+.ds-item:hover{background:#1E1E28;}
+.ds-item-active{background:#1E1E28 !important;border:0.5px solid #3C4052;}
+.ds-item-title{font-size:11.5px;color:#C8CADF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;}
+.ds-item-active .ds-item-title{color:#FFF;}
+.ds-item-foot{display:flex;align-items:center;justify-content:space-between;margin-top:3px;}
+.ds-item-time{font-size:10px;color:#6C7082;}
+.ds-item-del{background:none;border:none;color:#6C7082;cursor:pointer;padding:0;display:none;align-items:center;justify-content:center;width:18px;height:18px;border-radius:3px;}
+.ds-item:hover .ds-item-del,.ds-item-active .ds-item-del{display:flex;}
+.ds-item-del:hover{background:#2A1010;color:#F87171;}
 /* Context bar */
 .diag-ctx-strip{background:#1A1A1A;padding:9px 22px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #252525;flex-shrink:0;}
 .ctx-active{display:flex;align-items:center;gap:7px;padding:5px 12px;border-radius:8px;border:1px solid;flex:1;}
@@ -639,16 +686,17 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
       ${buildTopbarRight()}
     </div>
     <div class="diag-ctx-strip" id="diag-ctx-bar"></div>
-    <div class="diag-toolbar">
-      <button class="diag-clear-btn" id="diag-clear-btn"><i class="ti ti-trash" style="font-size:12px;"></i> Clear history</button>
-      <button class="diag-cart-btn" id="diag-cart-btn" onclick="diagToggleCart()" style="display:none;">
-        <i class="ti ti-shopping-cart" style="font-size:13px;"></i>
-        Cart <span class="cart-badge">0</span>
-      </button>
-      <span style="font-size:11px;color:#9CA3AF;margin-left:auto;">Skyjack SJIII 3219 · SmartEquip AI</span>
-    </div>
     <div class="diag-layout">
+      <div id="diag-sessions-panel"></div>
       <div class="diag-main">
+        <div class="diag-toolbar">
+          <button class="diag-clear-btn" id="diag-clear-btn"><i class="ti ti-trash" style="font-size:12px;"></i> Clear chat</button>
+          <button class="diag-cart-btn" id="diag-cart-btn" onclick="diagToggleCart()" style="display:none;">
+            <i class="ti ti-shopping-cart" style="font-size:13px;"></i>
+            Cart <span class="cart-badge">0</span>
+          </button>
+          <span style="font-size:11px;color:#9CA3AF;margin-left:auto;">Skyjack SJIII 3219 · SmartEquip AI</span>
+        </div>
         <div class="chat-area" id="diag-chat-area"></div>
         <div class="input-area">
           <div class="input-row">
@@ -672,6 +720,7 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
 </div>`;
 
   renderContextBar();
+  renderSessions();
   renderMessages();
   renderCartBadge();
 
@@ -680,9 +729,10 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   });
   document.getElementById('diag-clear-btn').addEventListener('click', function() {
-    Modal.confirm('Clear all diagnostic history?', function() {
+    Modal.confirm('Clear this chat?', function() {
       Store.clearDiagnosticHistory();
       renderMessages();
+      renderSessions();
     });
   });
 }

@@ -402,7 +402,8 @@ const Store = (() => {
       },
     ],
     cart: [],
-    diagnosticHistory: [],
+    diagSessions: [],
+    activeDiagSessionId: null,
     parts: DEFAULT_PARTS,
     manuals: DEFAULT_MANUALS,
   };
@@ -738,10 +739,53 @@ const Store = (() => {
     return order;
   }
 
-  // --- Diagnostics ---
-  function addDiagnosticMessage(msg) { _data.diagnosticHistory.push(msg); save(_data); }
-  function getDiagnosticHistory() { return _data.diagnosticHistory; }
-  function clearDiagnosticHistory() { _data.diagnosticHistory = []; save(_data); }
+  // --- Diagnostics sessions ---
+  function _ensureSessions() {
+    if (!Array.isArray(_data.diagSessions)) _data.diagSessions = [];
+  }
+  function createDiagSession(title) {
+    _ensureSessions();
+    const id = 'ds-' + Date.now();
+    const session = { id, title: title || 'New chat', createdAt: Date.now(), messages: [] };
+    _data.diagSessions.unshift(session);
+    _data.activeDiagSessionId = id;
+    save(_data);
+    return session;
+  }
+  function getDiagSessions() { _ensureSessions(); return _data.diagSessions; }
+  function getActiveDiagSession() {
+    _ensureSessions();
+    return _data.diagSessions.find(s => s.id === _data.activeDiagSessionId) || null;
+  }
+  function setActiveDiagSession(id) { _data.activeDiagSessionId = id; save(_data); }
+  function renameDiagSession(id, title) {
+    const s = _data.diagSessions.find(x => x.id === id);
+    if (s) { s.title = title; save(_data); }
+  }
+  function deleteDiagSession(id) {
+    _data.diagSessions = _data.diagSessions.filter(s => s.id !== id);
+    if (_data.activeDiagSessionId === id) _data.activeDiagSessionId = _data.diagSessions[0]?.id || null;
+    save(_data);
+  }
+  function addDiagnosticMessage(msg) {
+    _ensureSessions();
+    let session = getActiveDiagSession();
+    if (!session) session = createDiagSession('New chat');
+    session.messages.push(msg);
+    // Auto-title from first user message
+    if (msg.role === 'user' && session.title === 'New chat') {
+      session.title = msg.text.length > 40 ? msg.text.slice(0, 40) + '…' : msg.text;
+    }
+    save(_data);
+  }
+  function getDiagnosticHistory() {
+    const s = getActiveDiagSession();
+    return s ? s.messages : [];
+  }
+  function clearDiagnosticHistory() {
+    const s = getActiveDiagSession();
+    if (s) { s.messages = []; save(_data); }
+  }
 
   // --- Parts ---
   function getParts(query, category) {
@@ -1189,6 +1233,8 @@ const Store = (() => {
     getWoCart, addToWoCart, removeFromWoCart, updateWoCartQty, submitWoCart,
     swapWoCartItem, setWoCartItemSource, setWoCartItemSources, submitWoCartItems,
     addDiagnosticMessage, getDiagnosticHistory, clearDiagnosticHistory,
+    createDiagSession, getDiagSessions, getActiveDiagSession, setActiveDiagSession,
+    renameDiagSession, deleteDiagSession,
     getParts, getManuals,
     getUsers, authenticate, setCurrentUser, getCurrentUser, logout,
     getLocations, getCurrentLocation, setCurrentLocation,
