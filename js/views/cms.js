@@ -64,7 +64,9 @@ const AI_REWRITES = {
 
 function render_cms(el) {
   const _user = Store.getCurrentUser();
-  if (!_user || _user.role !== 'supervisor') {
+  const _feat = (_user && Store.getEffectiveFeatures) ? Store.getEffectiveFeatures(_user.id) : {};
+  const _canCms = 'cms' in _feat ? _feat.cms : _user?.role === 'supervisor';
+  if (!_user || !_canCms) {
     el.innerHTML = `<div class="shell">${buildSidebar('cms')}<div class="main"><div style="padding:60px;text-align:center;color:#9CA3AF;"><i class="ti ti-lock" style="font-size:32px;display:block;margin-bottom:12px;"></i>Access restricted.</div></div></div>`;
     return;
   }

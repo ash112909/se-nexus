@@ -90,6 +90,18 @@ function buildSidebar(activeItem, opts) {
   // ── Fleet sidebar (mechanic / supervisor) ─────────────────────────────────
   const isSupervisor = role === 'supervisor';
   const locName      = loc ? loc.name : 'Mid-County Rental';
+
+  // Resolve effective feature access for this user
+  const _feat = (user && typeof Store !== 'undefined' && Store.getEffectiveFeatures)
+    ? Store.getEffectiveFeatures(user.id)
+    : {};
+  const _can = (id) => {
+    // If feature is explicitly in the map, respect it; otherwise fall back to role defaults
+    if (id in _feat) return _feat[id];
+    if (id === 'analytics' || id === 'cms' || id === 'approvals') return isSupervisor;
+    return true; // all other features on by default
+  };
+
   return `
   <div class="sb-wrap${wrapCls}">
   <div class="sidebar${pinCls}">
@@ -102,19 +114,17 @@ function buildSidebar(activeItem, opts) {
       <div class="sb-item ${activeItem==='home'?'active':''}" onclick="Router.navigate('home')"><i class="ti ti-home"></i><span class="sb-lbl"> Home</span></div>
       <div class="sb-item ${activeItem==='dashboard'?'active':''}" onclick="sendPrompt('Go back to dashboard')"><i class="ti ti-layout-dashboard"></i><span class="sb-lbl"> Dashboard</span></div>
       <div class="sb-item ${activeItem==='wo'?'active':''}" onclick="sendPrompt('Open orders list')"><i class="ti ti-clipboard-list"></i><span class="sb-lbl"> Orders <span class="sb-badge">2</span></span></div>
-      <div class="sb-item ${activeItem==='order-history'?'active':''}" onclick="sendPrompt('Open order history')"><i class="ti ti-history"></i><span class="sb-lbl"> Order history</span></div>
-      ${isSupervisor ? `
-      <div class="sb-item ${activeItem==='approvals'?'active':''}" onclick="sendPrompt('Open approvals')"><i class="ti ti-circle-check"></i><span class="sb-lbl"> Approvals</span></div>
-      <div class="sb-item ${activeItem==='analytics'?'active':''}" onclick="sendPrompt('Open analytics')"><i class="ti ti-chart-bar"></i><span class="sb-lbl"> Analytics</span></div>
-      <div class="sb-item ${activeItem==='cms'?'active':''}" onclick="Router.navigate('cms')"><i class="ti ti-pencil"></i><span class="sb-lbl"> Content mgmt</span></div>
-      ` : ''}
+      ${_can('order_history') ? `<div class="sb-item ${activeItem==='order-history'?'active':''}" onclick="sendPrompt('Open order history')"><i class="ti ti-history"></i><span class="sb-lbl"> Order history</span></div>` : ''}
+      ${_can('approvals') ? `<div class="sb-item ${activeItem==='approvals'?'active':''}" onclick="sendPrompt('Open approvals')"><i class="ti ti-circle-check"></i><span class="sb-lbl"> Approvals</span></div>` : ''}
+      ${_can('analytics') ? `<div class="sb-item ${activeItem==='analytics'?'active':''}" onclick="sendPrompt('Open analytics')"><i class="ti ti-chart-bar"></i><span class="sb-lbl"> Analytics</span></div>` : ''}
+      ${_can('cms') ? `<div class="sb-item ${activeItem==='cms'?'active':''}" onclick="Router.navigate('cms')"><i class="ti ti-pencil"></i><span class="sb-lbl"> Content mgmt</span></div>` : ''}
       <div class="sb-section-label">Parts</div>
       <div class="sb-item ${activeItem==='parts'?'active':''}" onclick="sendPrompt('Open Parts Search scoped to WO #100094, Skyjack SJIII 3219 — diagram view, hydraulic lift cylinder')"><i class="ti ti-search"></i><span class="sb-lbl"> Search parts</span></div>
-      <div class="sb-item ${activeItem==='recommended'?'active':''}" onclick="sendPrompt('Open recommended parts')"><i class="ti ti-star"></i><span class="sb-lbl"> Recommended</span></div>
+      ${_can('recommended') ? `<div class="sb-item ${activeItem==='recommended'?'active':''}" onclick="sendPrompt('Open recommended parts')"><i class="ti ti-star"></i><span class="sb-lbl"> Recommended</span></div>` : ''}
       <div class="sb-section-label">Knowledge</div>
-      <div class="sb-item ${activeItem==='manuals'?'active':''}" onclick="sendPrompt('Open manuals and docs')"><i class="ti ti-book"></i><span class="sb-lbl"> Manuals &amp; docs</span></div>
-      <div class="sb-item ${activeItem==='diagnostics'?'active':''}" onclick="sendPrompt('Open diagnostic assistant')"><i class="ti ti-tool"></i><span class="sb-lbl"> Diagnostics</span></div>
-      <div class="sb-item ${activeItem==='news'?'active':''}" onclick="sendPrompt('Open news and updates')"><i class="ti ti-news"></i><span class="sb-lbl"> News &amp; updates</span></div>
+      ${_can('manuals') ? `<div class="sb-item ${activeItem==='manuals'?'active':''}" onclick="sendPrompt('Open manuals and docs')"><i class="ti ti-book"></i><span class="sb-lbl"> Manuals &amp; docs</span></div>` : ''}
+      ${_can('diagnostics') ? `<div class="sb-item ${activeItem==='diagnostics'?'active':''}" onclick="sendPrompt('Open diagnostic assistant')"><i class="ti ti-tool"></i><span class="sb-lbl"> Diagnostics</span></div>` : ''}
+      ${_can('news') ? `<div class="sb-item ${activeItem==='news'?'active':''}" onclick="sendPrompt('Open news and updates')"><i class="ti ti-news"></i><span class="sb-lbl"> News &amp; updates</span></div>` : ''}
     </div>
     <div class="sb-pin-row" id="sb-pin-btn"><i class="ti ${pinIcon}"></i><span class="sb-pin-label">${pinLabel}</span></div>
   </div>

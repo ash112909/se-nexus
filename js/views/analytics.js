@@ -4,7 +4,9 @@ let _anLocs = null; // null = all; Set otherwise
 
 function render_analytics(el) {
   const _user = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
-  if (!_user || _user.role !== 'supervisor') {
+  const _feat = (_user && Store.getEffectiveFeatures) ? Store.getEffectiveFeatures(_user.id) : {};
+  const _canAnalytics = 'analytics' in _feat ? _feat.analytics : _user?.role === 'supervisor';
+  if (!_user || !_canAnalytics) {
     el.innerHTML = `<div class="shell">${buildSidebar('analytics')}<div class="main"><div style="padding:60px;text-align:center;color:#9CA3AF;font-size:14px;"><i class="ti ti-lock" style="font-size:32px;display:block;margin-bottom:12px;"></i>You don't have access to Analytics.</div></div></div>`;
     return;
   }
