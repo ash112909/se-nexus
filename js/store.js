@@ -488,6 +488,19 @@ const Store = (() => {
     return wo;
   }
 
+  function addPartsToWorkOrder(id, parts) {
+    const wo = getWorkOrder(id);
+    if (!wo) return null;
+    if (!wo.cart) wo.cart = [];
+    for (const p of parts) {
+      const existing = wo.cart.find(i => i.partNo === p.partNo);
+      if (existing) existing.qty = (existing.qty || 1) + p.qty;
+      else wo.cart.push(Object.assign({}, p));
+    }
+    save(_data);
+    return wo;
+  }
+
   function updateWorkOrder(id, changes) {
     const wo = getWorkOrder(id);
     if (!wo) return null;
@@ -1170,7 +1183,7 @@ const Store = (() => {
   }
 
   return {
-    getWorkOrders, getWorkOrder, addWorkOrder, updateWorkOrder, addWoNote, closeWorkOrder,
+    getWorkOrders, getWorkOrder, addWorkOrder, addPartsToWorkOrder, updateWorkOrder, addWoNote, closeWorkOrder,
     getOrders, addOrder, updateOrder,
     getCart, addToCart, removeFromCart, updateCartQty, clearCart, submitCart,
     getWoCart, addToWoCart, removeFromWoCart, updateWoCartQty, submitWoCart,
