@@ -15,11 +15,9 @@ function render_fleet_admin(el) {
 
   el.innerHTML = `
 <style>
-.fa-shell { display:flex; height:100vh; overflow:hidden; }
-.fa-main  { display:flex; flex-direction:column; flex:1; overflow:hidden; min-width:0; }
-.fa-topbar { display:flex; align-items:center; justify-content:space-between; padding:0 24px; height:52px; background:#fff; border-bottom:1px solid #E8E4DF; flex-shrink:0; }
-.fa-topbar-title { font-size:15px; font-weight:700; color:#111318; }
 .fa-content { flex:1; overflow-y:auto; padding:28px; }
+
+/* ── remove custom shell overrides — use shared .shell/.main/.topbar ── */
 
 /* ── KPI tiles ── */
 .fa-kpi-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; margin-bottom:28px; }
@@ -56,6 +54,9 @@ function render_fleet_admin(el) {
 .fa-feat-label { font-size:13px; font-weight:600; color:#111318; display:flex; align-items:center; gap:6px; }
 .fa-feat-desc { font-size:12px; color:#9CA3AF; }
 .fa-override-note { font-size:11px; color:#534AB7; margin-top:3px; }
+
+/* ── Topbar title ── */
+.fa-topbar-title { font-size:13px; font-weight:500; color:#FFFFFF; }
 
 /* ── Toggle switch ── */
 .fa-toggle { position:relative; width:40px; height:22px; flex-shrink:0; }
@@ -111,11 +112,13 @@ function render_fleet_admin(el) {
 .fa-btn-danger:hover { background:#FEF2F2; }
 </style>
 
-<div class="fa-shell">
+<div class="shell">
   ${buildSidebar('fa-home')}
-  <div class="fa-main">
-    <div class="fa-topbar">
-      <span class="fa-topbar-title" id="fa-topbar-title">Home</span>
+  <div class="main" style="display:flex;flex-direction:column;overflow:hidden;">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
+        <span class="fa-topbar-title" id="fa-topbar-title">Home</span>
+      </div>
       ${buildTopbarRight()}
     </div>
     <div class="fa-content" id="fa-content"></div>
@@ -129,7 +132,7 @@ function render_fleet_admin(el) {
       item.classList.toggle('active', item.dataset.faTab === tab);
     });
     const contentEl = document.getElementById('fa-content');
-    if (contentEl) contentEl.style.cssText = 'flex:1;overflow-y:auto;padding:28px;';
+    if (contentEl) contentEl.style.cssText = 'flex:1;overflow-y:auto;padding:28px;box-sizing:border-box;';
     if (tab === 'home')      renderHome();
     if (tab === 'users')     renderUsers();
     if (tab === 'features')  renderFeatures();
