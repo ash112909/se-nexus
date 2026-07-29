@@ -103,3 +103,16 @@ body[data-sb-pinned] .sb-lbl, body[data-sb-pinned] .sb-pin-label { opacity: 1; p
 .up-panel-action:hover { background:#FFF5F5; color:#C0392B; }
 .up-panel-action i { font-size:14px; }
 .oem-badge { background: #E1F5EE; color: #0F6E56; font-size: 9px; font-weight: 700; border-radius: 3px; padding: 1px 4px; }
+/* ── Modal form styles (used across WO creation, diagnostics, etc.) ── */
+.modal-form-field { margin-bottom: 14px; }
+.modal-form-label { font-size: 12px; font-weight: 600; color: #5A5F6E; margin-bottom: 5px; display: block; }
+.modal-form-label .lbl-opt { font-weight: 400; color: #9CA3AF; }
+.lbl-opt { font-weight: 400; color: #9CA3AF; }
+.modal-form-input { width: 100%; height: 36px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; box-sizing: border-box; }
+.modal-form-input:focus { border-color: #F5A623; }
+.modal-form-select { width: 100%; height: 36px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; cursor: pointer; box-sizing: border-box; }
+.modal-field-error { font-size: 11px; color: #A32D2D; margin-top: 3px; display: none; }
+.modal-form-hint { font-size: 11px; color: #9CA3AF; margin-top: 3px; }
+.nwo-autofill-banner { font-size: 11px; color: #0F6E56; background: #E1F5EE; border-radius: 6px; padding: 5px 9px; margin-top: 4px; display: none; }
+.wol-type-pick-card { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 20px 14px; background: #FAFAF9; border: 1.5px solid #E8E4DF; border-radius: 12px; cursor: pointer; transition: border-color 0.12s, background 0.12s; font-family: inherit; width: 100%; }
+.wol-type-pick-card:hover { border-color: #F5A623; background: #FFFBF2; }
