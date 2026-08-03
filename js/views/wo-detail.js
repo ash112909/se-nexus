@@ -318,8 +318,8 @@ function render_wo_detail(el) {
 .wo-field-label { font-size: 11px; color: #9CA3AF; margin-bottom: 2px; }
 .wo-field-value { font-size: 13px; font-weight: 500; color: #111318; }
 .warranty-badge { display: inline-flex; align-items: center; gap: 5px; background: #E1F5EE; border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 600; color: #0F6E56; position: relative; cursor: default; }
-.warranty-badge .wb-tip { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #1E1E1E; color: #FFFFFF; font-size: 12px; font-weight: 400; border-radius: 8px; padding: 8px 12px; white-space: nowrap; pointer-events: none; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
-.warranty-badge .wb-tip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #1E1E1E; }
+.warranty-badge .wb-tip { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #3AAA35; color: #FFFFFF; font-size: 12px; font-weight: 400; border-radius: 8px; padding: 8px 12px; white-space: nowrap; pointer-events: none; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
+.warranty-badge .wb-tip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #3AAA35; }
 .warranty-badge:hover .wb-tip { display: block; }
 /* Cart */
 .cart-section { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
@@ -354,7 +354,7 @@ function render_wo_detail(el) {
 .ci-warn { color: #BA7517; }
 .ci-err { color: #A32D2D; }
 /* Fixed-position tooltip — appended to body so it escapes overflow:hidden */
-#wod-float-tip { position: fixed; background: #1E1E1E; color: #FFFFFF; font-size: 11px; font-weight: 400; border-radius: 7px; padding: 6px 10px; white-space: nowrap; pointer-events: none; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,.25); display: none; }
+#wod-float-tip { position: fixed; background: #3AAA35; color: #FFFFFF; font-size: 11px; font-weight: 400; border-radius: 7px; padding: 6px 10px; white-space: nowrap; pointer-events: none; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,.25); display: none; }
 /* Part # cell */
 .ci-partnum { font-family: 'SF Mono','Consolas',monospace; font-size: 11px; color: #3A3D4A; font-weight: 600; }
 .ci-vendor-line { font-size: 10px; color: #9CA3AF; margin-top: 2px; display: flex; align-items: center; gap: 4px; }

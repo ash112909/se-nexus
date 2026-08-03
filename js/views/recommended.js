@@ -251,7 +251,7 @@ function render_recommended(el) {
     + '.rec-page-hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px;}'
     + '.page-title{font-size:20px;font-weight:700;color:#111318;letter-spacing:-0.3px;}'
     + '.page-title-sub{font-size:13px;color:#7A7F8E;margin-top:3px;}'
-    + '.rec-cart-btn{display:none;align-items:center;gap:6px;background:#1E1E1E;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;flex-shrink:0;margin-top:2px;}'
+    + '.rec-cart-btn{display:none;align-items:center;gap:6px;background:#3AAA35;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;flex-shrink:0;margin-top:2px;}'
     + '.rec-cart-btn:hover{background:#111318;}'
     + '.rec-legend{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px;}'
     + '.rec-legend-item{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#7A7F8E;}'

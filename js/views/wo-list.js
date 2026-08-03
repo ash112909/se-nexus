@@ -148,14 +148,14 @@ function render_wo_list(el) {
 
   el.innerHTML = `
 <style>
-.topbar-search { flex: 1; max-width: 380px; height: 32px; background: #2A2A2A; border: 1px solid #333; border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 0 10px; color: #5C6070; font-size: 13px; cursor: text; }
+.topbar-search { flex: 1; max-width: 380px; height: 32px; background: #2D8528; border: 1px solid #2D8528; border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 0 10px; color: #5C6070; font-size: 13px; cursor: text; }
 .wol-content { flex: 1; padding: 28px 28px 40px; overflow-y: auto; }
 .wol-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
 .wol-title { font-size: 18px; font-weight: 700; color: #111318; letter-spacing: -0.3px; }
 .wol-subtitle { font-size: 13px; color: #7A7F8E; margin-top: 2px; }
 .wol-filters { display: flex; align-items: center; gap: 8px; }
 .wol-filter-pill { display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid #E2DDD8; background: #FFFFFF; color: #5A5F6E; transition: all 0.12s; user-select: none; }
-.wol-filter-pill.active { background: #1E1E1E; color: #FFFFFF; border-color: #1E1E1E; }
+.wol-filter-pill.active { background: #3AAA35; color: #FFFFFF; border-color: #3AAA35; }
 .wol-filter-pill:hover:not(.active) { border-color: #C8C3BC; }
 .wol-search { height: 34px; background: #FFFFFF; border: 1px solid #E2DDD8; border-radius: 8px; padding: 0 12px; font-size: 13px; font-family: inherit; color: #111318; outline: none; width: 200px; }
 .wol-search:focus { border-color: #00843D; }

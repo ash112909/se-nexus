@@ -415,7 +415,7 @@ function render_diagnostics(el) {
       fullscreen: true,
       body: '<style>'
         + '.pdf-viewer-wrap{display:flex;flex-direction:column;flex:1;overflow:hidden;}'
-        + '.pdf-viewer-toolbar{background:#1A1A1A;padding:8px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}'
+        + '.pdf-viewer-toolbar{background:#3AAA35;padding:8px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}'
         + '.pdf-viewer-meta{color:#9CA3AF;font-size:11px;flex:1;}'
         + '.pdf-frame{flex:1;border:none;background:#525659;width:100%;}'
         + '</style>'
@@ -424,7 +424,7 @@ function render_diagnostics(el) {
         + '<i class="ti ti-book" style="color:#9CA3AF;font-size:13px;flex-shrink:0;"></i>'
         + '<span class="pdf-viewer-meta">Skyjack SJIII Series Operating Manual (ANSI/CSA) · 93 pages</span>'
         + (manPage ? '<span style="font-size:11px;color:#00843D;display:flex;align-items:center;gap:4px;"><i class="ti ti-bookmark-filled" style="font-size:11px;"></i> Page ' + manPage + '</span>' : '')
-        + '<a href="' + pdfFile + '" download style="font-size:11px;color:#9CA3AF;background:#2A2A2A;border:0.5px solid #3C4052;border-radius:5px;padding:4px 10px;text-decoration:none;display:flex;align-items:center;gap:4px;flex-shrink:0;"><i class="ti ti-download" style="font-size:11px;"></i> Download</a>'
+        + '<a href="' + pdfFile + '" download style="font-size:11px;color:#9CA3AF;background:#2D8528;border:0.5px solid #3C4052;border-radius:5px;padding:4px 10px;text-decoration:none;display:flex;align-items:center;gap:4px;flex-shrink:0;"><i class="ti ti-download" style="font-size:11px;"></i> Download</a>'
         + '</div>'
         + '<iframe class="pdf-frame" src="' + pdfSrc + '" title="' + (title || 'Manual') + '"></iframe>'
         + '</div>',
@@ -565,30 +565,30 @@ function render_diagnostics(el) {
 .diag-layout{flex:1;display:flex;min-height:0;overflow:hidden;}
 .diag-main{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
 /* Sessions sidebar */
-#diag-sessions-panel{width:210px;flex-shrink:0;border-right:0.5px solid #252525;background:#141418;display:flex;flex-direction:column;overflow:hidden;}
-.ds-header{padding:10px 10px 8px;border-bottom:0.5px solid #252525;flex-shrink:0;}
-.ds-new-btn{width:100%;background:#2A2A32;border:0.5px solid #3C4052;border-radius:7px;padding:7px 10px;font-size:12px;font-weight:600;color:#C8CADF;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;}
+#diag-sessions-panel{width:210px;flex-shrink:0;border-right:0.5px solid #2D8528;background:#2D8528;display:flex;flex-direction:column;overflow:hidden;}
+.ds-header{padding:10px 10px 8px;border-bottom:0.5px solid #2D8528;flex-shrink:0;}
+.ds-new-btn{width:100%;background:#2D8528;border:0.5px solid rgba(255,255,255,0.25);border-radius:7px;padding:7px 10px;font-size:12px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;}
 .ds-new-btn:hover{background:#353545;color:#FFF;}
 .ds-list{flex:1;overflow-y:auto;padding:6px 6px;}
 .ds-item{padding:8px 10px;border-radius:7px;cursor:pointer;margin-bottom:2px;}
-.ds-item:hover{background:#1E1E28;}
-.ds-item-active{background:#1E1E28 !important;border:0.5px solid #3C4052;}
+.ds-item:hover{background:#2D8528;}
+.ds-item-active{background:#2D8528 !important;border:0.5px solid rgba(255,255,255,0.25);}
 .ds-item-title{font-size:11.5px;color:#C8CADF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;}
 .ds-item-active .ds-item-title{color:#FFF;}
 .ds-item-foot{display:flex;align-items:center;justify-content:space-between;margin-top:3px;}
-.ds-item-time{font-size:10px;color:#6C7082;}
-.ds-item-del{background:none;border:none;color:#6C7082;cursor:pointer;padding:0;display:none;align-items:center;justify-content:center;width:18px;height:18px;border-radius:3px;}
+.ds-item-time{font-size:10px;color:#C5EAC3;}
+.ds-item-del{background:none;border:none;color:#C5EAC3;cursor:pointer;padding:0;display:none;align-items:center;justify-content:center;width:18px;height:18px;border-radius:3px;}
 .ds-item:hover .ds-item-del,.ds-item-active .ds-item-del{display:flex;}
 .ds-item-del:hover{background:#2A1010;color:#F87171;}
 /* Context bar */
-.diag-ctx-strip{background:#1A1A1A;padding:9px 22px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #252525;flex-shrink:0;}
+.diag-ctx-strip{background:#3AAA35;padding:9px 22px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #2D8528;flex-shrink:0;}
 .ctx-active{display:flex;align-items:center;gap:7px;padding:5px 12px;border-radius:8px;border:1px solid;flex:1;}
 .ctx-active-label{font-size:12px;font-weight:600;flex:1;}
 .ctx-detail{font-size:11px;color:#8A8FA8;padding-left:6px;border-left:1px solid #3C4052;margin-left:2px;}
-.ctx-switch-btn{margin-left:auto;background:none;border:0.5px solid #3C4052;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:500;color:#8A8FA8;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;white-space:nowrap;}
-.ctx-switch-btn:hover{border-color:#6C7082;color:#FFF;}
-.ctx-clear-btn{width:26px;height:26px;background:none;border:0.5px solid #3C4052;border-radius:6px;color:#8A8FA8;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.ctx-clear-btn:hover{border-color:#6C7082;color:#FFF;}
+.ctx-switch-btn{margin-left:auto;background:none;border:0.5px solid rgba(255,255,255,0.3);border-radius:5px;padding:3px 9px;font-size:11px;font-weight:500;color:#DCEFD9;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;white-space:nowrap;}
+.ctx-switch-btn:hover{border-color:#FFFFFF;color:#FFF;}
+.ctx-clear-btn{width:26px;height:26px;background:none;border:0.5px solid rgba(255,255,255,0.3);border-radius:6px;color:#DCEFD9;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ctx-clear-btn:hover{border-color:#FFFFFF;color:#FFF;}
 /* Toolbar */
 .diag-toolbar{background:#FAFAF8;border-bottom:0.5px solid #E8E4DF;padding:7px 22px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .diag-clear-btn{font-size:11px;font-weight:500;color:#7A7F8E;background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 9px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;}
@@ -601,7 +601,7 @@ function render_diagnostics(el) {
 .msg-system{display:flex;align-items:center;gap:5px;font-size:11px;color:#9CA3AF;justify-content:center;padding:2px 0;}
 .msg-user{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
 .msg-ctx-pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;border:1px solid;}
-.msg-user-bubble{background:#1E1E1E;color:#FFF;border-radius:14px 14px 4px 14px;padding:11px 16px;max-width:60%;font-size:13px;line-height:1.5;}
+.msg-user-bubble{background:#3AAA35;color:#FFF;border-radius:14px 14px 4px 14px;padding:11px 16px;max-width:60%;font-size:13px;line-height:1.5;}
 .msg-ai{display:flex;gap:12px;align-items:flex-start;}
 .ai-avatar{width:32px;height:32px;background:#00843D;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#0D2E18;flex-shrink:0;margin-top:2px;}
 .ai-bubble{flex:1;min-width:0;}
