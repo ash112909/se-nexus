@@ -518,6 +518,7 @@ function render_diagnostics(el) {
   // ── Context switcher ──────────────────────────────────────────────────────
   window.diagSwitchContext = function() {
     const wos = Store.getWorkOrders('active');
+    const partsQ = _ctx.type === 'parts' ? (_ctx.query || '') : '';
     Modal.show({
       title: 'Switch context',
       body: `<div style="display:flex;flex-direction:column;gap:6px;">
@@ -525,11 +526,29 @@ function render_diagnostics(el) {
           <i class="ti ti-message-circle" style="color:#8A8FA8;font-size:14px;flex-shrink:0;"></i>
           <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:#111318;">General question</div><div style="font-size:11px;color:#9CA3AF;">No machine or WO attached</div></div>
         </div>
-        <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#9CA3AF;margin:8px 0 2px;">Orders</div>
-        ${wos.map(w=>`<div class="ctx-option ${_ctx.type==='wo'&&_ctx.woId===w.id?'selected':''}" onclick="diagSetCtx('wo',${w.id})">
+
+        <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#9CA3AF;margin:8px 0 2px;">Parts lookup</div>
+        <div class="ctx-option ${_ctx.type==='parts'?'selected parts-selected':''}" id="ctx-parts-opt" style="${_ctx.type==='parts'?'border-color:#7C6FF7;background:#F5F4FF;':''}">
+          <i class="ti ti-search" style="color:#7C6FF7;font-size:14px;flex-shrink:0;margin-top:2px;"></i>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:600;color:#111318;margin-bottom:5px;">Parts search context</div>
+            <input id="ctx-parts-query" type="text" placeholder="Part number or description…"
+              value="${escHtml(partsQ)}"
+              onclick="event.stopPropagation()"
+              style="width:100%;border:1px solid #E2DDD8;border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;color:#111318;"
+              onfocus="this.style.borderColor='#7C6FF7'"
+              onblur="this.style.borderColor='#E2DDD8'"/>
+            <div style="font-size:11px;color:#9CA3AF;margin-top:4px;">AI will focus answers on this part or category</div>
+          </div>
+          <button onclick="event.stopPropagation();var q=document.getElementById('ctx-parts-query').value.trim();if(q)diagSetCtx('parts',null,q);"
+            style="background:#7C6FF7;border:none;border-radius:6px;padding:5px 11px;font-size:11px;font-weight:600;color:#FFF;cursor:pointer;font-family:inherit;flex-shrink:0;">Set</button>
+        </div>
+
+        <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#9CA3AF;margin:8px 0 2px;">Work orders</div>
+        ${wos.length ? wos.map(w=>`<div class="ctx-option ${_ctx.type==='wo'&&_ctx.woId===w.id?'selected':''}" onclick="diagSetCtx('wo',${w.id})" ${_ctx.type==='wo'&&_ctx.woId===w.id?'style="border-color:#00843D;background:#E6F4EC;"':''}>
           <i class="ti ti-clipboard-list" style="color:#00843D;font-size:14px;flex-shrink:0;"></i>
           <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:#111318;">Order #${w.id} — ${w.machine}</div><div style="font-size:11px;color:#9CA3AF;">${w.asset||''} · ${w.status}</div></div>
-        </div>`).join('')}
+        </div>`).join('') : '<div style="font-size:12px;color:#9CA3AF;padding:8px 12px;">No active work orders</div>'}
       </div>
       <style>
         .ctx-option{display:flex;align-items:center;gap:10px;padding:10px 12px;border:0.5px solid #E8E4DF;border-radius:9px;cursor:pointer;transition:background .1s;}
@@ -540,10 +559,11 @@ function render_diagnostics(el) {
     });
   };
 
-  window.diagSetCtx = function(type, woId) {
+  window.diagSetCtx = function(type, woId, partsQuery) {
     const prev = ctxLabel(_ctx);
     if (type === 'none') _ctx = { type: 'none' };
     else if (type === 'wo') _ctx = { type: 'wo', woId };
+    else if (type === 'parts') _ctx = { type: 'parts', query: partsQuery || '' };
     const next = ctxLabel(_ctx);
     Modal.close();
     if (prev !== next) Store.addDiagnosticMessage({ role: 'system', text: `Context switched to: ${next}` });
