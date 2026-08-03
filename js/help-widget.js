@@ -63,18 +63,18 @@ const HelpWidget = (() => {
 /* ── Help Widget ── */
 #hw-fab { position:fixed; bottom:24px; right:24px; z-index:9000; width:52px; height:52px; border-radius:50%; background:#111318; color:#FFFFFF; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow:0 4px 18px rgba(0,0,0,.28); transition:transform .15s, background .15s; }
 #hw-fab:hover { background:#2A2D3A; transform:scale(1.07); }
-#hw-fab .hw-badge { position:absolute; top:2px; right:2px; width:16px; height:16px; background:#F5A623; border-radius:50%; font-size:9px; font-weight:700; color:#1A1200; display:flex; align-items:center; justify-content:center; border:2px solid #FFFFFF; display:none; }
+#hw-fab .hw-badge { position:absolute; top:2px; right:2px; width:16px; height:16px; background:#00843D; border-radius:50%; font-size:9px; font-weight:700; color:#0D2E18; display:flex; align-items:center; justify-content:center; border:2px solid #FFFFFF; display:none; }
 #hw-panel { position:fixed; bottom:88px; right:24px; z-index:9000; width:380px; max-width:calc(100vw - 32px); background:#FFFFFF; border-radius:16px; box-shadow:0 8px 40px rgba(0,0,0,.18); display:flex; flex-direction:column; overflow:hidden; transition:opacity .18s, transform .18s; transform-origin:bottom right; }
 #hw-panel.hw-hidden { opacity:0; pointer-events:none; transform:scale(.94) translateY(8px); }
 .hw-header { background:#111318; color:#FFFFFF; padding:14px 16px 12px; display:flex; align-items:center; gap:10px; flex-shrink:0; }
-.hw-header-icon { width:32px; height:32px; border-radius:9px; background:#F5A623; display:flex; align-items:center; justify-content:center; font-size:15px; color:#1A1200; flex-shrink:0; }
+.hw-header-icon { width:32px; height:32px; border-radius:9px; background:#00843D; display:flex; align-items:center; justify-content:center; font-size:15px; color:#0D2E18; flex-shrink:0; }
 .hw-header-title { font-size:14px; font-weight:700; flex:1; }
 .hw-header-sub { font-size:11px; color:#9CA3AF; margin-top:1px; }
 .hw-close-btn { background:none; border:none; color:#9CA3AF; font-size:18px; cursor:pointer; padding:2px; line-height:1; }
 .hw-close-btn:hover { color:#FFFFFF; }
 .hw-tabs { display:flex; border-bottom:1px solid #F0ECE8; flex-shrink:0; background:#FAFAF8; }
 .hw-tab { flex:1; padding:10px 6px; font-size:12px; font-weight:600; color:#7A7F8E; text-align:center; cursor:pointer; border-bottom:2px solid transparent; transition:all .15s; display:flex; align-items:center; justify-content:center; gap:5px; }
-.hw-tab.active { color:#111318; border-bottom-color:#F5A623; background:#FFFFFF; }
+.hw-tab.active { color:#111318; border-bottom-color:#00843D; background:#FFFFFF; }
 .hw-tab:hover:not(.active) { background:#F5F2EE; color:#3A3D4A; }
 .hw-body { flex:1; overflow:hidden; display:flex; flex-direction:column; min-height:0; }
 /* ── Chat ── */
@@ -99,14 +99,14 @@ const HelpWidget = (() => {
 @keyframes hw-bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
 .hw-chat-input-row { display:flex; gap:8px; padding:12px; border-top:0.5px solid #F0ECE8; flex-shrink:0; }
 .hw-chat-input { flex:1; height:36px; border:1px solid #E2DDD8; border-radius:9px; padding:0 12px; font-size:13px; font-family:inherit; color:#111318; outline:none; background:#FAFAF8; }
-.hw-chat-input:focus { border-color:#F5A623; background:#FFFFFF; }
+.hw-chat-input:focus { border-color:#00843D; background:#FFFFFF; }
 .hw-chat-send { width:36px; height:36px; border-radius:9px; background:#111318; color:#FFFFFF; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
 .hw-chat-send:hover { background:#2A2D3A; }
 /* ── Articles ── */
 .hw-articles-search-wrap { padding:12px; border-bottom:0.5px solid #F0ECE8; position:relative; flex-shrink:0; }
 .hw-articles-search-icon { position:absolute; left:22px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:14px; pointer-events:none; }
 .hw-articles-search { width:100%; height:34px; background:#F5F2EE; border:1px solid #E2DDD8; border-radius:8px; padding:0 10px 0 32px; font-size:12px; font-family:inherit; color:#111318; outline:none; }
-.hw-articles-search:focus { border-color:#F5A623; background:#FFFFFF; }
+.hw-articles-search:focus { border-color:#00843D; background:#FFFFFF; }
 .hw-articles-list { flex:1; overflow-y:auto; padding:8px; max-height:380px; }
 .hw-article-cat-label { font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#9CA3AF; padding:8px 8px 4px; }
 .hw-article-row { padding:9px 10px; border-radius:8px; cursor:pointer; border:0.5px solid transparent; margin-bottom:3px; }
@@ -125,11 +125,11 @@ const HelpWidget = (() => {
 .hw-ticket-field { margin-bottom:12px; }
 .hw-ticket-label { font-size:11px; font-weight:600; color:#5A5F6E; text-transform:uppercase; letter-spacing:.6px; margin-bottom:4px; display:block; }
 .hw-ticket-input { width:100%; height:34px; border:0.5px solid #E2DDD8; border-radius:8px; padding:0 10px; font-size:12px; font-family:inherit; color:#111318; outline:none; background:#FFFFFF; }
-.hw-ticket-input:focus { border-color:#F5A623; }
+.hw-ticket-input:focus { border-color:#00843D; }
 .hw-ticket-select { width:100%; height:34px; border:0.5px solid #E2DDD8; border-radius:8px; padding:0 10px; font-size:12px; font-family:inherit; color:#111318; outline:none; background:#FFFFFF; cursor:pointer; }
-.hw-ticket-select:focus { border-color:#F5A623; }
+.hw-ticket-select:focus { border-color:#00843D; }
 .hw-ticket-textarea { width:100%; min-height:90px; border:0.5px solid #E2DDD8; border-radius:8px; padding:8px 10px; font-size:12px; font-family:inherit; color:#111318; outline:none; resize:vertical; background:#FFFFFF; }
-.hw-ticket-textarea:focus { border-color:#F5A623; }
+.hw-ticket-textarea:focus { border-color:#00843D; }
 .hw-ticket-submit { width:100%; height:38px; background:#111318; color:#FFFFFF; border:none; border-radius:9px; font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px; margin-top:4px; }
 .hw-ticket-submit:hover { background:#2A2D3A; }
 .hw-ticket-success { text-align:center; padding:28px 20px; display:flex; flex-direction:column; align-items:center; gap:10px; }

@@ -23,7 +23,7 @@ function render_recommended(el) {
   };
 
   var REASON_STYLES = {
-    'wo':        { bg: '#FAEEDA', color: '#854F0B', border: '#F5A623' },
+    'wo':        { bg: '#E6F4EC', color: '#1B5E35', border: '#00843D' },
     'warranty':  { bg: '#EAF3DE', color: '#3B6D11', border: '#8DC751' },
     'scheduled': { bg: '#E6F1FB', color: '#185FA5', border: '#5DA0D6' },
     'wear':      { bg: '#FCEBEB', color: '#A32D2D', border: '#E87878' },
@@ -31,7 +31,7 @@ function render_recommended(el) {
 
   var CAT_META = {
     'Seals':       { icon: 'ti-circle-dashed', color: '#185FA5', bg: '#E6F1FB' },
-    'Hydraulic':   { icon: 'ti-droplet',        color: '#854F0B', bg: '#FAEEDA' },
+    'Hydraulic':   { icon: 'ti-droplet',        color: '#1B5E35', bg: '#E6F4EC' },
     'Electrical':  { icon: 'ti-bolt',           color: '#534AB7', bg: '#EEEDFE' },
     'Drive':       { icon: 'ti-engine',         color: '#3B6D11', bg: '#EAF3DE' },
     'Structure':   { icon: 'ti-building',       color: '#5A5F6E', bg: '#F0ECE8' },
@@ -96,7 +96,7 @@ function render_recommended(el) {
       title: 'No active order',
       body: '<div style="display:flex;flex-direction:column;gap:12px;">'
         + '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#FFF8EC;border:0.5px solid #F5C97A;border-radius:9px;">'
-        + '<i class="ti ti-alert-triangle" style="font-size:16px;color:#854F0B;flex-shrink:0;margin-top:1px;"></i>'
+        + '<i class="ti ti-alert-triangle" style="font-size:16px;color:#1B5E35;flex-shrink:0;margin-top:1px;"></i>'
         + '<div style="font-size:12px;color:#7A5510;line-height:1.5;"><strong>' + assetLabel + '</strong>' + (machineLabel !== assetLabel ? ' (' + machineLabel + ')' : '') + ' has no active order. Create one to track this part, or add to a general order.</div>'
         + '</div>'
         + '<div style="font-size:12px;font-weight:600;color:#3A3D4A;">Part: ' + part.description + ' <span style="color:#9CA3AF;font-weight:400;">· ' + part.partNum + ' · $' + part.price.toFixed(2) + '</span></div>'
@@ -146,7 +146,7 @@ function render_recommended(el) {
 
   function reasonHtml(partId) {
     var r = PART_REASONS[partId];
-    if (!r) return '<div class="part-card-reason"><i class="ti ti-sparkles" style="color:#854F0B;flex-shrink:0;margin-top:1px;"></i><span>Recommended for your fleet</span></div>';
+    if (!r) return '<div class="part-card-reason"><i class="ti ti-sparkles" style="color:#1B5E35;flex-shrink:0;margin-top:1px;"></i><span>Recommended for your fleet</span></div>';
     var s = REASON_STYLES[r.type] || REASON_STYLES['wo'];
     return '<div class="part-card-reason">'
       + '<span class="rec-reason-badge" style="background:' + s.bg + ';color:' + s.color + ';border-color:' + s.border + ';">'
@@ -166,7 +166,7 @@ function render_recommended(el) {
     } else {
       btn.style.display = 'flex';
       btn.innerHTML = '<i class="ti ti-shopping-cart" style="font-size:13px;"></i> View cart'
-        + '<span style="background:#F5A623;color:#1A1200;font-size:10px;font-weight:700;border-radius:999px;padding:1px 6px;margin-left:4px;">' + count + '</span>';
+        + '<span style="background:#00843D;color:#0D2E18;font-size:10px;font-weight:700;border-radius:999px;padding:1px 6px;margin-left:4px;">' + count + '</span>';
     }
   }
 
@@ -275,10 +275,10 @@ function render_recommended(el) {
     + '.part-card-avail{display:flex;align-items:center;gap:4px;font-size:11px;}'
     + '.avail-dot{width:6px;height:6px;border-radius:50%;}'
     + '.avail-dot.green{background:#639922;}.avail-dot.amber{background:#BA7517;}'
-    + '.avail-label.green{color:#3B6D11;}.avail-label.amber{color:#854F0B;}'
+    + '.avail-label.green{color:#3B6D11;}.avail-label.amber{color:#1B5E35;}'
     + '.in-cart-tag{background:#EAF3DE;color:#3B6D11;font-size:11px;font-weight:600;border-radius:5px;padding:5px 10px;display:inline-flex;align-items:center;gap:4px;}'
-    + '.add-cart-btn{background:#F5A623;border:none;border-radius:7px;padding:5px 12px;font-size:11px;font-weight:600;color:#1A1200;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;}'
-    + '.add-cart-btn:hover{background:#E8980F;}'
+    + '.add-cart-btn{background:#00843D;border:none;border-radius:7px;padding:5px 12px;font-size:11px;font-weight:600;color:#0D2E18;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;}'
+    + '.add-cart-btn:hover{background:#006830;}'
     + '</style>'
     + '<h2 class="sr-only">Recommended parts</h2>'
     + '<div class="shell">' + buildSidebar('recommended') + '<div class="main">'
@@ -293,7 +293,7 @@ function render_recommended(el) {
     + '<button class="rec-cart-btn" id="rec-cart-btn" onclick="recViewCart()"></button>'
     + '</div>'
     + '<div class="rec-legend">'
-    + '<span class="rec-legend-item"><span class="rec-legend-dot" style="background:#F5A623;"></span>Active WO</span>'
+    + '<span class="rec-legend-item"><span class="rec-legend-dot" style="background:#00843D;"></span>Active WO</span>'
     + '<span class="rec-legend-item"><span class="rec-legend-dot" style="background:#8DC751;"></span>Warranty</span>'
     + '<span class="rec-legend-item"><span class="rec-legend-dot" style="background:#5DA0D6;"></span>Scheduled PM</span>'
     + '<span class="rec-legend-item"><span class="rec-legend-dot" style="background:#E87878;"></span>Wear flag</span>'
@@ -309,9 +309,9 @@ function render_recommended(el) {
     var chip = document.createElement('div');
     chip.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:12px;';
     chip.innerHTML = '<span style="font-size:11px;color:#7A7F8E;">Filtered by:</span>'
-      + '<span style="display:inline-flex;align-items:center;gap:5px;background:#FAEEDA;border:0.5px solid #F5A623;border-radius:100px;padding:3px 10px;font-size:12px;font-weight:600;color:#854F0B;">'
+      + '<span style="display:inline-flex;align-items:center;gap:5px;background:#E6F4EC;border:0.5px solid #00843D;border-radius:100px;padding:3px 10px;font-size:12px;font-weight:600;color:#1B5E35;">'
       + '<i class="ti ti-building-store" style="font-size:11px;"></i>' + _vendorFilter
-      + '<button onclick="recClearVendor()" style="background:none;border:none;padding:0;margin-left:2px;cursor:pointer;color:#854F0B;font-size:14px;line-height:1;display:flex;align-items:center;" title="Remove filter">×</button>'
+      + '<button onclick="recClearVendor()" style="background:none;border:none;padding:0;margin-left:2px;cursor:pointer;color:#1B5E35;font-size:14px;line-height:1;display:flex;align-items:center;" title="Remove filter">×</button>'
       + '</span>';
     legend.parentNode.insertBefore(chip, legend);
   })();

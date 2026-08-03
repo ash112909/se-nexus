@@ -11,7 +11,7 @@ function render_search_results(el) {
     'Parts':           { icon: 'ti-package',        color: '#534AB7', bg: '#EEEDFE' },
     'Orders':          { icon: 'ti-clipboard-list',  color: '#0F6E56', bg: '#E1F5EE' },
     'Manuals':         { icon: 'ti-book',            color: '#185FA5', bg: '#E6F1FB' },
-    'Orders':          { icon: 'ti-receipt',         color: '#854F0B', bg: '#FAEEDA' },
+    'Orders':          { icon: 'ti-receipt',         color: '#1B5E35', bg: '#E6F4EC' },
     'News & Bulletins':{ icon: 'ti-news',            color: '#B91C1C', bg: '#FEE2E2' },
     'Pages':           { icon: 'ti-layout-dashboard', color: '#5B21B6', bg: '#EDE9FE' },
     'Knowledge Base':  { icon: 'ti-help-circle',     color: '#6B7280', bg: '#F3F4F6' },
@@ -89,7 +89,7 @@ function render_search_results(el) {
       badge: wo.status === 'active'
         ? { text: 'Active',    color: '#3B6D11', bg: '#EAF3DE' }
         : wo.status === 'pending'
-        ? { text: 'Pending',   color: '#854F0B', bg: '#FAEEDA' }
+        ? { text: 'Pending',   color: '#1B5E35', bg: '#E6F4EC' }
         : { text: wo.status,   color: '#5A5F6E', bg: '#F0ECE8' },
       action: () => Router.navigate('wo-detail', { woId: wo.id }),
     }));
@@ -116,7 +116,7 @@ function render_search_results(el) {
         ? { text: 'Delivered',   color: '#3B6D11', bg: '#EAF3DE' }
         : o.status === 'backordered'
         ? { text: 'Backordered', color: '#A32D2D', bg: '#FEE2E2' }
-        : { text: o.status,      color: '#854F0B', bg: '#FAEEDA' },
+        : { text: o.status,      color: '#1B5E35', bg: '#E6F4EC' },
       action: () => Router.navigate('order-history'),
     }));
 
@@ -173,16 +173,16 @@ function render_search_results(el) {
 .sr-section-label { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#B0AAA3; padding:12px 16px 6px; }
 .sr-filter-item { display:flex; align-items:center; gap:8px; padding:7px 16px; cursor:pointer; border-radius:0; border-left:3px solid transparent; font-size:13px; color:#5A5F6E; transition:all .12s; }
 .sr-filter-item:hover { background:#F5F2EE; color:#111318; }
-.sr-filter-item.active { background:#FAEEDA; color:#854F0B; font-weight:600; border-left-color:#F5A623; }
+.sr-filter-item.active { background:#E6F4EC; color:#1B5E35; font-weight:600; border-left-color:#00843D; }
 .sr-filter-icon { width:22px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
 .sr-filter-count { margin-left:auto; font-size:10px; font-weight:700; background:#F0ECE8; color:#7A7F8E; border-radius:10px; padding:1px 7px; }
-.sr-filter-item.active .sr-filter-count { background:#F5A623; color:#1A1200; }
+.sr-filter-item.active .sr-filter-count { background:#00843D; color:#0D2E18; }
 .sr-main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 .sr-topbar { background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; padding:14px 24px; flex-shrink:0; display:flex; align-items:center; gap:14px; }
 .sr-search-wrap { flex:1; max-width:580px; position:relative; }
 .sr-search-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:18px; pointer-events:none; }
 .sr-search-input { width:100%; height:42px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:11px; padding:0 14px 0 44px; font-size:15px; font-family:inherit; color:#111318; outline:none; }
-.sr-search-input:focus { border-color:#F5A623; background:#FFFFFF; }
+.sr-search-input:focus { border-color:#00843D; background:#FFFFFF; }
 .sr-search-input::placeholder { color:#B0AAA3; }
 .sr-clear-btn { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:#B0AAA3; font-size:16px; cursor:pointer; padding:2px; line-height:1; display:none; }
 .sr-clear-btn.visible { display:block; }

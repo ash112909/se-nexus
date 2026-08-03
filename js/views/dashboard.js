@@ -76,21 +76,21 @@ function render_dashboard(el) {
 .section-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #9CA3AF; margin-bottom: 10px; }
 .ai-strip { background: #1E1E1E; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 20px; cursor: pointer; }
 .ai-strip:hover { background: #262626; }
-.ai-icon { width: 36px; height: 36px; background: #F5A623; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; color: #1A1200; }
+.ai-icon { width: 36px; height: 36px; background: #00843D; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; color: #0D2E18; }
 .ai-text { flex: 1; }
 .ai-label { font-size: 13px; font-weight: 600; color: #FFFFFF; margin-bottom: 2px; }
 .ai-hint { font-size: 12px; color: #5C6070; }
-.ai-arrow { color: #F5A623; font-size: 18px; }
-.wo-active-card { background: #FFFFFF; border: 1.5px solid #F5A623; border-radius: 12px; padding: 16px 18px; margin-bottom: 8px; cursor: pointer; }
-.wo-active-card:hover { border-color: #E8980F; }
+.ai-arrow { color: #00843D; font-size: 18px; }
+.wo-active-card { background: #FFFFFF; border: 1.5px solid #00843D; border-radius: 12px; padding: 16px 18px; margin-bottom: 8px; cursor: pointer; }
+.wo-active-card:hover { border-color: #006830; }
 .wo-card { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; padding: 16px 18px; margin-bottom: 8px; cursor: pointer; }
 .wo-card:hover { border-color: #C8C3BC; }
 .wo-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 .pill { font-size: 11px; font-weight: 600; border-radius: 999px; padding: 3px 10px; }
-.pill-ordered { background: #FAEEDA; color: #854F0B; }
+.pill-ordered { background: #E6F4EC; color: #1B5E35; }
 .pill-open { background: #E6F1FB; color: #185FA5; }
 .pill-high { background: #FCEBEB; color: #A32D2D; }
-.pill-med { background: #FAEEDA; color: #854F0B; }
+.pill-med { background: #E6F4EC; color: #1B5E35; }
 .pill-low { background: #EAF3DE; color: #3B6D11; }
 .wo-num { font-size: 12px; color: #9CA3AF; font-weight: 500; }
 .wo-priority { margin-left: auto; }
@@ -107,8 +107,8 @@ function render_dashboard(el) {
 .wo-footer { display: flex; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 0.5px solid #F0ECE8; gap: 16px; flex-wrap: wrap; }
 .wo-stat { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #9CA3AF; }
 .wo-stat strong { color: #3A3D4A; font-weight: 600; }
-.wo-action-btn { margin-left: auto; background: #F5A623; border: none; border-radius: 7px; padding: 5px 13px; font-size: 12px; font-weight: 600; color: #1A1200; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: inherit; }
-.wo-action-btn:hover { background: #E8980F; }
+.wo-action-btn { margin-left: auto; background: #00843D; border: none; border-radius: 7px; padding: 5px 13px; font-size: 12px; font-weight: 600; color: #0D2E18; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: inherit; }
+.wo-action-btn:hover { background: #006830; }
 .wo-action-btn-ghost { margin-left: auto; background: none; border: 0.5px solid #E2DDD8; border-radius: 7px; padding: 5px 13px; font-size: 12px; font-weight: 500; color: #5A5F6E; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: inherit; }
 .wo-action-btn-ghost:hover { background: #F5F2EE; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
@@ -116,14 +116,14 @@ function render_dashboard(el) {
 .action-card { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; padding: 12px 14px; cursor: pointer; display: flex; flex-direction: column; gap: 5px; }
 .action-card:hover { border-color: #C8C3BC; }
 .action-card-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 15px; margin-bottom: 1px; }
-.icon-amber { background: #FAEEDA; color: #854F0B; }
+.icon-amber { background: #E6F4EC; color: #1B5E35; }
 .icon-blue { background: #E6F1FB; color: #185FA5; }
 .icon-purple { background: #EEEDFE; color: #534AB7; }
 .icon-green { background: #EAF3DE; color: #3B6D11; }
 .icon-teal { background: #E1F5EE; color: #0F6E56; }
 .action-card-title { font-size: 13px; font-weight: 600; color: #111318; }
 .action-card-sub { font-size: 12px; color: #9CA3AF; }
-.action-card-badge { margin-top: auto; display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: #854F0B; background: #FAEEDA; border-radius: 999px; padding: 2px 8px; width: fit-content; }
+.action-card-badge { margin-top: auto; display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: #1B5E35; background: #E6F4EC; border-radius: 999px; padding: 2px 8px; width: fit-content; }
 .notif-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
 .notif-item { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 10px; padding: 12px 14px; display: flex; align-items: flex-start; gap: 10px; }
 .notif-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; margin-top: 1px; }
@@ -131,7 +131,7 @@ function render_dashboard(el) {
 .notif-title { font-size: 13px; font-weight: 500; color: #111318; margin-bottom: 2px; }
 .notif-sub { font-size: 12px; color: #9CA3AF; }
 .notif-time { font-size: 11px; color: #C0BAB3; white-space: nowrap; }
-.notif-unread { width: 7px; height: 7px; background: #F5A623; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+.notif-unread { width: 7px; height: 7px; background: #00843D; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
 .news-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
 .news-item { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 10px; padding: 13px 14px; display: flex; align-items: flex-start; gap: 11px; cursor: pointer; transition: border-color 0.12s; }
 .news-item:hover { border-color: #C8C3BC; }

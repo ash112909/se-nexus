@@ -80,7 +80,7 @@ function render_wo_list(el) {
         <div class="wol-td">
           <span class="wol-wo-id">#${wo.id}</span>
           ${wo.externalId ? `<div style="font-size:10px;color:#9CA3AF;margin-top:2px;">${wo.externalId}</div>` : ''}
-          ${isWorkOrder(wo) ? '<div style="font-size:9px;font-weight:700;letter-spacing:.6px;color:#C8A04A;text-transform:uppercase;margin-top:1px;">WO</div>' : ''}
+          ${isWorkOrder(wo) ? '<div style="font-size:9px;font-weight:700;letter-spacing:.6px;color:#4A9A6A;text-transform:uppercase;margin-top:1px;">WO</div>' : ''}
         </div>
         <div class="wol-td">${typePill(wo.woType)}</div>
         <div class="wol-td">
@@ -158,9 +158,9 @@ function render_wo_list(el) {
 .wol-filter-pill.active { background: #1E1E1E; color: #FFFFFF; border-color: #1E1E1E; }
 .wol-filter-pill:hover:not(.active) { border-color: #C8C3BC; }
 .wol-search { height: 34px; background: #FFFFFF; border: 1px solid #E2DDD8; border-radius: 8px; padding: 0 12px; font-size: 13px; font-family: inherit; color: #111318; outline: none; width: 200px; }
-.wol-search:focus { border-color: #F5A623; }
-.wol-new-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: #F5A623; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: #1A1200; cursor: pointer; font-family: inherit; }
-.wol-new-btn:hover { background: #E8980F; }
+.wol-search:focus { border-color: #00843D; }
+.wol-new-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: #00843D; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: #0D2E18; cursor: pointer; font-family: inherit; }
+.wol-new-btn:hover { background: #006830; }
 .wol-table { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; overflow: hidden; }
 .wol-thead { display: grid; gap: 0; border-bottom: 1px solid #F0ECE8; padding: 0 18px; background: #FAFAF9; }
 .wol-th { font-size: 11px; font-weight: 600; color: #9CA3AF; letter-spacing: 0.8px; text-transform: uppercase; padding: 10px 8px; }
@@ -175,12 +175,12 @@ function render_wo_list(el) {
 .wol-machine-name { font-size: 13px; font-weight: 600; color: #111318; line-height: 1.3; }
 .wol-machine-issue { font-size: 12px; color: #7A7F8E; margin-top: 1px; }
 .wol-pill { display: inline-flex; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
-.wol-pill-ordered  { background: #FAEEDA; color: #854F0B; }
+.wol-pill-ordered  { background: #E6F4EC; color: #1B5E35; }
 .wol-pill-open     { background: #E6F1FB; color: #185FA5; }
 .wol-pill-waiting  { background: #F1EEFE; color: #534AB7; }
 .wol-pill-done     { background: #F0ECE8; color: #5A5F6E; }
 .wol-priority-high { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; color: #A32D2D; }
-.wol-priority-med  { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; color: #854F0B; }
+.wol-priority-med  { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; color: #1B5E35; }
 .wol-priority-low  { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; color: #3B6D11; }
 .wol-arrow { color: #C0BAB3; font-size: 14px; }
 .wol-empty { padding: 48px 24px; text-align: center; color: #9CA3AF; font-size: 13px; }
@@ -193,13 +193,13 @@ function render_wo_list(el) {
 .modal-form-label { font-size: 12px; font-weight: 600; color: #5A5F6E; margin-bottom: 5px; display: block; }
 .modal-form-label .lbl-opt { font-weight: 400; color: #9CA3AF; }
 .modal-form-input { width: 100%; height: 36px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; }
-.modal-form-input:focus { border-color: #F5A623; }
+.modal-form-input:focus { border-color: #00843D; }
 .modal-form-select { width: 100%; height: 36px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; cursor: pointer; }
 .modal-field-error { font-size: 11px; color: #A32D2D; margin-top: 3px; display: none; }
 .modal-form-hint { font-size: 11px; color: #9CA3AF; margin-top: 3px; }
 .nwo-autofill-banner { font-size: 11px; color: #0F6E56; background: #E1F5EE; border-radius: 6px; padding: 5px 9px; margin-top: 4px; display: none; }
 .wol-type-pick-card { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 20px 14px; background: #FAFAF9; border: 1.5px solid #E8E4DF; border-radius: 12px; cursor: pointer; transition: border-color 0.12s, background 0.12s; font-family: inherit; width: 100%; }
-.wol-type-pick-card:hover { border-color: #F5A623; background: #FFFBF2; }
+.wol-type-pick-card:hover { border-color: #00843D; background: #FFFBF2; }
 </style>
 <h2 class="sr-only">Orders</h2>
 <div class="shell">
@@ -233,7 +233,7 @@ function render_wo_list(el) {
           <div class="wol-summary-label">Active orders</div>
         </div>
         <div class="wol-summary-card">
-          <div class="wol-summary-val" style="color:#854F0B;" id="wol-sum-parts">0</div>
+          <div class="wol-summary-val" style="color:#1B5E35;" id="wol-sum-parts">0</div>
           <div class="wol-summary-label">Parts on order</div>
         </div>
         <div class="wol-summary-card">

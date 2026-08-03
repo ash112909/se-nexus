@@ -28,7 +28,7 @@ function render_supplier_portal(el) {
   let _spNewsReported = new Set(JSON.parse(localStorage.getItem('se-news-reported') || '[]'));
 
   const PR_STATUS = {
-    pending:    { label: 'Awaiting response', color: '#854F0B', bg: '#FAEEDA' },
+    pending:    { label: 'Awaiting response', color: '#1B5E35', bg: '#E6F4EC' },
     needs_info: { label: 'More info needed',  color: '#534AB7', bg: '#EEEDFE' },
     quoted:     { label: 'Quoted',            color: '#0F6E56', bg: '#E1F5EE' },
     rejected:   { label: 'Not available',     color: '#5A5F6E', bg: '#F0ECE8' },
@@ -42,7 +42,7 @@ function render_supplier_portal(el) {
 .sp-fleet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 32px; }
 .sp-fleet-card { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
 .sp-fleet-card-header { display: flex; align-items: center; gap: 12px; }
-.sp-fleet-logo { width: 40px; height: 40px; background: #1E1E1E; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #F5A623; flex-shrink: 0; letter-spacing: .5px; }
+.sp-fleet-logo { width: 40px; height: 40px; background: #1E1E1E; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #00843D; flex-shrink: 0; letter-spacing: .5px; }
 .sp-fleet-name { font-size: 14px; font-weight: 700; color: #111318; }
 .sp-fleet-city { font-size: 12px; color: #9CA3AF; }
 .sp-fleet-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -52,7 +52,7 @@ function render_supplier_portal(el) {
 .sp-fleet-actions { display: flex; gap: 8px; }
 .sp-btn { height: 32px; padding: 0 12px; border-radius: 7px; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; border: none; transition: opacity 0.1s; }
 .sp-btn:hover { opacity: 0.85; }
-.sp-btn-primary { background: #F5A623; color: #1A1200; }
+.sp-btn-primary { background: #00843D; color: #0D2E18; }
 .sp-btn-ghost { background: #FFFFFF; color: #3A3D4A; border: 1px solid #E2DDD8 !important; }
 .sp-table { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; overflow: hidden; }
 .sp-table-head { display: grid; grid-template-columns: 120px 1fr 100px 120px 90px 90px; padding: 0 18px; background: #FAFAF9; border-bottom: 1px solid #F0ECE8; }
@@ -65,36 +65,36 @@ function render_supplier_portal(el) {
 .sp-compose-field { margin-bottom: 16px; }
 .sp-compose-label { font-size: 12px; font-weight: 600; color: #5A5F6E; margin-bottom: 5px; display: block; }
 .sp-compose-input { width: 100%; height: 36px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; }
-.sp-compose-input:focus { border-color: #F5A623; }
+.sp-compose-input:focus { border-color: #00843D; }
 .sp-compose-textarea { width: 100%; min-height: 100px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; resize: vertical; }
-.sp-compose-textarea:focus { border-color: #F5A623; }
+.sp-compose-textarea:focus { border-color: #00843D; }
 .sp-compose-select { width: 100%; height: 36px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; cursor: pointer; }
 .sp-fleet-check-row { display: flex; flex-direction: column; gap: 7px; padding: 10px; background: #FAFAF9; border: 1px solid #E8E4DF; border-radius: 7px; }
 .sp-fleet-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #3A3D4A; cursor: pointer; }
-.sp-fleet-check input { accent-color: #F5A623; }
+.sp-fleet-check input { accent-color: #00843D; }
 /* ── Manuals CSS ─── */
 .man-content-row { display:flex; flex:1; min-height:0; overflow:hidden; }
 .man-vendor-panel { width:200px; min-width:200px; background:#FFFFFF; border-right:0.5px solid #E8E4DF; display:flex; flex-direction:column; padding:16px 0; overflow-y:auto; }
 .mvp-label { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#9CA3AF; margin-bottom:10px; padding:0 14px; }
 .man-vendor-item { display:flex; align-items:center; gap:8px; padding:6px 14px; cursor:pointer; margin-bottom:2px; }
 .man-vendor-item:hover { background:#F5F2EE; }
-.man-vendor-item.active { background:#FAEEDA; }
+.man-vendor-item.active { background:#E6F4EC; }
 .mvi-icon { width:26px; height:26px; background:#F5F2EE; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:13px; color:#9CA3AF; flex-shrink:0; }
-.man-vendor-item.active .mvi-icon { background:#F5A623; color:#1A1200; }
+.man-vendor-item.active .mvi-icon { background:#00843D; color:#0D2E18; }
 .mvi-name { font-size:12px; font-weight:500; color:#3A3D4A; line-height:1.3; flex:1; }
-.man-vendor-item.active .mvi-name { color:#854F0B; font-weight:600; }
+.man-vendor-item.active .mvi-name { color:#1B5E35; font-weight:600; }
 .mvi-count { font-size:10px; color:#B0AAA3; }
 .man-main-panel { flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden; }
 .man-search-area { padding:12px 20px; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; flex-shrink:0; }
 .man-search-wrap { position:relative; }
 .man-search-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:17px; pointer-events:none; }
 .man-search-input { width:100%; height:40px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:10px; padding:0 14px 0 44px; font-size:14px; font-family:inherit; color:#111318; outline:none; box-sizing:border-box; }
-.man-search-input:focus { border-color:#F5A623; background:#FFFFFF; }
+.man-search-input:focus { border-color:#00843D; background:#FFFFFF; }
 .man-search-input::placeholder { color:#B0AAA3; }
 .man-machine-chip-row { display:flex; align-items:center; gap:6px; padding:10px 20px; background:#FAFAF8; border-bottom:0.5px solid #E8E4DF; flex-wrap:wrap; flex-shrink:0; }
 .man-machine-chip { height:28px; padding:0 12px; border:1px solid #E2DDD8; border-radius:999px; background:#FFFFFF; font-size:12px; font-weight:500; color:#5A5F6E; cursor:pointer; font-family:inherit; white-space:nowrap; }
 .man-machine-chip:hover { background:#F5F2EE; border-color:#C8C3BC; }
-.man-machine-chip.active { background:#FAEEDA; border-color:#F5A623; color:#854F0B; font-weight:600; }
+.man-machine-chip.active { background:#E6F4EC; border-color:#00843D; color:#1B5E35; font-weight:600; }
 .man-content-body { flex:1; padding:20px; overflow-y:auto; }
 .man-section-label { font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#9CA3AF; margin-bottom:12px; }
 .docs-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:10px; margin-bottom:24px; }
@@ -107,11 +107,11 @@ function render_supplier_portal(el) {
 .doc-meta-sep { color:#D1CBC4; }
 .doc-tags { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:6px; }
 .doc-tag { font-size:10px; border-radius:4px; padding:2px 6px; font-weight:500; }
-.tag-type { background:#FAEEDA; color:#854F0B; }
+.tag-type { background:#E6F4EC; color:#1B5E35; }
 .doc-actions { display:flex; align-items:center; gap:6px; }
 .doc-btn { font-size:11px; font-weight:500; border-radius:6px; padding:4px 10px; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:4px; }
-.doc-btn-primary { background:#F5A623; border:none; color:#1A1200; font-weight:600; }
-.doc-btn-primary:hover { background:#E8980F; }
+.doc-btn-primary { background:#00843D; border:none; color:#0D2E18; font-weight:600; }
+.doc-btn-primary:hover { background:#006830; }
 .doc-btn-ghost { background:none; border:0.5px solid #E2DDD8; color:#3A3D4A; }
 .doc-btn-ghost:hover { background:#F5F2EE; }
 /* ── News CSS ─── */
@@ -121,17 +121,17 @@ function render_supplier_portal(el) {
 .nfp-label { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#9CA3AF; margin-bottom:8px; }
 .nfp-item { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:7px; cursor:pointer; font-size:12px; color:#5A5F6E; margin-bottom:2px; }
 .nfp-item:hover { background:#F5F2EE; }
-.nfp-item.active { background:#FAEEDA; color:#854F0B; font-weight:600; }
+.nfp-item.active { background:#E6F4EC; color:#1B5E35; font-weight:600; }
 .nfp-item-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 .nfp-poster { display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:7px; cursor:pointer; font-size:12px; color:#5A5F6E; margin-bottom:2px; }
 .nfp-poster:hover { background:#F5F2EE; }
-.nfp-poster.active { background:#FAEEDA; color:#854F0B; font-weight:600; }
+.nfp-poster.active { background:#E6F4EC; color:#1B5E35; font-weight:600; }
 .news-main { flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden; }
 .news-toolbar { padding:14px 20px; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:10px; flex-wrap:wrap; flex-shrink:0; }
 .news-search-wrap { position:relative; flex:1; min-width:200px; max-width:360px; }
 .news-search-icon { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:15px; pointer-events:none; }
 .news-search-input { width:100%; height:36px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:9px; padding:0 12px 0 34px; font-size:13px; font-family:inherit; color:#111318; outline:none; }
-.news-search-input:focus { border-color:#F5A623; background:#FFFFFF; }
+.news-search-input:focus { border-color:#00843D; background:#FFFFFF; }
 .news-search-input::placeholder { color:#B0AAA3; }
 .news-sort-btn { display:flex; align-items:center; gap:5px; height:36px; padding:0 12px; background:#FFFFFF; border:0.5px solid #E2DDD8; border-radius:9px; font-size:12px; font-weight:500; color:#5A5F6E; cursor:pointer; font-family:inherit; white-space:nowrap; }
 .news-sort-btn:hover { background:#F5F2EE; }
@@ -151,7 +151,7 @@ function render_supplier_portal(el) {
 .nc-actions { display:flex; align-items:center; gap:8px; margin-top:10px; padding-top:10px; border-top:0.5px solid #F0ECE8; }
 .nc-action-btn { display:inline-flex; align-items:center; gap:5px; padding:5px 11px; border-radius:7px; border:0.5px solid #E2DDD8; background:#FFFFFF; color:#5A5F6E; font-size:11px; font-weight:500; cursor:pointer; font-family:inherit; }
 .nc-action-btn:hover { background:#F5F2EE; }
-.nc-saved { background:#FAEEDA; color:#854F0B; border-color:#F5A623; }
+.nc-saved { background:#E6F4EC; color:#1B5E35; border-color:#00843D; }
 .nc-saved:hover { background:#F5DFC0; }
 .nc-report-btn:hover { background:#FFF5F5; color:#B91C1C; border-color:#FCA5A5; }
 .nc-reported { color:#9CA3AF; border-color:#E2DDD8; cursor:default; }
@@ -166,7 +166,7 @@ function render_supplier_portal(el) {
 .an-filter-sep { width:0.5px; height:20px; background:#E8E4DF; }
 .an-loc-pills { display:flex; gap:5px; flex-wrap:wrap; }
 .an-loc-pill { display:flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:0.5px solid #E0DBD5; color:#5A5F6E; background:#FFFFFF; transition:all 0.15s; white-space:nowrap; }
-.an-loc-pill.active { background:#FAEEDA; color:#854F0B; border-color:#F5C97A; }
+.an-loc-pill.active { background:#E6F4EC; color:#1B5E35; border-color:#F5C97A; }
 .an-loc-pill:hover:not(.active) { border-color:#9CA3AF; }
 .an-content { flex:1; padding:20px 24px 40px; overflow-y:auto; }
 .an-kpi-row { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:18px; }
@@ -270,7 +270,7 @@ function render_supplier_portal(el) {
         </div>
         <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:18px;">
           <div style="font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;">Open Price Requests</div>
-          <div style="font-size:28px;font-weight:700;color:${pending > 0 ? '#854F0B' : '#111318'};">${pending}</div>
+          <div style="font-size:28px;font-weight:700;color:${pending > 0 ? '#1B5E35' : '#111318'};">${pending}</div>
         </div>
         <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:18px;">
           <div style="font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;">Content Published</div>
@@ -585,7 +585,7 @@ function render_supplier_portal(el) {
   let _spPtExpandedCats = new Set();
 
   const SP_CONTENT_TYPES = {
-    bulletin: { label:'Service Bulletin', icon:'ti-alert-triangle', color:'#854F0B', bg:'#FAEEDA' },
+    bulletin: { label:'Service Bulletin', icon:'ti-alert-triangle', color:'#1B5E35', bg:'#E6F4EC' },
     news:     { label:'Product News',     icon:'ti-news',           color:'#534AB7', bg:'#EEEDFE' },
     safety:   { label:'Safety Notice',    icon:'ti-alert-octagon',  color:'#B91C1C', bg:'#FEE2E2' },
     promo:    { label:'Promotion',        icon:'ti-tag',            color:'#0F6E56', bg:'#E1F5EE' },
@@ -649,7 +649,7 @@ function render_supplier_portal(el) {
 .spc-search-wrap { position:relative; margin-bottom:12px; max-width:400px; }
 .spc-search-icon { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:15px; pointer-events:none; }
 .spc-search-input { width:100%; height:36px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:9px; padding:0 12px 0 34px; font-size:13px; font-family:inherit; color:#111318; outline:none; }
-.spc-search-input:focus { border-color:#F5A623; background:#FFFFFF; }
+.spc-search-input:focus { border-color:#00843D; background:#FFFFFF; }
 .spc-row { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; padding:14px 16px; display:flex; align-items:flex-start; gap:14px; cursor:pointer; transition:border-color .15s; margin-bottom:8px; }
 .spc-row:hover { border-color:#C8C3BC; }
 .spc-row-icon { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
@@ -670,21 +670,21 @@ function render_supplier_portal(el) {
 .spc-field { display:flex; flex-direction:column; gap:5px; }
 .spc-label { font-size:11px; font-weight:600; color:#5A5F6E; text-transform:uppercase; letter-spacing:.6px; }
 .spc-input { width:100%; padding:8px 10px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:13px; font-family:inherit; color:#111318; outline:none; background:#FFFFFF; }
-.spc-input:focus { border-color:#F5A623; }
+.spc-input:focus { border-color:#00843D; }
 .spc-textarea { width:100%; padding:10px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:13px; font-family:inherit; color:#111318; outline:none; resize:vertical; min-height:130px; line-height:1.6; background:#FFFFFF; }
-.spc-textarea:focus { border-color:#F5A623; }
+.spc-textarea:focus { border-color:#00843D; }
 .spc-select { width:100%; padding:8px 10px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:13px; font-family:inherit; color:#111318; outline:none; background:#FFFFFF; cursor:pointer; }
-.spc-select:focus { border-color:#F5A623; }
+.spc-select:focus { border-color:#00843D; }
 .spc-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .spc-check-list { display:flex; flex-direction:column; gap:7px; padding:10px; background:#FAFAF9; border:1px solid #E8E4DF; border-radius:7px; }
 .spc-check-item { display:flex; align-items:center; gap:8px; font-size:13px; color:#3A3D4A; cursor:pointer; }
-.spc-check-item input { accent-color:#F5A623; }
+.spc-check-item input { accent-color:#00843D; }
 .spc-post-opt { display:flex; align-items:center; gap:8px; padding:8px 10px; border:0.5px solid #E2DDD8; border-radius:8px; cursor:pointer; font-size:12px; color:#3A3D4A; transition:all .15s; }
-.spc-post-opt.selected { border-color:#F5A623; background:#FAEEDA; color:#854F0B; font-weight:600; }
-.spc-post-opt input { accent-color:#F5A623; display:none; }
+.spc-post-opt.selected { border-color:#00843D; background:#E6F4EC; color:#1B5E35; font-weight:600; }
+.spc-post-opt input { accent-color:#00843D; display:none; }
 .spc-ai-btn { display:flex; align-items:center; gap:7px; padding:8px 12px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:12px; font-weight:500; font-family:inherit; cursor:pointer; background:#FFFFFF; color:#3A3D4A; transition:all .15s; width:100%; }
 .spc-ai-btn:hover { background:#F5F2EE; border-color:#C8C3BC; }
-.spc-ai-btn .ai-icon { width:22px; height:22px; border-radius:6px; background:#111318; color:#F5A623; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; }
+.spc-ai-btn .ai-icon { width:22px; height:22px; border-radius:6px; background:#111318; color:#00843D; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; }
 .spc-ai-preview { background:#F5F2EE; border:0.5px solid #E2DDD8; border-radius:8px; padding:12px; font-size:12px; color:#3A3D4A; line-height:1.6; margin-top:2px; white-space:pre-wrap; }
 .spc-action-bar { display:flex; align-items:center; gap:8px; padding:14px 0 0; border-top:0.5px solid #E8E4DF; margin-top:4px; }
 /* ── Part tree (in editor) ─── */
@@ -692,7 +692,7 @@ function render_supplier_portal(el) {
 .spc-tree-search-wrap { position:relative; padding:10px; border-bottom:0.5px solid #F0ECE8; }
 .spc-tree-search-icon { position:absolute; left:20px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:13px; pointer-events:none; }
 .spc-tree-search { width:100%; height:30px; background:#FFFFFF; border:1px solid #E2DDD8; border-radius:7px; padding:0 8px 0 28px; font-size:12px; font-family:inherit; color:#111318; outline:none; }
-.spc-tree-search:focus { border-color:#F5A623; }
+.spc-tree-search:focus { border-color:#00843D; }
 .spc-tree-body { max-height:280px; overflow-y:auto; padding:6px 0; }
 .spc-cat-hdr { display:flex; align-items:center; gap:6px; padding:5px 12px; cursor:pointer; font-size:10px; font-weight:700; color:#5A5F6E; letter-spacing:.3px; text-transform:uppercase; }
 .spc-cat-hdr:hover { background:#F5F2EE; }
@@ -700,13 +700,13 @@ function render_supplier_portal(el) {
 .spc-cat-chevron.open { transform:rotate(90deg); }
 .spc-part-item { display:flex; flex-direction:column; padding:5px 12px 5px 26px; cursor:pointer; border-left:2px solid transparent; }
 .spc-part-item:hover { background:#F5F2EE; border-left-color:#E2DDD8; }
-.spc-part-item.selected { background:#FAEEDA; border-left-color:#F5A623; }
+.spc-part-item.selected { background:#E6F4EC; border-left-color:#00843D; }
 .spc-part-pnum { font-size:10px; font-weight:700; color:#9CA3AF; font-family:monospace; }
-.spc-part-item.selected .spc-part-pnum { color:#854F0B; }
+.spc-part-item.selected .spc-part-pnum { color:#1B5E35; }
 .spc-part-desc { font-size:11px; font-weight:500; color:#3A3D4A; line-height:1.3; }
 .spc-part-item.selected .spc-part-desc { color:#111318; }
-.spc-selected-banner { background:#FAEEDA; border:1px solid #F5C97A; border-radius:7px; padding:8px 11px; display:flex; align-items:center; gap:8px; margin-top:6px; }
-.spc-banner-pnum { font-size:10px; font-weight:700; color:#854F0B; font-family:monospace; }
+.spc-selected-banner { background:#E6F4EC; border:1px solid #F5C97A; border-radius:7px; padding:8px 11px; display:flex; align-items:center; gap:8px; margin-top:6px; }
+.spc-banner-pnum { font-size:10px; font-weight:700; color:#1B5E35; font-family:monospace; }
 .spc-banner-desc { font-size:11px; color:#3A3D4A; margin-top:1px; }
 </style>
 <div id="spc-body" style="padding:0 28px 28px;"></div>`;
@@ -894,7 +894,7 @@ function render_supplier_portal(el) {
               </div>
               <div id="spc-part-tree-section" style="${a.showOnPartPage?'':'display:none;'}">
                 <label class="spc-label" style="margin-bottom:6px;display:block;">Target part <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9CA3AF;">— select from your catalog</span></label>
-                ${selectedPart ? `<div class="spc-selected-banner"><i class="ti ti-tag" style="font-size:13px;color:#854F0B;flex-shrink:0;"></i><div><div class="spc-banner-pnum">${selectedPart.partNum}</div><div class="spc-banner-desc">${selectedPart.description}</div></div><button class="spc-btn-ghost" style="margin-left:auto;padding:3px 8px;font-size:11px;" onclick="spCmsClearPart()">✕ Clear</button></div>` : ''}
+                ${selectedPart ? `<div class="spc-selected-banner"><i class="ti ti-tag" style="font-size:13px;color:#1B5E35;flex-shrink:0;"></i><div><div class="spc-banner-pnum">${selectedPart.partNum}</div><div class="spc-banner-desc">${selectedPart.description}</div></div><button class="spc-btn-ghost" style="margin-left:auto;padding:3px 8px;font-size:11px;" onclick="spCmsClearPart()">✕ Clear</button></div>` : ''}
                 <div class="spc-tree-panel">
                   <div class="spc-tree-search-wrap">
                     <i class="ti ti-search spc-tree-search-icon"></i>
@@ -925,7 +925,7 @@ function render_supplier_portal(el) {
 
           <!-- AI tools -->
           <div class="spc-panel">
-            <div class="spc-panel-hdr"><i class="ti ti-sparkles" style="color:#F5A623;"></i> AI writing tools</div>
+            <div class="spc-panel-hdr"><i class="ti ti-sparkles" style="color:#00843D;"></i> AI writing tools</div>
             <div class="spc-panel-body" style="gap:8px;">
               <button class="spc-ai-btn" onclick="spcAiAction('rewrite')"><div class="ai-icon"><i class="ti ti-wand"></i></div><div><div style="font-weight:600;">Rewrite &amp; improve</div><div style="font-size:10px;color:#9CA3AF;">Enhance clarity and professional tone</div></div></button>
               <button class="spc-ai-btn" onclick="spcAiAction('simplify')"><div class="ai-icon"><i class="ti ti-list-check"></i></div><div><div style="font-weight:600;">Simplify</div><div style="font-size:10px;color:#9CA3AF;">Reduce to key action items</div></div></button>
@@ -1063,7 +1063,7 @@ function render_supplier_portal(el) {
           section.insertBefore(bannerEl, section.querySelector('.spc-tree-panel'));
         }
         bannerEl.className = 'spc-selected-banner';
-        bannerEl.innerHTML = `<i class="ti ti-tag" style="font-size:13px;color:#854F0B;flex-shrink:0;"></i><div><div class="spc-banner-pnum">${part.partNum}</div><div class="spc-banner-desc">${part.description}</div></div><button class="spc-btn-ghost" style="margin-left:auto;padding:3px 8px;font-size:11px;" onclick="spCmsClearPart()">✕ Clear</button>`;
+        bannerEl.innerHTML = `<i class="ti ti-tag" style="font-size:13px;color:#1B5E35;flex-shrink:0;"></i><div><div class="spc-banner-pnum">${part.partNum}</div><div class="spc-banner-desc">${part.description}</div></div><button class="spc-btn-ghost" style="margin-left:auto;padding:3px 8px;font-size:11px;" onclick="spCmsClearPart()">✕ Clear</button>`;
       }
     };
     window.spCmsClearPart = function() {
@@ -1467,7 +1467,7 @@ function render_supplier_portal(el) {
           <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
             ${['Inaccurate or incorrect information','Outdated — information no longer applies','Duplicate post','Inappropriate or irrelevant content','Other'].map((reason, i) => `
               <label style="display:flex;align-items:center;gap:9px;padding:9px 12px;border:0.5px solid #E2DDD8;border-radius:8px;cursor:pointer;font-size:13px;color:#3A3D4A;">
-                <input type="radio" name="sp-report-reason" value="${reason}" ${i===0?'checked':''} style="accent-color:#F5A623;"/> ${reason}
+                <input type="radio" name="sp-report-reason" value="${reason}" ${i===0?'checked':''} style="accent-color:#00843D;"/> ${reason}
               </label>`).join('')}
           </div>
           <textarea id="sp-report-notes" placeholder="Additional notes (optional)" style="width:100%;height:72px;padding:9px 12px;border:0.5px solid #E2DDD8;border-radius:8px;font-size:13px;font-family:inherit;color:#111318;resize:none;outline:none;"></textarea>`,
@@ -1512,7 +1512,7 @@ function render_supplier_portal(el) {
           <div class="nfp-section">
             <div class="nfp-label">Category</div>
             <div class="nfp-item ${_spNewsType==='all'?'active':''}" id="sp-nft-all" onclick="spNewsFilter('type','all')"><div class="nfp-item-dot" style="background:#D1D5DB;"></div>All types</div>
-            <div class="nfp-item ${_spNewsType==='bulletin'?'active':''}" id="sp-nft-bulletin" onclick="spNewsFilter('type','bulletin')"><div class="nfp-item-dot" style="background:#F5A623;"></div>Service Bulletin</div>
+            <div class="nfp-item ${_spNewsType==='bulletin'?'active':''}" id="sp-nft-bulletin" onclick="spNewsFilter('type','bulletin')"><div class="nfp-item-dot" style="background:#00843D;"></div>Service Bulletin</div>
             <div class="nfp-item ${_spNewsType==='supplier'?'active':''}" id="sp-nft-supplier" onclick="spNewsFilter('type','supplier')"><div class="nfp-item-dot" style="background:#8B5CF6;"></div>Supplier / Platform</div>
             <div class="nfp-item ${_spNewsType==='safety'?'active':''}" id="sp-nft-safety" onclick="spNewsFilter('type','safety')"><div class="nfp-item-dot" style="background:#EF4444;"></div>Safety Alert</div>
           </div>
@@ -1580,7 +1580,7 @@ function render_supplier_portal(el) {
     if (titleEl) titleEl.textContent = 'Analytics';
 
     const contentEl = document.getElementById('sp-content');
-    const FLEET_COLORS = ['#F5A623','#185FA5','#3B6D11','#534AB7','#A32D2D'];
+    const FLEET_COLORS = ['#00843D','#185FA5','#3B6D11','#534AB7','#A32D2D'];
 
     contentEl.innerHTML = `
       <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
@@ -1602,14 +1602,14 @@ function render_supplier_portal(el) {
   }
 
   function renderFleetPills() {
-    const FLEET_COLORS = ['#F5A623','#185FA5','#3B6D11','#534AB7','#A32D2D'];
+    const FLEET_COLORS = ['#00843D','#185FA5','#3B6D11','#534AB7','#A32D2D'];
     const allActive = !_spFleetIds;
     return `<div class="an-loc-pill ${allActive?'active':''}" onclick="spAnToggleAllFleets()" style="${allActive?'background:#111318;color:#FFFFFF;border-color:#111318;':''}">
         <i class="ti ti-stack-2" style="font-size:11px;"></i> All fleets
       </div>
       ${_fleets.map((f, i) => {
         const active = !_spFleetIds || _spFleetIds.has(f.fleetId);
-        return `<div class="an-loc-pill ${active?'active':''}" onclick="spAnToggleFleet('${f.fleetId}')" style="${active?`background:#FAEEDA;color:#854F0B;border-color:#F5C97A;`:''}">
+        return `<div class="an-loc-pill ${active?'active':''}" onclick="spAnToggleFleet('${f.fleetId}')" style="${active?`background:#E6F4EC;color:#1B5E35;border-color:#F5C97A;`:''}">
           <div class="an-loc-dot" style="background:${FLEET_COLORS[i%FLEET_COLORS.length]};"></div>
           ${f.fleetName.split(' ')[0]}
         </div>`;
@@ -1686,13 +1686,13 @@ function render_supplier_portal(el) {
       const isLast = i === trend.labels.length - 1;
       return `<div class="an-bar-col">
         <div class="an-bar-amt">${isLast || trend.labels.length <= 5 ? scaledValues[i] : ''}</div>
-        <div class="an-bar-seg" style="height:${h}px;background:${isLast?'#F5A623':'#E0DBD5'};"></div>
+        <div class="an-bar-seg" style="height:${h}px;background:${isLast?'#00843D':'#E0DBD5'};"></div>
         <div class="an-bar-lbl">${lbl}</div>
       </div>`;
     }).join('');
 
     // By fleet breakdown
-    const FLEET_COLORS = ['#F5A623','#185FA5','#3B6D11','#534AB7','#A32D2D'];
+    const FLEET_COLORS = ['#00843D','#185FA5','#3B6D11','#534AB7','#A32D2D'];
     const byFleetData = _fleets.map((f, i) => {
       const fReqs = allReqs.filter(r => r.fleetId === f.fleetId);
       return { name: f.fleetName, total: fReqs.length, quoted: fReqs.filter(r=>r.status==='quoted').length,
@@ -1711,7 +1711,7 @@ function render_supplier_portal(el) {
 
     // Content by type
     const contentByType = [
-      { type: 'bulletin', label: 'Service Bulletins', color: '#F5A623' },
+      { type: 'bulletin', label: 'Service Bulletins', color: '#00843D' },
       { type: 'news', label: 'Product News', color: '#185FA5' },
       { type: 'safety', label: 'Safety Notices', color: '#A32D2D' },
       { type: 'promo', label: 'Promotions', color: '#3B6D11' },
@@ -1738,14 +1738,14 @@ function render_supplier_portal(el) {
       {
         icon: pending > 3 ? 'ti-alert-triangle' : 'ti-circle-check',
         iconBg: pending > 3 ? '#FFF8EC' : '#F0FDF4',
-        iconColor: pending > 3 ? '#854F0B' : '#3B6D11',
+        iconColor: pending > 3 ? '#1B5E35' : '#3B6D11',
         title: pending > 0 ? `${pending} request${pending !== 1 ? 's' : ''} awaiting response` : 'All requests responded to',
         body: pending > 0
           ? `${pending} price request${pending !== 1 ? 's are' : ' is'} awaiting your response. Fleets expect a reply within 24 hours — late responses can affect your responsiveness score.`
           : 'Great work — you\'re fully caught up on price requests. Your responsiveness score is strong.',
         tag: pending > 3 ? 'Action needed' : (pending > 0 ? 'In progress' : 'Up to date'),
         tagBg: pending > 3 ? '#FFF8EC' : (pending > 0 ? '#EDE9FE' : '#F0FDF4'),
-        tagColor: pending > 3 ? '#854F0B' : (pending > 0 ? '#534AB7' : '#3B6D11'),
+        tagColor: pending > 3 ? '#1B5E35' : (pending > 0 ? '#534AB7' : '#3B6D11'),
       },
       {
         icon: 'ti-building-warehouse',
@@ -1815,7 +1815,7 @@ function render_supplier_portal(el) {
     <div class="an-grid-3" style="margin-bottom:14px;">
       <div class="an-card" style="grid-column:1/2;">
         <div class="an-card-hdr">
-          <div class="an-card-title"><i class="ti ti-trending-up" style="font-size:13px;color:#F5A623;"></i> Price request trend</div>
+          <div class="an-card-title"><i class="ti ti-trending-up" style="font-size:13px;color:#00843D;"></i> Price request trend</div>
           <span class="an-card-sub">${!_spFleetIds ? 'All fleets' : filteredFleets.map(f=>f.fleetName.split(' ')[0]).join(', ')} · ${_spPeriod}</span>
         </div>
         <div class="an-card-body">
@@ -1838,7 +1838,7 @@ function render_supplier_portal(el) {
           </div>
           <div class="an-wo-stat">
             <span style="font-size:12px;color:#5A5F6E;">Pending response</span>
-            <span class="an-wo-badge" style="background:#FAEEDA;color:#854F0B;">${pending}</span>
+            <span class="an-wo-badge" style="background:#E6F4EC;color:#1B5E35;">${pending}</span>
           </div>
           <div class="an-wo-stat">
             <span style="font-size:12px;color:#5A5F6E;">More info needed</span>
@@ -1852,7 +1852,7 @@ function render_supplier_portal(el) {
             <div style="height:10px;background:#F0ECE8;border-radius:5px;overflow:hidden;display:flex;">
               ${totalReqs > 0 ? `
               <div style="width:${Math.round(quoted/totalReqs*100)}%;background:#0F6E56;"></div>
-              <div style="width:${Math.round(pending/totalReqs*100)}%;background:#F5A623;"></div>
+              <div style="width:${Math.round(pending/totalReqs*100)}%;background:#00843D;"></div>
               <div style="width:${Math.round(filteredReqs.filter(r=>r.status==='needs_info').length/totalReqs*100)}%;background:#534AB7;"></div>
               ` : ''}
             </div>

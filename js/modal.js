@@ -46,7 +46,7 @@ const Modal = (() => {
         const btn = document.createElement('button');
         btn.textContent = a.label;
         btn.style.cssText = a.primary
-          ? 'background:#F5A623;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;color:#1A1200;cursor:pointer;font-family:inherit;'
+          ? 'background:#00843D;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;color:#0D2E18;cursor:pointer;font-family:inherit;'
           : 'background:#FFFFFF;border:0.5px solid #E2DDD8;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:500;color:#3A3D4A;cursor:pointer;font-family:inherit;';
         btn.onclick = () => { if (a.onClick) a.onClick(); };
         footer.appendChild(btn);

@@ -7,8 +7,8 @@ function render_home(el) {
   const activeWOs = Store.getWorkOrders('active', _isSupervisor ? null : (_user ? _user.shortName : null));
 
   const SUPPLIERS = [
-    { id:'skyjack',    name:'Skyjack',        category:'Aerial / OEM',      icon:'ti-crane',         color:'#854F0B', bg:'#FAEEDA' },
-    { id:'caterpillar',name:'Caterpillar',     category:'Heavy / OEM',       icon:'ti-backhoe',       color:'#1A1200', bg:'#F5A623' },
+    { id:'skyjack',    name:'Skyjack',        category:'Aerial / OEM',      icon:'ti-crane',         color:'#1B5E35', bg:'#E6F4EC' },
+    { id:'caterpillar',name:'Caterpillar',     category:'Heavy / OEM',       icon:'ti-backhoe',       color:'#0D2E18', bg:'#00843D' },
     { id:'toyota',     name:'Toyota MH',       category:'Material / OEM',    icon:'ti-forklift',      color:'#B91C1C', bg:'#FEE2E2' },
     { id:'bobcat',     name:'Bobcat',          category:'Compact / OEM',     icon:'ti-bulldozer',     color:'#C2410C', bg:'#FFF0E6' },
     { id:'parker',     name:'Parker Hannifin', category:'Hydraulics / Afmkt', icon:'ti-droplet',       color:'#185FA5', bg:'#DBEAFE' },
@@ -28,7 +28,7 @@ function render_home(el) {
   }
 
   const TYPE_META = {
-    bulletin:{ label:'Service Bulletin', color:'#854F0B', bg:'#FAEEDA', icon:'ti-alert-triangle' },
+    bulletin:{ label:'Service Bulletin', color:'#1B5E35', bg:'#E6F4EC', icon:'ti-alert-triangle' },
     fleet:   { label:'Fleet Update',     color:'#185FA5', bg:'#DBEAFE', icon:'ti-building'       },
     supplier:{ label:'Supplier News',    color:'#534AB7', bg:'#EDE9FE', icon:'ti-news'            },
     warranty:{ label:'Warranty',         color:'#0F6E56', bg:'#D1FAE5', icon:'ti-shield-check'   },
@@ -39,7 +39,7 @@ function render_home(el) {
   };
 
   const SLIDES = [
-    { icon:'ti-crane',        iconBg:'#FAEEDA', iconColor:'#854F0B', accent:'#F5A623', bg:'#1C1F2E',
+    { icon:'ti-crane',        iconBg:'#E6F4EC', iconColor:'#1B5E35', accent:'#00843D', bg:'#1C1F2E',
       eyebrow:'Fleet highlight', title:'2 new Bobcat S770 units arriving Jul 8',
       body:'Pre-delivery inspection checklists are ready. Assign intake orders before delivery.',
       cta:'Create intake order', ctaFn:"sendPrompt('Open orders list')" },
@@ -66,7 +66,7 @@ function render_home(el) {
 /* ── Welcome bar ──────────────────────────────────────── */
 .home-welcome { background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; padding:18px 28px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
 .hw-brand     { display:flex; align-items:center; gap:10px; flex-shrink:0; }
-.hw-mark      { width:38px; height:38px; background:#F5A623; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.hw-mark      { width:38px; height:38px; background:#00843D; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .hw-name      { font-size:15px; font-weight:800; color:#111318; letter-spacing:-.3px; line-height:1.15; }
 .hw-sub       { font-size:10px; color:#ABA6A0; margin-top:1px; }
 .hw-sep       { width:1px; height:30px; background:#E8E4DF; flex-shrink:0; }
@@ -77,8 +77,8 @@ function render_home(el) {
 .hw-stat      { text-align:center; padding:7px 14px; background:#F5F2EE; border-radius:8px; min-width:64px; }
 .hw-stat-val  { font-size:18px; font-weight:800; color:#111318; line-height:1; }
 .hw-stat-lbl  { font-size:9px; color:#9CA3AF; margin-top:2px; letter-spacing:.2px; white-space:nowrap; }
-.hw-cta       { background:#F5A623; color:#1A1200; border:none; border-radius:8px; padding:9px 18px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; flex-shrink:0; }
-.hw-cta:hover { background:#E8980F; }
+.hw-cta       { background:#00843D; color:#0D2E18; border:none; border-radius:8px; padding:9px 18px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; flex-shrink:0; }
+.hw-cta:hover { background:#006830; }
 
 /* ── Two-col grid ─────────────────────────────────────── */
 .home-grid   { display:grid; grid-template-columns:1fr 340px; gap:20px; align-items:start; }
@@ -96,7 +96,7 @@ function render_home(el) {
 .home-slide.active { display:flex; }
 .home-car-footer { display:flex; align-items:center; padding:0 4px 14px 4px; }
 .home-dot  { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.2); border:none; cursor:pointer; padding:0; margin-right:5px; transition:all .15s; }
-.home-dot.active { background:#F5A623; width:16px; border-radius:3px; }
+.home-dot.active { background:#00843D; width:16px; border-radius:3px; }
 .home-arr  { width:26px; height:26px; border:0.5px solid rgba(255,255,255,.12); border-radius:6px; background:rgba(255,255,255,.06); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; color:rgba(255,255,255,.5); margin-left:4px; }
 .home-arr:hover { background:rgba(255,255,255,.12); color:#FFF; }
 
@@ -161,7 +161,7 @@ function render_home(el) {
 
         <!-- Left: carousel + news -->
         <div class="home-left">
-          <div class="h-lbl"><i class="ti ti-speakerphone" style="color:#F5A623;"></i> Fleet highlights</div>
+          <div class="h-lbl"><i class="ti ti-speakerphone" style="color:#00843D;"></i> Fleet highlights</div>
           <div class="home-car-wrap">
             ${SLIDES.map((s, i) => `
             <div class="home-slide${i===0?' active':''}" style="background:${s.bg};" id="hslide-${i}">

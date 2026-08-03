@@ -1,6 +1,6 @@
 // Shared article data — defined at module level so dashboard and other views can call newsOpenArticle
 const NEWS_TYPE_META = {
-  bulletin:  { label: 'Service Bulletin', color: '#854F0B', bg: '#FAEEDA', icon: 'ti-alert-triangle' },
+  bulletin:  { label: 'Service Bulletin', color: '#1B5E35', bg: '#E6F4EC', icon: 'ti-alert-triangle' },
   fleet:     { label: 'Fleet Update',     color: '#185FA5', bg: '#E6F1FB', icon: 'ti-building'       },
   supplier:  { label: 'Supplier News',    color: '#534AB7', bg: '#EEEDFE', icon: 'ti-news'            },
   warranty:  { label: 'Warranty',         color: '#0F6E56', bg: '#E1F5EE', icon: 'ti-shield-check'   },
@@ -224,7 +224,7 @@ window.newsOpenArticle = function(id) {
         ${n.tags.map(t => `<span style="font-size:11px;background:#F5F2EE;color:#7A7F8E;border-radius:4px;padding:2px 8px;">${t}</span>`).join('')}
       </div>
       <div style="display:flex;gap:8px;padding-top:12px;border-top:0.5px solid #F0ECE8;">
-        <button onclick="newsSave('${n.id}');Modal.close();" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:0.5px solid #E2DDD8;background:${saved?'#FAEEDA':'#FFFFFF'};color:${saved?'#854F0B':'#5A5F6E'};font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;">
+        <button onclick="newsSave('${n.id}');Modal.close();" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:0.5px solid #E2DDD8;background:${saved?'#E6F4EC':'#FFFFFF'};color:${saved?'#1B5E35':'#5A5F6E'};font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;">
           <i class="ti ${saved?'ti-bookmark-filled':'ti-bookmark'}"></i> ${saved ? 'Remove from saved' : 'Save article'}
         </button>
         <button onclick="Modal.close();setTimeout(()=>newsReport('${n.id}'),80);" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:0.5px solid #E2DDD8;background:#FFFFFF;color:#5A5F6E;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;">
@@ -363,7 +363,7 @@ function render_news(el) {
         <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
           ${['Inaccurate or incorrect information','Outdated — information no longer applies','Duplicate post','Inappropriate or irrelevant content','Missing critical information','Other'].map((reason, i) => `
             <label style="display:flex;align-items:center;gap:9px;padding:9px 12px;border:0.5px solid #E2DDD8;border-radius:8px;cursor:pointer;font-size:13px;color:#3A3D4A;">
-              <input type="radio" name="report-reason" value="${reason}" ${i===0?'checked':''} style="accent-color:#F5A623;"/> ${reason}
+              <input type="radio" name="report-reason" value="${reason}" ${i===0?'checked':''} style="accent-color:#00843D;"/> ${reason}
             </label>`).join('')}
         </div>
         <textarea id="report-notes" placeholder="Additional notes (optional)" style="width:100%;height:72px;padding:9px 12px;border:0.5px solid #E2DDD8;border-radius:8px;font-size:13px;font-family:inherit;color:#111318;resize:none;outline:none;"></textarea>`,
@@ -392,17 +392,17 @@ function render_news(el) {
 .nfp-label { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#9CA3AF; margin-bottom:8px; }
 .nfp-item { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:7px; cursor:pointer; font-size:12px; color:#5A5F6E; margin-bottom:2px; }
 .nfp-item:hover { background:#F5F2EE; }
-.nfp-item.active { background:#FAEEDA; color:#854F0B; font-weight:600; }
+.nfp-item.active { background:#E6F4EC; color:#1B5E35; font-weight:600; }
 .nfp-item-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 .nfp-poster { display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:7px; cursor:pointer; font-size:12px; color:#5A5F6E; margin-bottom:2px; }
 .nfp-poster:hover { background:#F5F2EE; }
-.nfp-poster.active { background:#FAEEDA; color:#854F0B; font-weight:600; }
+.nfp-poster.active { background:#E6F4EC; color:#1B5E35; font-weight:600; }
 .news-main { flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden; }
 .news-toolbar { padding:14px 20px; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .news-search-wrap { position:relative; flex:1; min-width:200px; max-width:360px; }
 .news-search-icon { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:15px; pointer-events:none; }
 .news-search-input { width:100%; height:36px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:9px; padding:0 12px 0 34px; font-size:13px; font-family:inherit; color:#111318; outline:none; }
-.news-search-input:focus { border-color:#F5A623; background:#FFFFFF; }
+.news-search-input:focus { border-color:#00843D; background:#FFFFFF; }
 .news-search-input::placeholder { color:#B0AAA3; }
 .news-sort-btn { display:flex; align-items:center; gap:5px; height:36px; padding:0 12px; background:#FFFFFF; border:0.5px solid #E2DDD8; border-radius:9px; font-size:12px; font-weight:500; color:#5A5F6E; cursor:pointer; font-family:inherit; white-space:nowrap; }
 .news-sort-btn:hover { background:#F5F2EE; }
@@ -422,7 +422,7 @@ function render_news(el) {
 .nc-actions { display:flex; align-items:center; gap:8px; margin-top:10px; padding-top:10px; border-top:0.5px solid #F0ECE8; }
 .nc-action-btn { display:inline-flex; align-items:center; gap:5px; padding:5px 11px; border-radius:7px; border:0.5px solid #E2DDD8; background:#FFFFFF; color:#5A5F6E; font-size:11px; font-weight:500; cursor:pointer; font-family:inherit; transition:background .1s,border-color .1s; }
 .nc-action-btn:hover { background:#F5F2EE; }
-.nc-saved { background:#FAEEDA; color:#854F0B; border-color:#F5A623; }
+.nc-saved { background:#E6F4EC; color:#1B5E35; border-color:#00843D; }
 .nc-saved:hover { background:#F5DFC0; }
 .nc-report-btn:hover { background:#FFF5F5; color:#B91C1C; border-color:#FCA5A5; }
 .nc-reported { color:#9CA3AF; border-color:#E2DDD8; cursor:default; }
@@ -456,7 +456,7 @@ function render_news(el) {
         <div class="nfp-section">
           <div class="nfp-label">Category</div>
           <div class="nfp-item active" id="nft-all" onclick="newsFilter('type','all')"><div class="nfp-item-dot" style="background:#D1D5DB;"></div>All types</div>
-          <div class="nfp-item" id="nft-bulletin" onclick="newsFilter('type','bulletin')"><div class="nfp-item-dot" style="background:#F5A623;"></div>Service Bulletin</div>
+          <div class="nfp-item" id="nft-bulletin" onclick="newsFilter('type','bulletin')"><div class="nfp-item-dot" style="background:#00843D;"></div>Service Bulletin</div>
           <div class="nfp-item" id="nft-fleet" onclick="newsFilter('type','fleet')"><div class="nfp-item-dot" style="background:#3B82F6;"></div>Fleet Update</div>
           <div class="nfp-item" id="nft-supplier" onclick="newsFilter('type','supplier')"><div class="nfp-item-dot" style="background:#8B5CF6;"></div>Supplier News</div>
           <div class="nfp-item" id="nft-warranty" onclick="newsFilter('type','warranty')"><div class="nfp-item-dot" style="background:#10B981;"></div>Warranty</div>

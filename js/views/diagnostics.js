@@ -146,7 +146,7 @@ function render_diagnostics(el) {
   }
   function ctxColor(ctx) {
     if (!ctx || ctx.type === 'none') return '#8A8FA8';
-    if (ctx.type === 'wo') return '#F5A623';
+    if (ctx.type === 'wo') return '#00843D';
     if (ctx.type === 'parts') return '#7C6FF7';
     return '#8A8FA8';
   }
@@ -285,7 +285,7 @@ function render_diagnostics(el) {
     const history = Store.getDiagnosticHistory();
     if (!history.length) {
       area.innerHTML = `<div style="text-align:center;padding:48px 20px;">
-        <div style="width:48px;height:48px;background:#FAEEDA;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#854F0B;margin:0 auto 14px;"><i class="ti ti-sparkles"></i></div>
+        <div style="width:48px;height:48px;background:#E6F4EC;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#1B5E35;margin:0 auto 14px;"><i class="ti ti-sparkles"></i></div>
         <div style="font-size:14px;font-weight:600;color:#111318;margin-bottom:6px;">Diagnostic Assistant — Skyjack SJIII 3219</div>
         <div style="font-size:13px;color:#9CA3AF;max-width:320px;margin:0 auto;line-height:1.6;">Describe a fault code, symptom, or ask about a service interval. Parts can be added to a cart and converted to a work order.</div>
       </div>`;
@@ -423,7 +423,7 @@ function render_diagnostics(el) {
         + '<div class="pdf-viewer-toolbar">'
         + '<i class="ti ti-book" style="color:#9CA3AF;font-size:13px;flex-shrink:0;"></i>'
         + '<span class="pdf-viewer-meta">Skyjack SJIII Series Operating Manual (ANSI/CSA) · 93 pages</span>'
-        + (manPage ? '<span style="font-size:11px;color:#F5A623;display:flex;align-items:center;gap:4px;"><i class="ti ti-bookmark-filled" style="font-size:11px;"></i> Page ' + manPage + '</span>' : '')
+        + (manPage ? '<span style="font-size:11px;color:#00843D;display:flex;align-items:center;gap:4px;"><i class="ti ti-bookmark-filled" style="font-size:11px;"></i> Page ' + manPage + '</span>' : '')
         + '<a href="' + pdfFile + '" download style="font-size:11px;color:#9CA3AF;background:#2A2A2A;border:0.5px solid #3C4052;border-radius:5px;padding:4px 10px;text-decoration:none;display:flex;align-items:center;gap:4px;flex-shrink:0;"><i class="ti ti-download" style="font-size:11px;"></i> Download</a>'
         + '</div>'
         + '<iframe class="pdf-frame" src="' + pdfSrc + '" title="' + (title || 'Manual') + '"></iframe>'
@@ -482,7 +482,7 @@ function render_diagnostics(el) {
         <div style="font-size:12px;color:#7A7F8E;margin-bottom:6px;">Select the order to add ${_diagCart.length} part(s) to:</div>
         ${wos.map(wo=>`
           <div class="ctx-option" onclick="diagConfirmAddToWO(${wo.id})" style="cursor:pointer;">
-            <i class="ti ti-clipboard-list" style="color:#F5A623;font-size:14px;flex-shrink:0;"></i>
+            <i class="ti ti-clipboard-list" style="color:#00843D;font-size:14px;flex-shrink:0;"></i>
             <div style="flex:1;">
               <div style="font-size:12px;font-weight:600;color:#111318;">Order #${wo.id} — ${wo.machine}</div>
               <div style="font-size:11px;color:#9CA3AF;">${wo.asset || ''} · ${wo.status}</div>
@@ -527,7 +527,7 @@ function render_diagnostics(el) {
         </div>
         <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#9CA3AF;margin:8px 0 2px;">Orders</div>
         ${wos.map(w=>`<div class="ctx-option ${_ctx.type==='wo'&&_ctx.woId===w.id?'selected':''}" onclick="diagSetCtx('wo',${w.id})">
-          <i class="ti ti-clipboard-list" style="color:#F5A623;font-size:14px;flex-shrink:0;"></i>
+          <i class="ti ti-clipboard-list" style="color:#00843D;font-size:14px;flex-shrink:0;"></i>
           <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:#111318;">Order #${w.id} — ${w.machine}</div><div style="font-size:11px;color:#9CA3AF;">${w.asset||''} · ${w.status}</div></div>
         </div>`).join('')}
       </div>
@@ -593,9 +593,9 @@ function render_diagnostics(el) {
 .diag-toolbar{background:#FAFAF8;border-bottom:0.5px solid #E8E4DF;padding:7px 22px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .diag-clear-btn{font-size:11px;font-weight:500;color:#7A7F8E;background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 9px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;}
 .diag-clear-btn:hover{background:#F5F2EE;color:#3A3D4A;}
-.diag-cart-btn{font-size:11px;font-weight:600;color:#854F0B;background:#FAEEDA;border:1px solid #F5A62340;border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;margin-left:auto;}
-.diag-cart-btn:hover{background:#F5D9AA;}
-.cart-badge{background:#F5A623;color:#1A1200;border-radius:10px;padding:0 5px;font-size:10px;font-weight:700;min-width:16px;text-align:center;}
+.diag-cart-btn{font-size:11px;font-weight:600;color:#1B5E35;background:#E6F4EC;border:1px solid #00843D40;border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;margin-left:auto;}
+.diag-cart-btn:hover{background:#B7DEC7;}
+.cart-badge{background:#00843D;color:#0D2E18;border-radius:10px;padding:0 5px;font-size:10px;font-weight:700;min-width:16px;text-align:center;}
 /* Chat */
 .chat-area{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:18px;}
 .msg-system{display:flex;align-items:center;gap:5px;font-size:11px;color:#9CA3AF;justify-content:center;padding:2px 0;}
@@ -603,7 +603,7 @@ function render_diagnostics(el) {
 .msg-ctx-pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;border:1px solid;}
 .msg-user-bubble{background:#1E1E1E;color:#FFF;border-radius:14px 14px 4px 14px;padding:11px 16px;max-width:60%;font-size:13px;line-height:1.5;}
 .msg-ai{display:flex;gap:12px;align-items:flex-start;}
-.ai-avatar{width:32px;height:32px;background:#F5A623;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#1A1200;flex-shrink:0;margin-top:2px;}
+.ai-avatar{width:32px;height:32px;background:#00843D;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#0D2E18;flex-shrink:0;margin-top:2px;}
 .ai-bubble{flex:1;min-width:0;}
 /* Response card */
 .response-card{background:#FFF;border:0.5px solid #E8E4DF;border-radius:12px;overflow:hidden;}
@@ -657,20 +657,20 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
 .cart-action-btn{width:100%;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid;display:flex;align-items:center;justify-content:center;gap:5px;}
 .cart-action-secondary{background:#F5F2EE;color:#3A3D4A;border-color:#E2DDD8;}
 .cart-action-secondary:hover{background:#EAE6E1;}
-.cart-action-primary{background:#F5A623;color:#1A1200;border-color:#E8980F;}
-.cart-action-primary:hover{background:#E8980F;}
+.cart-action-primary{background:#00843D;color:#0D2E18;border-color:#006830;}
+.cart-action-primary:hover{background:#006830;}
 /* Input */
 .input-area{background:#FFF;border-top:0.5px solid #E8E4DF;padding:14px 24px;flex-shrink:0;}
 .input-row{display:flex;align-items:flex-end;gap:10px;}
 .input-wrap{flex:1;position:relative;}
 .input-box{width:100%;min-height:44px;max-height:120px;background:#F5F2EE;border:1.5px solid #E2DDD8;border-radius:12px;padding:11px 16px;font-size:13px;font-family:inherit;color:#111318;outline:none;resize:none;line-height:1.5;box-sizing:border-box;}
-.input-box:focus{border-color:#F5A623;background:#FFF;}
+.input-box:focus{border-color:#00843D;background:#FFF;}
 .input-box::placeholder{color:#B0AAA3;}
-.send-btn{width:44px;height:44px;background:#F5A623;border:none;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:#1A1200;flex-shrink:0;}
-.send-btn:hover{background:#E8980F;}
+.send-btn{width:44px;height:44px;background:#00843D;border:none;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:#0D2E18;flex-shrink:0;}
+.send-btn:hover{background:#006830;}
 .input-hints{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
 .hint-chip{background:#F5F2EE;border-radius:5px;padding:3px 9px;cursor:pointer;color:#7A7F8E;font-size:11px;}
-.hint-chip:hover{background:#FAEEDA;color:#854F0B;}
+.hint-chip:hover{background:#E6F4EC;color:#1B5E35;}
 </style>
 <h2 class="sr-only">Diagnostic assistant</h2>
 <div class="shell">
