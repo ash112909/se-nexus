@@ -1969,8 +1969,8 @@ function render_parts_search(el) {
       displayName: 'Skyjack',
       tagline: 'Aerial Work Platforms',
       color: '#00843D',
-      logo: `<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="48" rx="4" fill="#3AAA35"/><text x="14" y="32" font-size="22" font-weight="800" font-family="Inter,sans-serif" fill="#00843D" letter-spacing="-0.5">SKYJACK</text></svg>`,
-      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMinYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="120" fill="#3AAA35"/><defs><linearGradient id="skj-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#3AAA35"/><stop offset="100%" stop-color="#2A2210"/></linearGradient></defs><rect x="0" y="0" width="800" height="120" fill="url(#skj-grad)"/><text x="28" y="52" font-size="32" font-weight="800" font-family="Inter,sans-serif" fill="#00843D" letter-spacing="-1">SKYJACK</text><text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#8A8878" letter-spacing="2">AERIAL WORK PLATFORMS</text><rect x="28" y="88" width="64" height="3" rx="1.5" fill="#00843D"/></svg>`,
+      logo: `<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="48" rx="4" fill="#1F6B22"/><text x="14" y="32" font-size="22" font-weight="800" font-family="Inter,sans-serif" fill="#00843D" letter-spacing="-0.5">SKYJACK</text></svg>`,
+      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMinYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="120" fill="#1F6B22"/><defs><linearGradient id="skj-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#1F6B22"/><stop offset="100%" stop-color="#2A2210"/></linearGradient></defs><rect x="0" y="0" width="800" height="120" fill="url(#skj-grad)"/><text x="28" y="52" font-size="32" font-weight="800" font-family="Inter,sans-serif" fill="#00843D" letter-spacing="-1">SKYJACK</text><text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#8A8878" letter-spacing="2">AERIAL WORK PLATFORMS</text><rect x="28" y="88" width="64" height="3" rx="1.5" fill="#00843D"/></svg>`,
       categories: [
         { icon:'ti-crane',    label:'Scissor Lifts',    sub:'SJIII, SJIV Series',     navModelId:'SKJ-SJIII3219', navComp:null },
         { icon:'ti-forklift', label:'Boom Lifts',       sub:'SJ45T, SJ66T',           navModelId:'SKJ-SJ45T',    navComp:null },
@@ -2184,7 +2184,7 @@ function render_parts_search(el) {
 .ps-search-area{padding:10px 20px;background:#FFFFFF;border-bottom:0.5px solid #E8E4DF;flex-shrink:0;}
 .search-mode-row{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;}
 .smode-btn{padding:4px 10px;border-radius:6px;border:0.5px solid #E2DDD8;background:none;font-size:11px;font-weight:500;color:#5A5F6E;cursor:pointer;font-family:inherit;}
-.smode-btn.active{background:#3AAA35;color:#FFFFFF;border-color:#3AAA35;}
+.smode-btn.active{background:#1F6B22;color:#FFFFFF;border-color:#1F6B22;}
 .search-input-row{display:flex;gap:8px;align-items:center;}
 .search-input-wrap{position:relative;flex:1;}
 .search-icon-abs{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#B0AAA3;font-size:14px;pointer-events:none;}
@@ -2259,7 +2259,7 @@ function render_parts_search(el) {
 .diag-tab-row{display:flex;gap:4px;padding:8px 14px;background:#FAFAF8;border-bottom:0.5px solid #E8E4DF;flex-wrap:wrap;flex-shrink:0;}
 .diag-tab{padding:5px 12px;border-radius:6px;border:0.5px solid #E2DDD8;background:#FFFFFF;font-size:11px;font-weight:500;color:#5A5F6E;cursor:pointer;font-family:inherit;}
 .diag-tab:hover{border-color:#C8C3BC;}
-.diag-tab.active{background:#3AAA35;color:#FFFFFF;border-color:#3AAA35;}
+.diag-tab.active{background:#1F6B22;color:#FFFFFF;border-color:#1F6B22;}
 .diag-svg-area{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:16px;background:#F8F6F2;}
 .diag-canvas{position:relative;display:inline-block;}
 .diag-legend{border-top:0.5px solid #E8E4DF;flex-shrink:0;max-height:200px;overflow-y:auto;}
@@ -2336,7 +2336,7 @@ function render_parts_search(el) {
 .slp-wo-table tr:hover td{background:#FAFAF8;cursor:pointer;}
 .wo-status-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;border-radius:4px;padding:2px 6px;}
 .wo-status-badge.active{background:#E6F4EC;color:#1B5E35;}
-.wo-ribbon{background:#3AAA35;padding:9px 22px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #2D8528;flex-shrink:0;flex-wrap:wrap;}
+.wo-ribbon{background:#1F6B22;padding:9px 22px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #185219;flex-shrink:0;flex-wrap:wrap;}
 .wr-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#8A8FA8;}
 .wr-item strong{color:#FFF;font-weight:600;}
 .wr-sep{color:#3C4052;}
@@ -2355,7 +2355,7 @@ function render_parts_search(el) {
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
       ${buildTopbarRight()}
     </div>
-    ${_impersonating ? `<div style="background:#FFF7ED;border-bottom:2px solid #00843D;padding:9px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:500;color:#1B5E35;flex-shrink:0;"><i class="ti ti-eye" style="font-size:13px;"></i> Viewing as <strong style="margin:0 3px;">${_impersonatingFleet || 'fleet'}</strong> — you are seeing this supplier page as this fleet would see it.<button onclick="Router.navigate('supplier-portal')" style="margin-left:auto;background:#3AAA35;color:#FFFFFF;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;">Exit impersonation</button></div>` : ''}
+    ${_impersonating ? `<div style="background:#FFF7ED;border-bottom:2px solid #00843D;padding:9px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:500;color:#1B5E35;flex-shrink:0;"><i class="ti ti-eye" style="font-size:13px;"></i> Viewing as <strong style="margin:0 3px;">${_impersonatingFleet || 'fleet'}</strong> — you are seeing this supplier page as this fleet would see it.<button onclick="Router.navigate('supplier-portal')" style="margin-left:auto;background:#1F6B22;color:#FFFFFF;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;">Exit impersonation</button></div>` : ''}
     ${_wo ? `<div class="wo-ribbon"><div class="wr-item"><i class="ti ti-shopping-cart" style="color:#00843D;"></i> Adding to <strong>WO #${_wo.id}</strong></div><span class="wr-sep">·</span><div class="wr-item"><strong>${_wo.machine}</strong></div><span class="wr-sep">·</span><div class="wr-item"><strong>${_wo.asset}</strong></div><button onclick="sendPrompt('Work Order detail WO #${_wo.id}')" style="margin-left:auto;background:none;border:1px solid #3C4052;border-radius:6px;padding:4px 11px;font-size:11px;color:#8A8FA8;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;"><i class="ti ti-arrow-left" style="font-size:11px;"></i> Back to WO</button></div>` : ''}
     <div class="ps-search-area">
       <div class="search-mode-row" id="ps-mode-row"></div>

@@ -82,7 +82,7 @@ function render_fleet_admin(el) {
 .fa-section-sub { font-size:12px; color:#7A7F8E; margin-bottom:16px; }
 
 /* ── Avatar ── */
-.fa-avatar { width:36px; height:36px; border-radius:50%; background:#3AAA35; color:#00843D; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.fa-avatar { width:36px; height:36px; border-radius:50%; background:#1F6B22; color:#00843D; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 
 /* ── Location card ── */
 .fa-loc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }

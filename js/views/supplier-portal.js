@@ -42,7 +42,7 @@ function render_supplier_portal(el) {
 .sp-fleet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 32px; }
 .sp-fleet-card { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
 .sp-fleet-card-header { display: flex; align-items: center; gap: 12px; }
-.sp-fleet-logo { width: 40px; height: 40px; background: #3AAA35; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #00843D; flex-shrink: 0; letter-spacing: .5px; }
+.sp-fleet-logo { width: 40px; height: 40px; background: #1F6B22; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #00843D; flex-shrink: 0; letter-spacing: .5px; }
 .sp-fleet-name { font-size: 14px; font-weight: 700; color: #111318; }
 .sp-fleet-city { font-size: 12px; color: #9CA3AF; }
 .sp-fleet-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }

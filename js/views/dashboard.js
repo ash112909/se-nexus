@@ -74,8 +74,8 @@ function render_dashboard(el) {
 .greeting-top { font-size: 20px; font-weight: 700; color: #111318; letter-spacing: -0.3px; }
 .greeting-sub { font-size: 13px; color: #7A7F8E; margin-top: 3px; }
 .section-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #9CA3AF; margin-bottom: 10px; }
-.ai-strip { background: #3AAA35; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 20px; cursor: pointer; }
-.ai-strip:hover { background: #2D8528; }
+.ai-strip { background: #1F6B22; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 20px; cursor: pointer; }
+.ai-strip:hover { background: #185219; }
 .ai-icon { width: 36px; height: 36px; background: #00843D; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; color: #0D2E18; }
 .ai-text { flex: 1; }
 .ai-label { font-size: 13px; font-weight: 600; color: #FFFFFF; margin-bottom: 2px; }
@@ -101,8 +101,8 @@ function render_dashboard(el) {
 .wo-machine-issue { font-size: 13px; color: #7A7F8E; }
 .wo-warranty { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: #0F6E56; background: #E1F5EE; border-radius: 999px; padding: 2px 7px; position: relative; cursor: default; }
 .wo-warranty.expired { color: #5F5E5A; background: #F1EFE8; }
-.wo-warranty .wb-tip { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #3AAA35; color: #FFFFFF; font-size: 12px; font-weight: 400; border-radius: 8px; padding: 8px 12px; white-space: nowrap; pointer-events: none; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
-.wo-warranty .wb-tip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #3AAA35; }
+.wo-warranty .wb-tip { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #1F6B22; color: #FFFFFF; font-size: 12px; font-weight: 400; border-radius: 8px; padding: 8px 12px; white-space: nowrap; pointer-events: none; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
+.wo-warranty .wb-tip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #1F6B22; }
 .wo-warranty:hover .wb-tip { display: block; }
 .wo-footer { display: flex; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 0.5px solid #F0ECE8; gap: 16px; flex-wrap: wrap; }
 .wo-stat { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #9CA3AF; }

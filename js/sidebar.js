@@ -24,7 +24,7 @@ function buildSidebar(activeItem, opts) {
       <div class="sb-item active"><i class="ti ti-search"></i><span class="sb-lbl"> Search parts</span></div>
     </div>
     <div style="margin-top:auto;">
-      <div class="sb-item" onclick="Router.navigate('supplier-portal')" style="color:#00843D;border-top:1px solid #2D8528;">
+      <div class="sb-item" onclick="Router.navigate('supplier-portal')" style="color:#00843D;border-top:1px solid #185219;">
         <i class="ti ti-arrow-left"></i><span class="sb-lbl"> Exit impersonation</span>
       </div>
       <div class="sb-pin-row" id="sb-pin-btn"><i class="ti ${pinIcon}"></i><span class="sb-pin-label">${pinLabel}</span></div>

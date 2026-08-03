@@ -415,7 +415,7 @@ function render_diagnostics(el) {
       fullscreen: true,
       body: '<style>'
         + '.pdf-viewer-wrap{display:flex;flex-direction:column;flex:1;overflow:hidden;}'
-        + '.pdf-viewer-toolbar{background:#3AAA35;padding:8px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}'
+        + '.pdf-viewer-toolbar{background:#1F6B22;padding:8px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}'
         + '.pdf-viewer-meta{color:#9CA3AF;font-size:11px;flex:1;}'
         + '.pdf-frame{flex:1;border:none;background:#525659;width:100%;}'
         + '</style>'
@@ -424,7 +424,7 @@ function render_diagnostics(el) {
         + '<i class="ti ti-book" style="color:#9CA3AF;font-size:13px;flex-shrink:0;"></i>'
         + '<span class="pdf-viewer-meta">Skyjack SJIII Series Operating Manual (ANSI/CSA) · 93 pages</span>'
         + (manPage ? '<span style="font-size:11px;color:#00843D;display:flex;align-items:center;gap:4px;"><i class="ti ti-bookmark-filled" style="font-size:11px;"></i> Page ' + manPage + '</span>' : '')
-        + '<a href="' + pdfFile + '" download style="font-size:11px;color:#9CA3AF;background:#2D8528;border:0.5px solid #3C4052;border-radius:5px;padding:4px 10px;text-decoration:none;display:flex;align-items:center;gap:4px;flex-shrink:0;"><i class="ti ti-download" style="font-size:11px;"></i> Download</a>'
+        + '<a href="' + pdfFile + '" download style="font-size:11px;color:#9CA3AF;background:#185219;border:0.5px solid #3C4052;border-radius:5px;padding:4px 10px;text-decoration:none;display:flex;align-items:center;gap:4px;flex-shrink:0;"><i class="ti ti-download" style="font-size:11px;"></i> Download</a>'
         + '</div>'
         + '<iframe class="pdf-frame" src="' + pdfSrc + '" title="' + (title || 'Manual') + '"></iframe>'
         + '</div>',
