@@ -59,14 +59,154 @@ function render_home(el) {
     { id:'xtreme',      name:'Xtreme Parts'            }, { id:'ziegler',     name:'Ziegler CAT Parts'        },
   ].sort((a,b) => a.name.localeCompare(b.name));
 
-  // Avatar color palette — cycled by first-letter char code
+  // SVG logo helpers — all produce a 34×34 inline SVG mark
+  function _svgWrap(inner) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">${inner}</svg>`;
+  }
+  function _txt(lbl, fg, sz, y) {
+    return `<text x="17" y="${y||17}" text-anchor="middle" dominant-baseline="central" fill="${fg}" font-family="system-ui,Arial,sans-serif" font-weight="800" font-size="${sz||13}" letter-spacing=".5">${lbl}</text>`;
+  }
+  // Solid flat color badge (rounded rect)
+  function svgFlat(bg, lbl, fg, sz) {
+    return _svgWrap(`<rect width="34" height="34" rx="8" fill="${bg}"/>${_txt(lbl,fg,sz)}`);
+  }
+  // Circle badge on light card
+  function svgBadge(circleFill, lbl, fg, sz) {
+    return _svgWrap(`<rect width="34" height="34" rx="8" fill="#F5F2EE"/><circle cx="17" cy="17" r="12" fill="${circleFill}"/>${_txt(lbl,fg,sz)}`);
+  }
+  // Horizontal split (top / bottom)
+  function svgSH(top, bot, lbl, fg, sz) {
+    return _svgWrap(`<rect width="34" height="34" rx="8" fill="${bot}"/><rect width="34" height="17" rx="0" fill="${top}"/><rect width="34" height="8" rx="8" fill="${top}" y="0"/><rect width="34" height="8" rx="8" fill="${bot}" y="26"/>${_txt(lbl,fg,sz)}`);
+  }
+  // Vertical split (left / right)
+  function svgSV(left, right, lbl, fg, sz) {
+    return _svgWrap(`<rect width="34" height="34" rx="8" fill="${right}"/><rect width="17" height="34" fill="${left}"/><rect width="9" height="34" rx="8" fill="${left}" x="0"/><rect width="9" height="34" rx="8" fill="${right}" x="25"/>${_txt(lbl,fg,sz)}`);
+  }
+  // Diagonal split (top-left / bottom-right)
+  function svgDG(c1, c2, lbl, fg, sz) {
+    return _svgWrap(`<rect width="34" height="34" rx="8" fill="${c2}"/><path d="M0 0 L34 0 L0 34 Z" fill="${c1}" clip-path="url(#dgc)"/><clipPath id="dgc"><rect width="34" height="34" rx="8"/></clipPath>${_txt(lbl,fg,sz)}`);
+  }
+  // Stripe accent — solid bg with a right-edge accent stripe
+  function svgStripe(bg, stripe, lbl, fg, sz) {
+    return _svgWrap(`<rect width="34" height="34" rx="8" fill="${bg}"/><rect x="28" width="6" height="34" fill="${stripe}"/><rect x="28" width="6" height="34" rx="0" fill="${stripe}"/><rect x="29" width="5" height="34" rx="3" fill="${stripe}"/>${_txt(lbl,fg,sz)}`);
+  }
+
+  // Per-supplier logo map
+  const SUPPLIER_LOGOS = {
+    'abatement':   svgFlat('#005F8A','ABT','#FFF',10),
+    'abc-weld':    svgFlat('#1A1A1A','ABC','#F59E0B',10),
+    'access-inn':  svgBadge('#6366F1','AI','#FFF',13),
+    'access-trk':  svgFlat('#0F4C81','ATP','#FFF',10),
+    'advance':     svgFlat('#CC0000','ADV','#FFF',10),
+    'airgas':      svgFlat('#003087','AG','#FFF',13),
+    'allen-eng':   svgFlat('#2563EB','AE','#FFF',13),
+    'allmand':     svgFlat('#D97706','AMB','#FFF',10),
+    'ametek':      svgFlat('#1E3A5F','AMK','#FFF',10),
+    'ana-airman':  svgSH('#005BAA','#E8F0FB','ANA','#FFF',11),
+    'apt':         svgFlat('#374151','APT','#FCD34D',11),
+    'armadillo':   svgBadge('#92400E','AT','#FFF',13),
+    'arp-elec':    svgFlat('#FDE68A','ARP','#1F2937',10),
+    'arrow':       svgFlat('#6B7280','ARW','#FFF',10),
+    'astrak':      svgFlat('#0D4F3C','ASK','#4ADE80',10),
+    'atlas-cop':   svgFlat('#0072BC','AC','#FFF',13),
+    'baldor':      svgFlat('#1B3A6B','BLD','#FFF',10),
+    'baldwin':     svgFlat('#D32F2F','BFI','#FFF',10),
+    'bobcat':      svgFlat('#FF6720','BC','#FFF',14),
+    'bosch-pt':    svgFlat('#D40000','BSC','#FFF',10),
+    'bosch-rex':   svgFlat('#D40000','BRX','#FFF',10),
+    'bridgestone': svgSH('#CC0000','#1A1A1A','BS','#FFF',13),
+    'carquest':    svgFlat('#CC0000','CQ','#FFF',13),
+    'case':        svgFlat('#F0A500','CAS','#1A1A1A',10),
+    'caterpillar': svgFlat('#FFC72C','CAT','#1A1A1A',11),
+    'continental': svgFlat('#F5A200','CNT','#1A1A1A',10),
+    'cte':         svgFlat('#1D4ED8','CTE','#FFF',11),
+    'cummins':     svgBadge('#E31C37','C','#FFF',17),
+    'danfoss':     svgFlat('#E2001A','DAN','#FFF',10),
+    'dewalt':      svgFlat('#FEBD17','DW','#1A1A1A',14),
+    'donaldson':   svgFlat('#005E9E','DON','#FFF',10),
+    'doosan':      svgFlat('#003087','DPN','#FFF',10),
+    'dur-a-lift':  svgFlat('#CC5500','DAL','#FFF',10),
+    'eaton':       svgFlat('#001A70','ETN','#FFF',10),
+    'emerson':     svgFlat('#0056A2','EMR','#FFF',10),
+    'empire-hyd':  svgDG('#7C3AED','#1E1B4B','EH','#FFF',13),
+    'enerpac':     svgFlat('#E10600','EP','#FFF',13),
+    'fastenal':    svgFlat('#003DA5','FST','#FFC72C',10),
+    'fleetpride':  svgFlat('#CC0000','FP','#FFF',13),
+    'flo-comp':    svgFlat('#0F766E','FLO','#FFF',11),
+    'flowserve':   svgFlat('#003087','FSV','#FFF',10),
+    'genie':       svgFlat('#00AEEF','GEN','#1A1A1A',10),
+    'grainger':    svgFlat('#CC0000','GRA','#FFF',10),
+    'grove':       svgFlat('#1B5E20','GRV','#A5D6A7',10),
+    'haulotte':    svgFlat('#F97316','HAU','#FFF',10),
+    'hendrickson': svgFlat('#003DA5','HEN','#FFF',10),
+    'hose-fit':    svgFlat('#374151','HFI','#FCD34D',10),
+    'husco':       svgFlat('#005BAA','HSC','#FFF',10),
+    'hydraforce':  svgFlat('#0F4C81','HF','#FFF',13),
+    'igus':        svgFlat('#FF6600','IGS','#1A1A1A',10),
+    'ingersoll':   svgFlat('#003DA5','IR','#FFF',14),
+    'inpro':       svgFlat('#2D3748','IPR','#FFF',10),
+    'interstate':  svgFlat('#CC0000','INT','#FFF',10),
+    'jlg':         svgFlat('#003DA5','JLG','#FFF',11),
+    'john-deere':  svgSV('#367C2B','#FFDE00','JD','#FFF',13),
+    'knd':         svgFlat('#E10600','K&N','#1A1A1A',11),
+    'komatsu':     svgFlat('#F59E0B','KMT','#1A1A1A',10),
+    'lift-parts':  svgBadge('#059669','LQ','#FFF',13),
+    'lincoln-elc': svgFlat('#CC0000','LNE','#FFF',10),
+    'link-belt':   svgFlat('#F59E0B','LBC','#1A1A1A',10),
+    'lubrizol':    svgFlat('#0F5132','LBZ','#FFF',10),
+    'manitou':     svgSH('#E10600','#1A1A1A','MAN','#FFF',10),
+    'manitowoc':   svgFlat('#003087','MTC','#FFF',10),
+    'mcneilus':    svgFlat('#CC0000','MCN','#FFF',10),
+    'meritor':     svgFlat('#003DA5','MRT','#FFF',10),
+    'michelin':    svgFlat('#003087','MCH','#FFF',10),
+    'mobil-ind':   svgFlat('#CC0000','MOB','#FFF',10),
+    'msc':         svgFlat('#0052A5','MSC','#FFF',11),
+    'napa':        svgSH('#003DA5','#F7A800','NAPA','#FFF',9),
+    'nat-hyd':     svgFlat('#1D4ED8','NHS','#FFF',10),
+    'netzsch':     svgFlat('#E10600','NTZ','#FFF',10),
+    'oregon':      svgFlat('#4B5320','ORG','#FFF',10),
+    'pce':         svgFlat('#0F4C81','PCE','#FFF',10),
+    'parker':      svgDG('#FF6600','#1A1A1A','PH','#FFF',13),
+    'perkins':     svgFlat('#003DA5','PKS','#FFF',10),
+    'pettibone':   svgFlat('#CC5500','PTB','#FFF',10),
+    'raymond':     svgFlat('#0052A5','RCO','#FFF',10),
+    'rexnord':     svgFlat('#1B3A6B','RXN','#FFF',10),
+    'sauer':       svgFlat('#E2001A','S-D','#FFF',11),
+    'schaeffer':   svgFlat('#003087','SFR','#FFF',10),
+    'shell-lub':   svgFlat('#FCD217','SHL','#CC0000',10),
+    'skf':         svgFlat('#003DA5','SKF','#FEBD17',11),
+    'skyjack':     svgFlat('#1F6B22','SJ','#FFF',14),
+    'stanley':     svgFlat('#FCD217','SWK','#1A1A1A',10),
+    'sun-hyd':     svgBadge('#0052A5','SH','#FFF',13),
+    'sunbelt-pts': svgFlat('#F97316','SBP','#FFF',10),
+    'superior':    svgFlat('#6B21A8','SUP','#FFF',10),
+    'terex':       svgFlat('#009639','TRX','#FFF',10),
+    'toro':        svgFlat('#CC0000','TRO','#FFF',10),
+    'toyota':      svgBadge('#CC0000','TMH','#FFF',10),
+    'trelleborg':  svgFlat('#00457C','TRB','#FFF',10),
+    'twin-power':  svgFlat('#1B3A6B','TP','#FFF',13),
+    'united-pts':  svgFlat('#003DA5','UPS','#FFF',10),
+    'valeo':       svgFlat('#003DA5','VLO','#FFF',10),
+    'vanair':      svgFlat('#1D4ED8','VNR','#FFF',10),
+    'vermeer':     svgFlat('#F59E0B','VMR','#1A1A1A',10),
+    'wagner':      svgFlat('#374151','WGR','#FFF',10),
+    'wesco':       svgFlat('#CC0000','WSC','#FFF',10),
+    'xtreme':      svgFlat('#7C3AED','XPT','#FFF',10),
+    'ziegler':     svgFlat('#FFC72C','ZGR','#1A1A1A',10),
+  };
+
+  // Fallback letter avatar for unmapped suppliers
   const AV_COLORS = [
     { bg:'#E6F4EC', fg:'#1B5E35' }, { bg:'#DBEAFE', fg:'#1D4ED8' }, { bg:'#FEE2E2', fg:'#B91C1C' },
     { bg:'#EDE9FE', fg:'#534AB7' }, { bg:'#D1FAE5', fg:'#065F46' }, { bg:'#FEF3C7', fg:'#92400E' },
     { bg:'#F3F4F6', fg:'#374151' }, { bg:'#FFE4E6', fg:'#9F1239' }, { bg:'#E0F2FE', fg:'#0369A1' },
     { bg:'#FDF4FF', fg:'#7E22CE' },
   ];
-  function avColor(name) { return AV_COLORS[name.charCodeAt(0) % AV_COLORS.length]; }
+  function svgLogo(id, name) {
+    if (SUPPLIER_LOGOS[id]) return SUPPLIER_LOGOS[id];
+    const av = AV_COLORS[name.charCodeAt(0) % AV_COLORS.length];
+    return svgFlat(av.bg, name[0].toUpperCase(), av.fg, 15);
+  }
 
   // Keep a small array for the welcome-bar stat reference
   const SUPPLIERS = ALL_SUPPLIERS;
@@ -174,7 +314,8 @@ function render_home(el) {
 .hs-list    { max-height:540px; overflow-y:auto; padding:4px 0; }
 .hs-row     { display:flex; align-items:center; gap:10px; padding:7px 12px; cursor:pointer; transition:background .1s; }
 .hs-row:hover { background:#F5F2EE; }
-.hs-avatar  { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; letter-spacing:.3px; }
+.hs-avatar  { width:34px; height:34px; border-radius:8px; overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.hs-avatar svg { width:34px; height:34px; display:block; }
 .hs-row-name { font-size:13px; font-weight:600; color:#111318; line-height:1.3; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 </style>
 
@@ -274,13 +415,10 @@ function render_home(el) {
               <input class="hs-search" id="hs-search" placeholder="Filter suppliers…" oninput="hsFilter(this.value)" autocomplete="off"/>
             </div>
             <div class="hs-list" id="hs-list">
-              ${ALL_SUPPLIERS.map(s => {
-                const av = avColor(s.name);
-                return `<div class="hs-row" data-name="${s.name.toLowerCase()}" onclick="homeOpenSupplier('${s.id}')">
-                  <div class="hs-avatar" style="background:${av.bg};color:${av.fg};">${s.name[0].toUpperCase()}</div>
+              ${ALL_SUPPLIERS.map(s => `<div class="hs-row" data-name="${s.name.toLowerCase()}" onclick="homeOpenSupplier('${s.id}')">
+                  <div class="hs-avatar">${svgLogo(s.id, s.name)}</div>
                   <div class="hs-row-name">${s.name}</div>
-                </div>`;
-              }).join('')}
+                </div>`).join('')}
             </div>
           </div>
         </div>
