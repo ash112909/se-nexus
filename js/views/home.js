@@ -233,151 +233,198 @@ function render_home(el) {
     notice:  { label:'Notice',           color:'#374151', bg:'#F9FAFB', icon:'ti-info-circle'    },
   };
 
-  function _sbBadge() {
-    return `<div style="display:inline-flex;align-items:center;gap:5px;background:#00843D;border-radius:5px;padding:3px 9px;">
-      <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4.5" fill="none" stroke="#FFF" stroke-width=".8"/><path d="M5 1.5 L6.5 4 L9 4.2 L7 6 L7.6 8.5 L5 7.2 L2.4 8.5 L3 6 L1 4.2 L3.5 4Z" fill="#FFF"/></svg>
-      <span style="font-size:9px;font-weight:800;color:#FFF;letter-spacing:.4px;font-family:system-ui,sans-serif;">SUNBELT RENTALS</span>
-    </div>`;
-  }
-
-  function _catGrid(items, accent) {
-    return items.map(c => `<div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border-radius:7px;padding:8px 10px;">
-      <div style="width:26px;height:26px;background:rgba(0,0,0,.3);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <i class="ti ${c.icon}" style="font-size:13px;color:${accent};"></i>
-      </div>
-      <span style="font-size:11px;font-weight:600;color:#D8D8D8;">${c.label}</span>
-    </div>`).join('');
-  }
-
   const SLIDES = [
+    // ── Slide 1: MWE / Bridgestone — Tracks, Tires, Undercarriage ──────────
     {
-      bg:'#0D0D0D',
-      html:`<div style="display:flex;width:100%;">
-        <div style="flex:0 0 44%;background:#1A1100;padding:22px 20px;display:flex;flex-direction:column;justify-content:space-between;min-height:166px;">
-          <div>
-            <div style="display:inline-block;background:#FFC72C;padding:3px 10px;border-radius:3px;margin-bottom:11px;">
-              <span style="font-size:20px;font-weight:900;color:#1A1A1A;letter-spacing:-1px;font-family:Arial Black,Arial,sans-serif;">CAT</span>
-            </div>
-            <div style="font-size:16px;font-weight:800;color:#FFF;line-height:1.25;margin-bottom:5px;">Genuine Cat® Parts<br><span style="color:#FFC72C;">Zero Downtime.</span></div>
-            <div style="font-size:10px;color:rgba(255,255,255,.4);line-height:1.6;">Ziegler CAT Parts — Authorized Distributor<br>Available on Sunbelt Parts Supply</div>
+      bg:'#0A0A0A',
+      html:`<div style="display:flex;width:100%;min-height:188px;">
+        <!-- Left: photo-style panel with bold text over dark texture -->
+        <div style="flex:0 0 46%;position:relative;overflow:hidden;background:#111;display:flex;flex-direction:column;justify-content:flex-end;padding:20px 18px;">
+          <!-- diagonal texture stripes -->
+          <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.07;" viewBox="0 0 200 200" preserveAspectRatio="none">
+            ${Array.from({length:20},(_,i)=>`<line x1="${i*22-40}" y1="0" x2="${i*22+40}" y2="200" stroke="#FFC72C" stroke-width="18"/>`).join('')}
+          </svg>
+          <!-- overlay gradient -->
+          <div style="position:absolute;inset:0;background:linear-gradient(135deg,#1a0a00 0%,transparent 60%,#0a0a0a 100%);"></div>
+          <!-- brand logos top-left -->
+          <div style="position:absolute;top:14px;left:16px;display:flex;gap:6px;align-items:center;">
+            <div style="background:#CC0000;border-radius:3px;padding:2px 7px;"><span style="font-size:9px;font-weight:900;color:#FFF;letter-spacing:.4px;font-family:Arial,sans-serif;">BRIDGESTONE</span></div>
+            <div style="background:#1a1a1a;border:1px solid #444;border-radius:3px;padding:2px 7px;"><span style="font-size:9px;font-weight:900;color:#FFC72C;letter-spacing:.4px;font-family:Arial,sans-serif;">ASTRAK</span></div>
           </div>
-          <button onclick="sendPrompt('Search Caterpillar parts')" style="margin-top:14px;display:inline-flex;align-items:center;gap:5px;padding:7px 13px;background:#FFC72C;color:#1A1A1A;border:none;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;width:fit-content;">Shop Cat Parts <i class="ti ti-arrow-right" style="font-size:10px;"></i></button>
+          <!-- big headline -->
+          <div style="position:relative;">
+            <div style="font-size:26px;font-weight:900;color:#FFF;line-height:1.0;letter-spacing:-1px;font-family:Arial Black,Arial,sans-serif;text-transform:uppercase;">TRACKS,<br>TIRES,<br><span style="color:#FFC72C;">UNDER-<br>CARRIAGE</span></div>
+          </div>
         </div>
-        <div style="flex:1;background:#141414;padding:16px 18px;display:flex;flex-direction:column;gap:7px;">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
-            ${_catGrid([
-              {icon:'ti-filter',         label:'Filters & Fluids'},
-              {icon:'ti-settings-2',     label:'Undercarriage'},
-              {icon:'ti-droplet',        label:'Hydraulics'},
-              {icon:'ti-engine',         label:'Engine Parts'},
-              {icon:'ti-bolt',           label:'Electrical'},
-              {icon:'ti-tools',          label:'Ground Engaging'},
-            ],'#FFC72C')}
+        <!-- Right: white panel with product grid -->
+        <div style="flex:1;background:#FAFAFA;padding:16px 16px 12px;">
+          <div style="font-size:8px;font-weight:700;color:#999;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Product Lines</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;">
+            ${[
+              {label:'CTL Rubber Tracks',      svg:`<path d="M4 8 Q8 4 16 4 Q24 4 28 8 L30 12 Q26 16 16 16 Q6 16 2 12Z" fill="none" stroke="#222" stroke-width="2"/><rect x="8" y="7" width="16" height="5" rx="2" fill="#222"/>`},
+              {label:'MX Rubber Tracks',        svg:`<path d="M3 10 Q8 4 16 4 Q24 4 29 10 L29 12 Q24 18 16 18 Q8 18 3 12Z" fill="none" stroke="#444" stroke-width="1.5"/><rect x="7" y="8" width="18" height="6" rx="3" fill="#333"/>`},
+              {label:'Steel Track Assemblies',  svg:`<rect x="3" y="7" width="26" height="8" rx="2" fill="none" stroke="#555" stroke-width="1.5"/>${[0,1,2,3,4].map(i=>`<rect x="${5+i*5}" y="9" width="3" height="4" rx="1" fill="#555"/>`).join('')}`},
+              {label:'Hybrid Tracks',           svg:`<path d="M4 10 Q16 4 28 10 L28 12 Q16 18 4 12Z" fill="none" stroke="#333" stroke-width="1.5"/><circle cx="16" cy="11" r="4" fill="none" stroke="#555" stroke-width="1.2"/>`},
+              {label:'Pneumatic &amp; Solid Tires', svg:`<circle cx="16" cy="11" r="8" fill="none" stroke="#222" stroke-width="2.5"/><circle cx="16" cy="11" r="3.5" fill="none" stroke="#666" stroke-width="1"/>`},
+              {label:'Clip-on / Bolt-on Pads',  svg:`<rect x="5" y="7" width="22" height="8" rx="3" fill="none" stroke="#444" stroke-width="1.5"/><rect x="9" y="9" width="14" height="4" rx="1" fill="#ccc"/>${[0,1,2].map(i=>`<circle cx="${10+i*5}" cy="11" r="1.2" fill="#888"/>`).join('')}`},
+            ].map(p=>`<div style="display:flex;align-items:center;gap:8px;background:#FFF;border:1px solid #E8E4DF;border-radius:7px;padding:7px 9px;">
+              <svg width="32" height="22" viewBox="0 0 32 22">${p.svg}</svg>
+              <span style="font-size:10px;font-weight:600;color:#111318;line-height:1.3;">${p.label}</span>
+            </div>`).join('')}
           </div>
-          <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:4px;">
-            <span style="font-size:9px;color:rgba(255,255,255,.25);letter-spacing:.5px;text-transform:uppercase;">Preferred Supplier</span>
-            ${_sbBadge()}
-          </div>
+          <button onclick="sendPrompt('Search track and tire parts')" style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#111318;color:#FFF;border:none;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;">Browse Catalog <i class="ti ti-arrow-right" style="font-size:9px;"></i></button>
         </div>
       </div>`
     },
+
+    // ── Slide 2: Doosan Portable Power — Generators ────────────────────────
     {
-      bg:'#080808',
-      html:`<div style="display:flex;width:100%;">
-        <div style="flex:0 0 44%;background:#12090A;padding:22px 20px;display:flex;flex-direction:column;justify-content:space-between;min-height:166px;">
-          <div>
-            <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;">
-              <div style="background:#CC0000;border-radius:4px;padding:3px 9px;"><span style="font-size:11px;font-weight:900;color:#FFF;letter-spacing:.5px;font-family:Arial,sans-serif;">BRIDGESTONE</span></div>
-            </div>
-            <div style="font-size:16px;font-weight:800;color:#FFF;line-height:1.25;margin-bottom:5px;">TRACKS.<br>TIRES.<br><span style="color:#CC0000;">UNDERCARRIAGE.</span></div>
-            <div style="font-size:10px;color:rgba(255,255,255,.4);line-height:1.5;">OEM-grade replacement for<br>CTL, excavator &amp; aerial fleets</div>
-          </div>
-          <button onclick="sendPrompt('Search Bridgestone tires')" style="margin-top:14px;display:inline-flex;align-items:center;gap:5px;padding:7px 13px;background:#CC0000;color:#FFF;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;width:fit-content;">Browse Catalog <i class="ti ti-arrow-right" style="font-size:10px;"></i></button>
-        </div>
-        <div style="flex:1;background:#111111;padding:16px 18px;display:flex;flex-direction:column;gap:7px;">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
-            ${_catGrid([
-              {icon:'ti-circle',       label:'CTL Rubber Tracks'},
-              {icon:'ti-circles',      label:'MX Rubber Tracks'},
-              {icon:'ti-link',         label:'Steel Track Assemblies'},
-              {icon:'ti-adjustments',  label:'Hybrid Tracks'},
-              {icon:'ti-wind',         label:'Pneumatic Tires'},
-              {icon:'ti-diamond',      label:'Solid Fill OTTs'},
-            ],'#CC0000')}
-          </div>
-          <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:4px;">
-            <span style="font-size:9px;color:rgba(255,255,255,.25);letter-spacing:.5px;text-transform:uppercase;">Preferred Supplier</span>
-            ${_sbBadge()}
-          </div>
-        </div>
-      </div>`
-    },
-    {
-      bg:'#060608',
-      html:`<div style="display:flex;width:100%;">
-        <div style="flex:0 0 44%;background:#130800;padding:22px 20px;display:flex;flex-direction:column;justify-content:space-between;min-height:166px;">
-          <div>
-            <div style="margin-bottom:10px;display:flex;align-items:center;gap:0;">
-              <div style="background:#FF6600;width:8px;height:34px;border-radius:3px 0 0 3px;"></div>
-              <div style="background:#1A1A1A;padding:4px 10px;border-radius:0 4px 4px 0;border:1px solid #333;">
-                <span style="font-size:10px;font-weight:900;color:#FF6600;letter-spacing:.3px;font-family:Arial,sans-serif;">PARKER</span>
-                <span style="font-size:8px;font-weight:500;color:rgba(255,255,255,.5);display:block;letter-spacing:.5px;">HANNIFIN</span>
+      bg:'#060C06',
+      html:`<div style="position:relative;width:100%;min-height:188px;overflow:hidden;background:linear-gradient(135deg,#060C06 0%,#0A1A08 50%,#060C06 100%);">
+        <!-- dramatic background grid -->
+        <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.06;" viewBox="0 0 600 200" preserveAspectRatio="none">
+          ${Array.from({length:12},(_,i)=>`<line x1="${i*55}" y1="0" x2="${i*55}" y2="200" stroke="#4ADE80" stroke-width=".5"/>`).join('')}
+          ${Array.from({length:5},(_,i)=>`<line x1="0" y1="${i*45}" x2="600" y2="${i*45}" stroke="#4ADE80" stroke-width=".5"/>`).join('')}
+        </svg>
+        <!-- lightning bolt accent -->
+        <svg style="position:absolute;right:0;top:0;opacity:.08;" width="200" height="200" viewBox="0 0 200 200">
+          <path d="M120 10 L80 95 L110 95 L70 190 L150 80 L118 80Z" fill="#4ADE80"/>
+        </svg>
+        <div style="position:relative;padding:22px 24px;display:flex;gap:24px;align-items:center;">
+          <!-- Left: brand + headline -->
+          <div style="flex:0 0 auto;min-width:180px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+              <div style="width:36px;height:36px;background:#1a1a1a;border:1.5px solid #333;border-radius:7px;display:flex;align-items:center;justify-content:center;">
+                <svg width="22" height="22" viewBox="0 0 22 22"><path d="M13 2 L9 10 L13 10 L8 20 L16 9 L12 9Z" fill="#4ADE80"/></svg>
+              </div>
+              <div>
+                <div style="font-size:11px;font-weight:900;color:#FFF;letter-spacing:.3px;font-family:Arial,sans-serif;">DOOSAN</div>
+                <div style="font-size:8px;color:rgba(255,255,255,.45);letter-spacing:.5px;">PORTABLE POWER</div>
               </div>
             </div>
-            <div style="font-size:15px;font-weight:800;color:#FFF;line-height:1.3;margin-bottom:5px;">Hydraulic &amp; Motion<br>Control Solutions</div>
-            <div style="font-size:10px;color:rgba(255,255,255,.4);line-height:1.5;">Hose, fittings, cylinders &amp;<br>pump assemblies in stock</div>
+            <div style="font-size:13px;font-weight:900;color:#FFF;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px;">Inverter Generators</div>
+            <div style="font-size:22px;font-weight:900;color:#4ADE80;line-height:1.1;margin-bottom:8px;">Empowering<br>your fleet.</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.45);margin-bottom:14px;">CO Detector equipped.<br>Built for job-site demands.</div>
+            <button onclick="sendPrompt('Search generator parts')" style="display:inline-flex;align-items:center;gap:5px;padding:7px 13px;background:#4ADE80;color:#0A1A08;border:none;border-radius:6px;font-size:10px;font-weight:800;cursor:pointer;font-family:inherit;">View Models <i class="ti ti-arrow-right" style="font-size:9px;"></i></button>
           </div>
-          <button onclick="sendPrompt('Search Parker Hannifin parts')" style="margin-top:14px;display:inline-flex;align-items:center;gap:5px;padding:7px 13px;background:#FF6600;color:#FFF;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;width:fit-content;">Find Parts <i class="ti ti-arrow-right" style="font-size:10px;"></i></button>
-        </div>
-        <div style="flex:1;background:#0E0E0E;padding:16px 18px;display:flex;flex-direction:column;gap:7px;">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
-            ${_catGrid([
-              {icon:'ti-wave-sine',    label:'Hydraulic Hose'},
-              {icon:'ti-plug',         label:'Fittings & Adapters'},
-              {icon:'ti-arrow-up-circle', label:'Cylinders'},
-              {icon:'ti-refresh',      label:'Pump Assemblies'},
-              {icon:'ti-filter',       label:'Filtration'},
-              {icon:'ti-gauge',        label:'Instrumentation'},
-            ],'#FF6600')}
-          </div>
-          <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:4px;">
-            <span style="font-size:9px;color:rgba(255,255,255,.25);letter-spacing:.5px;text-transform:uppercase;">Preferred Supplier</span>
-            ${_sbBadge()}
+          <!-- Right: 3 generator units -->
+          <div style="flex:1;display:flex;gap:12px;align-items:flex-end;justify-content:center;">
+            ${[
+              {model:'P025IF',  kw:'2.5 kW',  h:90,  accent:'#4ADE80'},
+              {model:'P040IF',  kw:'4.0 kW',  h:108, accent:'#86EFAC'},
+              {model:'P080IF',  kw:'8.0 kW',  h:124, accent:'#4ADE80'},
+            ].map(g=>`<div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+              <!-- generator body SVG -->
+              <svg width="64" height="${g.h}" viewBox="0 0 64 ${g.h}">
+                <!-- chassis -->
+                <rect x="6" y="${g.h-30}" width="52" height="26" rx="4" fill="#1C2B1C" stroke="#2A3F2A" stroke-width="1"/>
+                <!-- body -->
+                <rect x="8" y="14" width="48" height="${g.h-44}" rx="5" fill="#1A2E1A" stroke="#2D4A2D" stroke-width="1"/>
+                <!-- top panel -->
+                <rect x="10" y="10" width="44" height="10" rx="3" fill="#233523"/>
+                <!-- vent slats -->
+                ${Array.from({length:4},(_,i)=>`<rect x="14" y="${18+i*7}" width="36" height="3" rx="1" fill="#0D1F0D" opacity=".8"/>`).join('')}
+                <!-- accent stripe -->
+                <rect x="8" y="${g.h-42}" width="48" height="5" fill="${g.accent}" opacity=".7"/>
+                <!-- exhaust pipe -->
+                <rect x="48" y="${g.h-56}" width="6" height="20" rx="3" fill="#333"/>
+                <!-- wheel -->
+                <circle cx="16" cy="${g.h-6}" r="6" fill="#111" stroke="#333" stroke-width="1"/>
+                <circle cx="48" cy="${g.h-6}" r="6" fill="#111" stroke="#333" stroke-width="1"/>
+                <circle cx="16" cy="${g.h-6}" r="2.5" fill="#444"/>
+                <circle cx="48" cy="${g.h-6}" r="2.5" fill="#444"/>
+                <!-- brand dot -->
+                <circle cx="32" cy="${g.h-60}" r="5" fill="${g.accent}" opacity=".6"/>
+              </svg>
+              <div style="text-align:center;">
+                <div style="font-size:9px;font-weight:800;color:${g.accent};letter-spacing:.5px;">${g.model}</div>
+                <div style="font-size:11px;font-weight:700;color:#FFF;">${g.kw}</div>
+              </div>
+            </div>`).join('')}
           </div>
         </div>
       </div>`
     },
+
+    // ── Slide 3: Parker Hannifin — Hydraulic Solutions ─────────────────────
     {
-      bg:'#060A06',
-      html:`<div style="display:flex;width:100%;">
-        <div style="flex:0 0 44%;background:#061206;padding:22px 20px;display:flex;flex-direction:column;justify-content:space-between;min-height:166px;">
-          <div>
-            <div style="margin-bottom:10px;">
-              <div style="display:inline-flex;align-items:center;gap:6px;background:#003DA5;border-radius:5px;padding:4px 10px;">
-                <i class="ti ti-crane" style="font-size:12px;color:#FFF;"></i>
-                <span style="font-size:10px;font-weight:900;color:#FFF;letter-spacing:.3px;font-family:Arial,sans-serif;">JLG</span>
-                <span style="font-size:8px;color:rgba(255,255,255,.6);">INDUSTRIES</span>
+      bg:'#0A0500',
+      html:`<div style="display:flex;width:100%;min-height:188px;">
+        <!-- Left: brand panel -->
+        <div style="flex:0 0 44%;background:linear-gradient(160deg,#1A0800 0%,#0F0500 100%);padding:22px 20px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;">
+          <!-- diagonal accent -->
+          <svg style="position:absolute;right:-10px;top:0;opacity:.15;" width="80" height="200" viewBox="0 0 80 200">
+            <polygon points="80,0 80,200 0,200" fill="#FF6600"/>
+          </svg>
+          <div style="position:relative;">
+            <!-- Parker logo mark -->
+            <div style="display:flex;align-items:stretch;gap:0;margin-bottom:14px;">
+              <div style="background:#FF6600;width:6px;border-radius:3px 0 0 3px;"></div>
+              <div style="background:#1A1A1A;border:1px solid #2A2A2A;padding:5px 12px;border-radius:0 5px 5px 0;">
+                <div style="font-size:14px;font-weight:900;color:#FF6600;letter-spacing:-.3px;font-family:Arial Black,Arial,sans-serif;line-height:1;">PARKER</div>
+                <div style="font-size:7px;color:rgba(255,255,255,.4);letter-spacing:1.2px;margin-top:1px;">HANNIFIN</div>
               </div>
             </div>
-            <div style="font-size:15px;font-weight:800;color:#FFF;line-height:1.3;margin-bottom:5px;">Aerial Work Platform<br><span style="color:#60A5FA;">Parts &amp; Service</span></div>
-            <div style="font-size:10px;color:rgba(255,255,255,.4);line-height:1.5;">Genuine OEM parts for boom,<br>scissor &amp; telehandler fleets</div>
+            <div style="font-size:18px;font-weight:800;color:#FFF;line-height:1.2;margin-bottom:6px;">Hydraulic &amp;<br>Motion Control</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.4);line-height:1.6;">Hose assemblies · Fittings<br>Cylinders · Pump &amp; motor</div>
           </div>
-          <button onclick="sendPrompt('Search JLG parts')" style="margin-top:14px;display:inline-flex;align-items:center;gap:5px;padding:7px 13px;background:#003DA5;color:#FFF;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;width:fit-content;">Shop JLG OEM <i class="ti ti-arrow-right" style="font-size:10px;"></i></button>
+          <button onclick="sendPrompt('Search Parker hydraulic parts')" style="display:inline-flex;align-items:center;gap:5px;padding:7px 13px;background:#FF6600;color:#FFF;border:none;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;width:fit-content;position:relative;">Find Parts <i class="ti ti-arrow-right" style="font-size:9px;"></i></button>
         </div>
-        <div style="flex:1;background:#0A0E0A;padding:16px 18px;display:flex;flex-direction:column;gap:7px;">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
-            ${_catGrid([
-              {icon:'ti-crane',         label:'Boom Lift Parts'},
-              {icon:'ti-arrows-vertical', label:'Scissor Lift Parts'},
-              {icon:'ti-forklift',      label:'Telehandler Parts'},
-              {icon:'ti-battery',       label:'Battery & Electrical'},
-              {icon:'ti-settings',      label:'Drive Components'},
-              {icon:'ti-shield-check',  label:'Safety Systems'},
-            ],'#60A5FA')}
+        <!-- Right: product illustration panel -->
+        <div style="flex:1;background:#0E0E0E;padding:14px 16px;display:flex;flex-direction:column;gap:0;">
+          <div style="font-size:8px;font-weight:700;color:#555;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Product Catalog</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1;">
+            ${[
+              {label:'Hydraulic Hose', svg:`<!-- coiled hose --><path d="M8 16 Q8 8 16 8 Q24 8 24 14 Q24 20 16 20 Q10 20 10 15" fill="none" stroke="#FF6600" stroke-width="3" stroke-linecap="round"/><path d="M10 15 Q10 10 16 10" fill="none" stroke="#FF6600" stroke-width="3" stroke-linecap="round" opacity=".5"/>`},
+              {label:'Fittings &amp; Adapters', svg:`<rect x="12" y="6" width="8" height="14" rx="2" fill="#555"/><polygon points="10,9 22,9 24,13 10,13" fill="#888"/><polygon points="10,15 22,15 24,11 10,11" fill="#666"/><rect x="14" y="4" width="4" height="4" rx="1" fill="#444"/>`},
+              {label:'Cylinders', svg:`<rect x="5" y="9" width="28" height="8" rx="4" fill="#444" stroke="#FF6600" stroke-width="1"/><rect x="2" y="11" width="8" height="4" rx="2" fill="#333" stroke="#555" stroke-width="1"/><rect x="25" y="11" width="12" height="4" rx="2" fill="#666"/><circle cx="10" cy="13" r="2" fill="#FF6600" opacity=".6"/>`},
+              {label:'Pump Assemblies', svg:`<circle cx="16" cy="13" r="9" fill="none" stroke="#FF6600" stroke-width="1.5"/><circle cx="16" cy="13" r="5" fill="#222" stroke="#555" stroke-width="1"/>${Array.from({length:6},(_,i)=>`<line x1="16" y1="13" x2="${16+9*Math.cos(i*Math.PI/3)}" y2="${13+9*Math.sin(i*Math.PI/3)}" stroke="#FF6600" stroke-width="1" opacity=".4"/>`).join('')}<circle cx="16" cy="13" r="2" fill="#FF6600"/>`},
+              {label:'Filtration', svg:`<rect x="10" y="4" width="12" height="18" rx="3" fill="#333" stroke="#555" stroke-width="1"/>${Array.from({length:5},(_,i)=>`<rect x="12" y="${7+i*3}" width="8" height="1.5" rx="1" fill="#FF6600" opacity=".6"/>`).join('')}<rect x="9" y="18" width="14" height="4" rx="2" fill="#444"/>`},
+              {label:'Instrumentation', svg:`<circle cx="16" cy="13" r="9" fill="#222" stroke="#555" stroke-width="1"/><circle cx="16" cy="13" r="6" fill="none" stroke="#444" stroke-width="1"/>${Array.from({length:8},(_,i)=>`<line x1="${16+5*Math.cos(i*Math.PI/4)}" y1="${13+5*Math.sin(i*Math.PI/4)}" x2="${16+7*Math.cos(i*Math.PI/4)}" y2="${13+7*Math.sin(i*Math.PI/4)}" stroke="#666" stroke-width="1"/>`).join('')}<line x1="16" y1="13" x2="20" y2="10" stroke="#FF6600" stroke-width="1.5" stroke-linecap="round"/>`},
+            ].map(p=>`<div style="display:flex;align-items:center;gap:8px;background:#161616;border-radius:7px;padding:8px 10px;">
+              <svg width="34" height="26" viewBox="0 0 34 26">${p.svg}</svg>
+              <span style="font-size:10px;font-weight:600;color:#D0D0D0;line-height:1.3;">${p.label}</span>
+            </div>`).join('')}
           </div>
-          <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:4px;">
-            <span style="font-size:9px;color:rgba(255,255,255,.25);letter-spacing:.5px;text-transform:uppercase;">Preferred Supplier</span>
-            ${_sbBadge()}
+        </div>
+      </div>`
+    },
+
+    // ── Slide 4: Caterpillar — Genuine Parts ───────────────────────────────
+    {
+      bg:'#100E00',
+      html:`<div style="display:flex;width:100%;min-height:188px;">
+        <!-- Left: CAT brand panel -->
+        <div style="flex:0 0 44%;background:linear-gradient(150deg,#1F1700 0%,#120E00 100%);padding:22px 20px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;">
+          <!-- bold diagonal mark -->
+          <svg style="position:absolute;bottom:-10px;right:-10px;opacity:.1;" width="120" height="120" viewBox="0 0 120 120">
+            <text x="0" y="90" font-size="90" font-weight="900" fill="#FFC72C" font-family="Arial Black">C</text>
+          </svg>
+          <div style="position:relative;">
+            <div style="display:inline-block;background:#FFC72C;padding:4px 12px;border-radius:4px;margin-bottom:14px;">
+              <span style="font-size:22px;font-weight:900;color:#1A1A1A;letter-spacing:-1.5px;font-family:Arial Black,Arial,sans-serif;">CAT</span>
+            </div>
+            <div style="font-size:18px;font-weight:800;color:#FFF;line-height:1.2;margin-bottom:6px;">Genuine<br>Cat® Parts</div>
+            <div style="font-size:11px;color:#FFC72C;font-weight:700;margin-bottom:4px;">Zero Downtime.</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.4);line-height:1.5;">Ziegler CAT Parts<br>Authorized Distributor</div>
+          </div>
+          <button onclick="sendPrompt('Search Caterpillar parts')" style="display:inline-flex;align-items:center;gap:5px;padding:7px 13px;background:#FFC72C;color:#1A1A1A;border:none;border-radius:6px;font-size:10px;font-weight:800;cursor:pointer;font-family:inherit;width:fit-content;position:relative;">Shop Cat Parts <i class="ti ti-arrow-right" style="font-size:9px;"></i></button>
+        </div>
+        <!-- Right: parts category tiles on light background -->
+        <div style="flex:1;background:#F8F5EE;padding:14px 16px;">
+          <div style="font-size:8px;font-weight:700;color:#999;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Parts &amp; Attachments</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
+            ${[
+              {label:'Filters &amp; Fluids',  svg:`<rect x="10" y="4" width="12" height="18" rx="3" fill="#DEB600"/><rect x="8" y="18" width="16" height="4" rx="2" fill="#C9A800"/>${Array.from({length:4},(_,i)=>`<rect x="12" y="${7+i*3}" width="8" height="1.5" rx="1" fill="rgba(0,0,0,.2)"/>`).join('')}`},
+              {label:'Undercarriage',    svg:`<rect x="4" y="12" width="24" height="8" rx="3" fill="#555"/>${Array.from({length:5},(_,i)=>`<rect x="${6+i*4}" y="14" width="3" height="4" rx="1" fill="#888"/>`).join('')}<circle cx="8" cy="11" r="4" fill="#444"/><circle cx="24" cy="11" r="4" fill="#444"/>`},
+              {label:'Hydraulics',       svg:`<path d="M8 8 Q8 4 14 4 Q20 4 20 8 L20 18 Q20 22 14 22 Q8 22 8 18Z" fill="none" stroke="#DEB600" stroke-width="2"/><path d="M20 13 L28 13" stroke="#DEB600" stroke-width="2"/><rect x="26" y="10" width="4" height="6" rx="2" fill="#DEB600"/>`},
+              {label:'Engine Parts',     svg:`<ellipse cx="16" cy="13" rx="9" ry="8" fill="none" stroke="#555" stroke-width="1.5"/>${Array.from({length:4},(_,i)=>`<rect x="${10+i*3}" y="10" width="2" height="6" rx="1" fill="#DEB600"/>`).join('')}<rect x="6" y="12" width="20" height="2" rx="1" fill="#555"/>`},
+              {label:'Electrical',       svg:`<path d="M14 4 L10 13 L15 13 L11 22 L20 10 L15 10Z" fill="#DEB600"/>`},
+              {label:'Ground Engaging',  svg:`<path d="M6 16 L16 6 L26 16 L26 20 L6 20Z" fill="#555"/><rect x="8" y="16" width="16" height="5" rx="2" fill="#444"/>${Array.from({length:3},(_,i)=>`<rect x="${9+i*5}" y="14" width="4" height="4" rx="1" fill="#DEB600" opacity=".7"/>`).join('')}`},
+            ].map(p=>`<div style="display:flex;align-items:center;gap:8px;background:#FFF;border:1px solid #E8E0D0;border-radius:7px;padding:8px 10px;">
+              <svg width="34" height="26" viewBox="0 0 34 26">${p.svg}</svg>
+              <span style="font-size:10px;font-weight:600;color:#111318;line-height:1.3;">${p.label}</span>
+            </div>`).join('')}
           </div>
         </div>
       </div>`
