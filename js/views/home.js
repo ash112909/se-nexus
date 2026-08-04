@@ -233,23 +233,155 @@ function render_home(el) {
     notice:  { label:'Notice',           color:'#374151', bg:'#F9FAFB', icon:'ti-info-circle'    },
   };
 
+  function _sbBadge() {
+    return `<div style="display:inline-flex;align-items:center;gap:5px;background:#00843D;border-radius:5px;padding:3px 9px;">
+      <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4.5" fill="none" stroke="#FFF" stroke-width=".8"/><path d="M5 1.5 L6.5 4 L9 4.2 L7 6 L7.6 8.5 L5 7.2 L2.4 8.5 L3 6 L1 4.2 L3.5 4Z" fill="#FFF"/></svg>
+      <span style="font-size:9px;font-weight:800;color:#FFF;letter-spacing:.4px;font-family:system-ui,sans-serif;">SUNBELT RENTALS</span>
+    </div>`;
+  }
+
+  function _catGrid(items, accent) {
+    return items.map(c => `<div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border-radius:7px;padding:8px 10px;">
+      <div style="width:26px;height:26px;background:rgba(0,0,0,.3);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="ti ${c.icon}" style="font-size:13px;color:${accent};"></i>
+      </div>
+      <span style="font-size:11px;font-weight:600;color:#D8D8D8;">${c.label}</span>
+    </div>`).join('');
+  }
+
   const SLIDES = [
-    { icon:'ti-crane',        iconBg:'#E6F4EC', iconColor:'#1B5E35', accent:'#00843D', bg:'#1C1F2E',
-      eyebrow:'Fleet highlight', title:'2 new Bobcat S770 units arriving Jul 8',
-      body:'Pre-delivery inspection checklists are ready. Assign intake orders before delivery.',
-      cta:'Create intake order', ctaFn:"sendPrompt('Open orders list')" },
-    { icon:'ti-shield-check', iconBg:'#D1FAE5', iconColor:'#0F6E56', accent:'#34D399', bg:'#0E2218',
-      eyebrow:'Warranty alert', title:'Toyota FL-031 warranty expires Dec 2026',
-      body:'Submit outstanding warranty claims before coverage lapses.',
-      cta:'View WO #100103', ctaFn:"Router.navigate('wo-detail',{woId:100103})" },
-    { icon:'ti-speakerphone', iconBg:'#EDE9FE', iconColor:'#534AB7', accent:'#A78BFA', bg:'#19163A',
-      eyebrow:'Platform update', title:'SmartEquip training — Jun 11, 2:00 PM',
-      body:'Covers parts diagrams, the diagnostic assistant, and the updated ordering workflow.',
-      cta:'Read more', ctaFn:"sendPrompt('Open news and updates')" },
-    { icon:'ti-tag',          iconBg:'#DBEAFE', iconColor:'#185FA5', accent:'#60A5FA', bg:'#0E1E38',
-      eyebrow:'Pricing notice', title:'Caterpillar parts +3–5% effective Jul 1',
-      body:'Track adjuster and undercarriage parts affected. Review open POs before Jun 30.',
-      cta:'View news', ctaFn:"sendPrompt('Open news and updates')" },
+    {
+      bg:'#0D0D0D',
+      html:`<div style="display:flex;width:100%;">
+        <div style="flex:0 0 44%;background:#1A1100;padding:22px 20px;display:flex;flex-direction:column;justify-content:space-between;min-height:166px;">
+          <div>
+            <div style="display:inline-block;background:#FFC72C;padding:3px 10px;border-radius:3px;margin-bottom:11px;">
+              <span style="font-size:20px;font-weight:900;color:#1A1A1A;letter-spacing:-1px;font-family:Arial Black,Arial,sans-serif;">CAT</span>
+            </div>
+            <div style="font-size:16px;font-weight:800;color:#FFF;line-height:1.25;margin-bottom:5px;">Genuine Cat® Parts<br><span style="color:#FFC72C;">Zero Downtime.</span></div>
+            <div style="font-size:10px;color:rgba(255,255,255,.4);line-height:1.6;">Ziegler CAT Parts — Authorized Distributor<br>Available on Sunbelt Parts Supply</div>
+          </div>
+          <button onclick="sendPrompt('Search Caterpillar parts')" style="margin-top:14px;display:inline-flex;align-items:center;gap:5px;padding:7px 13px;background:#FFC72C;color:#1A1A1A;border:none;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;width:fit-content;">Shop Cat Parts <i class="ti ti-arrow-right" style="font-size:10px;"></i></button>
+        </div>
+        <div style="flex:1;background:#141414;padding:16px 18px;display:flex;flex-direction:column;gap:7px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
+            ${_catGrid([
+              {icon:'ti-filter',         label:'Filters & Fluids'},
+              {icon:'ti-settings-2',     label:'Undercarriage'},
+              {icon:'ti-droplet',        label:'Hydraulics'},
+              {icon:'ti-engine',         label:'Engine Parts'},
+              {icon:'ti-bolt',           label:'Electrical'},
+              {icon:'ti-tools',          label:'Ground Engaging'},
+            ],'#FFC72C')}
+          </div>
+          <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:4px;">
+            <span style="font-size:9px;color:rgba(255,255,255,.25);letter-spacing:.5px;text-transform:uppercase;">Preferred Supplier</span>
+            ${_sbBadge()}
+          </div>
+        </div>
+      </div>`
+    },
+    {
+      bg:'#080808',
+      html:`<div style="display:flex;width:100%;">
+        <div style="flex:0 0 44%;background:#12090A;padding:22px 20px;display:flex;flex-direction:column;justify-content:space-between;min-height:166px;">
+          <div>
+            <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+              <div style="background:#CC0000;border-radius:4px;padding:3px 9px;"><span style="font-size:11px;font-weight:900;color:#FFF;letter-spacing:.5px;font-family:Arial,sans-serif;">BRIDGESTONE</span></div>
+            </div>
+            <div style="font-size:16px;font-weight:800;color:#FFF;line-height:1.25;margin-bottom:5px;">TRACKS.<br>TIRES.<br><span style="color:#CC0000;">UNDERCARRIAGE.</span></div>
+            <div style="font-size:10px;color:rgba(255,255,255,.4);line-height:1.5;">OEM-grade replacement for<br>CTL, excavator &amp; aerial fleets</div>
+          </div>
+          <button onclick="sendPrompt('Search Bridgestone tires')" style="margin-top:14px;display:inline-flex;align-items:center;gap:5px;padding:7px 13px;background:#CC0000;color:#FFF;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;width:fit-content;">Browse Catalog <i class="ti ti-arrow-right" style="font-size:10px;"></i></button>
+        </div>
+        <div style="flex:1;background:#111111;padding:16px 18px;display:flex;flex-direction:column;gap:7px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
+            ${_catGrid([
+              {icon:'ti-circle',       label:'CTL Rubber Tracks'},
+              {icon:'ti-circles',      label:'MX Rubber Tracks'},
+              {icon:'ti-link',         label:'Steel Track Assemblies'},
+              {icon:'ti-adjustments',  label:'Hybrid Tracks'},
+              {icon:'ti-wind',         label:'Pneumatic Tires'},
+              {icon:'ti-diamond',      label:'Solid Fill OTTs'},
+            ],'#CC0000')}
+          </div>
+          <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:4px;">
+            <span style="font-size:9px;color:rgba(255,255,255,.25);letter-spacing:.5px;text-transform:uppercase;">Preferred Supplier</span>
+            ${_sbBadge()}
+          </div>
+        </div>
+      </div>`
+    },
+    {
+      bg:'#060608',
+      html:`<div style="display:flex;width:100%;">
+        <div style="flex:0 0 44%;background:#130800;padding:22px 20px;display:flex;flex-direction:column;justify-content:space-between;min-height:166px;">
+          <div>
+            <div style="margin-bottom:10px;display:flex;align-items:center;gap:0;">
+              <div style="background:#FF6600;width:8px;height:34px;border-radius:3px 0 0 3px;"></div>
+              <div style="background:#1A1A1A;padding:4px 10px;border-radius:0 4px 4px 0;border:1px solid #333;">
+                <span style="font-size:10px;font-weight:900;color:#FF6600;letter-spacing:.3px;font-family:Arial,sans-serif;">PARKER</span>
+                <span style="font-size:8px;font-weight:500;color:rgba(255,255,255,.5);display:block;letter-spacing:.5px;">HANNIFIN</span>
+              </div>
+            </div>
+            <div style="font-size:15px;font-weight:800;color:#FFF;line-height:1.3;margin-bottom:5px;">Hydraulic &amp; Motion<br>Control Solutions</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.4);line-height:1.5;">Hose, fittings, cylinders &amp;<br>pump assemblies in stock</div>
+          </div>
+          <button onclick="sendPrompt('Search Parker Hannifin parts')" style="margin-top:14px;display:inline-flex;align-items:center;gap:5px;padding:7px 13px;background:#FF6600;color:#FFF;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;width:fit-content;">Find Parts <i class="ti ti-arrow-right" style="font-size:10px;"></i></button>
+        </div>
+        <div style="flex:1;background:#0E0E0E;padding:16px 18px;display:flex;flex-direction:column;gap:7px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
+            ${_catGrid([
+              {icon:'ti-wave-sine',    label:'Hydraulic Hose'},
+              {icon:'ti-plug',         label:'Fittings & Adapters'},
+              {icon:'ti-arrow-up-circle', label:'Cylinders'},
+              {icon:'ti-refresh',      label:'Pump Assemblies'},
+              {icon:'ti-filter',       label:'Filtration'},
+              {icon:'ti-gauge',        label:'Instrumentation'},
+            ],'#FF6600')}
+          </div>
+          <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:4px;">
+            <span style="font-size:9px;color:rgba(255,255,255,.25);letter-spacing:.5px;text-transform:uppercase;">Preferred Supplier</span>
+            ${_sbBadge()}
+          </div>
+        </div>
+      </div>`
+    },
+    {
+      bg:'#060A06',
+      html:`<div style="display:flex;width:100%;">
+        <div style="flex:0 0 44%;background:#061206;padding:22px 20px;display:flex;flex-direction:column;justify-content:space-between;min-height:166px;">
+          <div>
+            <div style="margin-bottom:10px;">
+              <div style="display:inline-flex;align-items:center;gap:6px;background:#003DA5;border-radius:5px;padding:4px 10px;">
+                <i class="ti ti-crane" style="font-size:12px;color:#FFF;"></i>
+                <span style="font-size:10px;font-weight:900;color:#FFF;letter-spacing:.3px;font-family:Arial,sans-serif;">JLG</span>
+                <span style="font-size:8px;color:rgba(255,255,255,.6);">INDUSTRIES</span>
+              </div>
+            </div>
+            <div style="font-size:15px;font-weight:800;color:#FFF;line-height:1.3;margin-bottom:5px;">Aerial Work Platform<br><span style="color:#60A5FA;">Parts &amp; Service</span></div>
+            <div style="font-size:10px;color:rgba(255,255,255,.4);line-height:1.5;">Genuine OEM parts for boom,<br>scissor &amp; telehandler fleets</div>
+          </div>
+          <button onclick="sendPrompt('Search JLG parts')" style="margin-top:14px;display:inline-flex;align-items:center;gap:5px;padding:7px 13px;background:#003DA5;color:#FFF;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;width:fit-content;">Shop JLG OEM <i class="ti ti-arrow-right" style="font-size:10px;"></i></button>
+        </div>
+        <div style="flex:1;background:#0A0E0A;padding:16px 18px;display:flex;flex-direction:column;gap:7px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
+            ${_catGrid([
+              {icon:'ti-crane',         label:'Boom Lift Parts'},
+              {icon:'ti-arrows-vertical', label:'Scissor Lift Parts'},
+              {icon:'ti-forklift',      label:'Telehandler Parts'},
+              {icon:'ti-battery',       label:'Battery & Electrical'},
+              {icon:'ti-settings',      label:'Drive Components'},
+              {icon:'ti-shield-check',  label:'Safety Systems'},
+            ],'#60A5FA')}
+          </div>
+          <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:4px;">
+            <span style="font-size:9px;color:rgba(255,255,255,.25);letter-spacing:.5px;text-transform:uppercase;">Preferred Supplier</span>
+            ${_sbBadge()}
+          </div>
+        </div>
+      </div>`
+    },
   ];
 
   el.innerHTML = `
@@ -287,8 +419,8 @@ function render_home(el) {
 
 /* ── Carousel ─────────────────────────────────────────── */
 .home-car-wrap { background:#111318; border-radius:12px; overflow:hidden; margin-bottom:8px; }
-.home-slide    { display:none; padding:22px 22px 20px; align-items:flex-start; gap:14px; }
-.home-slide.active { display:flex; }
+.home-slide    { display:none; }
+.home-slide.active { display:block; }
 .home-car-footer { display:flex; align-items:center; padding:0 4px 14px 4px; }
 .home-dot  { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.2); border:none; cursor:pointer; padding:0; margin-right:5px; transition:all .15s; }
 .home-dot.active { background:#00843D; width:16px; border-radius:3px; }
@@ -364,18 +496,7 @@ function render_home(el) {
         <div class="home-left">
           <div class="h-lbl"><i class="ti ti-speakerphone" style="color:#00843D;"></i> Fleet highlights</div>
           <div class="home-car-wrap">
-            ${SLIDES.map((s, i) => `
-            <div class="home-slide${i===0?' active':''}" style="background:${s.bg};" id="hslide-${i}">
-              <div style="width:38px;height:38px;border-radius:9px;background:${s.iconBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <i class="ti ${s.icon}" style="font-size:18px;color:${s.iconColor};"></i>
-              </div>
-              <div style="flex:1;min-width:0;">
-                <div style="font-size:9px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:${s.accent};margin-bottom:4px;">${s.eyebrow}</div>
-                <div style="font-size:14px;font-weight:700;color:#FFF;line-height:1.35;margin-bottom:5px;">${s.title}</div>
-                <div style="font-size:11px;color:rgba(255,255,255,.45);line-height:1.55;margin-bottom:13px;">${s.body}</div>
-                <button onclick="${s.ctaFn}" style="display:inline-flex;align-items:center;gap:5px;padding:6px 13px;background:${s.accent};color:#111318;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">${s.cta} <i class="ti ti-arrow-right" style="font-size:10px;"></i></button>
-              </div>
-            </div>`).join('')}
+            ${SLIDES.map((s, i) => `<div class="home-slide${i===0?' active':''}" style="background:${s.bg};" id="hslide-${i}">${s.html}</div>`).join('')}
             <div class="home-car-footer">
               ${SLIDES.map((_, i) => `<button class="home-dot${i===0?' active':''}" onclick="homeGoSlide(${i})"></button>`).join('')}
               <div style="margin-left:auto;display:flex;gap:4px;">
