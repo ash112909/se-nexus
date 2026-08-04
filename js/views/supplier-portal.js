@@ -2225,6 +2225,7 @@ function render_supplier_portal(el) {
 .du-progress-bar { height:4px; background:#F0ECE8; border-radius:2px; margin-top:4px; overflow:hidden; }
 .du-progress-fill { height:100%; border-radius:2px; background:#00843D; animation:duPulse 1.4s ease-in-out infinite; }
 @keyframes duPulse { 0%,100%{opacity:.6;} 50%{opacity:1;} }
+@keyframes spin { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
 </style>
 <div class="du-shell">
   <div class="du-main">
@@ -2894,16 +2895,25 @@ function render_supplier_portal(el) {
   </div>
 </div>`;
 
-    window.exSelectJob = function(id) { _exActiveJobId = id; renderExtractor(); };
-    window.exSetView   = function(v) {
+    window.exSelectJob = function(id) {
+      _exActiveJobId = id;
+      const job = _exJobs.find(j => j.id === id);
+      if (job) {
+        if (_exView === 'bom'      && ['queued','classifying'].includes(job.status)) _exView = 'queue';
+        if (_exView === 'classify' && job.status === 'queued') _exView = 'queue';
+      }
+      renderExtractor();
+    };
+    window.exSetView = function(v) {
       const job = _exJobs.find(j => j.id === _exActiveJobId);
       if (!job) return;
       if (v === 'classify' && job.status === 'queued') return;
       if (v === 'bom' && ['queued','classifying'].includes(job.status)) return;
-      _exView = v; exRenderBody();
+      _exView = v;
+      renderExtractor();
     };
-    window.exGoClassify = function(id) { _exActiveJobId = id; _exView = 'classify'; exRenderBody(); };
-    window.exGoBom      = function(id) { if (id) _exActiveJobId = id; _exView = 'bom'; exRenderBody(); };
+    window.exGoClassify = function(id) { _exActiveJobId = id; _exView = 'classify'; renderExtractor(); };
+    window.exGoBom      = function(id) { if (id) _exActiveJobId = id; _exView = 'bom'; renderExtractor(); };
     window.exSetBomFilter = function(v)  { _exBomFilter = v;        exRenderBom(document.getElementById('ex-body')); };
     window.exSetBomPage   = function(pg) { _exBomPage = String(pg); exRenderBom(document.getElementById('ex-body')); };
     window.exUploadNew = function() {
@@ -3001,14 +3011,27 @@ ${_exJobs.map(j => {
   }
 
   function exRenderClassify(body) {
-    // Apply mutable overrides
-    let pages = EX_SAMPLE_PAGES.map((p, i) => ({ ...p, type: _exPageTypes[i] || p.type, _idx: i }));
+    const job = _exJobs.find(j => j.id === _exActiveJobId);
+    if (!job) return;
 
-    // Count by type
+    const isClassifying = job.status === 'classifying';
+    const classifyPct = job.steps ? job.steps.classify : 1;
+    // How many of our sample pages are "done" for this job
+    const donePagesCount = isClassifying ? Math.floor(EX_SAMPLE_PAGES.length * classifyPct) : EX_SAMPLE_PAGES.length;
+
+    // Apply mutable overrides; mark pages past the done threshold as pending
+    let pages = EX_SAMPLE_PAGES.map((p, i) => ({
+      ...p,
+      type: i < donePagesCount ? (_exPageTypes[i] || p.type) : 'pending',
+      _idx: i,
+      _pending: i >= donePagesCount,
+    }));
+
+    const donePages = pages.filter(p => !p._pending);
     const typeCounts = { diagram:0, bom:0, text:0, cover:0, toc:0, ignore:0 };
-    pages.forEach(p => { if (typeCounts[p.type] !== undefined) typeCounts[p.type]++; else typeCounts.text++; });
+    donePages.forEach(p => { if (typeCounts[p.type] !== undefined) typeCounts[p.type]++; else typeCounts.text++; });
 
-    // Group by section
+    // Group by section (include all pages so pending ones show under their section)
     const sections = [];
     const sectionOrder = [];
     pages.forEach(p => {
@@ -3025,11 +3048,22 @@ ${_exJobs.map(j => {
       { t:'ignore',  label:'Ignore',  bg:'#FEE2E2', color:'#B91C1C' },
     ];
 
+    const canProceed = !isClassifying;
+
     body.innerHTML = `
+${isClassifying ? `
+<div style="background:#EEEDFE;border:0.5px solid #C4C0F5;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+  <i class="ti ti-loader-2" style="font-size:20px;color:#534AB7;animation:spin 1s linear infinite;flex-shrink:0;"></i>
+  <div style="flex:1;">
+    <div style="font-size:13px;font-weight:600;color:#3730A3;">Classification in progress</div>
+    <div style="font-size:11px;color:#534AB7;margin-top:2px;">${job.pagesClassified} of ${job.pages} pages classified (${Math.round(classifyPct*100)}%) — results update live</div>
+    <div style="height:4px;background:#C4C0F5;border-radius:2px;margin-top:6px;overflow:hidden;"><div style="height:100%;width:${Math.round(classifyPct*100)}%;background:#534AB7;"></div></div>
+  </div>
+</div>` : ''}
 <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:12px;">
   <div>
-    <div style="font-size:14px;font-weight:700;color:#111318;">Page classification</div>
-    <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">AI pre-classified ${pages.length} pages — review and correct before extraction</div>
+    <div style="font-size:14px;font-weight:700;color:#111318;">Page classification — ${job.name}</div>
+    <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">${isClassifying ? `${donePagesCount} of ${pages.length} sample pages classified so far` : `${pages.length} pages classified — review and correct before extraction`}</div>
     <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
       <span style="font-size:11px;color:#1D4ED8;font-weight:600;"><i class="ti ti-stack" style="font-size:12px;margin-right:3px;"></i>${typeCounts.diagram} diagrams</span>
       <span style="font-size:11px;color:#065F46;font-weight:600;"><i class="ti ti-table" style="font-size:12px;margin-right:3px;"></i>${typeCounts.bom} BoMs</span>
@@ -3039,12 +3073,15 @@ ${_exJobs.map(j => {
   </div>
   <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
     <button class="sp-btn sp-btn-ghost" style="height:28px;font-size:11px;" onclick="exAutoClassify()"><i class="ti ti-sparkles" style="font-size:12px;"></i> Re-classify</button>
-    <button class="sp-btn sp-btn-primary" style="height:28px;font-size:11px;" onclick="exSetView('bom')"><i class="ti ti-table" style="font-size:12px;"></i> Proceed to BoM</button>
+    <button class="sp-btn sp-btn-primary" style="height:28px;font-size:11px;${!canProceed?'opacity:0.4;cursor:not-allowed;':''}" onclick="${canProceed?'exSetView(\'bom\')':'void 0'}">
+      <i class="ti ti-table" style="font-size:12px;"></i> ${isClassifying ? 'Classification running…' : 'Proceed to BoM'}
+    </button>
   </div>
 </div>
 <div style="display:flex;gap:6px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
-  <span style="font-size:11px;color:#9CA3AF;margin-right:2px;">Type legend:</span>
+  <span style="font-size:11px;color:#9CA3AF;margin-right:2px;">Legend:</span>
   ${legendTypes.map(l => `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:${l.bg};color:${l.color};">${l.label}</span>`).join('')}
+  ${isClassifying ? `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:#F3F4F6;color:#9CA3AF;">Pending</span>` : ''}
 </div>
 <div id="ex-class-grid">
 ${sections.map(sec => `
@@ -3052,6 +3089,16 @@ ${sections.map(sec => `
   <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#9CA3AF;margin-bottom:10px;padding-bottom:6px;border-bottom:0.5px solid #F0ECE8;">${sec.name}</div>
   <div class="ex-class-grid">
     ${sec.pages.map(p => {
+      if (p._pending) {
+        return `<div class="ex-page-card" style="border-color:#E5E7EB;opacity:.5;cursor:default;">
+          <div class="ex-page-thumb" style="background:#F9FAFB;height:110px;padding:4px;overflow:hidden;">${exThumbSVG('ignore')}</div>
+          <div class="ex-page-footer">
+            <div class="ex-page-num" style="margin:0 0 3px;">Pg ${p.num}</div>
+            <div class="ex-page-label" style="color:#9CA3AF;">Pending…</div>
+            <div style="font-size:9px;color:#C8C3BC;margin-top:4px;display:flex;align-items:center;gap:3px;"><i class="ti ti-loader-2" style="font-size:10px;"></i> Classifying</div>
+          </div>
+        </div>`;
+      }
       const curType = p.type;
       const typeColors = { cover:'#1B5E35', toc:'#5A5F6E', diagram:'#1D4ED8', bom:'#065F46', text:'#5A5F6E', ignore:'#B91C1C' };
       const typeBgs   = { cover:'#E6F4EC', toc:'#F0ECE8', diagram:'#DBEAFE', bom:'#D1FAE5', text:'#F5F2EE', ignore:'#FEE2E2' };
@@ -3093,11 +3140,21 @@ ${sections.map(sec => `
   }
 
   function exRenderBom(body) {
-    // Source pages for filter pill
-    const srcPages = [...new Set(EX_SAMPLE_BOM.map(r => r.srcPage))].sort((a,b) => a-b);
+    const job = _exJobs.find(j => j.id === _exActiveJobId);
+    if (!job) return;
 
-    // Build filtered view
-    let rows = EX_SAMPLE_BOM.filter(r => {
+    const isExtracting = job.status === 'extracting';
+    const extractPct = job.steps ? job.steps.extract : 1;
+    // Slice rows proportionally for in-progress jobs
+    const availableRows = isExtracting
+      ? EX_SAMPLE_BOM.slice(0, Math.floor(EX_SAMPLE_BOM.length * extractPct))
+      : EX_SAMPLE_BOM;
+
+    // Source pages for filter pill
+    const srcPages = [...new Set(availableRows.map(r => r.srcPage))].sort((a,b) => a-b);
+
+    // Build filtered view from available rows (job-scoped)
+    let rows = availableRows.filter(r => {
       if (_exBomFilter === 'issues' && !r.issues.length) return false;
       if (_exBomFilter === 'clean'  &&  r.issues.length) return false;
       if (_exBomPage !== 'all' && String(r.srcPage) !== String(_exBomPage)) return false;
@@ -3113,16 +3170,26 @@ ${sections.map(sec => `
     const pageLabel = {};
     EX_SAMPLE_PAGES.forEach(p => { pageLabel[p.num] = p.label; });
 
-    const cleanCount = EX_SAMPLE_BOM.filter(r=>!r.issues.length).length;
-    const issueCount = EX_SAMPLE_BOM.filter(r=>r.issues.length).length;
-    const avgConf = Math.round(EX_SAMPLE_BOM.reduce((a,r)=>a+r.conf,0)/EX_SAMPLE_BOM.length*100);
-    const catalogCount = EX_SAMPLE_BOM.filter(r=>r.inCatalog).length;
+    const cleanCount = availableRows.filter(r=>!r.issues.length).length;
+    const issueCount = availableRows.filter(r=>r.issues.length).length;
+    const avgConf = availableRows.length ? Math.round(availableRows.reduce((a,r)=>a+r.conf,0)/availableRows.length*100) : 0;
+    const catalogCount = availableRows.filter(r=>r.inCatalog).length;
+    const bomPageCount = [...new Set(availableRows.map(r=>r.srcPage))].length;
 
     body.innerHTML = `
+${isExtracting ? `
+<div style="background:#FFFBEB;border:0.5px solid #FCD34D;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+  <i class="ti ti-loader-2" style="font-size:20px;color:#B45309;animation:spin 1s linear infinite;flex-shrink:0;"></i>
+  <div style="flex:1;">
+    <div style="font-size:13px;font-weight:600;color:#92400E;">Extraction in progress</div>
+    <div style="font-size:11px;color:#B45309;margin-top:2px;">${availableRows.length} of ${EX_SAMPLE_BOM.length} rows extracted so far (${Math.round(extractPct*100)}%) — results update as pages finish</div>
+    <div style="height:4px;background:#FDE68A;border-radius:2px;margin-top:6px;overflow:hidden;"><div style="height:100%;width:${Math.round(extractPct*100)}%;background:#B45309;"></div></div>
+  </div>
+</div>` : ''}
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:12px;">
   <div>
-    <div style="font-size:14px;font-weight:700;color:#111318;">BoM extraction results</div>
-    <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">${EX_SAMPLE_BOM.length} rows · ${EX_SAMPLE_PAGES.filter(p=>p.type==='bom').length} source pages · <span style="color:#B45309;font-weight:600;">${issueCount} need review</span></div>
+    <div style="font-size:14px;font-weight:700;color:#111318;">BoM extraction — ${job.name}</div>
+    <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">${availableRows.length} rows · ${bomPageCount} source pages · <span style="color:#B45309;font-weight:600;">${issueCount} need review</span></div>
   </div>
   <div style="display:flex;gap:6px;">
     <button class="sp-btn sp-btn-ghost" style="height:28px;font-size:11px;" onclick="exExportBom()"><i class="ti ti-download" style="font-size:12px;"></i> Export CSV</button>
@@ -3131,7 +3198,7 @@ ${sections.map(sec => `
 </div>
 <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
   <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:8px;padding:10px 16px;text-align:center;min-width:80px;">
-    <div style="font-size:20px;font-weight:700;color:#111318;">${EX_SAMPLE_BOM.length}</div>
+    <div style="font-size:20px;font-weight:700;color:#111318;">${availableRows.length}${isExtracting?`<span style="font-size:11px;color:#B45309;">/${EX_SAMPLE_BOM.length}</span>`:''}</div>
     <div style="font-size:10px;color:#9CA3AF;margin-top:2px;">Rows</div>
   </div>
   <div style="background:#F0FDF4;border:0.5px solid #86EFAC;border-radius:8px;padding:10px 16px;text-align:center;min-width:80px;">
