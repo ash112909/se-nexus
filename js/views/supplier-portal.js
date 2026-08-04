@@ -2711,32 +2711,85 @@ function render_supplier_portal(el) {
 
   // ── Parts Extractor ───────────────────────────────────────────────────────────
   let _exJobs = [
-    { id:'ex1', name:'SJIII-3219-Service-Manual.pdf', pages:312, status:'classified', pagesClassified:312, bomsExtracted:28, partsFound:184, uploadedAt:'2026-07-12 09:14' },
-    { id:'ex2', name:'SJ6832RT-Parts-Catalog-2025.pdf', pages:187, status:'extracting', pagesClassified:187, bomsExtracted:15, partsFound:null, uploadedAt:'2026-08-03 14:32' },
-    { id:'ex3', name:'Hydraulics-Guide.pdf', pages:98, status:'classifying', pagesClassified:67, bomsExtracted:null, partsFound:null, uploadedAt:'2026-08-04 08:51' },
+    { id:'ex1', name:'SJIII-3219-Service-Manual.pdf',   pages:312, status:'classified', pagesClassified:312, bomPages:18, partsFound:184, steps:{ upload:1, ocr:1, classify:1, extract:1 }, uploadedAt:'2026-07-12 09:14' },
+    { id:'ex2', name:'SJ6832RT-Parts-Catalog-2025.pdf', pages:187, status:'extracting', pagesClassified:187, bomPages:14, partsFound:null, steps:{ upload:1, ocr:1, classify:1, extract:0.55 }, uploadedAt:'2026-08-03 14:32' },
+    { id:'ex3', name:'Hydraulics-Overhaul-Guide.pdf',   pages:98,  status:'classifying',pagesClassified:67,  bomPages:null, partsFound:null, steps:{ upload:1, ocr:1, classify:0.68, extract:0 }, uploadedAt:'2026-08-04 08:51' },
+    { id:'ex4', name:'SJIII-4632-Parts-Manual-v3.pdf',  pages:241, status:'queued',     pagesClassified:0,   bomPages:null, partsFound:null, steps:{ upload:1, ocr:0, classify:0, extract:0 }, uploadedAt:'2026-08-04 11:03' },
   ];
   let _exActiveJobId = 'ex1';
   let _exView = 'queue'; // 'queue' | 'classify' | 'bom'
+  let _exBomFilter = 'all'; // 'all' | 'issues' | 'clean'
+  let _exBomPage = 'all';   // 'all' | page num string
+  let _exPageTypes = {};    // mutable per-page type overrides: idx -> type
+
+  // SVG thumbnails for each page type
+  function exThumbSVG(type, label) {
+    const svgs = {
+      cover:   `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#1F6B22"/><rect x="8" y="18" width="64" height="6" rx="1" fill="#fff" opacity=".9"/><rect x="8" y="28" width="48" height="3" rx="1" fill="#fff" opacity=".5"/><rect x="8" y="34" width="36" height="3" rx="1" fill="#fff" opacity=".5"/><rect x="8" y="60" width="30" height="2" rx="1" fill="#9DD89A" opacity=".8"/><rect x="8" y="65" width="22" height="2" rx="1" fill="#9DD89A" opacity=".6"/></svg>`,
+      toc:     `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#F5F2EE"/><rect x="8" y="8" width="40" height="4" rx="1" fill="#9CA3AF"/><rect x="8" y="18" width="32" height="2" rx="1" fill="#C8C3BC"/><line x1="40" y1="19" x2="62" y2="19" stroke="#E2DDD8" stroke-width="1" stroke-dasharray="2,2"/><rect x="62" y="18" width="8" height="2" rx="1" fill="#C8C3BC"/><rect x="12" y="24" width="26" height="2" rx="1" fill="#C8C3BC"/><line x1="38" y1="25" x2="62" y2="25" stroke="#E2DDD8" stroke-width="1" stroke-dasharray="2,2"/><rect x="62" y="24" width="8" height="2" rx="1" fill="#C8C3BC"/><rect x="8" y="32" width="34" height="2" rx="1" fill="#C8C3BC"/><line x1="42" y1="33" x2="62" y2="33" stroke="#E2DDD8" stroke-width="1" stroke-dasharray="2,2"/><rect x="62" y="32" width="8" height="2" rx="1" fill="#C8C3BC"/><rect x="12" y="38" width="28" height="2" rx="1" fill="#C8C3BC"/><line x1="40" y1="39" x2="62" y2="39" stroke="#E2DDD8" stroke-width="1" stroke-dasharray="2,2"/><rect x="62" y="38" width="8" height="2" rx="1" fill="#C8C3BC"/><rect x="8" y="46" width="36" height="2" rx="1" fill="#C8C3BC"/><line x1="44" y1="47" x2="62" y2="47" stroke="#E2DDD8" stroke-width="1" stroke-dasharray="2,2"/><rect x="62" y="46" width="8" height="2" rx="1" fill="#C8C3BC"/></svg>`,
+      diagram: `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#EFF6FF"/><rect x="28" y="12" width="24" height="14" rx="2" fill="#BFDBFE" stroke="#3B82F6" stroke-width="1"/><rect x="6" y="42" width="20" height="12" rx="2" fill="#BFDBFE" stroke="#3B82F6" stroke-width="1"/><rect x="30" y="42" width="20" height="12" rx="2" fill="#BFDBFE" stroke="#3B82F6" stroke-width="1"/><rect x="54" y="42" width="20" height="12" rx="2" fill="#DBEAFE" stroke="#3B82F6" stroke-width="0.5"/><line x1="40" y1="26" x2="16" y2="42" stroke="#3B82F6" stroke-width="1"/><line x1="40" y1="26" x2="40" y2="42" stroke="#3B82F6" stroke-width="1"/><line x1="40" y1="26" x2="64" y2="42" stroke="#3B82F6" stroke-width="1"/><rect x="14" y="62" width="12" height="10" rx="1" fill="#DBEAFE" stroke="#3B82F6" stroke-width="0.5"/><rect x="34" y="62" width="12" height="10" rx="1" fill="#DBEAFE" stroke="#3B82F6" stroke-width="0.5"/><line x1="16" y1="54" x2="20" y2="62" stroke="#93C5FD" stroke-width="0.8"/><line x1="40" y1="54" x2="40" y2="62" stroke="#93C5FD" stroke-width="0.8"/><circle cx="8" cy="48" r="3" fill="#1D4ED8" opacity=".7"/><circle cx="32" cy="48" r="3" fill="#1D4ED8" opacity=".7"/><circle cx="56" cy="48" r="3" fill="#1D4ED8" opacity=".5"/></svg>`,
+      bom:     `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#F0FDF4"/><rect x="4" y="8" width="72" height="7" rx="1" fill="#86EFAC"/><rect x="4" y="8" width="12" height="7" rx="1" fill="#4ADE80"/><rect x="4" y="17" width="12" height="6" rx="0" fill="#DCFCE7"/><rect x="4" y="17" width="72" height="6" rx="0" fill="none" stroke="#BBF7D0" stroke-width="0.5"/><rect x="4" y="23" width="12" height="6" rx="0" fill="#F0FDF4"/><rect x="4" y="23" width="72" height="6" rx="0" fill="none" stroke="#BBF7D0" stroke-width="0.5"/><rect x="4" y="29" width="12" height="6" rx="0" fill="#DCFCE7"/><rect x="4" y="29" width="72" height="6" rx="0" fill="none" stroke="#BBF7D0" stroke-width="0.5"/><rect x="4" y="35" width="12" height="6" rx="0" fill="#F0FDF4"/><rect x="4" y="35" width="72" height="6" rx="0" fill="none" stroke="#BBF7D0" stroke-width="0.5"/><rect x="4" y="41" width="12" height="6" rx="0" fill="#DCFCE7"/><rect x="4" y="41" width="72" height="6" rx="0" fill="none" stroke="#BBF7D0" stroke-width="0.5"/><rect x="4" y="47" width="12" height="6" rx="0" fill="#F0FDF4"/><rect x="4" y="47" width="72" height="6" rx="0" fill="none" stroke="#BBF7D0" stroke-width="0.5"/><rect x="16" y="8" width="0.5" height="45" fill="#86EFAC"/><rect x="40" y="8" width="0.5" height="45" fill="#86EFAC"/><rect x="58" y="8" width="0.5" height="45" fill="#86EFAC"/></svg>`,
+      text:    `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#FAFAF8"/><rect x="8" y="8" width="52" height="3" rx="1" fill="#9CA3AF"/><rect x="8" y="15" width="64" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="20" width="60" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="25" width="56" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="30" width="64" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="35" width="40" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="43" width="64" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="48" width="58" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="53" width="64" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="58" width="44" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="66" width="64" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="71" width="62" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="76" width="30" height="2" rx="1" fill="#E2DDD8"/></svg>`,
+      ignore:  `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#F9FAFB"/><rect x="8" y="8" width="64" height="3" rx="1" fill="#E5E7EB"/><rect x="8" y="15" width="52" height="2" rx="1" fill="#F3F4F6"/><rect x="8" y="20" width="60" height="2" rx="1" fill="#F3F4F6"/><rect x="8" y="25" width="44" height="2" rx="1" fill="#F3F4F6"/><line x1="4" y1="4" x2="76" y2="96" stroke="#FCA5A5" stroke-width="1.5" opacity=".4"/></svg>`,
+    };
+    return svgs[type] || svgs.text;
+  }
 
   const EX_SAMPLE_PAGES = [
-    { num:1,  type:'other',   thumb:'📄', label:'Cover Page',        conf:0.97 },
-    { num:2,  type:'other',   thumb:'📋', label:'Table of Contents', conf:0.91 },
-    { num:14, type:'diagram', thumb:'🔧', label:'Hydraulic System',  conf:0.94 },
-    { num:15, type:'bom',     thumb:'📊', label:'Part Number Table', conf:0.98 },
-    { num:16, type:'diagram', thumb:'🔧', label:'Drive Assembly',    conf:0.89 },
-    { num:17, type:'bom',     thumb:'📊', label:'Drive Parts List',  conf:0.96 },
-    { num:18, type:'ignore',  thumb:'📄', label:'Legal Notice',      conf:0.88 },
-    { num:42, type:'diagram', thumb:'🔧', label:'Platform Frame',    conf:0.92 },
-    { num:43, type:'bom',     thumb:'📊', label:'Platform Parts',    conf:0.99 },
+    { num:1,   type:'cover',   label:'Cover Page',              conf:0.99, section:'Front Matter' },
+    { num:2,   type:'toc',     label:'Table of Contents',       conf:0.97, section:'Front Matter' },
+    { num:3,   type:'text',    label:'Safety Warnings',         conf:0.95, section:'Front Matter' },
+    { num:4,   type:'text',    label:'General Information',     conf:0.91, section:'Front Matter' },
+    { num:11,  type:'diagram', label:'Hydraulic System Overview',conf:0.96, section:'Hydraulics' },
+    { num:12,  type:'diagram', label:'Cylinder Detail — Stage 1',conf:0.93, section:'Hydraulics' },
+    { num:13,  type:'bom',     label:'Hydraulic Parts List',    conf:0.98, section:'Hydraulics' },
+    { num:14,  type:'diagram', label:'Pump & Valve Assembly',   conf:0.91, section:'Hydraulics' },
+    { num:15,  type:'bom',     label:'Pump Assembly Parts',     conf:0.97, section:'Hydraulics' },
+    { num:22,  type:'diagram', label:'Drive Motor — Exploded',  conf:0.94, section:'Drive System' },
+    { num:23,  type:'bom',     label:'Drive Motor Parts',       conf:0.99, section:'Drive System' },
+    { num:24,  type:'diagram', label:'Wheel Hub Assembly',      conf:0.89, section:'Drive System' },
+    { num:25,  type:'bom',     label:'Wheel Hub Parts',         conf:0.96, section:'Drive System' },
+    { num:36,  type:'diagram', label:'Platform Frame — Top View',conf:0.92, section:'Platform' },
+    { num:37,  type:'diagram', label:'Guardrail Weldment',      conf:0.88, section:'Platform' },
+    { num:38,  type:'bom',     label:'Platform & Rail Parts',   conf:0.98, section:'Platform' },
+    { num:44,  type:'text',    label:'Electrical Schematic Notes',conf:0.85, section:'Electrical' },
+    { num:45,  type:'diagram', label:'Main Wiring Harness',     conf:0.90, section:'Electrical' },
+    { num:46,  type:'bom',     label:'Electrical Parts',        conf:0.96, section:'Electrical' },
+    { num:47,  type:'ignore',  label:'Warranty / Legal',        conf:0.94, section:'Back Matter' },
+    { num:48,  type:'ignore',  label:'Index',                   conf:0.91, section:'Back Matter' },
   ];
+
   const EX_SAMPLE_BOM = [
-    { row:1,  partNum:'1520539', desc:'Hydraulic Lift Cylinder, 2-Stage',  qty:'1',  uom:'EA', notes:'',                  conf:0.98, issues:[] },
-    { row:2,  partNum:'1520540', desc:'Cylinder Seal Kit',                  qty:'1',  uom:'EA', notes:'Inspect at 500h',  conf:0.96, issues:[] },
-    { row:3,  partNum:'HYD-0812',desc:'Hydraulic Hose ⅜" × 36"',           qty:'2',  uom:'EA', notes:'',                  conf:0.91, issues:['low_conf'] },
-    { row:4,  partNum:'',        desc:'Fitting, 90° Swivel JIC',            qty:'4',  uom:'EA', notes:'',                  conf:0.73, issues:['no_partnum','low_conf'] },
-    { row:5,  partNum:'1520119', desc:'Main Pump Assembly',                  qty:'1',  uom:'EA', notes:'',                  conf:0.99, issues:[] },
-    { row:6,  partNum:'1520245', desc:'Relief Valve, 3000 PSI',             qty:'1',  uom:'EA', notes:'Torque to 35 ft-lb',conf:0.94, issues:[] },
-    { row:7,  partNum:'FL-MAST', desc:'Mast Filter Kit',                    qty:'1',  uom:'KIT',notes:'Replace annually',  conf:0.87, issues:['low_conf'] },
+    // Hydraulics — page 13
+    { row:1,  callout:'1',  partNum:'1520539', desc:'Hydraulic Lift Cylinder, 2-Stage', qty:'1',  uom:'EA',  notes:'',                   conf:0.98, issues:[],                    srcPage:13, inCatalog:true  },
+    { row:2,  callout:'2',  partNum:'1520540', desc:'Cylinder Seal Kit',                qty:'1',  uom:'KIT', notes:'Inspect at 500h',     conf:0.96, issues:[],                    srcPage:13, inCatalog:true  },
+    { row:3,  callout:'3',  partNum:'HYD-0812',desc:'Hydraulic Hose 3/8" × 36"',       qty:'2',  uom:'EA',  notes:'',                    conf:0.91, issues:['low_conf'],          srcPage:13, inCatalog:false },
+    { row:4,  callout:'4',  partNum:'',        desc:'Fitting, 90° Swivel JIC #8',       qty:'4',  uom:'EA',  notes:'',                    conf:0.73, issues:['no_partnum','low_conf'], srcPage:13, inCatalog:false },
+    { row:5,  callout:'5',  partNum:'1520119', desc:'Main Pump Assembly',               qty:'1',  uom:'EA',  notes:'',                    conf:0.99, issues:[],                    srcPage:13, inCatalog:true  },
+    // Pump assembly — page 15
+    { row:6,  callout:'1',  partNum:'1520245', desc:'Relief Valve, 3000 PSI',           qty:'1',  uom:'EA',  notes:'Torque to 35 ft-lb',  conf:0.97, issues:[],                    srcPage:15, inCatalog:true  },
+    { row:7,  callout:'2',  partNum:'1520246', desc:'Check Valve Assembly',             qty:'2',  uom:'EA',  notes:'',                    conf:0.95, issues:[],                    srcPage:15, inCatalog:true  },
+    { row:8,  callout:'3',  partNum:'FL-FILT', desc:'Hydraulic Return Filter',          qty:'1',  uom:'EA',  notes:'Replace at 1000h',    conf:0.88, issues:['low_conf'],          srcPage:15, inCatalog:false },
+    { row:9,  callout:'4',  partNum:'',        desc:'O-Ring, -212, Buna-N',             qty:'6',  uom:'EA',  notes:'',                    conf:0.71, issues:['no_partnum','low_conf'], srcPage:15, inCatalog:false },
+    // Drive motor — page 23
+    { row:10, callout:'1',  partNum:'2641032', desc:'Drive Motor Assembly, 24V DC',     qty:'2',  uom:'EA',  notes:'',                    conf:0.99, issues:[],                    srcPage:23, inCatalog:true  },
+    { row:11, callout:'2',  partNum:'2641045', desc:'Motor Brush Set',                  qty:'1',  uom:'SET', notes:'Replace at 2000h',    conf:0.94, issues:[],                    srcPage:23, inCatalog:false },
+    { row:12, callout:'3',  partNum:'2641089', desc:'Drive Chain, #50 × 82 Links',      qty:'2',  uom:'EA',  notes:'',                    conf:0.96, issues:[],                    srcPage:23, inCatalog:false },
+    { row:13, callout:'4',  partNum:'',        desc:'Sprocket, 15T, 1" Bore',           qty:'2',  uom:'EA',  notes:'',                    conf:0.68, issues:['no_partnum','low_conf'], srcPage:23, inCatalog:false },
+    // Wheel hub — page 25
+    { row:14, callout:'1',  partNum:'2641102', desc:'Wheel Hub Assembly, RH',           qty:'1',  uom:'EA',  notes:'',                    conf:0.98, issues:[],                    srcPage:25, inCatalog:false },
+    { row:15, callout:'2',  partNum:'2641103', desc:'Wheel Hub Assembly, LH',           qty:'1',  uom:'EA',  notes:'',                    conf:0.98, issues:[],                    srcPage:25, inCatalog:false },
+    { row:16, callout:'3',  partNum:'WHL-0044',desc:'Drive Tyre 15×5–8',               qty:'4',  uom:'EA',  notes:'',                    conf:0.93, issues:[],                    srcPage:25, inCatalog:true  },
+    // Platform — page 38
+    { row:17, callout:'1',  partNum:'3310087', desc:'Platform Chain Set',               qty:'1',  uom:'SET', notes:'',                    conf:0.99, issues:[],                    srcPage:38, inCatalog:true  },
+    { row:18, callout:'2',  partNum:'3310102', desc:'Guardrail Section, Mid',           qty:'2',  uom:'EA',  notes:'',                    conf:0.97, issues:[],                    srcPage:38, inCatalog:false },
+    { row:19, callout:'3',  partNum:'',        desc:'Gate Hinge Assembly',              qty:'2',  uom:'EA',  notes:'',                    conf:0.76, issues:['no_partnum'],         srcPage:38, inCatalog:false },
+    { row:20, callout:'4',  partNum:'3310215', desc:'Floor Plate Weldment',             qty:'1',  uom:'EA',  notes:'',                    conf:0.91, issues:[],                    srcPage:38, inCatalog:false },
+    // Electrical — page 46
+    { row:21, callout:'1',  partNum:'1100156', desc:'Control Board — ACLE',             qty:'1',  uom:'EA',  notes:'',                    conf:0.99, issues:[],                    srcPage:46, inCatalog:true  },
+    { row:22, callout:'2',  partNum:'1100201', desc:'Joystick Controller Assembly',     qty:'1',  uom:'EA',  notes:'',                    conf:0.96, issues:[],                    srcPage:46, inCatalog:false },
+    { row:23, callout:'3',  partNum:'',        desc:'Emergency Stop Switch',            qty:'2',  uom:'EA',  notes:'',                    conf:0.81, issues:['no_partnum'],         srcPage:46, inCatalog:false },
+    { row:24, callout:'4',  partNum:'1100344', desc:'Battery Charger, 24V 25A',         qty:'1',  uom:'EA',  notes:'',                    conf:0.94, issues:[],                    srcPage:46, inCatalog:false },
   ];
 
   function renderExtractor() {
@@ -2889,31 +2942,50 @@ function render_supplier_portal(el) {
 
   function exRenderQueue(body) {
     const S = {
-      classified: { label:'Ready for extraction', bg:'#E6F4EC', color:'#1B5E35', pct:100, barColor:'#00843D' },
-      extracting: { label:'Extracting parts…',    bg:'#FFFBEB', color:'#B45309', pct:55,  barColor:'#B45309' },
-      classifying:{ label:'Classifying pages…',   bg:'#EEEDFE', color:'#534AB7', pct:68,  barColor:'#534AB7' },
-      queued:     { label:'Waiting in queue',      bg:'#F5F2EE', color:'#5A5F6E', pct:0,   barColor:'#C8C3BC' },
+      classified: { label:'Ready',        bg:'#E6F4EC', color:'#1B5E35' },
+      extracting: { label:'Extracting…',  bg:'#FFFBEB', color:'#B45309' },
+      classifying:{ label:'Classifying…', bg:'#EEEDFE', color:'#534AB7' },
+      queued:     { label:'Queued',        bg:'#F5F2EE', color:'#5A5F6E' },
     };
+    const STEP_DEFS = [
+      { key:'upload',   label:'Upload',   icon:'ti-cloud-upload' },
+      { key:'ocr',      label:'OCR',      icon:'ti-scan' },
+      { key:'classify', label:'Classify', icon:'ti-layout-grid' },
+      { key:'extract',  label:'Extract',  icon:'ti-table' },
+    ];
     body.innerHTML = `
 <div style="font-size:14px;font-weight:700;color:#111318;margin-bottom:14px;">Processing queue</div>
 ${_exJobs.map(j => {
   const s = S[j.status] || S.queued;
+  const steps = j.steps || {};
+  const stepsHtml = STEP_DEFS.map((sd, si) => {
+    const pct = steps[sd.key] || 0;
+    const done = pct >= 1;
+    const active = !done && pct > 0;
+    const dotColor = done ? '#00843D' : active ? '#B45309' : '#E2DDD8';
+    const lineColor = done ? '#00843D' : '#E2DDD8';
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;min-width:52px;">
+      <div style="width:28px;height:28px;border-radius:50%;background:${done?'#00843D':active?'#FFFBEB':'#F5F2EE'};border:2px solid ${dotColor};display:flex;align-items:center;justify-content:center;">
+        <i class="ti ${sd.icon}" style="font-size:13px;color:${done?'#0D2E18':active?'#B45309':'#C8C3BC'};"></i>
+      </div>
+      ${active ? `<div style="height:3px;width:28px;background:#F0ECE8;border-radius:2px;overflow:hidden;"><div style="height:100%;width:${Math.round(pct*100)}%;background:#B45309;"></div></div>` : ''}
+      <div style="font-size:9px;font-weight:${done||active?'600':'400'};color:${done?'#1B5E35':active?'#B45309':'#B0AAA3'};">${sd.label}</div>
+    </div>
+    ${si < STEP_DEFS.length-1 ? `<div style="flex:1;height:2px;background:${done?'#00843D':'#E2DDD8'};margin-top:13px;border-radius:1px;"></div>` : ''}`;
+  }).join('');
   return `<div class="ex-queue-row" style="${_exActiveJobId===j.id?'border-color:#00843D;background:#FAFFF8;':''}">
     <div class="ex-q-icon"><i class="ti ti-file-type-pdf" style="color:#B91C1C;font-size:22px;"></i></div>
     <div class="ex-q-body">
-      <div class="ex-q-name">${j.name}</div>
-      <div class="ex-q-meta">${j.pages} pages · Uploaded ${j.uploadedAt}</div>
-      <div class="ex-q-progress">
-        <div style="display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#9CA3AF;margin-bottom:2px;">
-          <span style="font-weight:600;color:${s.color};">${s.label}</span>
-          ${j.status !== 'queued' ? `<span>${s.pct}%</span>` : ''}
-        </div>
-        <div class="ex-q-prog-bar"><div class="ex-q-prog-fill" style="width:${s.pct}%;background:${s.barColor};${j.status==='extracting'||j.status==='classifying'?'animation:duPulse 1.4s ease-in-out infinite;':''}"></div></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <div class="ex-q-name">${j.name}</div>
+        <span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;background:${s.bg};color:${s.color};">${s.label}</span>
       </div>
-      <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;color:#7A7F8E;">
+      <div class="ex-q-meta">${j.pages} pages · Uploaded ${j.uploadedAt}</div>
+      <div style="display:flex;align-items:center;gap:0;margin-top:12px;">${stepsHtml}</div>
+      <div style="display:flex;gap:14px;margin-top:10px;font-size:11px;color:#7A7F8E;">
         ${j.pagesClassified ? `<span><i class="ti ti-layout-grid" style="font-size:12px;margin-right:3px;"></i>${j.pagesClassified} pages classified</span>` : ''}
-        ${j.bomsExtracted   ? `<span><i class="ti ti-table" style="font-size:12px;margin-right:3px;"></i>${j.bomsExtracted} BoMs found</span>` : ''}
-        ${j.partsFound      ? `<span><i class="ti ti-components" style="font-size:12px;margin-right:3px;"></i>${j.partsFound} parts extracted</span>` : ''}
+        ${j.bomPages   != null ? `<span><i class="ti ti-table" style="font-size:12px;margin-right:3px;"></i>${j.bomPages} BoM pages</span>` : ''}
+        ${j.partsFound != null ? `<span><i class="ti ti-components" style="font-size:12px;margin-right:3px;"></i>${j.partsFound} parts found</span>` : ''}
       </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0;">
@@ -2925,130 +2997,244 @@ ${_exJobs.map(j => {
   }
 
   function exRenderClassify(body) {
-    let pages = EX_SAMPLE_PAGES.map(p => ({ ...p }));
+    // Apply mutable overrides
+    let pages = EX_SAMPLE_PAGES.map((p, i) => ({ ...p, type: _exPageTypes[i] || p.type, _idx: i }));
+
+    // Count by type
+    const typeCounts = { diagram:0, bom:0, text:0, cover:0, toc:0, ignore:0 };
+    pages.forEach(p => { if (typeCounts[p.type] !== undefined) typeCounts[p.type]++; else typeCounts.text++; });
+
+    // Group by section
+    const sections = [];
+    const sectionOrder = [];
+    pages.forEach(p => {
+      if (!sectionOrder.includes(p.section)) { sectionOrder.push(p.section); sections.push({ name: p.section, pages: [] }); }
+      sections.find(s => s.name === p.section).pages.push(p);
+    });
+
+    const legendTypes = [
+      { t:'cover',   label:'Cover',   bg:'#E6F4EC', color:'#1B5E35' },
+      { t:'toc',     label:'TOC',     bg:'#F0ECE8', color:'#5A5F6E' },
+      { t:'diagram', label:'Diagram', bg:'#DBEAFE', color:'#1D4ED8' },
+      { t:'bom',     label:'BoM',     bg:'#D1FAE5', color:'#065F46' },
+      { t:'text',    label:'Text',    bg:'#F5F2EE', color:'#5A5F6E' },
+      { t:'ignore',  label:'Ignore',  bg:'#FEE2E2', color:'#B91C1C' },
+    ];
+
     body.innerHTML = `
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:12px;">
   <div>
     <div style="font-size:14px;font-weight:700;color:#111318;">Page classification</div>
-    <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">AI has pre-classified pages — review and correct before extraction</div>
-  </div>
-  <div style="display:flex;gap:8px;align-items:center;">
-    <div style="font-size:11px;color:#9CA3AF;">Legend:</div>
-    <span class="ex-ptype-btn diagram selected">Diagram</span>
-    <span class="ex-ptype-btn bom selected">BoM</span>
-    <span class="ex-ptype-btn other selected">Other</span>
-    <span class="ex-ptype-btn ignore selected">Ignore</span>
-  </div>
-</div>
-<div class="ex-class-grid" id="ex-class-grid">
-${pages.map((p,i) => `
-  <div class="ex-page-card type-${p.type}" id="ex-pc-${i}">
-    <div class="ex-page-thumb">${p.thumb}</div>
-    <div class="ex-page-footer">
-      <div class="ex-page-num">Page ${p.num}</div>
-      <div class="ex-page-label" title="${p.label}">${p.label}</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
-        <span style="font-size:9px;color:#9CA3AF;">AI conf: ${Math.round(p.conf*100)}%</span>
-        <span class="ex-conf-dot" style="background:${p.conf>0.9?'#10B981':p.conf>0.75?'#F59E0B':'#EF4444'};"></span>
-      </div>
-      <div class="ex-page-type-btns">
-        ${['diagram','bom','other','ignore'].map(t =>
-          `<span class="ex-ptype-btn ${t} ${p.type===t?'selected':''}" onclick="exSetPageType(${i},'${t}')">${t.charAt(0).toUpperCase()+t.slice(1)}</span>`
-        ).join('')}
-      </div>
+    <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">AI pre-classified ${pages.length} pages — review and correct before extraction</div>
+    <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
+      <span style="font-size:11px;color:#1D4ED8;font-weight:600;"><i class="ti ti-stack" style="font-size:12px;margin-right:3px;"></i>${typeCounts.diagram} diagrams</span>
+      <span style="font-size:11px;color:#065F46;font-weight:600;"><i class="ti ti-table" style="font-size:12px;margin-right:3px;"></i>${typeCounts.bom} BoMs</span>
+      <span style="font-size:11px;color:#5A5F6E;font-weight:600;"><i class="ti ti-file-text" style="font-size:12px;margin-right:3px;"></i>${typeCounts.text + typeCounts.cover + typeCounts.toc} other</span>
+      <span style="font-size:11px;color:#B91C1C;font-weight:600;"><i class="ti ti-eye-off" style="font-size:12px;margin-right:3px;"></i>${typeCounts.ignore} ignored</span>
     </div>
-  </div>`).join('')}
+  </div>
+  <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+    <button class="sp-btn sp-btn-ghost" style="height:28px;font-size:11px;" onclick="exAutoClassify()"><i class="ti ti-sparkles" style="font-size:12px;"></i> Re-classify</button>
+    <button class="sp-btn sp-btn-primary" style="height:28px;font-size:11px;" onclick="_exView='bom';exRenderBody()"><i class="ti ti-table" style="font-size:12px;"></i> Proceed to BoM</button>
+  </div>
 </div>
-<div style="margin-top:18px;display:flex;gap:8px;">
-  <button class="sp-btn sp-btn-primary" onclick="_exView='bom';exRenderBody()"><i class="ti ti-table" style="font-size:12px;"></i> Proceed to BoM extraction</button>
-  <button class="sp-btn sp-btn-ghost" onclick="exAutoClassify()"><i class="ti ti-sparkles" style="font-size:12px;"></i> Re-run AI classification</button>
+<div style="display:flex;gap:6px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+  <span style="font-size:11px;color:#9CA3AF;margin-right:2px;">Type legend:</span>
+  ${legendTypes.map(l => `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:${l.bg};color:${l.color};">${l.label}</span>`).join('')}
+</div>
+<div id="ex-class-grid">
+${sections.map(sec => `
+<div style="margin-bottom:20px;">
+  <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#9CA3AF;margin-bottom:10px;padding-bottom:6px;border-bottom:0.5px solid #F0ECE8;">${sec.name}</div>
+  <div class="ex-class-grid">
+    ${sec.pages.map(p => {
+      const curType = p.type;
+      const typeColors = { cover:'#1B5E35', toc:'#5A5F6E', diagram:'#1D4ED8', bom:'#065F46', text:'#5A5F6E', ignore:'#B91C1C' };
+      const typeBgs   = { cover:'#E6F4EC', toc:'#F0ECE8', diagram:'#DBEAFE', bom:'#D1FAE5', text:'#F5F2EE', ignore:'#FEE2E2' };
+      const borderCol = { diagram:'#3B82F6', bom:'#10B981', ignore:'#E2DDD8', cover:'#10B981', toc:'#C8C3BC', text:'#E2DDD8' };
+      const confColor = p.conf > 0.9 ? '#10B981' : p.conf > 0.75 ? '#F59E0B' : '#EF4444';
+      return `<div class="ex-page-card" style="border-color:${borderCol[curType]||'#E2DDD8'};${curType==='ignore'?'opacity:.55;':''}" id="ex-pc-${p._idx}">
+        <div class="ex-page-thumb" style="background:transparent;height:110px;padding:4px;overflow:hidden;">${exThumbSVG(curType)}</div>
+        <div class="ex-page-footer">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+            <div class="ex-page-num" style="margin:0;">Pg ${p.num}</div>
+            <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:${typeBgs[curType]||'#F5F2EE'};color:${typeColors[curType]||'#5A5F6E'};">${curType.toUpperCase()}</span>
+          </div>
+          <div class="ex-page-label" title="${p.label}">${p.label}</div>
+          <div style="display:flex;align-items:center;gap:3px;margin-bottom:5px;">
+            <span class="ex-conf-dot" style="background:${confColor};"></span>
+            <span style="font-size:9px;color:#9CA3AF;">AI ${Math.round(p.conf*100)}%</span>
+          </div>
+          <div class="ex-page-type-btns">
+            ${['diagram','bom','text','ignore'].map(t =>
+              `<span class="ex-ptype-btn ${t} ${curType===t?'selected':''}" onclick="exSetPageType(${p._idx},'${t}')">${t==='diagram'?'Diag':t==='ignore'?'Skip':t.charAt(0).toUpperCase()+t.slice(1)}</span>`
+            ).join('')}
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+</div>`).join('')}
 </div>`;
 
     window.exSetPageType = function(idx, type) {
-      const card = document.getElementById('ex-pc-' + idx);
-      if (!card) return;
-      card.className = 'ex-page-card type-' + type;
-      card.querySelectorAll('.ex-ptype-btn').forEach(b => b.classList.toggle('selected', b.classList.contains(type)));
+      _exPageTypes[idx] = type;
+      exRenderClassify(body);
     };
     window.exAutoClassify = function() {
+      _exPageTypes = {};
       const grid = document.getElementById('ex-class-grid');
-      if (grid) { grid.style.opacity = '0.4'; setTimeout(() => { grid.style.opacity = '1'; }, 1200); }
+      if (grid) { grid.style.opacity = '0.4'; setTimeout(() => { grid.style.opacity = '1'; }, 900); }
     };
   }
 
   function exRenderBom(body) {
+    // Source pages for filter pill
+    const srcPages = [...new Set(EX_SAMPLE_BOM.map(r => r.srcPage))].sort((a,b) => a-b);
+
+    // Build filtered view
+    let rows = EX_SAMPLE_BOM.filter(r => {
+      if (_exBomFilter === 'issues' && !r.issues.length) return false;
+      if (_exBomFilter === 'clean'  &&  r.issues.length) return false;
+      if (_exBomPage !== 'all' && String(r.srcPage) !== String(_exBomPage)) return false;
+      return true;
+    });
+
+    // Group by source page
+    const grouped = {};
+    rows.forEach(r => { if (!grouped[r.srcPage]) grouped[r.srcPage] = []; grouped[r.srcPage].push(r); });
+    const groupKeys = Object.keys(grouped).map(Number).sort((a,b) => a-b);
+
+    // Page label lookup
+    const pageLabel = {};
+    EX_SAMPLE_PAGES.forEach(p => { pageLabel[p.num] = p.label; });
+
+    const cleanCount = EX_SAMPLE_BOM.filter(r=>!r.issues.length).length;
+    const issueCount = EX_SAMPLE_BOM.filter(r=>r.issues.length).length;
+    const avgConf = Math.round(EX_SAMPLE_BOM.reduce((a,r)=>a+r.conf,0)/EX_SAMPLE_BOM.length*100);
+    const catalogCount = EX_SAMPLE_BOM.filter(r=>r.inCatalog).length;
+
     body.innerHTML = `
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:12px;">
   <div>
     <div style="font-size:14px;font-weight:700;color:#111318;">BoM extraction results</div>
-    <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">${EX_SAMPLE_BOM.length} rows extracted from ${EX_SAMPLE_PAGES.filter(p=>p.type==='bom').length} BoM pages · <span style="color:#B45309;font-weight:600;">${EX_SAMPLE_BOM.filter(r=>r.issues.length).length} rows need review</span></div>
+    <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">${EX_SAMPLE_BOM.length} rows · ${EX_SAMPLE_PAGES.filter(p=>p.type==='bom').length} source pages · <span style="color:#B45309;font-weight:600;">${issueCount} need review</span></div>
   </div>
   <div style="display:flex;gap:6px;">
-    <button class="sp-btn sp-btn-ghost" onclick="exExportBom()"><i class="ti ti-download" style="font-size:12px;"></i> Export CSV</button>
-    <button class="sp-btn sp-btn-primary" onclick="exCommit()"><i class="ti ti-database-import" style="font-size:12px;"></i> Commit to catalog</button>
+    <button class="sp-btn sp-btn-ghost" style="height:28px;font-size:11px;" onclick="exExportBom()"><i class="ti ti-download" style="font-size:12px;"></i> Export CSV</button>
+    <button class="sp-btn sp-btn-primary" style="height:28px;font-size:11px;" onclick="exCommit()"><i class="ti ti-database-import" style="font-size:12px;"></i> Commit to catalog</button>
   </div>
 </div>
-<div style="display:flex;gap:8px;margin-bottom:12px;">
-  <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:8px;padding:10px 16px;text-align:center;min-width:90px;">
+<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+  <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:8px;padding:10px 16px;text-align:center;min-width:80px;">
     <div style="font-size:20px;font-weight:700;color:#111318;">${EX_SAMPLE_BOM.length}</div>
     <div style="font-size:10px;color:#9CA3AF;margin-top:2px;">Rows</div>
   </div>
-  <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:8px;padding:10px 16px;text-align:center;min-width:90px;">
-    <div style="font-size:20px;font-weight:700;color:#1B5E35;">${EX_SAMPLE_BOM.filter(r=>!r.issues.length).length}</div>
-    <div style="font-size:10px;color:#9CA3AF;margin-top:2px;">Clean</div>
+  <div style="background:#F0FDF4;border:0.5px solid #86EFAC;border-radius:8px;padding:10px 16px;text-align:center;min-width:80px;">
+    <div style="font-size:20px;font-weight:700;color:#1B5E35;">${cleanCount}</div>
+    <div style="font-size:10px;color:#059669;margin-top:2px;">Clean</div>
   </div>
-  <div style="background:#FFFBF2;border:0.5px solid #F5C97A;border-radius:8px;padding:10px 16px;text-align:center;min-width:90px;">
-    <div style="font-size:20px;font-weight:700;color:#B45309;">${EX_SAMPLE_BOM.filter(r=>r.issues.length).length}</div>
-    <div style="font-size:10px;color:#B45309;margin-top:2px;">Need review</div>
+  <div style="background:#FFFBF2;border:0.5px solid #F5C97A;border-radius:8px;padding:10px 16px;text-align:center;min-width:80px;">
+    <div style="font-size:20px;font-weight:700;color:#B45309;">${issueCount}</div>
+    <div style="font-size:10px;color:#B45309;margin-top:2px;">Review</div>
   </div>
-  <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:8px;padding:10px 16px;text-align:center;min-width:90px;">
-    <div style="font-size:20px;font-weight:700;color:#111318;">${Math.round(EX_SAMPLE_BOM.reduce((a,r)=>a+r.conf,0)/EX_SAMPLE_BOM.length*100)}%</div>
-    <div style="font-size:10px;color:#9CA3AF;margin-top:2px;">Avg conf.</div>
+  <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:8px;padding:10px 16px;text-align:center;min-width:80px;">
+    <div style="font-size:20px;font-weight:700;color:#111318;">${avgConf}%</div>
+    <div style="font-size:10px;color:#9CA3AF;margin-top:2px;">Avg conf</div>
+  </div>
+  <div style="background:#EFF6FF;border:0.5px solid #BFDBFE;border-radius:8px;padding:10px 16px;text-align:center;min-width:80px;">
+    <div style="font-size:20px;font-weight:700;color:#1D4ED8;">${catalogCount}</div>
+    <div style="font-size:10px;color:#3B82F6;margin-top:2px;">In catalog</div>
   </div>
 </div>
-<div class="ex-bom-table">
-  <div class="ex-bom-head">
-    <div class="ex-bom-th">#</div>
-    <div class="ex-bom-th">Part #</div>
-    <div class="ex-bom-th">Description</div>
-    <div class="ex-bom-th">Qty</div>
-    <div class="ex-bom-th">UOM</div>
-    <div class="ex-bom-th">Confidence</div>
-    <div class="ex-bom-th">Issues</div>
-    <div class="ex-bom-th"></div>
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+  <div style="display:flex;gap:4px;">
+    ${[['all','All'],['clean','Clean only'],['issues','Issues only']].map(([v,l]) =>
+      `<button onclick="_exBomFilter='${v}';exRenderBom(document.getElementById('ex-body'))" style="height:27px;padding:0 11px;border-radius:20px;font-size:11px;font-weight:500;font-family:inherit;cursor:pointer;border:1px solid ${_exBomFilter===v?'#111318':'#E2DDD8'};background:${_exBomFilter===v?'#111318':'#FFFFFF'};color:${_exBomFilter===v?'#FFFFFF':'#5A5F6E'};">${l}</button>`
+    ).join('')}
   </div>
-  ${EX_SAMPLE_BOM.map((r,i) => {
-    const confColor = r.conf >= 0.95 ? '#10B981' : r.conf >= 0.8 ? '#F59E0B' : '#EF4444';
-    const hasIssue = r.issues.length > 0;
-    return `<div class="ex-bom-row ${hasIssue?'has-issue':''}">
-      <div class="ex-bom-td" style="color:#9CA3AF;font-size:11px;">${r.row}</div>
-      <div class="ex-bom-td"><input class="ex-bom-input" value="${r.partNum}" placeholder="—" style="font-family:monospace;font-size:11px;font-weight:700;${!r.partNum?'border-color:#FCA5A5;background:#FFF5F5;':''}"/></div>
-      <div class="ex-bom-td"><input class="ex-bom-input" value="${r.desc}" style="width:100%;"/></div>
-      <div class="ex-bom-td"><input class="ex-bom-input" value="${r.qty}" style="width:48px;text-align:center;"/></div>
-      <div class="ex-bom-td" style="font-size:11px;color:#7A7F8E;">${r.uom}</div>
-      <div class="ex-bom-td">
-        <div style="font-size:11px;font-weight:700;color:${confColor};">${Math.round(r.conf*100)}%</div>
-        <div class="ex-conf-bar"><div class="ex-conf-fill" style="width:${Math.round(r.conf*100)}%;background:${confColor};"></div></div>
-      </div>
-      <div class="ex-bom-td" style="display:flex;flex-wrap:wrap;gap:3px;">
-        ${r.issues.includes('no_partnum') ? `<span class="ex-issue-tag" style="background:#FEE2E2;color:#B91C1C;">No P/N</span>` : ''}
-        ${r.issues.includes('low_conf')   ? `<span class="ex-issue-tag" style="background:#FFFBEB;color:#B45309;">Low conf</span>` : ''}
-        ${!hasIssue ? `<span style="font-size:10px;color:#10B981;">✓ OK</span>` : ''}
-      </div>
-      <div class="ex-bom-td" style="justify-content:center;">
-        <button class="sp-btn sp-btn-ghost" style="height:24px;padding:0 7px;font-size:10px;" onclick="exIgnoreRow(${i})"><i class="ti ti-x"></i></button>
-      </div>
-    </div>`;
-  }).join('')}
+  <div style="width:1px;height:20px;background:#E2DDD8;"></div>
+  <div style="font-size:11px;color:#9CA3AF;">Source page:</div>
+  <div style="display:flex;gap:4px;flex-wrap:wrap;">
+    <button onclick="_exBomPage='all';exRenderBom(document.getElementById('ex-body'))" style="height:27px;padding:0 10px;border-radius:20px;font-size:11px;font-family:inherit;cursor:pointer;border:1px solid ${_exBomPage==='all'?'#111318':'#E2DDD8'};background:${_exBomPage==='all'?'#111318':'#FFFFFF'};color:${_exBomPage==='all'?'#FFFFFF':'#5A5F6E'};">All</button>
+    ${srcPages.map(pg =>
+      `<button onclick="_exBomPage='${pg}';exRenderBom(document.getElementById('ex-body'))" style="height:27px;padding:0 10px;border-radius:20px;font-size:11px;font-family:inherit;cursor:pointer;border:1px solid ${String(_exBomPage)===String(pg)?'#111318':'#E2DDD8'};background:${String(_exBomPage)===String(pg)?'#111318':'#FFFFFF'};color:${String(_exBomPage)===String(pg)?'#FFFFFF':'#5A5F6E'};">Pg ${pg}</button>`
+    ).join('')}
+  </div>
+  <div style="margin-left:auto;display:flex;gap:6px;">
+    <button class="sp-btn sp-btn-ghost" style="height:27px;font-size:11px;" onclick="exBulkAccept()"><i class="ti ti-checks" style="font-size:12px;"></i> Accept all clean</button>
+    <button class="sp-btn sp-btn-ghost" style="height:27px;font-size:11px;" onclick="exBulkSkip()"><i class="ti ti-ban" style="font-size:12px;"></i> Skip all issues</button>
+  </div>
+</div>
+${groupKeys.length === 0 ? `<div style="padding:40px;text-align:center;color:#9CA3AF;font-size:13px;">No rows match the current filter.</div>` :
+groupKeys.map(pg => {
+  const pgRows = grouped[pg];
+  const pgLabel = pageLabel[pg] ? ` — ${pageLabel[pg]}` : '';
+  return `
+<div style="margin-bottom:20px;">
+  <div style="font-size:11px;font-weight:700;color:#5A5F6E;letter-spacing:.8px;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+    <span style="background:#F0FDF4;border:0.5px solid #86EFAC;border-radius:5px;padding:2px 9px;font-size:10px;color:#065F46;">Pg ${pg}</span>
+    <span style="text-transform:uppercase;letter-spacing:1px;">${pgLabel.slice(3)}</span>
+    <span style="font-size:10px;font-weight:400;color:#9CA3AF;">${pgRows.length} rows</span>
+  </div>
+  <div class="ex-bom-table" style="margin-bottom:0;">
+    <div class="ex-bom-head" style="grid-template-columns:28px 32px 110px 1fr 50px 52px 76px 90px 32px;">
+      <div class="ex-bom-th">#</div>
+      <div class="ex-bom-th">⌖</div>
+      <div class="ex-bom-th">Part #</div>
+      <div class="ex-bom-th">Description</div>
+      <div class="ex-bom-th">Qty</div>
+      <div class="ex-bom-th">UOM</div>
+      <div class="ex-bom-th">Conf.</div>
+      <div class="ex-bom-th">Status</div>
+      <div class="ex-bom-th"></div>
+    </div>
+    ${pgRows.map((r,i) => {
+      const confColor = r.conf >= 0.95 ? '#10B981' : r.conf >= 0.8 ? '#F59E0B' : '#EF4444';
+      const hasIssue = r.issues.length > 0;
+      return `<div class="ex-bom-row ${hasIssue?'has-issue':''}" style="grid-template-columns:28px 32px 110px 1fr 50px 52px 76px 90px 32px;" id="ex-bom-r${r.row}">
+        <div class="ex-bom-td" style="color:#9CA3AF;font-size:11px;">${r.row}</div>
+        <div class="ex-bom-td" style="font-size:11px;font-weight:700;color:#3B82F6;font-family:monospace;">${r.callout}</div>
+        <div class="ex-bom-td"><input class="ex-bom-input" value="${r.partNum}" placeholder="—" style="font-family:monospace;font-size:11px;font-weight:700;${!r.partNum?'border-color:#FCA5A5;background:#FFF5F5;':''}"/></div>
+        <div class="ex-bom-td"><input class="ex-bom-input" value="${r.desc}" style="width:100%;"/></div>
+        <div class="ex-bom-td"><input class="ex-bom-input" value="${r.qty}" style="width:40px;text-align:center;"/></div>
+        <div class="ex-bom-td" style="font-size:11px;color:#7A7F8E;">${r.uom}</div>
+        <div class="ex-bom-td">
+          <div style="font-size:11px;font-weight:700;color:${confColor};">${Math.round(r.conf*100)}%</div>
+          <div class="ex-conf-bar"><div class="ex-conf-fill" style="width:${Math.round(r.conf*100)}%;background:${confColor};"></div></div>
+        </div>
+        <div class="ex-bom-td" style="display:flex;flex-wrap:wrap;gap:2px;align-items:center;">
+          ${r.inCatalog ? `<span class="ex-issue-tag" style="background:#EFF6FF;color:#1D4ED8;" title="Part already in catalog"><i class="ti ti-check" style="font-size:9px;"></i> Catalog</span>` : ''}
+          ${r.issues.includes('no_partnum') ? `<span class="ex-issue-tag" style="background:#FEE2E2;color:#B91C1C;">No P/N</span>` : ''}
+          ${r.issues.includes('low_conf')   ? `<span class="ex-issue-tag" style="background:#FFFBEB;color:#B45309;">Low conf</span>` : ''}
+          ${!hasIssue && !r.inCatalog ? `<span style="font-size:10px;color:#10B981;font-weight:600;">✓ OK</span>` : ''}
+        </div>
+        <div class="ex-bom-td" style="justify-content:center;">
+          <button class="sp-btn sp-btn-ghost" style="height:24px;padding:0 7px;font-size:10px;" onclick="exIgnoreRow('${r.row}')"><i class="ti ti-x"></i></button>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
 </div>`;
+}).join('')}`;
 
-    window.exIgnoreRow = function(i) {
-      const rows = document.querySelectorAll('.ex-bom-row');
-      if (rows[i]) { rows[i].style.opacity = '0.3'; rows[i].style.pointerEvents = 'none'; }
+    window.exIgnoreRow = function(rowId) {
+      const el = document.getElementById('ex-bom-r' + rowId);
+      if (el) { el.style.opacity = '0.3'; el.style.pointerEvents = 'none'; }
+    };
+    window.exBulkAccept = function() {
+      document.querySelectorAll('.ex-bom-row:not(.has-issue)').forEach(el => {
+        el.style.background = '#F0FDF4';
+      });
+    };
+    window.exBulkSkip = function() {
+      document.querySelectorAll('.ex-bom-row.has-issue').forEach(el => {
+        el.style.opacity = '0.3'; el.style.pointerEvents = 'none';
+      });
     };
     window.exExportBom = function() {
-      const lines = ['row,partNum,description,qty,uom,confidence',
-        ...EX_SAMPLE_BOM.map(r => `${r.row},${r.partNum},"${r.desc}",${r.qty},${r.uom},${Math.round(r.conf*100)}%`)];
+      const lines = ['row,callout,srcPage,partNum,description,qty,uom,confidence,inCatalog,issues',
+        ...EX_SAMPLE_BOM.map(r => `${r.row},${r.callout},${r.srcPage},${r.partNum},"${r.desc}",${r.qty},${r.uom},${Math.round(r.conf*100)}%,${r.inCatalog},"${r.issues.join(';')}"`)];
       const a = document.createElement('a');
       a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(lines.join('\n'));
       a.download = 'bom-extraction.csv'; a.click();
