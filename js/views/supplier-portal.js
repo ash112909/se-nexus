@@ -2902,6 +2902,10 @@ function render_supplier_portal(el) {
       if (v === 'bom' && ['queued','classifying'].includes(job.status)) return;
       _exView = v; exRenderBody();
     };
+    window.exGoClassify = function(id) { _exActiveJobId = id; _exView = 'classify'; exRenderBody(); };
+    window.exGoBom      = function(id) { if (id) _exActiveJobId = id; _exView = 'bom'; exRenderBody(); };
+    window.exSetBomFilter = function(v)  { _exBomFilter = v;        exRenderBom(document.getElementById('ex-body')); };
+    window.exSetBomPage   = function(pg) { _exBomPage = String(pg); exRenderBom(document.getElementById('ex-body')); };
     window.exUploadNew = function() {
       Modal.show({ title:'Add document to extractor', body:`
 <div style="display:flex;flex-direction:column;gap:12px;">
@@ -2912,7 +2916,7 @@ function render_supplier_portal(el) {
           const name = document.getElementById('ex-f-name').value.trim() || 'document.pdf';
           const pages = parseInt(document.getElementById('ex-f-pages').value) || 100;
           const id = 'ex' + Date.now();
-          _exJobs.unshift({ id, name, pages, status:'queued', pagesClassified:0, bomsExtracted:null, partsFound:null, uploadedAt:new Date().toISOString().slice(0,16).replace('T',' ') });
+          _exJobs.unshift({ id, name, pages, status:'queued', pagesClassified:0, bomPages:null, partsFound:null, steps:{ upload:1, ocr:0, classify:0, extract:0 }, uploadedAt:new Date().toISOString().slice(0,16).replace('T',' ') });
           _exActiveJobId = id; _exView = 'queue';
           Modal.close(); renderExtractor();
         }},
@@ -2989,8 +2993,8 @@ ${_exJobs.map(j => {
       </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0;">
-      ${j.status !== 'queued' ? `<button class="sp-btn sp-btn-ghost" style="height:28px;font-size:11px;" onclick="_exActiveJobId='${j.id}';_exView='classify';exRenderBody()">Classify</button>` : ''}
-      ${j.status === 'classified' ? `<button class="sp-btn sp-btn-primary" style="height:28px;font-size:11px;" onclick="_exActiveJobId='${j.id}';_exView='bom';exRenderBody()">View BoM</button>` : ''}
+      ${j.status !== 'queued' ? `<button class="sp-btn sp-btn-ghost" style="height:28px;font-size:11px;" onclick="exGoClassify('${j.id}')">Classify</button>` : ''}
+      ${j.status === 'classified' ? `<button class="sp-btn sp-btn-primary" style="height:28px;font-size:11px;" onclick="exGoBom('${j.id}')">View BoM</button>` : ''}
     </div>
   </div>`;
 }).join('')}`;
@@ -3035,7 +3039,7 @@ ${_exJobs.map(j => {
   </div>
   <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
     <button class="sp-btn sp-btn-ghost" style="height:28px;font-size:11px;" onclick="exAutoClassify()"><i class="ti ti-sparkles" style="font-size:12px;"></i> Re-classify</button>
-    <button class="sp-btn sp-btn-primary" style="height:28px;font-size:11px;" onclick="_exView='bom';exRenderBody()"><i class="ti ti-table" style="font-size:12px;"></i> Proceed to BoM</button>
+    <button class="sp-btn sp-btn-primary" style="height:28px;font-size:11px;" onclick="exSetView('bom')"><i class="ti ti-table" style="font-size:12px;"></i> Proceed to BoM</button>
   </div>
 </div>
 <div style="display:flex;gap:6px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
@@ -3084,7 +3088,7 @@ ${sections.map(sec => `
     window.exAutoClassify = function() {
       _exPageTypes = {};
       const grid = document.getElementById('ex-class-grid');
-      if (grid) { grid.style.opacity = '0.4'; setTimeout(() => { grid.style.opacity = '1'; }, 900); }
+      if (grid) { grid.style.opacity = '0.4'; setTimeout(() => { exRenderClassify(body); }, 700); }
     };
   }
 
@@ -3150,15 +3154,15 @@ ${sections.map(sec => `
 <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
   <div style="display:flex;gap:4px;">
     ${[['all','All'],['clean','Clean only'],['issues','Issues only']].map(([v,l]) =>
-      `<button onclick="_exBomFilter='${v}';exRenderBom(document.getElementById('ex-body'))" style="height:27px;padding:0 11px;border-radius:20px;font-size:11px;font-weight:500;font-family:inherit;cursor:pointer;border:1px solid ${_exBomFilter===v?'#111318':'#E2DDD8'};background:${_exBomFilter===v?'#111318':'#FFFFFF'};color:${_exBomFilter===v?'#FFFFFF':'#5A5F6E'};">${l}</button>`
+      `<button onclick="exSetBomFilter('${v}')" style="height:27px;padding:0 11px;border-radius:20px;font-size:11px;font-weight:500;font-family:inherit;cursor:pointer;border:1px solid ${_exBomFilter===v?'#111318':'#E2DDD8'};background:${_exBomFilter===v?'#111318':'#FFFFFF'};color:${_exBomFilter===v?'#FFFFFF':'#5A5F6E'};">${l}</button>`
     ).join('')}
   </div>
   <div style="width:1px;height:20px;background:#E2DDD8;"></div>
   <div style="font-size:11px;color:#9CA3AF;">Source page:</div>
   <div style="display:flex;gap:4px;flex-wrap:wrap;">
-    <button onclick="_exBomPage='all';exRenderBom(document.getElementById('ex-body'))" style="height:27px;padding:0 10px;border-radius:20px;font-size:11px;font-family:inherit;cursor:pointer;border:1px solid ${_exBomPage==='all'?'#111318':'#E2DDD8'};background:${_exBomPage==='all'?'#111318':'#FFFFFF'};color:${_exBomPage==='all'?'#FFFFFF':'#5A5F6E'};">All</button>
+    <button onclick="exSetBomPage('all')" style="height:27px;padding:0 10px;border-radius:20px;font-size:11px;font-family:inherit;cursor:pointer;border:1px solid ${_exBomPage==='all'?'#111318':'#E2DDD8'};background:${_exBomPage==='all'?'#111318':'#FFFFFF'};color:${_exBomPage==='all'?'#FFFFFF':'#5A5F6E'};">All</button>
     ${srcPages.map(pg =>
-      `<button onclick="_exBomPage='${pg}';exRenderBom(document.getElementById('ex-body'))" style="height:27px;padding:0 10px;border-radius:20px;font-size:11px;font-family:inherit;cursor:pointer;border:1px solid ${String(_exBomPage)===String(pg)?'#111318':'#E2DDD8'};background:${String(_exBomPage)===String(pg)?'#111318':'#FFFFFF'};color:${String(_exBomPage)===String(pg)?'#FFFFFF':'#5A5F6E'};">Pg ${pg}</button>`
+      `<button onclick="exSetBomPage('${pg}')" style="height:27px;padding:0 10px;border-radius:20px;font-size:11px;font-family:inherit;cursor:pointer;border:1px solid ${String(_exBomPage)===String(pg)?'#111318':'#E2DDD8'};background:${String(_exBomPage)===String(pg)?'#111318':'#FFFFFF'};color:${String(_exBomPage)===String(pg)?'#FFFFFF':'#5A5F6E'};">Pg ${pg}</button>`
     ).join('')}
   </div>
   <div style="margin-left:auto;display:flex;gap:6px;">
