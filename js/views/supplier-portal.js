@@ -2176,6 +2176,684 @@ function render_supplier_portal(el) {
 
   // ── Tab switching ─────────────────────────────────────────────────────────────
 
+  // ── Doc Ingestion ────────────────────────────────────────────────────────────
+  let _docUploads = [
+    { id:'du1', name:'SJIII-3219-Service-Manual.pdf',   machine:'Skyjack SJIII 3219', type:'Service Manual', version:'Rev 4', size:'8.4 MB', status:'indexed',    uploaded:'2026-07-12', pages:312 },
+    { id:'du2', name:'SJ6832RT-Parts-Catalog-2025.pdf', machine:'Skyjack SJ6832 RT',  type:'Parts Catalog',  version:'2025', size:'5.1 MB', status:'indexed',    uploaded:'2026-07-01', pages:187 },
+    { id:'du3', name:'SJIII-4632-Safety-Notices.pdf',   machine:'Skyjack SJIII 4632', type:'Safety Notice',  version:'1.0',  size:'1.2 MB', status:'processing', uploaded:'2026-08-03', pages:null },
+    { id:'du4', name:'Skyjack-Hydraulics-Guide.pdf',    machine:'All',                type:'Technical Guide',version:'2.1',  size:'3.7 MB', status:'queued',     uploaded:'2026-08-04', pages:null },
+  ];
+
+  function renderDocUpload() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Doc Ingestion';
+    const contentEl = document.getElementById('sp-content');
+
+    const STATUS_CFG = {
+      indexed:    { label:'Indexed',    color:'#1B5E35', bg:'#E6F4EC', icon:'ti-circle-check' },
+      processing: { label:'Processing', color:'#B45309', bg:'#FFFBEB', icon:'ti-loader-2' },
+      queued:     { label:'Queued',     color:'#534AB7', bg:'#EEEDFE', icon:'ti-clock' },
+      error:      { label:'Error',      color:'#B91C1C', bg:'#FEE2E2', icon:'ti-alert-circle' },
+    };
+
+    const DOC_TYPES = ['Service Manual','Parts Catalog','Safety Notice','Technical Guide','Training Material','Warranty Policy'];
+    const MACHINES  = ['All','Skyjack SJIII 3219','Skyjack SJ6832 RT','Skyjack SJIII 4632','Skyjack SJ3246E'];
+
+    contentEl.innerHTML = `
+<style>
+.du-shell { display:flex; flex:1; min-height:0; overflow:hidden; }
+.du-main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.du-toolbar { padding:14px 24px; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.du-title-area { padding:0; }
+.du-body { flex:1; padding:20px 24px; overflow-y:auto; }
+.du-upload-zone { border:2px dashed #C8C3BC; border-radius:12px; background:#FAFAF8; padding:36px; text-align:center; cursor:pointer; transition:border-color .15s, background .15s; margin-bottom:20px; }
+.du-upload-zone:hover { border-color:#00843D; background:#F0FAF3; }
+.du-upload-icon { font-size:36px; color:#C8C3BC; margin-bottom:10px; }
+.du-upload-zone:hover .du-upload-icon { color:#00843D; }
+.du-upload-title { font-size:14px; font-weight:600; color:#3A3D4A; margin-bottom:4px; }
+.du-upload-sub { font-size:12px; color:#9CA3AF; }
+.du-table { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
+.du-table-head { display:grid; grid-template-columns:2fr 160px 130px 80px 90px 80px 100px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 18px; }
+.du-th { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.8px; text-transform:uppercase; padding:9px 8px; }
+.du-row { display:grid; grid-template-columns:2fr 160px 130px 80px 90px 80px 100px; padding:0 18px; border-bottom:0.5px solid #F5F2EE; align-items:center; transition:background .12s; }
+.du-row:last-child { border-bottom:none; }
+.du-row:hover { background:#FAFAF9; }
+.du-td { padding:12px 8px; font-size:13px; color:#3A3D4A; }
+.du-doc-name { font-size:13px; font-weight:500; color:#111318; }
+.du-doc-meta { font-size:11px; color:#9CA3AF; margin-top:2px; }
+.du-status-pill { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:700; border-radius:4px; padding:2px 8px; white-space:nowrap; }
+.du-progress-bar { height:4px; background:#F0ECE8; border-radius:2px; margin-top:4px; overflow:hidden; }
+.du-progress-fill { height:100%; border-radius:2px; background:#00843D; animation:duPulse 1.4s ease-in-out infinite; }
+@keyframes duPulse { 0%,100%{opacity:.6;} 50%{opacity:1;} }
+</style>
+<div class="du-shell">
+  <div class="du-main">
+    <div class="du-toolbar">
+      <div style="flex:1;">
+        <div style="font-size:16px;font-weight:700;color:#111318;">Document Ingestion</div>
+        <div style="font-size:12px;color:#9CA3AF;margin-top:1px;">Upload manuals, parts catalogs, and technical docs for indexing</div>
+      </div>
+      <button class="sp-btn sp-btn-primary" onclick="duOpenUpload()"><i class="ti ti-upload" style="font-size:13px;"></i> Upload document</button>
+    </div>
+    <div class="du-body">
+      <div class="du-upload-zone" onclick="duOpenUpload()">
+        <div class="du-upload-icon"><i class="ti ti-cloud-upload"></i></div>
+        <div class="du-upload-title">Drag &amp; drop files here, or click to browse</div>
+        <div class="du-upload-sub">Supports PDF, DOCX, XLSX — up to 100 MB per file</div>
+      </div>
+      <div style="font-size:14px;font-weight:700;color:#111318;margin-bottom:12px;">Uploaded documents <span style="font-size:12px;font-weight:400;color:#9CA3AF;">(${_docUploads.length})</span></div>
+      <div class="du-table">
+        <div class="du-table-head">
+          <div class="du-th">Document</div>
+          <div class="du-th">Machine</div>
+          <div class="du-th">Type</div>
+          <div class="du-th">Size</div>
+          <div class="du-th">Uploaded</div>
+          <div class="du-th">Pages</div>
+          <div class="du-th">Status</div>
+        </div>
+        ${_docUploads.map(d => {
+          const s = STATUS_CFG[d.status] || STATUS_CFG.queued;
+          return `<div class="du-row">
+            <div class="du-td">
+              <div class="du-doc-name"><i class="ti ti-file-type-pdf" style="color:#B91C1C;margin-right:5px;font-size:14px;"></i>${d.name}</div>
+              <div class="du-doc-meta">v${d.version}</div>
+            </div>
+            <div class="du-td" style="font-size:12px;">${d.machine}</div>
+            <div class="du-td" style="font-size:12px;">${d.type}</div>
+            <div class="du-td" style="font-size:12px;color:#7A7F8E;">${d.size}</div>
+            <div class="du-td" style="font-size:12px;color:#7A7F8E;">${d.uploaded}</div>
+            <div class="du-td" style="font-size:12px;color:#7A7F8E;">${d.pages ? d.pages.toLocaleString() : '—'}</div>
+            <div class="du-td">
+              <span class="du-status-pill" style="background:${s.bg};color:${s.color};">
+                <i class="ti ${s.icon}" style="font-size:10px;"></i>${s.label}
+              </span>
+              ${d.status === 'processing' ? '<div class="du-progress-bar"><div class="du-progress-fill" style="width:60%;"></div></div>' : ''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>
+</div>`;
+
+    window.duOpenUpload = function() {
+      Modal.show({
+        title: 'Upload document',
+        wide: true,
+        body: `
+<div style="display:flex;flex-direction:column;gap:14px;">
+  <div class="modal-form-field">
+    <label class="modal-form-label">File <span class="lbl-opt">(PDF, DOCX, XLSX)</span></label>
+    <div style="border:2px dashed #C8C3BC;border-radius:8px;padding:22px;text-align:center;cursor:pointer;background:#FAFAF8;" onclick="document.getElementById('du-file-input').click()">
+      <i class="ti ti-cloud-upload" style="font-size:26px;color:#9CA3AF;display:block;margin-bottom:6px;"></i>
+      <div style="font-size:13px;color:#5A5F6E;">Click to select a file</div>
+      <div style="font-size:11px;color:#B0AAA3;margin-top:3px;">Up to 100 MB</div>
+    </div>
+    <input id="du-file-input" type="file" accept=".pdf,.docx,.xlsx" style="display:none;"/>
+  </div>
+  <div class="modal-form-field">
+    <label class="modal-form-label">Document title</label>
+    <input id="du-f-title" class="modal-form-input" placeholder="e.g. SJIII 3219 Service Manual Rev 5"/>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="modal-form-field">
+      <label class="modal-form-label">Document type</label>
+      <select id="du-f-type" class="modal-form-select">
+        ${DOC_TYPES.map(t => `<option>${t}</option>`).join('')}
+      </select>
+    </div>
+    <div class="modal-form-field">
+      <label class="modal-form-label">Associated machine</label>
+      <select id="du-f-machine" class="modal-form-select">
+        ${MACHINES.map(m => `<option>${m}</option>`).join('')}
+      </select>
+    </div>
+  </div>
+  <div class="modal-form-field">
+    <label class="modal-form-label">Version / revision <span class="lbl-opt">(optional)</span></label>
+    <input id="du-f-version" class="modal-form-input" placeholder="e.g. Rev 5, 2026"/>
+  </div>
+</div>`,
+        actions: [
+          { label: 'Upload & queue', style: 'primary', onClick: () => {
+            const title   = document.getElementById('du-f-title').value.trim() || 'Untitled document.pdf';
+            const type    = document.getElementById('du-f-type').value;
+            const machine = document.getElementById('du-f-machine').value;
+            const version = document.getElementById('du-f-version').value.trim() || '1.0';
+            _docUploads.unshift({
+              id: 'du' + Date.now(), name: title.endsWith('.pdf') ? title : title + '.pdf',
+              machine, type, version, size: (Math.random()*8+1).toFixed(1) + ' MB',
+              status: 'queued', uploaded: new Date().toISOString().slice(0,10), pages: null,
+            });
+            Modal.close();
+            renderDocUpload();
+          }},
+          { label: 'Cancel', onClick: () => Modal.close() },
+        ],
+      });
+    };
+  }
+
+  // ── Pricing Catalog ───────────────────────────────────────────────────────────
+  let _pricingRows = [
+    { id:'pr1', partNum:'1520539',  desc:'Hydraulic Lift Cylinder',   machine:'Skyjack SJIII 3219', category:'Hydraulics', listPrice:487.50, fleetPrice:438.75, currency:'USD', effectiveDate:'2026-01-01', expiryDate:'', active:true  },
+    { id:'pr2', partNum:'2641032',  desc:'Drive Motor Assembly',       machine:'Skyjack SJIII 3219', category:'Drive',     listPrice:1240.00,fleetPrice:1116.00,currency:'USD', effectiveDate:'2026-01-01', expiryDate:'', active:true  },
+    { id:'pr3', partNum:'1100156',  desc:'Control Board — ACLE',       machine:'All',                category:'Electrical',listPrice:895.00, fleetPrice:805.50, currency:'USD', effectiveDate:'2026-03-01', expiryDate:'2026-12-31', active:true  },
+    { id:'pr4', partNum:'1520119',  desc:'Main Seal Kit',              machine:'Skyjack SJ6832 RT',  category:'Hydraulics', listPrice:145.00, fleetPrice:130.50, currency:'USD', effectiveDate:'2025-06-01', expiryDate:'', active:false },
+    { id:'pr5', partNum:'3310087',  desc:'Platform Chain Set',         machine:'Skyjack SJIII 4632', category:'Structure', listPrice:320.00, fleetPrice:288.00, currency:'USD', effectiveDate:'2026-02-15', expiryDate:'', active:true  },
+  ];
+  let _pricingSearch = '';
+  let _pricingFilter = 'all'; // 'all' | 'active' | 'inactive'
+
+  function renderPricing() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Pricing Catalog';
+    const contentEl = document.getElementById('sp-content');
+
+    contentEl.innerHTML = `
+<style>
+.pc-toolbar { padding:14px 24px; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.pc-body { flex:1; padding:20px 24px 40px; overflow-y:auto; }
+.pc-search-wrap { position:relative; flex:1; max-width:340px; }
+.pc-search-icon { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:15px; pointer-events:none; }
+.pc-search-input { width:100%; height:36px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:9px; padding:0 12px 0 34px; font-size:13px; font-family:inherit; color:#111318; outline:none; }
+.pc-search-input:focus { border-color:#00843D; background:#FFFFFF; }
+.pc-search-input::placeholder { color:#B0AAA3; }
+.pc-ftab { padding:5px 13px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:0.5px solid transparent; color:#5A5F6E; white-space:nowrap; }
+.pc-ftab.active { background:#111318; color:#FFFFFF; }
+.pc-ftab:hover:not(.active) { background:#F5F2EE; }
+.pc-table { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
+.pc-table-head { display:grid; grid-template-columns:120px 1fr 170px 110px 100px 100px 80px 80px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 16px; }
+.pc-th { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.8px; text-transform:uppercase; padding:9px 8px; }
+.pc-row { display:grid; grid-template-columns:120px 1fr 170px 110px 100px 100px 80px 80px; padding:0 16px; border-bottom:0.5px solid #F5F2EE; align-items:center; }
+.pc-row:last-child { border-bottom:none; }
+.pc-row:hover { background:#FAFAF9; }
+.pc-td { padding:11px 8px; font-size:13px; color:#3A3D4A; }
+.pc-discount { font-size:10px; font-weight:700; color:#1B5E35; background:#E6F4EC; border-radius:4px; padding:1px 5px; margin-left:5px; }
+</style>
+<div style="display:flex;flex-direction:column;flex:1;min-height:0;">
+  <div class="pc-toolbar">
+    <div style="flex:1;">
+      <div style="font-size:16px;font-weight:700;color:#111318;">Pricing Catalog</div>
+      <div style="font-size:12px;color:#9CA3AF;margin-top:1px;">Manage list and fleet prices for your parts</div>
+    </div>
+    <button class="sp-btn sp-btn-ghost" onclick="pcImportCSV()"><i class="ti ti-table-import" style="font-size:13px;"></i> Import CSV</button>
+    <button class="sp-btn sp-btn-primary" onclick="pcAddRow()"><i class="ti ti-plus" style="font-size:13px;"></i> Add part price</button>
+  </div>
+  <div class="pc-body">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+      <div class="pc-search-wrap">
+        <i class="ti ti-search pc-search-icon"></i>
+        <input class="pc-search-input" id="pc-search" type="text" placeholder="Search by part # or description…" value="${_pricingSearch}"/>
+      </div>
+      <div id="pc-filter-tabs" style="display:flex;gap:4px;">
+        ${[['all','All'],['active','Active'],['inactive','Inactive']].map(([v,l]) =>
+          `<div class="pc-ftab ${_pricingFilter===v?'active':''}" onclick="pcSetFilter('${v}')">${l}</div>`
+        ).join('')}
+      </div>
+      <button class="sp-btn sp-btn-ghost" onclick="pcExportCSV()" style="margin-left:auto;"><i class="ti ti-download" style="font-size:12px;"></i> Export</button>
+    </div>
+    <div id="pc-table-wrap"></div>
+  </div>
+</div>`;
+
+    document.getElementById('pc-search').addEventListener('input', function() {
+      _pricingSearch = this.value;
+      pcRenderTable();
+    });
+
+    window.pcSetFilter = function(v) { _pricingFilter = v; renderPricing(); };
+    window.pcImportCSV = function() {
+      Modal.show({ title:'Import pricing CSV', body:'<p style="font-size:13px;color:#5A5F6E;">CSV import: drag &amp; drop a CSV with columns <code>partNum, description, listPrice, fleetPrice, effectiveDate</code>. Demo only — no file is processed.</p>', actions:[{label:'Close',onClick:()=>Modal.close()}] });
+    };
+    window.pcExportCSV = function() {
+      const lines = ['partNum,description,machine,category,listPrice,fleetPrice,currency,effectiveDate,active',
+        ..._pricingRows.map(r => `${r.partNum},"${r.desc}","${r.machine}","${r.category}",${r.listPrice},${r.fleetPrice},${r.currency},${r.effectiveDate},${r.active}`)];
+      const a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(lines.join('\n'));
+      a.download = 'pricing-catalog.csv'; a.click();
+    };
+    window.pcAddRow = function(editId) {
+      const existing = editId ? _pricingRows.find(r => r.id === editId) : null;
+      const a = existing || { partNum:'', desc:'', machine:'All', category:'', listPrice:'', fleetPrice:'', currency:'USD', effectiveDate:new Date().toISOString().slice(0,10), expiryDate:'', active:true };
+      Modal.show({
+        title: editId ? 'Edit part price' : 'Add part price',
+        wide: true,
+        body: `
+<div style="display:flex;flex-direction:column;gap:12px;">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="modal-form-field"><label class="modal-form-label">Part number</label><input id="pc-f-pnum" class="modal-form-input" placeholder="e.g. 1520539" value="${a.partNum}"/></div>
+    <div class="modal-form-field"><label class="modal-form-label">Category</label><input id="pc-f-cat" class="modal-form-input" placeholder="e.g. Hydraulics" value="${a.category}"/></div>
+  </div>
+  <div class="modal-form-field"><label class="modal-form-label">Description</label><input id="pc-f-desc" class="modal-form-input" placeholder="Part description" value="${a.desc}"/></div>
+  <div class="modal-form-field"><label class="modal-form-label">Associated machine</label><input id="pc-f-machine" class="modal-form-input" placeholder="e.g. Skyjack SJIII 3219 or All" value="${a.machine}"/></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:12px;">
+    <div class="modal-form-field"><label class="modal-form-label">List price</label><input id="pc-f-list" class="modal-form-input" type="number" step="0.01" min="0" placeholder="0.00" value="${a.listPrice}"/></div>
+    <div class="modal-form-field"><label class="modal-form-label">Fleet price</label><input id="pc-f-fleet" class="modal-form-input" type="number" step="0.01" min="0" placeholder="0.00" value="${a.fleetPrice}"/></div>
+    <div class="modal-form-field"><label class="modal-form-label">Currency</label><select id="pc-f-currency" class="modal-form-select"><option>USD</option><option>CAD</option><option>EUR</option></select></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="modal-form-field"><label class="modal-form-label">Effective date</label><input id="pc-f-eff" class="modal-form-input" type="date" value="${a.effectiveDate}"/></div>
+    <div class="modal-form-field"><label class="modal-form-label">Expiry date <span class="lbl-opt">(optional)</span></label><input id="pc-f-exp" class="modal-form-input" type="date" value="${a.expiryDate}"/></div>
+  </div>
+  <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#3A3D4A;cursor:pointer;"><input type="checkbox" id="pc-f-active" ${a.active?'checked':''} style="accent-color:#00843D;"/> Active (visible to fleets)</label>
+</div>`,
+        actions: [
+          { label: editId ? 'Save changes' : 'Add', style:'primary', onClick: () => {
+            const row = {
+              id: editId || 'pr' + Date.now(),
+              partNum: document.getElementById('pc-f-pnum').value.trim(),
+              desc:    document.getElementById('pc-f-desc').value.trim(),
+              machine: document.getElementById('pc-f-machine').value.trim() || 'All',
+              category:document.getElementById('pc-f-cat').value.trim(),
+              listPrice: parseFloat(document.getElementById('pc-f-list').value) || 0,
+              fleetPrice:parseFloat(document.getElementById('pc-f-fleet').value) || 0,
+              currency:  document.getElementById('pc-f-currency').value,
+              effectiveDate: document.getElementById('pc-f-eff').value,
+              expiryDate:    document.getElementById('pc-f-exp').value,
+              active: document.getElementById('pc-f-active').checked,
+            };
+            if (editId) { const i = _pricingRows.findIndex(r => r.id === editId); if (i >= 0) _pricingRows[i] = row; }
+            else _pricingRows.unshift(row);
+            Modal.close();
+            pcRenderTable();
+          }},
+          { label: 'Cancel', onClick: () => Modal.close() },
+        ],
+      });
+    };
+    window.pcDeleteRow = function(id) {
+      _pricingRows = _pricingRows.filter(r => r.id !== id);
+      pcRenderTable();
+    };
+
+    pcRenderTable();
+  }
+
+  function pcRenderTable() {
+    const wrap = document.getElementById('pc-table-wrap');
+    if (!wrap) return;
+    const q = _pricingSearch.toLowerCase();
+    let rows = _pricingRows
+      .filter(r => _pricingFilter === 'all' || ((_pricingFilter === 'active') === r.active))
+      .filter(r => !q || r.partNum.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q));
+    if (!rows.length) { wrap.innerHTML = '<div style="padding:48px;text-align:center;color:#9CA3AF;font-size:13px;">No pricing entries match the current filter.</div>'; return; }
+    wrap.innerHTML = `
+<div class="pc-table">
+  <div class="pc-table-head">
+    <div class="pc-th">Part #</div><div class="pc-th">Description</div><div class="pc-th">Machine</div>
+    <div class="pc-th">Category</div><div class="pc-th">List price</div><div class="pc-th">Fleet price</div>
+    <div class="pc-th">Effective</div><div class="pc-th"></div>
+  </div>
+  ${rows.map(r => {
+    const disc = r.listPrice > 0 ? Math.round((1 - r.fleetPrice/r.listPrice)*100) : 0;
+    return `<div class="pc-row" style="${!r.active ? 'opacity:0.5;' : ''}">
+      <div class="pc-td"><span style="font-family:monospace;font-size:11px;font-weight:700;color:#111318;">${r.partNum}</span></div>
+      <div class="pc-td" style="font-size:12px;">${r.desc}</div>
+      <div class="pc-td" style="font-size:12px;color:#7A7F8E;">${r.machine}</div>
+      <div class="pc-td" style="font-size:12px;color:#7A7F8E;">${r.category}</div>
+      <div class="pc-td" style="font-size:13px;font-weight:600;">$${r.listPrice.toFixed(2)}</div>
+      <div class="pc-td">
+        <span style="font-size:13px;font-weight:700;color:#1B5E35;">$${r.fleetPrice.toFixed(2)}</span>
+        ${disc > 0 ? `<span class="pc-discount">-${disc}%</span>` : ''}
+      </div>
+      <div class="pc-td" style="font-size:12px;color:#7A7F8E;">${r.effectiveDate}</div>
+      <div class="pc-td" style="display:flex;gap:4px;justify-content:flex-end;">
+        <button class="sp-btn sp-btn-ghost" style="height:28px;padding:0 8px;font-size:11px;" onclick="pcAddRow('${r.id}')"><i class="ti ti-pencil"></i></button>
+        <button class="sp-btn" style="height:28px;padding:0 8px;font-size:11px;background:#FEE2E2;color:#B91C1C;" onclick="pcDeleteRow('${r.id}')"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>`;
+  }).join('')}
+</div>`;
+  }
+
+  // ── Parts Extractor ───────────────────────────────────────────────────────────
+  let _exJobs = [
+    { id:'ex1', name:'SJIII-3219-Service-Manual.pdf', pages:312, status:'classified', pagesClassified:312, bomsExtracted:28, partsFound:184, uploadedAt:'2026-07-12 09:14' },
+    { id:'ex2', name:'SJ6832RT-Parts-Catalog-2025.pdf', pages:187, status:'extracting', pagesClassified:187, bomsExtracted:15, partsFound:null, uploadedAt:'2026-08-03 14:32' },
+    { id:'ex3', name:'Hydraulics-Guide.pdf', pages:98, status:'classifying', pagesClassified:67, bomsExtracted:null, partsFound:null, uploadedAt:'2026-08-04 08:51' },
+  ];
+  let _exActiveJobId = 'ex1';
+  let _exView = 'queue'; // 'queue' | 'classify' | 'bom'
+
+  const EX_SAMPLE_PAGES = [
+    { num:1,  type:'other',   thumb:'📄', label:'Cover Page',        conf:0.97 },
+    { num:2,  type:'other',   thumb:'📋', label:'Table of Contents', conf:0.91 },
+    { num:14, type:'diagram', thumb:'🔧', label:'Hydraulic System',  conf:0.94 },
+    { num:15, type:'bom',     thumb:'📊', label:'Part Number Table', conf:0.98 },
+    { num:16, type:'diagram', thumb:'🔧', label:'Drive Assembly',    conf:0.89 },
+    { num:17, type:'bom',     thumb:'📊', label:'Drive Parts List',  conf:0.96 },
+    { num:18, type:'ignore',  thumb:'📄', label:'Legal Notice',      conf:0.88 },
+    { num:42, type:'diagram', thumb:'🔧', label:'Platform Frame',    conf:0.92 },
+    { num:43, type:'bom',     thumb:'📊', label:'Platform Parts',    conf:0.99 },
+  ];
+  const EX_SAMPLE_BOM = [
+    { row:1,  partNum:'1520539', desc:'Hydraulic Lift Cylinder, 2-Stage',  qty:'1',  uom:'EA', notes:'',                  conf:0.98, issues:[] },
+    { row:2,  partNum:'1520540', desc:'Cylinder Seal Kit',                  qty:'1',  uom:'EA', notes:'Inspect at 500h',  conf:0.96, issues:[] },
+    { row:3,  partNum:'HYD-0812',desc:'Hydraulic Hose ⅜" × 36"',           qty:'2',  uom:'EA', notes:'',                  conf:0.91, issues:['low_conf'] },
+    { row:4,  partNum:'',        desc:'Fitting, 90° Swivel JIC',            qty:'4',  uom:'EA', notes:'',                  conf:0.73, issues:['no_partnum','low_conf'] },
+    { row:5,  partNum:'1520119', desc:'Main Pump Assembly',                  qty:'1',  uom:'EA', notes:'',                  conf:0.99, issues:[] },
+    { row:6,  partNum:'1520245', desc:'Relief Valve, 3000 PSI',             qty:'1',  uom:'EA', notes:'Torque to 35 ft-lb',conf:0.94, issues:[] },
+    { row:7,  partNum:'FL-MAST', desc:'Mast Filter Kit',                    qty:'1',  uom:'KIT',notes:'Replace annually',  conf:0.87, issues:['low_conf'] },
+  ];
+
+  function renderExtractor() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Parts Extractor';
+    const contentEl = document.getElementById('sp-content');
+
+    contentEl.innerHTML = `
+<style>
+.ex-shell { display:flex; flex:1; min-height:0; overflow:hidden; }
+.ex-sidebar { width:260px; min-width:260px; background:#FFFFFF; border-right:0.5px solid #E8E4DF; display:flex; flex-direction:column; overflow:hidden; }
+.ex-sb-hdr { padding:14px 16px; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.ex-sb-title { font-size:13px; font-weight:700; color:#111318; }
+.ex-job-list { flex:1; overflow-y:auto; padding:8px 0; }
+.ex-job-item { padding:10px 16px; cursor:pointer; border-left:2px solid transparent; transition:background .12s; }
+.ex-job-item:hover { background:#FAFAF8; }
+.ex-job-item.active { background:#E6F4EC; border-left-color:#00843D; }
+.ex-job-name { font-size:12px; font-weight:600; color:#111318; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ex-job-item.active .ex-job-name { color:#1B5E35; }
+.ex-job-meta { font-size:10px; color:#9CA3AF; }
+.ex-job-status { display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:700; border-radius:4px; padding:1px 6px; margin-top:3px; }
+.ex-main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.ex-topbar { padding:10px 20px; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.ex-tab { padding:5px 14px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:0.5px solid transparent; color:#5A5F6E; white-space:nowrap; }
+.ex-tab.active { background:#111318; color:#FFFFFF; }
+.ex-tab.disabled { opacity:0.4; cursor:default; }
+.ex-tab:hover:not(.active):not(.disabled) { background:#F5F2EE; }
+.ex-body { flex:1; overflow-y:auto; padding:18px 20px 32px; }
+/* Queue view */
+.ex-queue-row { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:10px; padding:14px 18px; margin-bottom:10px; display:flex; align-items:center; gap:16px; }
+.ex-q-icon { width:40px; height:40px; background:#FEE2E2; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.ex-q-body { flex:1; min-width:0; }
+.ex-q-name { font-size:13px; font-weight:600; color:#111318; margin-bottom:3px; }
+.ex-q-meta { font-size:11px; color:#9CA3AF; }
+.ex-q-progress { margin-top:7px; }
+.ex-q-prog-bar { height:5px; background:#F0ECE8; border-radius:3px; overflow:hidden; margin-top:4px; }
+.ex-q-prog-fill { height:100%; border-radius:3px; }
+/* Classification view */
+.ex-class-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; }
+.ex-page-card { border:2px solid #E8E4DF; border-radius:10px; overflow:hidden; cursor:pointer; transition:border-color .15s; }
+.ex-page-card:hover { border-color:#9CA3AF; }
+.ex-page-card.type-diagram { border-color:#3B82F6; }
+.ex-page-card.type-bom     { border-color:#10B981; }
+.ex-page-card.type-ignore  { border-color:#E2DDD8; opacity:.6; }
+.ex-page-thumb { background:#F5F2EE; height:100px; display:flex; align-items:center; justify-content:center; font-size:36px; }
+.ex-page-footer { padding:8px 10px; background:#FFFFFF; border-top:0.5px solid #F0ECE8; }
+.ex-page-num { font-size:10px; color:#9CA3AF; margin-bottom:3px; }
+.ex-page-label { font-size:11px; font-weight:600; color:#111318; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ex-page-type-btns { display:flex; gap:3px; flex-wrap:wrap; }
+.ex-ptype-btn { font-size:9px; font-weight:700; padding:2px 6px; border-radius:4px; cursor:pointer; border:0.5px solid transparent; }
+.ex-ptype-btn.diagram { background:#DBEAFE; color:#1D4ED8; }
+.ex-ptype-btn.bom     { background:#D1FAE5; color:#065F46; }
+.ex-ptype-btn.other   { background:#F5F2EE; color:#5A5F6E; }
+.ex-ptype-btn.ignore  { background:#FEE2E2; color:#B91C1C; }
+.ex-ptype-btn.selected { opacity:1; box-shadow:0 0 0 1.5px currentColor; }
+.ex-ptype-btn:not(.selected) { opacity:.5; }
+.ex-conf-dot { width:6px; height:6px; border-radius:50%; display:inline-block; margin-right:3px; }
+/* BoM view */
+.ex-bom-table { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
+.ex-bom-head { display:grid; grid-template-columns:36px 110px 1fr 60px 60px 80px 100px 32px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
+.ex-bom-th { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.7px; text-transform:uppercase; padding:9px 6px; }
+.ex-bom-row { display:grid; grid-template-columns:36px 110px 1fr 60px 60px 80px 100px 32px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; }
+.ex-bom-row:last-child { border-bottom:none; }
+.ex-bom-row:hover { background:#FAFAF9; }
+.ex-bom-row.has-issue { background:#FFFBF2; }
+.ex-bom-td { padding:10px 6px; font-size:12px; color:#3A3D4A; }
+.ex-bom-input { width:100%; height:28px; border:0.5px solid #E2DDD8; border-radius:5px; padding:0 7px; font-size:12px; font-family:inherit; color:#111318; outline:none; background:#FAFAF9; }
+.ex-bom-input:focus { border-color:#00843D; background:#FFFFFF; }
+.ex-issue-tag { display:inline-flex; align-items:center; gap:3px; font-size:9px; font-weight:700; padding:1px 5px; border-radius:4px; }
+.ex-conf-bar { height:4px; background:#F0ECE8; border-radius:2px; margin-top:3px; overflow:hidden; }
+.ex-conf-fill { height:100%; border-radius:2px; }
+</style>
+<div class="ex-shell">
+  <div class="ex-sidebar">
+    <div class="ex-sb-hdr">
+      <div class="ex-sb-title">Processing queue</div>
+      <button class="sp-btn sp-btn-primary" style="height:28px;padding:0 10px;font-size:11px;" onclick="exUploadNew()"><i class="ti ti-plus"></i> New</button>
+    </div>
+    <div class="ex-job-list">
+      ${_exJobs.map(j => {
+        const S = { classified:{label:'Ready',bg:'#E6F4EC',color:'#1B5E35'}, extracting:{label:'Extracting',bg:'#FFFBEB',color:'#B45309'}, classifying:{label:'Classifying',bg:'#EEEDFE',color:'#534AB7'}, queued:{label:'Queued',bg:'#F5F2EE',color:'#5A5F6E'} };
+        const s = S[j.status] || S.queued;
+        return `<div class="ex-job-item ${_exActiveJobId===j.id?'active':''}" onclick="exSelectJob('${j.id}')">
+          <div class="ex-job-name" title="${j.name}">${j.name}</div>
+          <div class="ex-job-meta">${j.pages} pages · ${j.uploadedAt}</div>
+          <div class="ex-job-status" style="background:${s.bg};color:${s.color};">${s.label}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+  <div class="ex-main">
+    <div class="ex-topbar">
+      <div class="ex-tab ${_exView==='queue'?'active':''}" onclick="exSetView('queue')">Overview</div>
+      <div class="ex-tab ${_exView==='classify'?'active':''} ${_exJobs.find(j=>j.id===_exActiveJobId)?.status==='queued'?'disabled':''}" onclick="exSetView('classify')">Page classification</div>
+      <div class="ex-tab ${_exView==='bom'?'active':''} ${['queued','classifying'].includes(_exJobs.find(j=>j.id===_exActiveJobId)?.status||'')?'disabled':''}" onclick="exSetView('bom')">BoM extraction</div>
+      <div style="margin-left:auto;display:flex;gap:6px;">
+        <button class="sp-btn sp-btn-ghost" style="height:28px;padding:0 10px;font-size:11px;" onclick="exReview()"><i class="ti ti-eye" style="font-size:12px;"></i> Review</button>
+        <button class="sp-btn sp-btn-primary" style="height:28px;padding:0 10px;font-size:11px;" onclick="exCommit()"><i class="ti ti-database-import" style="font-size:12px;"></i> Commit to catalog</button>
+      </div>
+    </div>
+    <div class="ex-body" id="ex-body"></div>
+  </div>
+</div>`;
+
+    window.exSelectJob = function(id) { _exActiveJobId = id; renderExtractor(); };
+    window.exSetView   = function(v) {
+      const job = _exJobs.find(j => j.id === _exActiveJobId);
+      if (!job) return;
+      if (v === 'classify' && job.status === 'queued') return;
+      if (v === 'bom' && ['queued','classifying'].includes(job.status)) return;
+      _exView = v; exRenderBody();
+    };
+    window.exUploadNew = function() {
+      Modal.show({ title:'Add document to extractor', body:`
+<div style="display:flex;flex-direction:column;gap:12px;">
+  <div class="modal-form-field"><label class="modal-form-label">File name / identifier</label><input id="ex-f-name" class="modal-form-input" placeholder="e.g. SJIII-3219-Parts-Rev5.pdf"/></div>
+  <div class="modal-form-field"><label class="modal-form-label">Estimated pages</label><input id="ex-f-pages" class="modal-form-input" type="number" min="1" placeholder="e.g. 120"/></div>
+</div>`, actions:[
+        { label:'Add to queue', style:'primary', onClick:()=>{
+          const name = document.getElementById('ex-f-name').value.trim() || 'document.pdf';
+          const pages = parseInt(document.getElementById('ex-f-pages').value) || 100;
+          const id = 'ex' + Date.now();
+          _exJobs.unshift({ id, name, pages, status:'queued', pagesClassified:0, bomsExtracted:null, partsFound:null, uploadedAt:new Date().toISOString().slice(0,16).replace('T',' ') });
+          _exActiveJobId = id; _exView = 'queue';
+          Modal.close(); renderExtractor();
+        }},
+        { label:'Cancel', onClick:()=>Modal.close() },
+      ]});
+    };
+    window.exReview = function() {
+      Modal.show({ title:'Review summary', body:`<p style="font-size:13px;color:#5A5F6E;">In production, this would show a full diff of parts to be added or updated before committing. Demo only.</p>`, actions:[{label:'Close',onClick:()=>Modal.close()}] });
+    };
+    window.exCommit = function() {
+      Modal.show({ title:'Commit to catalog', body:`<p style="font-size:13px;color:#5A5F6E;">This would push the extracted parts records into the live parts catalog for fleet mechanics to find. Demo only.</p>`, actions:[
+        { label:'Commit', style:'primary', onClick:()=>Modal.close() },
+        { label:'Cancel', onClick:()=>Modal.close() },
+      ]});
+    };
+
+    exRenderBody();
+  }
+
+  function exRenderBody() {
+    const body = document.getElementById('ex-body');
+    if (!body) return;
+    if (_exView === 'queue')    exRenderQueue(body);
+    if (_exView === 'classify') exRenderClassify(body);
+    if (_exView === 'bom')      exRenderBom(body);
+  }
+
+  function exRenderQueue(body) {
+    const S = {
+      classified: { label:'Ready for extraction', bg:'#E6F4EC', color:'#1B5E35', pct:100, barColor:'#00843D' },
+      extracting: { label:'Extracting parts…',    bg:'#FFFBEB', color:'#B45309', pct:55,  barColor:'#B45309' },
+      classifying:{ label:'Classifying pages…',   bg:'#EEEDFE', color:'#534AB7', pct:68,  barColor:'#534AB7' },
+      queued:     { label:'Waiting in queue',      bg:'#F5F2EE', color:'#5A5F6E', pct:0,   barColor:'#C8C3BC' },
+    };
+    body.innerHTML = `
+<div style="font-size:14px;font-weight:700;color:#111318;margin-bottom:14px;">Processing queue</div>
+${_exJobs.map(j => {
+  const s = S[j.status] || S.queued;
+  return `<div class="ex-queue-row" style="${_exActiveJobId===j.id?'border-color:#00843D;background:#FAFFF8;':''}">
+    <div class="ex-q-icon"><i class="ti ti-file-type-pdf" style="color:#B91C1C;font-size:22px;"></i></div>
+    <div class="ex-q-body">
+      <div class="ex-q-name">${j.name}</div>
+      <div class="ex-q-meta">${j.pages} pages · Uploaded ${j.uploadedAt}</div>
+      <div class="ex-q-progress">
+        <div style="display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#9CA3AF;margin-bottom:2px;">
+          <span style="font-weight:600;color:${s.color};">${s.label}</span>
+          ${j.status !== 'queued' ? `<span>${s.pct}%</span>` : ''}
+        </div>
+        <div class="ex-q-prog-bar"><div class="ex-q-prog-fill" style="width:${s.pct}%;background:${s.barColor};${j.status==='extracting'||j.status==='classifying'?'animation:duPulse 1.4s ease-in-out infinite;':''}"></div></div>
+      </div>
+      <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;color:#7A7F8E;">
+        ${j.pagesClassified ? `<span><i class="ti ti-layout-grid" style="font-size:12px;margin-right:3px;"></i>${j.pagesClassified} pages classified</span>` : ''}
+        ${j.bomsExtracted   ? `<span><i class="ti ti-table" style="font-size:12px;margin-right:3px;"></i>${j.bomsExtracted} BoMs found</span>` : ''}
+        ${j.partsFound      ? `<span><i class="ti ti-components" style="font-size:12px;margin-right:3px;"></i>${j.partsFound} parts extracted</span>` : ''}
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0;">
+      ${j.status !== 'queued' ? `<button class="sp-btn sp-btn-ghost" style="height:28px;font-size:11px;" onclick="_exActiveJobId='${j.id}';_exView='classify';exRenderBody()">Classify</button>` : ''}
+      ${j.status === 'classified' ? `<button class="sp-btn sp-btn-primary" style="height:28px;font-size:11px;" onclick="_exActiveJobId='${j.id}';_exView='bom';exRenderBody()">View BoM</button>` : ''}
+    </div>
+  </div>`;
+}).join('')}`;
+  }
+
+  function exRenderClassify(body) {
+    let pages = EX_SAMPLE_PAGES.map(p => ({ ...p }));
+    body.innerHTML = `
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+  <div>
+    <div style="font-size:14px;font-weight:700;color:#111318;">Page classification</div>
+    <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">AI has pre-classified pages — review and correct before extraction</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <div style="font-size:11px;color:#9CA3AF;">Legend:</div>
+    <span class="ex-ptype-btn diagram selected">Diagram</span>
+    <span class="ex-ptype-btn bom selected">BoM</span>
+    <span class="ex-ptype-btn other selected">Other</span>
+    <span class="ex-ptype-btn ignore selected">Ignore</span>
+  </div>
+</div>
+<div class="ex-class-grid" id="ex-class-grid">
+${pages.map((p,i) => `
+  <div class="ex-page-card type-${p.type}" id="ex-pc-${i}">
+    <div class="ex-page-thumb">${p.thumb}</div>
+    <div class="ex-page-footer">
+      <div class="ex-page-num">Page ${p.num}</div>
+      <div class="ex-page-label" title="${p.label}">${p.label}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <span style="font-size:9px;color:#9CA3AF;">AI conf: ${Math.round(p.conf*100)}%</span>
+        <span class="ex-conf-dot" style="background:${p.conf>0.9?'#10B981':p.conf>0.75?'#F59E0B':'#EF4444'};"></span>
+      </div>
+      <div class="ex-page-type-btns">
+        ${['diagram','bom','other','ignore'].map(t =>
+          `<span class="ex-ptype-btn ${t} ${p.type===t?'selected':''}" onclick="exSetPageType(${i},'${t}')">${t.charAt(0).toUpperCase()+t.slice(1)}</span>`
+        ).join('')}
+      </div>
+    </div>
+  </div>`).join('')}
+</div>
+<div style="margin-top:18px;display:flex;gap:8px;">
+  <button class="sp-btn sp-btn-primary" onclick="_exView='bom';exRenderBody()"><i class="ti ti-table" style="font-size:12px;"></i> Proceed to BoM extraction</button>
+  <button class="sp-btn sp-btn-ghost" onclick="exAutoClassify()"><i class="ti ti-sparkles" style="font-size:12px;"></i> Re-run AI classification</button>
+</div>`;
+
+    window.exSetPageType = function(idx, type) {
+      const card = document.getElementById('ex-pc-' + idx);
+      if (!card) return;
+      card.className = 'ex-page-card type-' + type;
+      card.querySelectorAll('.ex-ptype-btn').forEach(b => b.classList.toggle('selected', b.classList.contains(type)));
+    };
+    window.exAutoClassify = function() {
+      const grid = document.getElementById('ex-class-grid');
+      if (grid) { grid.style.opacity = '0.4'; setTimeout(() => { grid.style.opacity = '1'; }, 1200); }
+    };
+  }
+
+  function exRenderBom(body) {
+    body.innerHTML = `
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+  <div>
+    <div style="font-size:14px;font-weight:700;color:#111318;">BoM extraction results</div>
+    <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">${EX_SAMPLE_BOM.length} rows extracted from ${EX_SAMPLE_PAGES.filter(p=>p.type==='bom').length} BoM pages · <span style="color:#B45309;font-weight:600;">${EX_SAMPLE_BOM.filter(r=>r.issues.length).length} rows need review</span></div>
+  </div>
+  <div style="display:flex;gap:6px;">
+    <button class="sp-btn sp-btn-ghost" onclick="exExportBom()"><i class="ti ti-download" style="font-size:12px;"></i> Export CSV</button>
+    <button class="sp-btn sp-btn-primary" onclick="exCommit()"><i class="ti ti-database-import" style="font-size:12px;"></i> Commit to catalog</button>
+  </div>
+</div>
+<div style="display:flex;gap:8px;margin-bottom:12px;">
+  <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:8px;padding:10px 16px;text-align:center;min-width:90px;">
+    <div style="font-size:20px;font-weight:700;color:#111318;">${EX_SAMPLE_BOM.length}</div>
+    <div style="font-size:10px;color:#9CA3AF;margin-top:2px;">Rows</div>
+  </div>
+  <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:8px;padding:10px 16px;text-align:center;min-width:90px;">
+    <div style="font-size:20px;font-weight:700;color:#1B5E35;">${EX_SAMPLE_BOM.filter(r=>!r.issues.length).length}</div>
+    <div style="font-size:10px;color:#9CA3AF;margin-top:2px;">Clean</div>
+  </div>
+  <div style="background:#FFFBF2;border:0.5px solid #F5C97A;border-radius:8px;padding:10px 16px;text-align:center;min-width:90px;">
+    <div style="font-size:20px;font-weight:700;color:#B45309;">${EX_SAMPLE_BOM.filter(r=>r.issues.length).length}</div>
+    <div style="font-size:10px;color:#B45309;margin-top:2px;">Need review</div>
+  </div>
+  <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:8px;padding:10px 16px;text-align:center;min-width:90px;">
+    <div style="font-size:20px;font-weight:700;color:#111318;">${Math.round(EX_SAMPLE_BOM.reduce((a,r)=>a+r.conf,0)/EX_SAMPLE_BOM.length*100)}%</div>
+    <div style="font-size:10px;color:#9CA3AF;margin-top:2px;">Avg conf.</div>
+  </div>
+</div>
+<div class="ex-bom-table">
+  <div class="ex-bom-head">
+    <div class="ex-bom-th">#</div>
+    <div class="ex-bom-th">Part #</div>
+    <div class="ex-bom-th">Description</div>
+    <div class="ex-bom-th">Qty</div>
+    <div class="ex-bom-th">UOM</div>
+    <div class="ex-bom-th">Confidence</div>
+    <div class="ex-bom-th">Issues</div>
+    <div class="ex-bom-th"></div>
+  </div>
+  ${EX_SAMPLE_BOM.map((r,i) => {
+    const confColor = r.conf >= 0.95 ? '#10B981' : r.conf >= 0.8 ? '#F59E0B' : '#EF4444';
+    const hasIssue = r.issues.length > 0;
+    return `<div class="ex-bom-row ${hasIssue?'has-issue':''}">
+      <div class="ex-bom-td" style="color:#9CA3AF;font-size:11px;">${r.row}</div>
+      <div class="ex-bom-td"><input class="ex-bom-input" value="${r.partNum}" placeholder="—" style="font-family:monospace;font-size:11px;font-weight:700;${!r.partNum?'border-color:#FCA5A5;background:#FFF5F5;':''}"/></div>
+      <div class="ex-bom-td"><input class="ex-bom-input" value="${r.desc}" style="width:100%;"/></div>
+      <div class="ex-bom-td"><input class="ex-bom-input" value="${r.qty}" style="width:48px;text-align:center;"/></div>
+      <div class="ex-bom-td" style="font-size:11px;color:#7A7F8E;">${r.uom}</div>
+      <div class="ex-bom-td">
+        <div style="font-size:11px;font-weight:700;color:${confColor};">${Math.round(r.conf*100)}%</div>
+        <div class="ex-conf-bar"><div class="ex-conf-fill" style="width:${Math.round(r.conf*100)}%;background:${confColor};"></div></div>
+      </div>
+      <div class="ex-bom-td" style="display:flex;flex-wrap:wrap;gap:3px;">
+        ${r.issues.includes('no_partnum') ? `<span class="ex-issue-tag" style="background:#FEE2E2;color:#B91C1C;">No P/N</span>` : ''}
+        ${r.issues.includes('low_conf')   ? `<span class="ex-issue-tag" style="background:#FFFBEB;color:#B45309;">Low conf</span>` : ''}
+        ${!hasIssue ? `<span style="font-size:10px;color:#10B981;">✓ OK</span>` : ''}
+      </div>
+      <div class="ex-bom-td" style="justify-content:center;">
+        <button class="sp-btn sp-btn-ghost" style="height:24px;padding:0 7px;font-size:10px;" onclick="exIgnoreRow(${i})"><i class="ti ti-x"></i></button>
+      </div>
+    </div>`;
+  }).join('')}
+</div>`;
+
+    window.exIgnoreRow = function(i) {
+      const rows = document.querySelectorAll('.ex-bom-row');
+      if (rows[i]) { rows[i].style.opacity = '0.3'; rows[i].style.pointerEvents = 'none'; }
+    };
+    window.exExportBom = function() {
+      const lines = ['row,partNum,description,qty,uom,confidence',
+        ...EX_SAMPLE_BOM.map(r => `${r.row},${r.partNum},"${r.desc}",${r.qty},${r.uom},${Math.round(r.conf*100)}%`)];
+      const a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(lines.join('\n'));
+      a.download = 'bom-extraction.csv'; a.click();
+    };
+  }
+
   function setTab(tab) {
     _activeTab = tab;
     el.querySelectorAll('.sb-item[data-sp-tab]').forEach(item => {
@@ -2183,8 +2861,8 @@ function render_supplier_portal(el) {
     });
 
     const contentEl = document.getElementById('sp-content');
-    const fullHeight = ['manuals', 'news', 'analytics'].includes(tab);
-    const scrollPad = ['content'].includes(tab);
+    const fullHeight = ['manuals', 'news', 'analytics', 'doc-upload', 'extractor'].includes(tab);
+    const scrollPad = ['content', 'pricing'].includes(tab);
     if (fullHeight) {
       contentEl.style.cssText = 'flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0;';
     } else if (scrollPad) {
@@ -2193,13 +2871,16 @@ function render_supplier_portal(el) {
       contentEl.style.cssText = 'flex:1;overflow-y:auto;padding:28px;';
     }
 
-    if (tab === 'home')      renderHome();
-    if (tab === 'fleets')    renderFleets();
-    if (tab === 'requests')  renderRequests();
-    if (tab === 'content')   renderContent();
-    if (tab === 'manuals')   renderManuals();
-    if (tab === 'news')      renderNews();
-    if (tab === 'analytics') renderAnalytics();
+    if (tab === 'home')       renderHome();
+    if (tab === 'fleets')     renderFleets();
+    if (tab === 'requests')   renderRequests();
+    if (tab === 'content')    renderContent();
+    if (tab === 'manuals')    renderManuals();
+    if (tab === 'news')       renderNews();
+    if (tab === 'analytics')  renderAnalytics();
+    if (tab === 'doc-upload') renderDocUpload();
+    if (tab === 'pricing')    renderPricing();
+    if (tab === 'extractor')  renderExtractor();
   }
 
   el.querySelectorAll('.sb-item[data-sp-tab]').forEach(item => {

@@ -56,6 +56,10 @@ function buildSidebar(activeItem, opts) {
       <div class="sb-section-label">Knowledge</div>
       <div class="sb-item ${activeItem==='sp-manuals'?'active':''}"  data-sp-tab="manuals"><i class="ti ti-book"></i><span class="sb-lbl"> Manuals &amp; Docs</span></div>
       <div class="sb-item ${activeItem==='sp-news'?'active':''}"     data-sp-tab="news"><i class="ti ti-news"></i><span class="sb-lbl"> News &amp; Updates</span></div>
+      <div class="sb-section-label">Supplier Tools</div>
+      <div class="sb-item ${activeItem==='sp-doc-upload'?'active':''}"  data-sp-tab="doc-upload"><i class="ti ti-cloud-upload"></i><span class="sb-lbl"> Doc Ingestion</span></div>
+      <div class="sb-item ${activeItem==='sp-pricing'?'active':''}"     data-sp-tab="pricing"><i class="ti ti-list-numbers"></i><span class="sb-lbl"> Pricing Catalog</span></div>
+      <div class="sb-item ${activeItem==='sp-extractor'?'active':''}"   data-sp-tab="extractor"><i class="ti ti-cpu"></i><span class="sb-lbl"> Parts Extractor</span></div>
       <div class="sb-section-label">Reports</div>
       <div class="sb-item ${activeItem==='sp-analytics'?'active':''}" data-sp-tab="analytics"><i class="ti ti-chart-bar"></i><span class="sb-lbl"> Analytics</span></div>
     </div>
