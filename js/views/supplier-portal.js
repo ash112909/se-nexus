@@ -2336,65 +2336,120 @@ function render_supplier_portal(el) {
   }
 
   // ── Pricing Catalog ───────────────────────────────────────────────────────────
-  let _pricingRows = [
-    { id:'pr1', partNum:'1520539',  desc:'Hydraulic Lift Cylinder',   machine:'Skyjack SJIII 3219', category:'Hydraulics', listPrice:487.50, fleetPrice:438.75, currency:'USD', effectiveDate:'2026-01-01', expiryDate:'', active:true  },
-    { id:'pr2', partNum:'2641032',  desc:'Drive Motor Assembly',       machine:'Skyjack SJIII 3219', category:'Drive',     listPrice:1240.00,fleetPrice:1116.00,currency:'USD', effectiveDate:'2026-01-01', expiryDate:'', active:true  },
-    { id:'pr3', partNum:'1100156',  desc:'Control Board — ACLE',       machine:'All',                category:'Electrical',listPrice:895.00, fleetPrice:805.50, currency:'USD', effectiveDate:'2026-03-01', expiryDate:'2026-12-31', active:true  },
-    { id:'pr4', partNum:'1520119',  desc:'Main Seal Kit',              machine:'Skyjack SJ6832 RT',  category:'Hydraulics', listPrice:145.00, fleetPrice:130.50, currency:'USD', effectiveDate:'2025-06-01', expiryDate:'', active:false },
-    { id:'pr5', partNum:'3310087',  desc:'Platform Chain Set',         machine:'Skyjack SJIII 4632', category:'Structure', listPrice:320.00, fleetPrice:288.00, currency:'USD', effectiveDate:'2026-02-15', expiryDate:'', active:true  },
-  ];
+  // Pricing catalog: keyed by fleetId ('default' = baseline for all fleets)
+  let _pricingData = {
+    'default': [
+      { id:'pr1', partNum:'1520539', desc:'Hydraulic Lift Cylinder',  machine:'Skyjack SJIII 3219', category:'Hydraulics', listPrice:487.50, contractPrice:438.75, currency:'USD', effectiveDate:'2026-01-01', expiryDate:'', active:true  },
+      { id:'pr2', partNum:'2641032', desc:'Drive Motor Assembly',      machine:'Skyjack SJIII 3219', category:'Drive',      listPrice:1240.00,contractPrice:1116.00,currency:'USD', effectiveDate:'2026-01-01', expiryDate:'', active:true  },
+      { id:'pr3', partNum:'1100156', desc:'Control Board — ACLE',      machine:'All',                category:'Electrical', listPrice:895.00, contractPrice:805.50, currency:'USD', effectiveDate:'2026-03-01', expiryDate:'2026-12-31', active:true  },
+      { id:'pr4', partNum:'1520119', desc:'Main Seal Kit',             machine:'Skyjack SJ6832 RT',  category:'Hydraulics', listPrice:145.00, contractPrice:130.50, currency:'USD', effectiveDate:'2025-06-01', expiryDate:'', active:false },
+      { id:'pr5', partNum:'3310087', desc:'Platform Chain Set',        machine:'Skyjack SJIII 4632', category:'Structure',  listPrice:320.00, contractPrice:288.00, currency:'USD', effectiveDate:'2026-02-15', expiryDate:'', active:true  },
+    ],
+    'FL-MCR': [
+      { id:'pr6', partNum:'1520539', desc:'Hydraulic Lift Cylinder',   machine:'Skyjack SJIII 3219', category:'Hydraulics', listPrice:487.50, contractPrice:415.00, currency:'USD', effectiveDate:'2026-01-01', expiryDate:'', active:true  },
+      { id:'pr7', partNum:'2641032', desc:'Drive Motor Assembly',      machine:'Skyjack SJIII 3219', category:'Drive',      listPrice:1240.00,contractPrice:1054.00,currency:'USD', effectiveDate:'2026-01-01', expiryDate:'', active:true  },
+      { id:'pr8', partNum:'1100156', desc:'Control Board — ACLE',      machine:'All',                category:'Electrical', listPrice:895.00, contractPrice:760.75, currency:'USD', effectiveDate:'2026-03-01', expiryDate:'', active:true  },
+    ],
+    'FL-SBR': [
+      { id:'pr9', partNum:'1520539', desc:'Hydraulic Lift Cylinder',   machine:'Skyjack SJIII 3219', category:'Hydraulics', listPrice:487.50, contractPrice:460.00, currency:'USD', effectiveDate:'2026-04-01', expiryDate:'', active:true  },
+      { id:'pr10',partNum:'3310087', desc:'Platform Chain Set',        machine:'Skyjack SJIII 4632', category:'Structure',  listPrice:320.00, contractPrice:304.00, currency:'USD', effectiveDate:'2026-04-01', expiryDate:'', active:true  },
+    ],
+  };
+  let _pricingFleetId = 'default';
   let _pricingSearch = '';
-  let _pricingFilter = 'all'; // 'all' | 'active' | 'inactive'
+  let _pricingFilter = 'all';
 
   function renderPricing() {
     const titleEl = document.getElementById('sp-topbar-title');
     if (titleEl) titleEl.textContent = 'Pricing Catalog';
     const contentEl = document.getElementById('sp-content');
 
+    // Build fleet list: "Default" + actual onboarded fleets
+    const fleetList = [
+      { id:'default', name:'Default pricing', sub:'Baseline for all fleets', logoText:'ALL' },
+      ..._fleets.map(f => ({ id:f.fleetId, name:f.fleetName, sub:f.city, logoText:f.logoText })),
+    ];
+
     contentEl.innerHTML = `
 <style>
-.pc-toolbar { padding:14px 24px; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:10px; flex-shrink:0; }
-.pc-body { flex:1; padding:20px 24px 40px; overflow-y:auto; }
-.pc-search-wrap { position:relative; flex:1; max-width:340px; }
-.pc-search-icon { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:15px; pointer-events:none; }
-.pc-search-input { width:100%; height:36px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:9px; padding:0 12px 0 34px; font-size:13px; font-family:inherit; color:#111318; outline:none; }
+.pc-shell { display:flex; flex:1; min-height:0; overflow:hidden; }
+.pc-fleet-panel { width:210px; min-width:210px; background:#FFFFFF; border-right:0.5px solid #E8E4DF; display:flex; flex-direction:column; overflow:hidden; }
+.pc-fp-hdr { padding:12px 14px; border-bottom:0.5px solid #E8E4DF; font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#9CA3AF; flex-shrink:0; }
+.pc-fp-list { flex:1; overflow-y:auto; padding:6px 0; }
+.pc-fp-item { display:flex; align-items:center; gap:9px; padding:9px 14px; cursor:pointer; border-left:2px solid transparent; transition:background .12s; }
+.pc-fp-item:hover { background:#FAFAF8; }
+.pc-fp-item.active { background:#E6F4EC; border-left-color:#00843D; }
+.pc-fp-logo { width:28px; height:28px; border-radius:7px; background:#1F6B22; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; color:#9DD89A; flex-shrink:0; }
+.pc-fp-item.active .pc-fp-logo { background:#00843D; color:#0D2E18; }
+.pc-fp-name { font-size:12px; font-weight:600; color:#3A3D4A; line-height:1.2; }
+.pc-fp-item.active .pc-fp-name { color:#1B5E35; }
+.pc-fp-sub { font-size:10px; color:#B0AAA3; }
+.pc-fp-count { margin-left:auto; font-size:10px; font-weight:700; background:#F0ECE8; color:#7A7F8E; border-radius:10px; padding:1px 6px; flex-shrink:0; }
+.pc-fp-item.active .pc-fp-count { background:#C5EAC3; color:#1B5E35; }
+.pc-main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.pc-toolbar { padding:12px 20px; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:8px; flex-shrink:0; flex-wrap:wrap; }
+.pc-body { flex:1; padding:16px 20px 40px; overflow-y:auto; }
+.pc-search-wrap { position:relative; flex:1; max-width:300px; }
+.pc-search-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:14px; pointer-events:none; }
+.pc-search-input { width:100%; height:34px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:9px; padding:0 10px 0 30px; font-size:12px; font-family:inherit; color:#111318; outline:none; }
 .pc-search-input:focus { border-color:#00843D; background:#FFFFFF; }
 .pc-search-input::placeholder { color:#B0AAA3; }
-.pc-ftab { padding:5px 13px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:0.5px solid transparent; color:#5A5F6E; white-space:nowrap; }
+.pc-ftab { padding:4px 11px; border-radius:20px; font-size:11px; font-weight:500; cursor:pointer; border:0.5px solid transparent; color:#5A5F6E; white-space:nowrap; }
 .pc-ftab.active { background:#111318; color:#FFFFFF; }
 .pc-ftab:hover:not(.active) { background:#F5F2EE; }
 .pc-table { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
-.pc-table-head { display:grid; grid-template-columns:120px 1fr 170px 110px 100px 100px 80px 80px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 16px; }
-.pc-th { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.8px; text-transform:uppercase; padding:9px 8px; }
-.pc-row { display:grid; grid-template-columns:120px 1fr 170px 110px 100px 100px 80px 80px; padding:0 16px; border-bottom:0.5px solid #F5F2EE; align-items:center; }
+.pc-table-head { display:grid; grid-template-columns:110px 1fr 160px 110px 110px 90px 76px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
+.pc-th { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.7px; text-transform:uppercase; padding:9px 7px; }
+.pc-row { display:grid; grid-template-columns:110px 1fr 160px 110px 110px 90px 76px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; }
 .pc-row:last-child { border-bottom:none; }
 .pc-row:hover { background:#FAFAF9; }
-.pc-td { padding:11px 8px; font-size:13px; color:#3A3D4A; }
-.pc-discount { font-size:10px; font-weight:700; color:#1B5E35; background:#E6F4EC; border-radius:4px; padding:1px 5px; margin-left:5px; }
+.pc-td { padding:11px 7px; font-size:12px; color:#3A3D4A; }
+.pc-discount { font-size:10px; font-weight:700; color:#1B5E35; background:#E6F4EC; border-radius:4px; padding:1px 5px; margin-left:4px; }
+.pc-inherited-row { background:#FAFFF8; }
+.pc-inherited-tag { font-size:9px; color:#9CA3AF; font-style:italic; margin-top:1px; }
 </style>
-<div style="display:flex;flex-direction:column;flex:1;min-height:0;">
-  <div class="pc-toolbar">
-    <div style="flex:1;">
-      <div style="font-size:16px;font-weight:700;color:#111318;">Pricing Catalog</div>
-      <div style="font-size:12px;color:#9CA3AF;margin-top:1px;">Manage list and fleet prices for your parts</div>
+<div class="pc-shell">
+  <div class="pc-fleet-panel">
+    <div class="pc-fp-hdr">Fleet pricing</div>
+    <div class="pc-fp-list">
+      ${fleetList.map(f => {
+        const rows = _pricingData[f.id] || [];
+        return `<div class="pc-fp-item ${_pricingFleetId===f.id?'active':''}" onclick="pcSelectFleet('${f.id}')">
+          <div class="pc-fp-logo">${f.logoText}</div>
+          <div>
+            <div class="pc-fp-name">${f.name}</div>
+            <div class="pc-fp-sub">${f.sub}</div>
+          </div>
+          <span class="pc-fp-count">${rows.length}</span>
+        </div>`;
+      }).join('')}
     </div>
-    <button class="sp-btn sp-btn-ghost" onclick="pcImportCSV()"><i class="ti ti-table-import" style="font-size:13px;"></i> Import CSV</button>
-    <button class="sp-btn sp-btn-primary" onclick="pcAddRow()"><i class="ti ti-plus" style="font-size:13px;"></i> Add part price</button>
   </div>
-  <div class="pc-body">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+  <div class="pc-main">
+    <div class="pc-toolbar">
       <div class="pc-search-wrap">
         <i class="ti ti-search pc-search-icon"></i>
-        <input class="pc-search-input" id="pc-search" type="text" placeholder="Search by part # or description…" value="${_pricingSearch}"/>
+        <input class="pc-search-input" id="pc-search" type="text" placeholder="Search part # or description…" value="${_pricingSearch}"/>
       </div>
-      <div id="pc-filter-tabs" style="display:flex;gap:4px;">
+      <div style="display:flex;gap:3px;">
         ${[['all','All'],['active','Active'],['inactive','Inactive']].map(([v,l]) =>
           `<div class="pc-ftab ${_pricingFilter===v?'active':''}" onclick="pcSetFilter('${v}')">${l}</div>`
         ).join('')}
       </div>
-      <button class="sp-btn sp-btn-ghost" onclick="pcExportCSV()" style="margin-left:auto;"><i class="ti ti-download" style="font-size:12px;"></i> Export</button>
+      <div style="margin-left:auto;display:flex;gap:6px;">
+        <button class="sp-btn sp-btn-ghost" onclick="pcImportCSV()"><i class="ti ti-table-import" style="font-size:12px;"></i> Import</button>
+        <button class="sp-btn sp-btn-ghost" onclick="pcExportCSV()"><i class="ti ti-download" style="font-size:12px;"></i> Export</button>
+        <button class="sp-btn sp-btn-primary" onclick="pcAddRow()"><i class="ti ti-plus" style="font-size:12px;"></i> Add price</button>
+      </div>
     </div>
-    <div id="pc-table-wrap"></div>
+    <div class="pc-body">
+      ${_pricingFleetId !== 'default' ? `
+      <div style="display:flex;align-items:center;gap:8px;background:#FFFBF2;border:0.5px solid #F5C97A;border-radius:8px;padding:9px 13px;margin-bottom:14px;font-size:12px;color:#7A7F8E;">
+        <i class="ti ti-info-circle" style="color:#B45309;font-size:14px;flex-shrink:0;"></i>
+        Parts not listed here <strong style="color:#111318;">inherit default pricing</strong>. Add a row to set a fleet-specific contract price that overrides the default.
+      </div>` : ''}
+      <div id="pc-table-wrap"></div>
+    </div>
   </div>
 </div>`;
 
@@ -2403,68 +2458,92 @@ function render_supplier_portal(el) {
       pcRenderTable();
     });
 
-    window.pcSetFilter = function(v) { _pricingFilter = v; renderPricing(); };
-    window.pcImportCSV = function() {
-      Modal.show({ title:'Import pricing CSV', body:'<p style="font-size:13px;color:#5A5F6E;">CSV import: drag &amp; drop a CSV with columns <code>partNum, description, listPrice, fleetPrice, effectiveDate</code>. Demo only — no file is processed.</p>', actions:[{label:'Close',onClick:()=>Modal.close()}] });
+    window.pcSelectFleet = function(id) { _pricingFleetId = id; _pricingSearch = ''; renderPricing(); };
+    window.pcSetFilter   = function(v) { _pricingFilter = v; renderPricing(); };
+    window.pcImportCSV   = function() {
+      Modal.show({ title:'Import pricing CSV', body:'<p style="font-size:13px;color:#5A5F6E;">Upload a CSV with columns <code>partNum, description, listPrice, contractPrice, effectiveDate</code>. Rows will be added to the currently selected fleet. Demo only.</p>', actions:[{label:'Close',onClick:()=>Modal.close()}] });
     };
     window.pcExportCSV = function() {
-      const lines = ['partNum,description,machine,category,listPrice,fleetPrice,currency,effectiveDate,active',
-        ..._pricingRows.map(r => `${r.partNum},"${r.desc}","${r.machine}","${r.category}",${r.listPrice},${r.fleetPrice},${r.currency},${r.effectiveDate},${r.active}`)];
+      const rows = _pricingData[_pricingFleetId] || [];
+      const fleetName = fleetList.find(f => f.id === _pricingFleetId)?.name || _pricingFleetId;
+      const lines = ['partNum,description,machine,category,listPrice,contractPrice,currency,effectiveDate,active',
+        ...rows.map(r => `${r.partNum},"${r.desc}","${r.machine}","${r.category}",${r.listPrice},${r.contractPrice},${r.currency},${r.effectiveDate},${r.active}`)];
       const a = document.createElement('a');
       a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(lines.join('\n'));
-      a.download = 'pricing-catalog.csv'; a.click();
+      a.download = `pricing-${_pricingFleetId}.csv`; a.click();
     };
     window.pcAddRow = function(editId) {
-      const existing = editId ? _pricingRows.find(r => r.id === editId) : null;
-      const a = existing || { partNum:'', desc:'', machine:'All', category:'', listPrice:'', fleetPrice:'', currency:'USD', effectiveDate:new Date().toISOString().slice(0,10), expiryDate:'', active:true };
+      const rows = _pricingData[_pricingFleetId] || [];
+      const existing = editId ? rows.find(r => r.id === editId) : null;
+      const defaultRows = _pricingData['default'] || [];
+      const prefill = window._pcPrefill; window._pcPrefill = null;
+      const a = existing || prefill || { partNum:'', desc:'', machine:'All', category:'', listPrice:'', contractPrice:'', currency:'USD', effectiveDate:new Date().toISOString().slice(0,10), expiryDate:'', active:true };
+      const fleetLabel = fleetList.find(f => f.id === _pricingFleetId)?.name || 'this fleet';
       Modal.show({
-        title: editId ? 'Edit part price' : 'Add part price',
+        title: editId ? 'Edit price' : `Add price — ${fleetLabel}`,
         wide: true,
         body: `
 <div style="display:flex;flex-direction:column;gap:12px;">
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-    <div class="modal-form-field"><label class="modal-form-label">Part number</label><input id="pc-f-pnum" class="modal-form-input" placeholder="e.g. 1520539" value="${a.partNum}"/></div>
+    <div class="modal-form-field"><label class="modal-form-label">Part number</label><input id="pc-f-pnum" class="modal-form-input" placeholder="e.g. 1520539" value="${a.partNum}" oninput="pcLookupDefault(this.value)"/></div>
     <div class="modal-form-field"><label class="modal-form-label">Category</label><input id="pc-f-cat" class="modal-form-input" placeholder="e.g. Hydraulics" value="${a.category}"/></div>
   </div>
   <div class="modal-form-field"><label class="modal-form-label">Description</label><input id="pc-f-desc" class="modal-form-input" placeholder="Part description" value="${a.desc}"/></div>
   <div class="modal-form-field"><label class="modal-form-label">Associated machine</label><input id="pc-f-machine" class="modal-form-input" placeholder="e.g. Skyjack SJIII 3219 or All" value="${a.machine}"/></div>
+  <div id="pc-default-banner" style="display:none;background:#E6F4EC;border:0.5px solid #00843D40;border-radius:7px;padding:8px 11px;font-size:11px;color:#1B5E35;"></div>
   <div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:12px;">
-    <div class="modal-form-field"><label class="modal-form-label">List price</label><input id="pc-f-list" class="modal-form-input" type="number" step="0.01" min="0" placeholder="0.00" value="${a.listPrice}"/></div>
-    <div class="modal-form-field"><label class="modal-form-label">Fleet price</label><input id="pc-f-fleet" class="modal-form-input" type="number" step="0.01" min="0" placeholder="0.00" value="${a.fleetPrice}"/></div>
+    <div class="modal-form-field"><label class="modal-form-label">List price (MSRP)</label><input id="pc-f-list" class="modal-form-input" type="number" step="0.01" min="0" placeholder="0.00" value="${a.listPrice}"/></div>
+    <div class="modal-form-field"><label class="modal-form-label">Contract price <span class="lbl-opt">(for ${fleetLabel})</span></label><input id="pc-f-fleet" class="modal-form-input" type="number" step="0.01" min="0" placeholder="0.00" value="${a.contractPrice}"/></div>
     <div class="modal-form-field"><label class="modal-form-label">Currency</label><select id="pc-f-currency" class="modal-form-select"><option>USD</option><option>CAD</option><option>EUR</option></select></div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
     <div class="modal-form-field"><label class="modal-form-label">Effective date</label><input id="pc-f-eff" class="modal-form-input" type="date" value="${a.effectiveDate}"/></div>
-    <div class="modal-form-field"><label class="modal-form-label">Expiry date <span class="lbl-opt">(optional)</span></label><input id="pc-f-exp" class="modal-form-input" type="date" value="${a.expiryDate}"/></div>
+    <div class="modal-form-field"><label class="modal-form-label">Expiry date <span class="lbl-opt">(optional)</span></label><input id="pc-f-exp" class="modal-form-input" type="date" value="${a.expiryDate||''}"/></div>
   </div>
-  <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#3A3D4A;cursor:pointer;"><input type="checkbox" id="pc-f-active" ${a.active?'checked':''} style="accent-color:#00843D;"/> Active (visible to fleets)</label>
+  <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#3A3D4A;cursor:pointer;"><input type="checkbox" id="pc-f-active" ${a.active?'checked':''} style="accent-color:#00843D;"/> Active (visible to this fleet)</label>
 </div>`,
         actions: [
-          { label: editId ? 'Save changes' : 'Add', style:'primary', onClick: () => {
+          { label: editId ? 'Save changes' : 'Add price', style:'primary', onClick: () => {
+            if (!_pricingData[_pricingFleetId]) _pricingData[_pricingFleetId] = [];
             const row = {
               id: editId || 'pr' + Date.now(),
-              partNum: document.getElementById('pc-f-pnum').value.trim(),
-              desc:    document.getElementById('pc-f-desc').value.trim(),
-              machine: document.getElementById('pc-f-machine').value.trim() || 'All',
-              category:document.getElementById('pc-f-cat').value.trim(),
-              listPrice: parseFloat(document.getElementById('pc-f-list').value) || 0,
-              fleetPrice:parseFloat(document.getElementById('pc-f-fleet').value) || 0,
-              currency:  document.getElementById('pc-f-currency').value,
+              partNum:       document.getElementById('pc-f-pnum').value.trim(),
+              desc:          document.getElementById('pc-f-desc').value.trim(),
+              machine:       document.getElementById('pc-f-machine').value.trim() || 'All',
+              category:      document.getElementById('pc-f-cat').value.trim(),
+              listPrice:     parseFloat(document.getElementById('pc-f-list').value) || 0,
+              contractPrice: parseFloat(document.getElementById('pc-f-fleet').value) || 0,
+              currency:      document.getElementById('pc-f-currency').value,
               effectiveDate: document.getElementById('pc-f-eff').value,
               expiryDate:    document.getElementById('pc-f-exp').value,
-              active: document.getElementById('pc-f-active').checked,
+              active:        document.getElementById('pc-f-active').checked,
             };
-            if (editId) { const i = _pricingRows.findIndex(r => r.id === editId); if (i >= 0) _pricingRows[i] = row; }
-            else _pricingRows.unshift(row);
+            const arr = _pricingData[_pricingFleetId];
+            if (editId) { const i = arr.findIndex(r => r.id === editId); if (i >= 0) arr[i] = row; }
+            else arr.unshift(row);
             Modal.close();
             pcRenderTable();
           }},
           { label: 'Cancel', onClick: () => Modal.close() },
         ],
       });
+      // Auto-fill from default catalog when part # matches
+      window.pcLookupDefault = function(pnum) {
+        const match = defaultRows.find(r => r.partNum.toLowerCase() === pnum.toLowerCase());
+        const banner = document.getElementById('pc-default-banner');
+        if (match) {
+          document.getElementById('pc-f-desc').value    = match.desc;
+          document.getElementById('pc-f-cat').value     = match.category;
+          document.getElementById('pc-f-machine').value = match.machine;
+          document.getElementById('pc-f-list').value    = match.listPrice;
+          if (banner) { banner.style.display = ''; banner.innerHTML = `<i class="ti ti-circle-check" style="margin-right:4px;"></i>Pre-filled from default catalog — set the contract price for this fleet below.`; }
+        } else {
+          if (banner) banner.style.display = 'none';
+        }
+      };
     };
     window.pcDeleteRow = function(id) {
-      _pricingRows = _pricingRows.filter(r => r.id !== id);
+      if (_pricingData[_pricingFleetId]) _pricingData[_pricingFleetId] = _pricingData[_pricingFleetId].filter(r => r.id !== id);
       pcRenderTable();
     };
 
@@ -2475,37 +2554,83 @@ function render_supplier_portal(el) {
     const wrap = document.getElementById('pc-table-wrap');
     if (!wrap) return;
     const q = _pricingSearch.toLowerCase();
-    let rows = _pricingRows
+    const isDefault = _pricingFleetId === 'default';
+    let rows = (_pricingData[_pricingFleetId] || [])
       .filter(r => _pricingFilter === 'all' || ((_pricingFilter === 'active') === r.active))
       .filter(r => !q || r.partNum.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q));
-    if (!rows.length) { wrap.innerHTML = '<div style="padding:48px;text-align:center;color:#9CA3AF;font-size:13px;">No pricing entries match the current filter.</div>'; return; }
+
+    // For fleet-specific views, also show inherited defaults not overridden
+    let inheritedRows = [];
+    if (!isDefault && _pricingFilter !== 'inactive') {
+      const overriddenNums = new Set(rows.map(r => r.partNum));
+      inheritedRows = (_pricingData['default'] || [])
+        .filter(r => r.active && !overriddenNums.has(r.partNum))
+        .filter(r => !q || r.partNum.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q));
+    }
+
+    if (!rows.length && !inheritedRows.length) {
+      wrap.innerHTML = '<div style="padding:48px;text-align:center;color:#9CA3AF;font-size:13px;">No pricing entries match the filter. <button class="sp-btn sp-btn-primary" style="margin-left:8px;height:28px;font-size:11px;" onclick="pcAddRow()"><i class="ti ti-plus"></i> Add price</button></div>';
+      return;
+    }
+
     wrap.innerHTML = `
 <div class="pc-table">
   <div class="pc-table-head">
-    <div class="pc-th">Part #</div><div class="pc-th">Description</div><div class="pc-th">Machine</div>
-    <div class="pc-th">Category</div><div class="pc-th">List price</div><div class="pc-th">Fleet price</div>
-    <div class="pc-th">Effective</div><div class="pc-th"></div>
+    <div class="pc-th">Part #</div>
+    <div class="pc-th">Description</div>
+    <div class="pc-th">Machine</div>
+    <div class="pc-th">List (MSRP)</div>
+    <div class="pc-th">Contract price</div>
+    <div class="pc-th">Effective</div>
+    <div class="pc-th"></div>
   </div>
   ${rows.map(r => {
-    const disc = r.listPrice > 0 ? Math.round((1 - r.fleetPrice/r.listPrice)*100) : 0;
-    return `<div class="pc-row" style="${!r.active ? 'opacity:0.5;' : ''}">
+    const disc = r.listPrice > 0 ? Math.round((1 - r.contractPrice/r.listPrice)*100) : 0;
+    return `<div class="pc-row" style="${!r.active?'opacity:0.45;':''}">
       <div class="pc-td"><span style="font-family:monospace;font-size:11px;font-weight:700;color:#111318;">${r.partNum}</span></div>
-      <div class="pc-td" style="font-size:12px;">${r.desc}</div>
-      <div class="pc-td" style="font-size:12px;color:#7A7F8E;">${r.machine}</div>
-      <div class="pc-td" style="font-size:12px;color:#7A7F8E;">${r.category}</div>
-      <div class="pc-td" style="font-size:13px;font-weight:600;">$${r.listPrice.toFixed(2)}</div>
-      <div class="pc-td">
-        <span style="font-size:13px;font-weight:700;color:#1B5E35;">$${r.fleetPrice.toFixed(2)}</span>
-        ${disc > 0 ? `<span class="pc-discount">-${disc}%</span>` : ''}
+      <div class="pc-td">${r.desc}${r.category?`<div style="font-size:10px;color:#B0AAA3;margin-top:1px;">${r.category}</div>`:''}
       </div>
-      <div class="pc-td" style="font-size:12px;color:#7A7F8E;">${r.effectiveDate}</div>
-      <div class="pc-td" style="display:flex;gap:4px;justify-content:flex-end;">
-        <button class="sp-btn sp-btn-ghost" style="height:28px;padding:0 8px;font-size:11px;" onclick="pcAddRow('${r.id}')"><i class="ti ti-pencil"></i></button>
-        <button class="sp-btn" style="height:28px;padding:0 8px;font-size:11px;background:#FEE2E2;color:#B91C1C;" onclick="pcDeleteRow('${r.id}')"><i class="ti ti-trash"></i></button>
+      <div class="pc-td" style="color:#7A7F8E;">${r.machine}</div>
+      <div class="pc-td" style="font-weight:600;">$${r.listPrice.toFixed(2)}</div>
+      <div class="pc-td">
+        <span style="font-size:13px;font-weight:700;color:#1B5E35;">$${r.contractPrice.toFixed(2)}</span>
+        ${disc>0?`<span class="pc-discount">-${disc}%</span>`:''}
+      </div>
+      <div class="pc-td" style="color:#7A7F8E;">${r.effectiveDate}</div>
+      <div class="pc-td" style="display:flex;gap:3px;justify-content:flex-end;">
+        <button class="sp-btn sp-btn-ghost" style="height:26px;padding:0 7px;font-size:11px;" onclick="pcAddRow('${r.id}')"><i class="ti ti-pencil"></i></button>
+        <button class="sp-btn" style="height:26px;padding:0 7px;font-size:11px;background:#FEE2E2;color:#B91C1C;" onclick="pcDeleteRow('${r.id}')"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>`;
+  }).join('')}
+  ${inheritedRows.map(r => {
+    const disc = r.listPrice > 0 ? Math.round((1 - r.contractPrice/r.listPrice)*100) : 0;
+    return `<div class="pc-row pc-inherited-row">
+      <div class="pc-td"><span style="font-family:monospace;font-size:11px;font-weight:700;color:#111318;">${r.partNum}</span></div>
+      <div class="pc-td">${r.desc}<div class="pc-inherited-tag">inherited default</div></div>
+      <div class="pc-td" style="color:#7A7F8E;">${r.machine}</div>
+      <div class="pc-td" style="font-weight:600;color:#9CA3AF;">$${r.listPrice.toFixed(2)}</div>
+      <div class="pc-td">
+        <span style="font-size:12px;font-weight:600;color:#9CA3AF;">$${r.contractPrice.toFixed(2)}</span>
+        ${disc>0?`<span class="pc-discount" style="opacity:0.6;">-${disc}%</span>`:''}
+      </div>
+      <div class="pc-td" style="color:#9CA3AF;">${r.effectiveDate}</div>
+      <div class="pc-td" style="display:flex;gap:3px;justify-content:flex-end;">
+        <button class="sp-btn sp-btn-ghost" style="height:26px;padding:0 7px;font-size:11px;" onclick="pcOverrideRow('${r.partNum}')" title="Set fleet-specific price"><i class="ti ti-adjustments-alt"></i></button>
       </div>
     </div>`;
   }).join('')}
 </div>`;
+
+    window.pcOverrideRow = function(partNum) {
+      const def = (_pricingData['default'] || []).find(r => r.partNum === partNum);
+      if (!def) return;
+      // Pre-populate add modal with default values so supplier just edits the price
+      const tmp = { ...def, id: null, contractPrice: def.contractPrice };
+      // Trigger the add modal with prefilled data by temporarily setting a global
+      window._pcPrefill = tmp;
+      pcAddRow(null);
+    };
   }
 
   // ── Parts Extractor ───────────────────────────────────────────────────────────
@@ -2861,8 +2986,8 @@ ${pages.map((p,i) => `
     });
 
     const contentEl = document.getElementById('sp-content');
-    const fullHeight = ['manuals', 'news', 'analytics', 'doc-upload', 'extractor'].includes(tab);
-    const scrollPad = ['content', 'pricing'].includes(tab);
+    const fullHeight = ['manuals', 'news', 'analytics', 'doc-upload', 'extractor', 'pricing'].includes(tab);
+    const scrollPad = ['content'].includes(tab);
     if (fullHeight) {
       contentEl.style.cssText = 'flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0;';
     } else if (scrollPad) {
