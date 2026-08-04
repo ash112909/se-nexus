@@ -2370,33 +2370,52 @@ function render_supplier_portal(el) {
       ..._fleets.map(f => ({ id:f.fleetId, name:f.fleetName, sub:f.city, logoText:f.logoText })),
     ];
 
+    const activeFl = fleetList.find(f => f.id === _pricingFleetId) || fleetList[0];
+    const activeRowCount = (_pricingData[_pricingFleetId] || []).length;
+
     contentEl.innerHTML = `
 <style>
-.pc-shell { display:flex; flex:1; min-height:0; overflow:hidden; }
-.pc-fleet-panel { width:210px; min-width:210px; background:#FFFFFF; border-right:0.5px solid #E8E4DF; display:flex; flex-direction:column; overflow:hidden; }
-.pc-fp-hdr { padding:12px 14px; border-bottom:0.5px solid #E8E4DF; font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#9CA3AF; flex-shrink:0; }
-.pc-fp-list { flex:1; overflow-y:auto; padding:6px 0; }
-.pc-fp-item { display:flex; align-items:center; gap:9px; padding:9px 14px; cursor:pointer; border-left:2px solid transparent; transition:background .12s; }
-.pc-fp-item:hover { background:#FAFAF8; }
-.pc-fp-item.active { background:#E6F4EC; border-left-color:#00843D; }
-.pc-fp-logo { width:28px; height:28px; border-radius:7px; background:#1F6B22; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; color:#9DD89A; flex-shrink:0; }
-.pc-fp-item.active .pc-fp-logo { background:#00843D; color:#0D2E18; }
-.pc-fp-name { font-size:12px; font-weight:600; color:#3A3D4A; line-height:1.2; }
-.pc-fp-item.active .pc-fp-name { color:#1B5E35; }
-.pc-fp-sub { font-size:10px; color:#B0AAA3; }
-.pc-fp-count { margin-left:auto; font-size:10px; font-weight:700; background:#F0ECE8; color:#7A7F8E; border-radius:10px; padding:1px 6px; flex-shrink:0; }
-.pc-fp-item.active .pc-fp-count { background:#C5EAC3; color:#1B5E35; }
-.pc-main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-.pc-toolbar { padding:12px 20px; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:8px; flex-shrink:0; flex-wrap:wrap; }
+.pc-shell { display:flex; flex:1; flex-direction:column; min-height:0; overflow:hidden; }
+.pc-toolbar { padding:10px 20px; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:8px; flex-shrink:0; flex-wrap:wrap; }
 .pc-body { flex:1; padding:16px 20px 40px; overflow-y:auto; }
-.pc-search-wrap { position:relative; flex:1; max-width:300px; }
+/* Fleet picker button */
+.pc-fleet-btn { display:flex; align-items:center; gap:8px; height:36px; padding:0 10px 0 6px; background:#FFFFFF; border:1px solid #E2DDD8; border-radius:9px; cursor:pointer; font-family:inherit; transition:border-color .15s, background .15s; max-width:260px; }
+.pc-fleet-btn:hover { border-color:#9CA3AF; background:#FAFAF8; }
+.pc-fleet-btn.open { border-color:#00843D; background:#F0FAF3; }
+.pc-fl-logo { width:24px; height:24px; border-radius:6px; background:#1F6B22; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:700; color:#9DD89A; flex-shrink:0; }
+.pc-fl-label { display:flex; flex-direction:column; text-align:left; min-width:0; }
+.pc-fl-name { font-size:12px; font-weight:600; color:#111318; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px; }
+.pc-fl-sub { font-size:10px; color:#9CA3AF; }
+.pc-fl-chevron { font-size:12px; color:#9CA3AF; flex-shrink:0; margin-left:2px; }
+/* Dropdown popover */
+.pc-fleet-drop { position:fixed; z-index:8000; background:#FFFFFF; border:0.5px solid #E2DDD8; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,.14); width:300px; display:flex; flex-direction:column; overflow:hidden; }
+.pc-drop-search-wrap { padding:10px; border-bottom:0.5px solid #F0ECE8; flex-shrink:0; position:relative; }
+.pc-drop-search-icon { position:absolute; left:19px; top:50%; transform:translateY(-50%); font-size:14px; color:#9CA3AF; pointer-events:none; }
+.pc-drop-search { width:100%; height:34px; border:1px solid #E2DDD8; border-radius:8px; padding:0 10px 0 32px; font-size:13px; font-family:inherit; color:#111318; outline:none; background:#F5F2EE; }
+.pc-drop-search:focus { border-color:#00843D; background:#FFFFFF; }
+.pc-drop-list { overflow-y:auto; max-height:300px; padding:4px 0; }
+.pc-drop-item { display:flex; align-items:center; gap:9px; padding:8px 12px; cursor:pointer; }
+.pc-drop-item:hover { background:#F5F2EE; }
+.pc-drop-item.active { background:#E6F4EC; }
+.pc-drop-logo { width:26px; height:26px; border-radius:6px; background:#1F6B22; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:700; color:#9DD89A; flex-shrink:0; }
+.pc-drop-item.active .pc-drop-logo { background:#00843D; color:#0D2E18; }
+.pc-drop-name { font-size:12px; font-weight:600; color:#3A3D4A; flex:1; }
+.pc-drop-item.active .pc-drop-name { color:#1B5E35; }
+.pc-drop-city { font-size:10px; color:#B0AAA3; }
+.pc-drop-count { font-size:10px; font-weight:700; background:#F0ECE8; color:#7A7F8E; border-radius:10px; padding:1px 6px; flex-shrink:0; }
+.pc-drop-item.active .pc-drop-count { background:#C5EAC3; color:#1B5E35; }
+.pc-drop-empty { padding:16px; text-align:center; font-size:12px; color:#9CA3AF; }
+.pc-drop-divider { height:0.5px; background:#F0ECE8; margin:4px 0; }
+/* Search & filters */
+.pc-search-wrap { position:relative; }
 .pc-search-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:14px; pointer-events:none; }
-.pc-search-input { width:100%; height:34px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:9px; padding:0 10px 0 30px; font-size:12px; font-family:inherit; color:#111318; outline:none; }
+.pc-search-input { width:220px; height:34px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:9px; padding:0 10px 0 30px; font-size:12px; font-family:inherit; color:#111318; outline:none; }
 .pc-search-input:focus { border-color:#00843D; background:#FFFFFF; }
 .pc-search-input::placeholder { color:#B0AAA3; }
 .pc-ftab { padding:4px 11px; border-radius:20px; font-size:11px; font-weight:500; cursor:pointer; border:0.5px solid transparent; color:#5A5F6E; white-space:nowrap; }
 .pc-ftab.active { background:#111318; color:#FFFFFF; }
 .pc-ftab:hover:not(.active) { background:#F5F2EE; }
+/* Table */
 .pc-table { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
 .pc-table-head { display:grid; grid-template-columns:110px 1fr 160px 110px 110px 90px 76px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
 .pc-th { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.7px; text-transform:uppercase; padding:9px 7px; }
@@ -2409,47 +2428,45 @@ function render_supplier_portal(el) {
 .pc-inherited-tag { font-size:9px; color:#9CA3AF; font-style:italic; margin-top:1px; }
 </style>
 <div class="pc-shell">
-  <div class="pc-fleet-panel">
-    <div class="pc-fp-hdr">Fleet pricing</div>
-    <div class="pc-fp-list">
-      ${fleetList.map(f => {
-        const rows = _pricingData[f.id] || [];
-        return `<div class="pc-fp-item ${_pricingFleetId===f.id?'active':''}" onclick="pcSelectFleet('${f.id}')">
-          <div class="pc-fp-logo">${f.logoText}</div>
-          <div>
-            <div class="pc-fp-name">${f.name}</div>
-            <div class="pc-fp-sub">${f.sub}</div>
-          </div>
-          <span class="pc-fp-count">${rows.length}</span>
-        </div>`;
-      }).join('')}
+  <div class="pc-toolbar">
+    <!-- Fleet picker -->
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;">Fleet</span>
+      <button class="pc-fleet-btn" id="pc-fleet-btn" onclick="pcToggleDrop(event)">
+        <div class="pc-fl-logo">${activeFl.logoText}</div>
+        <div class="pc-fl-label">
+          <div class="pc-fl-name">${activeFl.name}</div>
+          <div class="pc-fl-sub">${activeRowCount} price${activeRowCount!==1?'s':''} set${_pricingFleetId==='default'?'':' · '+activeFl.sub}</div>
+        </div>
+        <i class="ti ti-chevron-down pc-fl-chevron"></i>
+      </button>
+    </div>
+    <div style="width:0.5px;height:22px;background:#E8E4DF;flex-shrink:0;"></div>
+    <!-- Part search -->
+    <div class="pc-search-wrap">
+      <i class="ti ti-search pc-search-icon"></i>
+      <input class="pc-search-input" id="pc-search" type="text" placeholder="Search part # or description…" value="${_pricingSearch}"/>
+    </div>
+    <!-- Status filter -->
+    <div style="display:flex;gap:3px;">
+      ${[['all','All'],['active','Active'],['inactive','Inactive']].map(([v,l]) =>
+        `<div class="pc-ftab ${_pricingFilter===v?'active':''}" onclick="pcSetFilter('${v}')">${l}</div>`
+      ).join('')}
+    </div>
+    <!-- Actions -->
+    <div style="margin-left:auto;display:flex;gap:6px;">
+      <button class="sp-btn sp-btn-ghost" onclick="pcImportCSV()"><i class="ti ti-table-import" style="font-size:12px;"></i> Import</button>
+      <button class="sp-btn sp-btn-ghost" onclick="pcExportCSV()"><i class="ti ti-download" style="font-size:12px;"></i> Export</button>
+      <button class="sp-btn sp-btn-primary" onclick="pcAddRow()"><i class="ti ti-plus" style="font-size:12px;"></i> Add price</button>
     </div>
   </div>
-  <div class="pc-main">
-    <div class="pc-toolbar">
-      <div class="pc-search-wrap">
-        <i class="ti ti-search pc-search-icon"></i>
-        <input class="pc-search-input" id="pc-search" type="text" placeholder="Search part # or description…" value="${_pricingSearch}"/>
-      </div>
-      <div style="display:flex;gap:3px;">
-        ${[['all','All'],['active','Active'],['inactive','Inactive']].map(([v,l]) =>
-          `<div class="pc-ftab ${_pricingFilter===v?'active':''}" onclick="pcSetFilter('${v}')">${l}</div>`
-        ).join('')}
-      </div>
-      <div style="margin-left:auto;display:flex;gap:6px;">
-        <button class="sp-btn sp-btn-ghost" onclick="pcImportCSV()"><i class="ti ti-table-import" style="font-size:12px;"></i> Import</button>
-        <button class="sp-btn sp-btn-ghost" onclick="pcExportCSV()"><i class="ti ti-download" style="font-size:12px;"></i> Export</button>
-        <button class="sp-btn sp-btn-primary" onclick="pcAddRow()"><i class="ti ti-plus" style="font-size:12px;"></i> Add price</button>
-      </div>
-    </div>
-    <div class="pc-body">
-      ${_pricingFleetId !== 'default' ? `
-      <div style="display:flex;align-items:center;gap:8px;background:#FFFBF2;border:0.5px solid #F5C97A;border-radius:8px;padding:9px 13px;margin-bottom:14px;font-size:12px;color:#7A7F8E;">
-        <i class="ti ti-info-circle" style="color:#B45309;font-size:14px;flex-shrink:0;"></i>
-        Parts not listed here <strong style="color:#111318;">inherit default pricing</strong>. Add a row to set a fleet-specific contract price that overrides the default.
-      </div>` : ''}
-      <div id="pc-table-wrap"></div>
-    </div>
+  <div class="pc-body">
+    ${_pricingFleetId !== 'default' ? `
+    <div style="display:flex;align-items:center;gap:8px;background:#FFFBF2;border:0.5px solid #F5C97A;border-radius:8px;padding:9px 13px;margin-bottom:14px;font-size:12px;color:#7A7F8E;">
+      <i class="ti ti-info-circle" style="color:#B45309;font-size:14px;flex-shrink:0;"></i>
+      Parts not listed here <strong style="color:#111318;">inherit default pricing</strong>. Add a row to set a fleet-specific contract price that overrides the default.
+    </div>` : ''}
+    <div id="pc-table-wrap"></div>
   </div>
 </div>`;
 
@@ -2458,7 +2475,66 @@ function render_supplier_portal(el) {
       pcRenderTable();
     });
 
-    window.pcSelectFleet = function(id) { _pricingFleetId = id; _pricingSearch = ''; renderPricing(); };
+    // ── Fleet picker dropdown ─────────────────────────────────────────────────
+    let _pcDropOpen = false;
+    function pcCloseDrop() {
+      const drop = document.getElementById('pc-fleet-drop');
+      if (drop) drop.remove();
+      const btn = document.getElementById('pc-fleet-btn');
+      if (btn) btn.classList.remove('open');
+      _pcDropOpen = false;
+    }
+    window.pcToggleDrop = function(e) {
+      e.stopPropagation();
+      if (_pcDropOpen) { pcCloseDrop(); return; }
+      _pcDropOpen = true;
+      const btn = document.getElementById('pc-fleet-btn');
+      btn.classList.add('open');
+      const rect = btn.getBoundingClientRect();
+      const drop = document.createElement('div');
+      drop.id = 'pc-fleet-drop';
+      drop.className = 'pc-fleet-drop';
+      drop.style.cssText = `top:${rect.bottom+4}px;left:${rect.left}px;`;
+      drop.innerHTML = `
+        <div class="pc-drop-search-wrap">
+          <i class="ti ti-search pc-drop-search-icon"></i>
+          <input class="pc-drop-search" id="pc-drop-search" type="text" placeholder="Search fleets…" autocomplete="off"/>
+        </div>
+        <div class="pc-drop-list" id="pc-drop-list"></div>`;
+      document.body.appendChild(drop);
+      const searchEl = document.getElementById('pc-drop-search');
+      searchEl.focus();
+      function renderDropList(q) {
+        const list = document.getElementById('pc-drop-list');
+        if (!list) return;
+        const filtered = fleetList.filter(f => !q || f.name.toLowerCase().includes(q) || (f.sub||'').toLowerCase().includes(q));
+        if (!filtered.length) { list.innerHTML = '<div class="pc-drop-empty">No fleets match</div>'; return; }
+        // Default always first, then rest
+        const def = filtered.find(f => f.id === 'default');
+        const rest = filtered.filter(f => f.id !== 'default');
+        list.innerHTML = [
+          ...(def ? [def] : []),
+          ...(def && rest.length ? ['divider'] : []),
+          ...rest,
+        ].map(f => {
+          if (f === 'divider') return '<div class="pc-drop-divider"></div>';
+          const cnt = (_pricingData[f.id] || []).length;
+          return `<div class="pc-drop-item ${_pricingFleetId===f.id?'active':''}" onclick="pcSelectFleet('${f.id}')">
+            <div class="pc-drop-logo">${f.logoText}</div>
+            <div style="flex:1;min-width:0;">
+              <div class="pc-drop-name">${f.name}</div>
+              ${f.sub ? `<div class="pc-drop-city">${f.sub}</div>` : ''}
+            </div>
+            <span class="pc-drop-count">${cnt}</span>
+          </div>`;
+        }).join('');
+      }
+      renderDropList('');
+      searchEl.addEventListener('input', () => renderDropList(searchEl.value.toLowerCase()));
+      drop.addEventListener('click', e => e.stopPropagation());
+      document.addEventListener('click', pcCloseDrop, { once: true });
+    };
+    window.pcSelectFleet = function(id) { pcCloseDrop(); _pricingFleetId = id; _pricingSearch = ''; renderPricing(); };
     window.pcSetFilter   = function(v) { _pricingFilter = v; renderPricing(); };
     window.pcImportCSV   = function() {
       Modal.show({ title:'Import pricing CSV', body:'<p style="font-size:13px;color:#5A5F6E;">Upload a CSV with columns <code>partNum, description, listPrice, contractPrice, effectiveDate</code>. Rows will be added to the currently selected fleet. Demo only.</p>', actions:[{label:'Close',onClick:()=>Modal.close()}] });
@@ -2987,7 +3063,7 @@ ${pages.map((p,i) => `
 
     const contentEl = document.getElementById('sp-content');
     const fullHeight = ['manuals', 'news', 'analytics', 'doc-upload', 'extractor', 'pricing'].includes(tab);
-    const scrollPad = ['content'].includes(tab);
+    const scrollPad  = ['content'].includes(tab);
     if (fullHeight) {
       contentEl.style.cssText = 'flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0;';
     } else if (scrollPad) {
