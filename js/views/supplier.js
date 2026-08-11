@@ -169,7 +169,7 @@ function render_supplier(el) {
 .sup-hdr-tags { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
 .sup-hdr-tag  { font-size:11px; background:#F5F2EE; color:#3A3D4A; border-radius:6px; padding:3px 10px; }
 .sup-hdr-actions { display:flex; gap:8px; flex-shrink:0; flex-direction:column; align-items:flex-end; }
-.sup-btn-primary { background:#1C3969; color:#0A1628; border:none; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
+.sup-btn-primary { background:#1C3969; color:#FFFFFF; border:none; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
 .sup-btn-primary:hover { background:#152B52; }
 .sup-btn-ghost { background:#FFF; color:#3A3D4A; border:0.5px solid #E2DDD8; border-radius:8px; padding:8px 14px; font-size:12px; font-weight:500; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
 .sup-btn-ghost:hover { border-color:#C8C3BC; }
@@ -195,7 +195,7 @@ function render_supplier(el) {
 .sup-part-price { font-size:13px; font-weight:700; color:#111318; flex-shrink:0; }
 .sup-stock-pill { font-size:9px; font-weight:700; border-radius:999px; padding:2px 8px; flex-shrink:0; }
 .sup-add-btn { width:24px; height:24px; border-radius:6px; background:#F5F2EE; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; color:#5A5F6E; flex-shrink:0; }
-.sup-add-btn:hover { background:#1C3969; color:#0A1628; }
+.sup-add-btn:hover { background:#1C3969; color:#FFFFFF; }
 
 /* Orders */
 .sup-order-row { display:flex; align-items:center; gap:10px; padding:10px 16px; border-bottom:0.5px solid #F5F2EE; }

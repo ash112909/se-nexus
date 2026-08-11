@@ -63,11 +63,11 @@ const HelpWidget = (() => {
 /* ── Help Widget ── */
 #hw-fab { position:fixed; bottom:24px; right:24px; z-index:9000; width:52px; height:52px; border-radius:50%; background:#111318; color:#FFFFFF; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow:0 4px 18px rgba(0,0,0,.28); transition:transform .15s, background .15s; }
 #hw-fab:hover { background:#2A2D3A; transform:scale(1.07); }
-#hw-fab .hw-badge { position:absolute; top:2px; right:2px; width:16px; height:16px; background:#1C3969; border-radius:50%; font-size:9px; font-weight:700; color:#0A1628; display:flex; align-items:center; justify-content:center; border:2px solid #FFFFFF; display:none; }
+#hw-fab .hw-badge { position:absolute; top:2px; right:2px; width:16px; height:16px; background:#1C3969; border-radius:50%; font-size:9px; font-weight:700; color:#FFFFFF; display:flex; align-items:center; justify-content:center; border:2px solid #FFFFFF; display:none; }
 #hw-panel { position:fixed; bottom:88px; right:24px; z-index:9000; width:380px; max-width:calc(100vw - 32px); background:#FFFFFF; border-radius:16px; box-shadow:0 8px 40px rgba(0,0,0,.18); display:flex; flex-direction:column; overflow:hidden; transition:opacity .18s, transform .18s; transform-origin:bottom right; }
 #hw-panel.hw-hidden { opacity:0; pointer-events:none; transform:scale(.94) translateY(8px); }
 .hw-header { background:#111318; color:#FFFFFF; padding:14px 16px 12px; display:flex; align-items:center; gap:10px; flex-shrink:0; }
-.hw-header-icon { width:32px; height:32px; border-radius:9px; background:#1C3969; display:flex; align-items:center; justify-content:center; font-size:15px; color:#0A1628; flex-shrink:0; }
+.hw-header-icon { width:32px; height:32px; border-radius:9px; background:#1C3969; display:flex; align-items:center; justify-content:center; font-size:15px; color:#FFFFFF; flex-shrink:0; }
 .hw-header-title { font-size:14px; font-weight:700; flex:1; }
 .hw-header-sub { font-size:11px; color:#9CA3AF; margin-top:1px; }
 .hw-close-btn { background:none; border:none; color:#9CA3AF; font-size:18px; cursor:pointer; padding:2px; line-height:1; }

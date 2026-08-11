@@ -176,7 +176,7 @@ function render_search_results(el) {
 .sr-filter-item.active { background:#D6E4F7; color:#1C3969; font-weight:600; border-left-color:#1C3969; }
 .sr-filter-icon { width:22px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
 .sr-filter-count { margin-left:auto; font-size:10px; font-weight:700; background:#F0ECE8; color:#7A7F8E; border-radius:10px; padding:1px 7px; }
-.sr-filter-item.active .sr-filter-count { background:#1C3969; color:#0A1628; }
+.sr-filter-item.active .sr-filter-count { background:#1C3969; color:#FFFFFF; }
 .sr-main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 .sr-topbar { background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; padding:14px 24px; flex-shrink:0; display:flex; align-items:center; gap:14px; }
 .sr-search-wrap { flex:1; max-width:580px; position:relative; }

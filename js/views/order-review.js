@@ -196,7 +196,7 @@ function render_order_review(el) {
 .or-ship-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 20px; }
 /* Action bar */
 .or-action-bar { display:flex; align-items:center; gap:8px; padding:14px 20px; background:#FFFFFF; border-top:0.5px solid #E8E4DF; position:sticky; bottom:0; z-index:10; }
-.or-btn-primary { background:#1C3969; border:none; border-radius:8px; padding:9px 20px; font-size:13px; font-weight:600; color:#0A1628; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; }
+.or-btn-primary { background:#1C3969; border:none; border-radius:8px; padding:9px 20px; font-size:13px; font-weight:600; color:#FFFFFF; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; }
 .or-btn-primary:hover { background:#152B52; }
 .or-btn-ghost { background:none; border:0.5px solid #E2DDD8; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:500; color:#3A3D4A; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; }
 .or-btn-ghost:hover { background:#F5F2EE; }

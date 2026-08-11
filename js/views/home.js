@@ -451,7 +451,7 @@ function render_home(el) {
 .hw-stat      { text-align:center; padding:7px 14px; background:#F5F2EE; border-radius:8px; min-width:64px; }
 .hw-stat-val  { font-size:18px; font-weight:800; color:#111318; line-height:1; }
 .hw-stat-lbl  { font-size:9px; color:#9CA3AF; margin-top:2px; letter-spacing:.2px; white-space:nowrap; }
-.hw-cta       { background:#1C3969; color:#0A1628; border:none; border-radius:8px; padding:9px 18px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; flex-shrink:0; }
+.hw-cta       { background:#1C3969; color:#FFFFFF; border:none; border-radius:8px; padding:9px 18px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; flex-shrink:0; }
 .hw-cta:hover { background:#152B52; }
 
 /* ── Two-col grid ─────────────────────────────────────── */

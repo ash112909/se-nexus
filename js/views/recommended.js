@@ -166,7 +166,7 @@ function render_recommended(el) {
     } else {
       btn.style.display = 'flex';
       btn.innerHTML = '<i class="ti ti-shopping-cart" style="font-size:13px;"></i> View cart'
-        + '<span style="background:#1C3969;color:#0A1628;font-size:10px;font-weight:700;border-radius:999px;padding:1px 6px;margin-left:4px;">' + count + '</span>';
+        + '<span style="background:#1C3969;color:#FFFFFF;font-size:10px;font-weight:700;border-radius:999px;padding:1px 6px;margin-left:4px;">' + count + '</span>';
     }
   }
 
@@ -277,7 +277,7 @@ function render_recommended(el) {
     + '.avail-dot.green{background:#639922;}.avail-dot.amber{background:#BA7517;}'
     + '.avail-label.green{color:#3B6D11;}.avail-label.amber{color:#1C3969;}'
     + '.in-cart-tag{background:#EAF3DE;color:#3B6D11;font-size:11px;font-weight:600;border-radius:5px;padding:5px 10px;display:inline-flex;align-items:center;gap:4px;}'
-    + '.add-cart-btn{background:#1C3969;border:none;border-radius:7px;padding:5px 12px;font-size:11px;font-weight:600;color:#0A1628;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;}'
+    + '.add-cart-btn{background:#1C3969;border:none;border-radius:7px;padding:5px 12px;font-size:11px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;}'
     + '.add-cart-btn:hover{background:#152B52;}'
     + '</style>'
     + '<h2 class="sr-only">Recommended parts</h2>'

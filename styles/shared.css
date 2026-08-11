@@ -95,7 +95,7 @@ body[data-sb-pinned] .sb-lbl, body[data-sb-pinned] .sb-pin-label { opacity: 1; p
 .up-loc-row:hover { background:#FAFAF8; }
 .up-loc-row.active { background:#D6E4F7; }
 .up-loc-icon { width:28px; height:28px; border-radius:7px; background:#F5F2EE; display:flex; align-items:center; justify-content:center; font-size:13px; color:#9CA3AF; flex-shrink:0; }
-.up-loc-row.active .up-loc-icon { background:#1C3969; color:#0A1628; }
+.up-loc-row.active .up-loc-icon { background:#1C3969; color:#FFFFFF; }
 .up-loc-body { flex:1; min-width:0; }
 .up-loc-name { font-size:12px; font-weight:600; color:#111318; margin-bottom:1px; }
 .up-loc-addr { font-size:10px; color:#9CA3AF; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }

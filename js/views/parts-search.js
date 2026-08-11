@@ -2253,7 +2253,7 @@ function render_parts_search(el) {
 .avdot.g{background:#639922;}.avdot.a{background:#BA7517;}
 .avlbl.g{color:#3B6D11;}.avlbl.a{color:#1C3969;}
 .incart-badge{background:#D6E4F7;color:#1C3969;font-size:10px;font-weight:600;border-radius:5px;padding:3px 8px;}
-.add-btn{background:#1C3969;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;color:#0A1628;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;}
+.add-btn{background:#1C3969;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;}
 .add-btn:hover{background:#152B52;}
 .diag-wrap{display:flex;flex-direction:column;gap:0;flex:1;overflow:hidden;}
 .diag-tab-row{display:flex;gap:4px;padding:8px 14px;background:#FAFAF8;border-bottom:0.5px solid #E8E4DF;flex-wrap:wrap;flex-shrink:0;}
@@ -2270,16 +2270,16 @@ function render_parts_search(el) {
 .legend-row.inc{background:#FFFBF2;}
 .legend-ref{width:20px;height:20px;border-radius:50%;background:#F5F2EE;border:1.5px solid #D1CBC4;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#3A3D4A;flex-shrink:0;}
 .legend-row.sel .legend-ref{background:#534AB7;border-color:#3B3497;color:#FFF;}
-.legend-row.inc .legend-ref{background:#1C3969;border-color:#D4880A;color:#0A1628;}
+.legend-row.inc .legend-ref{background:#1C3969;border-color:#D4880A;color:#FFFFFF;}
 .legend-name{flex:1;font-weight:500;color:#111318;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .legend-num{font-size:10px;color:#9CA3AF;min-width:76px;}
 .legend-price{font-weight:700;color:#111318;min-width:46px;text-align:right;}
-.add-sm{background:#1C3969;border:none;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:600;color:#0A1628;cursor:pointer;font-family:inherit;}
+.add-sm{background:#1C3969;border:none;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;}
 .incart-sm{background:#D6E4F7;color:#1C3969;font-size:10px;font-weight:600;border-radius:5px;padding:2px 6px;}
 .cbubble{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;border:2px solid;transition:transform .15s;box-shadow:0 2px 5px rgba(0,0,0,.14);}
 .cbubble:hover{transform:scale(1.15);}
 .cb-def{background:#FFF;border-color:#9CA3AF;color:#3A3D4A;}
-.cb-cart{background:#1C3969;border-color:#D4880A;color:#0A1628;}
+.cb-cart{background:#1C3969;border-color:#D4880A;color:#FFFFFF;}
 .cb-sel{background:#534AB7;border-color:#3B3497;color:#FFF;}
 .dp-header{display:flex;align-items:flex-start;gap:6px;padding:14px 14px 0;}
 .dp-title{flex:1;font-size:13px;font-weight:700;color:#111318;line-height:1.4;}
@@ -2295,7 +2295,7 @@ function render_parts_search(el) {
 .dp-avail.g{color:#3B6D11;}.dp-avail.a{color:#1C3969;}
 .dp-path{padding:4px 14px 8px;font-size:10px;color:#9CA3AF;line-height:1.6;display:flex;align-items:flex-start;gap:4px;}
 .dp-actions{padding:12px 14px;border-top:0.5px solid #F0ECE8;margin-top:auto;}
-.dp-add{width:100%;background:#1C3969;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;color:#0A1628;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
+.dp-add{width:100%;background:#1C3969;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
 .dp-add:hover{background:#152B52;}
 .dp-incart{width:100%;background:#D6E4F7;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;color:#1C3969;cursor:default;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
 .dp-sec-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#9CA3AF;padding:10px 14px 4px;}
@@ -2389,7 +2389,7 @@ function render_parts_search(el) {
     if (_searchMode === 'wo') {
       const wos = Store.getWorkOrders('active');
       const opts = wos.map(w => `<option value="${w.id}" ${_woFilter == w.id ? 'selected' : ''}>${w.machine} — WO #${w.id} (${w.asset})</option>`).join('');
-      inputRow.innerHTML = `<select class="wo-mode-select" id="ps-wo-select"><option value="">Select a work order…</option>${opts}</select><button onclick="psApplyWoFilter()" style="background:#1C3969;border:none;border-radius:7px;padding:0 14px;height:36px;font-size:12px;font-weight:600;color:#0A1628;cursor:pointer;font-family:inherit;">Go</button>`;
+      inputRow.innerHTML = `<select class="wo-mode-select" id="ps-wo-select"><option value="">Select a work order…</option>${opts}</select><button onclick="psApplyWoFilter()" style="background:#1C3969;border:none;border-radius:7px;padding:0 14px;height:36px;font-size:12px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;">Go</button>`;
       document.getElementById('ps-wo-select').addEventListener('change', function() { _woFilter = this.value || null; });
     } else {
       const mode = MODES.find(m => m.id === _searchMode);
@@ -2570,7 +2570,7 @@ function render_parts_search(el) {
         <td>${wo.asset||'—'}</td>
         <td>${wo.description||'—'}</td>
         <td><span class="wo-status-badge active">Active</span></td>
-        <td><button onclick="event.stopPropagation();psNavFromWo(${wo.id})" style="background:#1C3969;border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:600;color:#0A1628;cursor:pointer;font-family:inherit;">Browse Parts</button></td>
+        <td><button onclick="event.stopPropagation();psNavFromWo(${wo.id})" style="background:#1C3969;border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;">Browse Parts</button></td>
       </tr>`
     ).join('');
 
