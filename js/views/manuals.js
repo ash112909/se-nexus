@@ -124,7 +124,7 @@ function render_manuals(el) {
       + machines.map(function(m) {
           var checked = _machineFilter.has(m);
           return '<label style="display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;font-size:12px;color:#111318;" onmouseover="this.style.background=\'#FAFAF8\'" onmouseout="this.style.background=\'\'">'
-            + '<input type="checkbox" data-model="' + m + '"' + (checked ? ' checked' : '') + ' style="accent-color:#00843D;cursor:pointer;"/>' + m + '</label>';
+            + '<input type="checkbox" data-model="' + m + '"' + (checked ? ' checked' : '') + ' style="accent-color:#1C3969;cursor:pointer;"/>' + m + '</label>';
         }).join('')
       + '</div></div>';
 
@@ -166,23 +166,23 @@ function render_manuals(el) {
     + '.mvp-label{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#9CA3AF;margin-bottom:10px;padding:0 14px;}'
     + '.man-vendor-item{display:flex;align-items:center;gap:8px;padding:6px 14px;cursor:pointer;margin-bottom:2px;}'
     + '.man-vendor-item:hover{background:#F5F2EE;}'
-    + '.man-vendor-item.active{background:#E6F4EC;}'
+    + '.man-vendor-item.active{background:#D6E4F7;}'
     + '.mvi-icon{width:26px;height:26px;background:#F5F2EE;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#9CA3AF;flex-shrink:0;}'
-    + '.man-vendor-item.active .mvi-icon{background:#00843D;color:#0D2E18;}'
+    + '.man-vendor-item.active .mvi-icon{background:#1C3969;color:#0A1628;}'
     + '.mvi-name{font-size:12px;font-weight:500;color:#3A3D4A;line-height:1.3;flex:1;}'
-    + '.man-vendor-item.active .mvi-name{color:#1B5E35;font-weight:600;}'
+    + '.man-vendor-item.active .mvi-name{color:#1C3969;font-weight:600;}'
     + '.mvi-count{font-size:10px;color:#B0AAA3;}'
     + '.man-main-panel{flex:1;display:flex;flex-direction:column;min-width:0;}'
     + '.man-search-area{padding:12px 20px;background:#FFFFFF;border-bottom:0.5px solid #E8E4DF;}'
     + '.man-search-wrap{position:relative;}'
     + '.man-search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#9CA3AF;font-size:17px;pointer-events:none;}'
     + '.man-search-input{width:100%;height:40px;background:#F5F2EE;border:1.5px solid #E2DDD8;border-radius:10px;padding:0 14px 0 44px;font-size:14px;font-family:inherit;color:#111318;outline:none;box-sizing:border-box;}'
-    + '.man-search-input:focus{border-color:#00843D;background:#FFFFFF;}'
+    + '.man-search-input:focus{border-color:#1C3969;background:#FFFFFF;}'
     + '.man-search-input::placeholder{color:#B0AAA3;}'
     + '.man-machine-chip-row{display:flex;align-items:center;gap:6px;padding:10px 20px;background:#FAFAF8;border-bottom:0.5px solid #E8E4DF;flex-wrap:wrap;}'
     + '.man-machine-chip{height:28px;padding:0 12px;border:1px solid #E2DDD8;border-radius:999px;background:#FFFFFF;font-size:12px;font-weight:500;color:#5A5F6E;cursor:pointer;font-family:inherit;white-space:nowrap;}'
     + '.man-machine-chip:hover{background:#F5F2EE;border-color:#C8C3BC;}'
-    + '.man-machine-chip.active{background:#E6F4EC;border-color:#00843D;color:#1B5E35;font-weight:600;}'
+    + '.man-machine-chip.active{background:#D6E4F7;border-color:#1C3969;color:#1C3969;font-weight:600;}'
     + '.man-content-body{flex:1;padding:20px;overflow-y:auto;}'
     + '.man-section-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#9CA3AF;margin-bottom:12px;}'
     + '.docs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:24px;}'
@@ -195,11 +195,11 @@ function render_manuals(el) {
     + '.doc-meta-sep{color:#D1CBC4;}'
     + '.doc-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;}'
     + '.doc-tag{font-size:10px;border-radius:4px;padding:2px 6px;font-weight:500;}'
-    + '.tag-type{background:#E6F4EC;color:#1B5E35;}'
+    + '.tag-type{background:#D6E4F7;color:#1C3969;}'
     + '.doc-actions{display:flex;align-items:center;gap:6px;}'
     + '.doc-btn{font-size:11px;font-weight:500;border-radius:6px;padding:4px 10px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;}'
-    + '.doc-btn-primary{background:#00843D;border:none;color:#0D2E18;font-weight:600;}'
-    + '.doc-btn-primary:hover{background:#006830;}'
+    + '.doc-btn-primary{background:#1C3969;border:none;color:#0A1628;font-weight:600;}'
+    + '.doc-btn-primary:hover{background:#152B52;}'
     + '.doc-btn-ghost{background:none;border:0.5px solid #E2DDD8;color:#3A3D4A;}'
     + '.doc-btn-ghost:hover{background:#F5F2EE;}'
     + '</style>'
@@ -249,7 +249,7 @@ function render_manuals(el) {
     if (_target) {
       setTimeout(function() {
         var card = document.querySelector('[data-manual-id="' + _targetManualId + '"]');
-        if (card) { card.scrollIntoView({ behavior:'smooth', block:'center' }); card.style.borderColor = '#00843D'; }
+        if (card) { card.scrollIntoView({ behavior:'smooth', block:'center' }); card.style.borderColor = '#1C3969'; }
         manViewManual(_targetManualId, _targetPdfPage);
       }, 80);
     }
@@ -263,7 +263,7 @@ function render_manuals(el) {
     if (pdfSrc) {
       body = '<style>'
         + '.pdf-viewer-wrap{display:flex;flex-direction:column;flex:1;overflow:hidden;}'
-        + '.pdf-viewer-toolbar{background:#1F6B22;padding:8px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}'
+        + '.pdf-viewer-toolbar{background:#152B52;padding:8px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}'
         + '.pdf-viewer-meta{color:#9CA3AF;font-size:11px;flex:1;}'
         + '.pdf-frame{flex:1;border:none;background:#525659;width:100%;}'
         + '</style>'
@@ -271,8 +271,8 @@ function render_manuals(el) {
         + '<div class="pdf-viewer-toolbar">'
         + '<i class="ti ti-book" style="color:#9CA3AF;font-size:13px;flex-shrink:0;"></i>'
         + '<span class="pdf-viewer-meta">' + m.machine + ' · ' + m.type + ' Manual · ' + m.pages + ' pages</span>'
-        + (pdfPage ? '<span style="font-size:11px;color:#00843D;display:flex;align-items:center;gap:4px;"><i class="ti ti-bookmark-filled" style="font-size:11px;"></i> Opened to page ' + pdfPage + '</span>' : '')
-        + '<a href="' + m.pdfFile + '" download style="font-size:11px;color:#9CA3AF;background:#185219;border:0.5px solid #3C4052;border-radius:5px;padding:4px 10px;text-decoration:none;display:flex;align-items:center;gap:4px;flex-shrink:0;"><i class="ti ti-download" style="font-size:11px;"></i> Download</a>'
+        + (pdfPage ? '<span style="font-size:11px;color:#1C3969;display:flex;align-items:center;gap:4px;"><i class="ti ti-bookmark-filled" style="font-size:11px;"></i> Opened to page ' + pdfPage + '</span>' : '')
+        + '<a href="' + m.pdfFile + '" download style="font-size:11px;color:#9CA3AF;background:#0E1F3D;border:0.5px solid #3C4052;border-radius:5px;padding:4px 10px;text-decoration:none;display:flex;align-items:center;gap:4px;flex-shrink:0;"><i class="ti ti-download" style="font-size:11px;"></i> Download</a>'
         + '</div>'
         + '<iframe class="pdf-frame" src="' + pdfSrc + '" title="' + m.title + '"></iframe>'
         + '</div>';

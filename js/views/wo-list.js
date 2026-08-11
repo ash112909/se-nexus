@@ -23,7 +23,7 @@ function render_wo_list(el) {
 
   const TYPE_META = {
     equipment: { label: 'Repair',  color: '#185FA5', bg: '#E6F1FB' },
-    pm:        { label: 'PM',      color: '#0F6E56', bg: '#E1F5EE' },
+    pm:        { label: 'PM',      color: '#1C3969', bg: '#E1F5EE' },
     stock:     { label: 'Stock',   color: '#534AB7', bg: '#EEEDFE' },
     other:     { label: 'General', color: '#6B7280', bg: '#F3F4F6' },
   };
@@ -148,19 +148,19 @@ function render_wo_list(el) {
 
   el.innerHTML = `
 <style>
-.topbar-search { flex: 1; max-width: 380px; height: 32px; background: #185219; border: 1px solid #185219; border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 0 10px; color: #5C6070; font-size: 13px; cursor: text; }
+.topbar-search { flex: 1; max-width: 380px; height: 32px; background: #0E1F3D; border: 1px solid #0E1F3D; border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 0 10px; color: #5C6070; font-size: 13px; cursor: text; }
 .wol-content { flex: 1; padding: 28px 28px 40px; overflow-y: auto; }
 .wol-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
 .wol-title { font-size: 18px; font-weight: 700; color: #111318; letter-spacing: -0.3px; }
 .wol-subtitle { font-size: 13px; color: #7A7F8E; margin-top: 2px; }
 .wol-filters { display: flex; align-items: center; gap: 8px; }
 .wol-filter-pill { display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid #E2DDD8; background: #FFFFFF; color: #5A5F6E; transition: all 0.12s; user-select: none; }
-.wol-filter-pill.active { background: #1F6B22; color: #FFFFFF; border-color: #1F6B22; }
+.wol-filter-pill.active { background: #152B52; color: #FFFFFF; border-color: #152B52; }
 .wol-filter-pill:hover:not(.active) { border-color: #C8C3BC; }
 .wol-search { height: 34px; background: #FFFFFF; border: 1px solid #E2DDD8; border-radius: 8px; padding: 0 12px; font-size: 13px; font-family: inherit; color: #111318; outline: none; width: 200px; }
-.wol-search:focus { border-color: #00843D; }
-.wol-new-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: #00843D; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: #0D2E18; cursor: pointer; font-family: inherit; }
-.wol-new-btn:hover { background: #006830; }
+.wol-search:focus { border-color: #1C3969; }
+.wol-new-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: #1C3969; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: #0A1628; cursor: pointer; font-family: inherit; }
+.wol-new-btn:hover { background: #152B52; }
 .wol-table { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; overflow: hidden; }
 .wol-thead { display: grid; gap: 0; border-bottom: 1px solid #F0ECE8; padding: 0 18px; background: #FAFAF9; }
 .wol-th { font-size: 11px; font-weight: 600; color: #9CA3AF; letter-spacing: 0.8px; text-transform: uppercase; padding: 10px 8px; }
@@ -175,12 +175,12 @@ function render_wo_list(el) {
 .wol-machine-name { font-size: 13px; font-weight: 600; color: #111318; line-height: 1.3; }
 .wol-machine-issue { font-size: 12px; color: #7A7F8E; margin-top: 1px; }
 .wol-pill { display: inline-flex; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
-.wol-pill-ordered  { background: #E6F4EC; color: #1B5E35; }
+.wol-pill-ordered  { background: #D6E4F7; color: #1C3969; }
 .wol-pill-open     { background: #E6F1FB; color: #185FA5; }
 .wol-pill-waiting  { background: #F1EEFE; color: #534AB7; }
 .wol-pill-done     { background: #F0ECE8; color: #5A5F6E; }
 .wol-priority-high { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; color: #A32D2D; }
-.wol-priority-med  { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; color: #1B5E35; }
+.wol-priority-med  { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; color: #1C3969; }
 .wol-priority-low  { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; color: #3B6D11; }
 .wol-arrow { color: #C0BAB3; font-size: 14px; }
 .wol-empty { padding: 48px 24px; text-align: center; color: #9CA3AF; font-size: 13px; }
@@ -193,13 +193,13 @@ function render_wo_list(el) {
 .modal-form-label { font-size: 12px; font-weight: 600; color: #5A5F6E; margin-bottom: 5px; display: block; }
 .modal-form-label .lbl-opt { font-weight: 400; color: #9CA3AF; }
 .modal-form-input { width: 100%; height: 36px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; }
-.modal-form-input:focus { border-color: #00843D; }
+.modal-form-input:focus { border-color: #1C3969; }
 .modal-form-select { width: 100%; height: 36px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; cursor: pointer; }
 .modal-field-error { font-size: 11px; color: #A32D2D; margin-top: 3px; display: none; }
 .modal-form-hint { font-size: 11px; color: #9CA3AF; margin-top: 3px; }
-.nwo-autofill-banner { font-size: 11px; color: #0F6E56; background: #E1F5EE; border-radius: 6px; padding: 5px 9px; margin-top: 4px; display: none; }
+.nwo-autofill-banner { font-size: 11px; color: #1C3969; background: #E1F5EE; border-radius: 6px; padding: 5px 9px; margin-top: 4px; display: none; }
 .wol-type-pick-card { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 20px 14px; background: #FAFAF9; border: 1.5px solid #E8E4DF; border-radius: 12px; cursor: pointer; transition: border-color 0.12s, background 0.12s; font-family: inherit; width: 100%; }
-.wol-type-pick-card:hover { border-color: #00843D; background: #FFFBF2; }
+.wol-type-pick-card:hover { border-color: #1C3969; background: #FFFBF2; }
 </style>
 <h2 class="sr-only">Orders</h2>
 <div class="shell">
@@ -233,7 +233,7 @@ function render_wo_list(el) {
           <div class="wol-summary-label">Active orders</div>
         </div>
         <div class="wol-summary-card">
-          <div class="wol-summary-val" style="color:#1B5E35;" id="wol-sum-parts">0</div>
+          <div class="wol-summary-val" style="color:#1C3969;" id="wol-sum-parts">0</div>
           <div class="wol-summary-label">Parts on order</div>
         </div>
         <div class="wol-summary-card">
@@ -241,7 +241,7 @@ function render_wo_list(el) {
           <div class="wol-summary-label">High priority</div>
         </div>
         <div class="wol-summary-card">
-          <div class="wol-summary-val" style="color:#0F6E56;" id="wol-sum-arriving">0</div>
+          <div class="wol-summary-val" style="color:#1C3969;" id="wol-sum-arriving">0</div>
           <div class="wol-summary-label">Parts arriving today</div>
         </div>
       </div>
@@ -677,7 +677,7 @@ function render_wo_list(el) {
               Modal.show({
                 title: 'Work order created',
                 body: `<div style="text-align:center;padding:12px 0;">
-                  <div style="font-size:32px;margin-bottom:8px;color:#15803D;">✓</div>
+                  <div style="font-size:32px;margin-bottom:8px;color:#1C3969;">✓</div>
                   <div style="font-size:14px;font-weight:600;color:#111318;margin-bottom:4px;">Work Order #${newWO.id} created</div>
                   <div style="font-size:13px;color:#7A7F8E;">${machine} · ${document.getElementById('nwo-priority') ? '' : 'Medium'} priority</div>
                 </div>`,

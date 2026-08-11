@@ -3,7 +3,7 @@ function render_approvals(el) {
   const _feat = (_user && Store.getEffectiveFeatures) ? Store.getEffectiveFeatures(_user.id) : {};
   const _canApprovals = 'approvals' in _feat ? _feat.approvals : _user?.role === 'supervisor';
   if (!_user || !_canApprovals) {
-    el.innerHTML = `<div class="shell">${buildSidebar('approvals')}<div class="main"><div style="padding:60px;text-align:center;color:#9CA3AF;font-size:14px;"><i class="ti ti-lock" style="font-size:32px;display:block;margin-bottom:12px;"></i>You don't have access to Approvals.<br><a style="color:#00843D;cursor:pointer;margin-top:10px;display:inline-block;" onclick="sendPrompt('dashboard')">Back to Dashboard</a></div></div></div>`;
+    el.innerHTML = `<div class="shell">${buildSidebar('approvals')}<div class="main"><div style="padding:60px;text-align:center;color:#9CA3AF;font-size:14px;"><i class="ti ti-lock" style="font-size:32px;display:block;margin-bottom:12px;"></i>You don't have access to Approvals.<br><a style="color:#1C3969;cursor:pointer;margin-top:10px;display:inline-block;" onclick="sendPrompt('dashboard')">Back to Dashboard</a></div></div></div>`;
     return;
   }
   let _searchQuery = '';
@@ -108,7 +108,7 @@ function render_approvals(el) {
     panel.style.display = 'block';
     panel.innerHTML = `
       <div class="ap-detail-header">
-        <i class="ti ti-truck-delivery" style="font-size:16px;color:#00843D;"></i>
+        <i class="ti ti-truck-delivery" style="font-size:16px;color:#1C3969;"></i>
         <div class="ap-detail-title">${o.poNum ? o.poNum + ' · ' : ''}${o.vendor} · ${o.name}</div>
         <span class="status-pill ${statusPillClass(o.status)}" style="margin-right:8px;">${statusLabel(o.status)}</span>
         <button class="ap-detail-close" onclick="apCloseDetail()"><i class="ti ti-x"></i></button>
@@ -150,7 +150,7 @@ function render_approvals(el) {
       <div class="ap-panel-actions">
         <button class="ap-panel-approve" onclick="apApprove('${o.id}')"><i class="ti ti-check"></i> Approve &amp; submit</button>
         <button class="ap-panel-reject" onclick="apReject('${o.id}')"><i class="ti ti-x"></i> Reject</button>
-        <span id="ap-edit-indicator" style="display:none;font-size:11px;color:#1B5E35;margin-left:4px;"><i class="ti ti-pencil" style="font-size:11px;"></i> Unsaved edits — will be saved on approve</span>
+        <span id="ap-edit-indicator" style="display:none;font-size:11px;color:#1C3969;margin-left:4px;"><i class="ti ti-pencil" style="font-size:11px;"></i> Unsaved edits — will be saved on approve</span>
       </div>`;
     renderEditItemsTable();
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -166,17 +166,17 @@ function render_approvals(el) {
 .ap-search-wrap { position: relative; flex: 1; min-width: 180px; max-width: 300px; }
 .ap-search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #B0AAA3; font-size: 14px; pointer-events: none; }
 .ap-search { width: 100%; height: 34px; background: #FFFFFF; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px 0 32px; font-size: 13px; font-family: inherit; color: #111318; outline: none; }
-.ap-search:focus { border-color: #00843D; }
+.ap-search:focus { border-color: #1C3969; }
 .ap-table-wrap { flex: 1; overflow-y: auto; min-height: 0; }
 .ap-table { width: 100%; border-collapse: collapse; }
 .ap-table th { background: #FAFAF8; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: #9CA3AF; padding: 9px 14px; text-align: left; border-bottom: 1px solid #E8E4DF; white-space: nowrap; position: sticky; top: 0; z-index: 1; }
 .ap-table td { padding: 10px 14px; border-bottom: 0.5px solid #F0ECE8; font-size: 13px; color: #3A3D4A; vertical-align: middle; }
 .ap-table tr:hover td { background: #FAFAF8; cursor: pointer; }
-.ap-table tr.selected-row td { background: #E6F4EC; }
+.ap-table tr.selected-row td { background: #D6E4F7; }
 .status-pill { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
 .pill-saved { background: #F0ECE8; color: #5A5F6E; }
 .pill-submitted { background: #DBEAFE; color: #1D4ED8; }
-.pill-delivered { background: #D1FAE5; color: #065F46; }
+.pill-delivered { background: #DBEAFE; color: #1C3969; }
 .pill-backordered { background: #FEF3C7; color: #92400E; }
 .pill-review { background: #EDE9FE; color: #5B21B6; }
 .ap-actions { display: flex; align-items: center; gap: 6px; }
@@ -215,7 +215,7 @@ function render_approvals(el) {
 .ap-qty-btn { width: 22px; height: 22px; background: #F0ECE8; border: none; border-radius: 4px; font-size: 14px; font-weight: 700; color: #5A5F6E; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
 .ap-qty-btn:hover { background: #E2DDD8; }
 .ap-qty-input { width: 40px; height: 22px; text-align: center; border: 1px solid #E2DDD8; border-radius: 4px; font-size: 12px; font-family: inherit; color: #111318; outline: none; }
-.ap-qty-input:focus { border-color: #00843D; }
+.ap-qty-input:focus { border-color: #1C3969; }
 .ap-remove-btn { background: none; border: none; color: #C0BAB4; cursor: pointer; border-radius: 4px; padding: 2px 4px; }
 .ap-remove-btn:hover { background: #FCEBEB; color: #A32D2D; }
 </style>

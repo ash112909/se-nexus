@@ -8,10 +8,10 @@ let _cmsPtExpandedCats = new Set();
 let _cmsPtExpandedVendors = new Set();
 
 const CMS_TYPES = {
-  bulletin: { label:'Service Bulletin', icon:'ti-alert-triangle', color:'#1B5E35', bg:'#E6F4EC' },
+  bulletin: { label:'Service Bulletin', icon:'ti-alert-triangle', color:'#1C3969', bg:'#D6E4F7' },
   fleet:    { label:'Fleet Update',     icon:'ti-building',       color:'#185FA5', bg:'#E6F1FB' },
   safety:   { label:'Safety Alert',     icon:'ti-alert-octagon',  color:'#B91C1C', bg:'#FEE2E2' },
-  warranty: { label:'Warranty Notice',  icon:'ti-shield-check',   color:'#0F6E56', bg:'#E1F5EE' },
+  warranty: { label:'Warranty Notice',  icon:'ti-shield-check',   color:'#1C3969', bg:'#E1F5EE' },
   supplier: { label:'Supplier News',    icon:'ti-news',           color:'#534AB7', bg:'#EEEDFE' },
   training: { label:'Training',         icon:'ti-certificate',    color:'#5B21B6', bg:'#EDE9FE' },
   pricing:  { label:'Pricing Update',   icon:'ti-tag',            color:'#6B7280', bg:'#F3F4F6' },
@@ -102,7 +102,7 @@ function render_cms(el) {
 .cms-row-meta { font-size:11px; color:#9CA3AF; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .cms-row-actions { display:flex; gap:6px; flex-shrink:0; }
 .cms-chip { display:inline-flex; align-items:center; gap:3px; padding:2px 7px; border-radius:6px; font-size:10px; font-weight:600; }
-.cms-status-published { background:#D1FAE5; color:#065F46; }
+.cms-status-published { background:#DBEAFE; color:#1C3969; }
 .cms-status-draft     { background:#F0ECE8; color:#5A5F6E; }
 .cms-status-scheduled { background:#DBEAFE; color:#1D4ED8; }
 .cms-status-expired   { background:#FEE2E2; color:#B91C1C; }
@@ -115,16 +115,16 @@ function render_cms(el) {
 .cms-field { display:flex; flex-direction:column; gap:5px; }
 .cms-label { font-size:11px; font-weight:600; color:#5A5F6E; text-transform:uppercase; letter-spacing:.6px; }
 .cms-input { width:100%; padding:8px 10px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:13px; font-family:inherit; color:#111318; outline:none; background:#FFFFFF; }
-.cms-input:focus { border-color:#00843D; }
+.cms-input:focus { border-color:#1C3969; }
 .cms-textarea { width:100%; padding:10px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:13px; font-family:inherit; color:#111318; outline:none; resize:vertical; min-height:120px; line-height:1.6; background:#FFFFFF; }
-.cms-textarea:focus { border-color:#00843D; }
+.cms-textarea:focus { border-color:#1C3969; }
 .cms-select { width:100%; padding:8px 10px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:13px; font-family:inherit; color:#111318; outline:none; background:#FFFFFF; cursor:pointer; }
-.cms-select:focus { border-color:#00843D; }
+.cms-select:focus { border-color:#1C3969; }
 .cms-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 /* ── AI panel ───────────── */
 .cms-ai-btn { display:flex; align-items:center; gap:7px; padding:8px 12px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:12px; font-weight:500; font-family:inherit; cursor:pointer; background:#FFFFFF; color:#3A3D4A; transition:all .15s; width:100%; }
 .cms-ai-btn:hover { background:#F5F2EE; border-color:#C8C3BC; }
-.cms-ai-btn .ai-icon { width:22px; height:22px; border-radius:6px; background:#111318; color:#00843D; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; }
+.cms-ai-btn .ai-icon { width:22px; height:22px; border-radius:6px; background:#111318; color:#1C3969; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; }
 .cms-ai-preview { background:#F5F2EE; border:0.5px solid #E2DDD8; border-radius:8px; padding:12px; font-size:12px; color:#3A3D4A; line-height:1.6; margin-top:2px; white-space:pre-wrap; }
 /* ── Attachments ────────── */
 .cms-attach-row { display:flex; align-items:center; gap:8px; padding:6px 8px; background:#F5F2EE; border-radius:7px; font-size:11px; color:#3A3D4A; }
@@ -134,8 +134,8 @@ function render_cms(el) {
 /* ── Post-as toggle ──────── */
 .cms-post-toggle { display:flex; flex-direction:column; gap:5px; }
 .cms-post-opt { display:flex; align-items:center; gap:8px; padding:8px 10px; border:0.5px solid #E2DDD8; border-radius:8px; cursor:pointer; font-size:12px; color:#3A3D4A; transition:all .15s; }
-.cms-post-opt.selected { border-color:#00843D; background:#E6F4EC; color:#1B5E35; font-weight:600; }
-.cms-post-opt input[type=radio] { accent-color:#00843D; }
+.cms-post-opt.selected { border-color:#1C3969; background:#D6E4F7; color:#1C3969; font-weight:600; }
+.cms-post-opt input[type=radio] { accent-color:#1C3969; }
 /* ── Action bar ─────────── */
 .cms-action-bar { display:flex; align-items:center; gap:8px; padding:16px 24px; border-top:0.5px solid #E8E4DF; background:#FAFAF8; flex-shrink:0; }
 </style>
@@ -369,7 +369,7 @@ function cmsRenderEditor() {
 
           <!-- AI tools -->
           <div class="cms-panel">
-            <div class="cms-panel-hdr"><i class="ti ti-sparkles" style="color:#00843D;"></i> AI writing tools</div>
+            <div class="cms-panel-hdr"><i class="ti ti-sparkles" style="color:#1C3969;"></i> AI writing tools</div>
             <div class="cms-panel-body" style="gap:8px;">
               <button class="cms-ai-btn" onclick="cmsAiAction('rewrite')">
                 <div class="ai-icon"><i class="ti ti-wand"></i></div>
@@ -588,7 +588,7 @@ function cmsRenderPartNotes() {
 .cpn-tree-search-wrap { position:relative; }
 .cpn-tree-search-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:14px; pointer-events:none; }
 .cpn-tree-search { width:100%; height:32px; background:#F5F2EE; border:1px solid #E2DDD8; border-radius:7px; padding:0 10px 0 30px; font-size:12px; font-family:inherit; color:#111318; outline:none; }
-.cpn-tree-search:focus { border-color:#00843D; background:#FFFFFF; }
+.cpn-tree-search:focus { border-color:#1C3969; background:#FFFFFF; }
 .cpn-tree-body { flex:1; overflow-y:auto; padding:8px 0; }
 .cpn-vendor-hdr { display:flex; align-items:center; gap:7px; padding:7px 14px; cursor:pointer; font-size:12px; font-weight:700; color:#3A3D4A; }
 .cpn-vendor-hdr:hover { background:#F5F2EE; }
@@ -601,9 +601,9 @@ function cmsRenderPartNotes() {
 .cpn-cat-chevron.open { transform:rotate(90deg); }
 .cpn-part-item { display:flex; flex-direction:column; padding:5px 14px 5px 38px; cursor:pointer; border-left:2px solid transparent; }
 .cpn-part-item:hover { background:#FAFAF9; border-left-color:#E2DDD8; }
-.cpn-part-item.selected { background:#E6F4EC; border-left-color:#00843D; }
+.cpn-part-item.selected { background:#D6E4F7; border-left-color:#1C3969; }
 .cpn-part-pnum { font-size:10px; font-weight:700; color:#9CA3AF; font-family:monospace; }
-.cpn-part-item.selected .cpn-part-pnum { color:#1B5E35; }
+.cpn-part-item.selected .cpn-part-pnum { color:#1C3969; }
 .cpn-part-desc { font-size:11px; font-weight:500; color:#3A3D4A; line-height:1.3; margin-top:1px; }
 .cpn-part-item.selected .cpn-part-desc { color:#111318; }
 .cpn-main { display:flex; flex-direction:column; overflow:hidden; }
@@ -629,9 +629,9 @@ function cmsRenderPartNotes() {
 .cpn-compose-body { padding:14px; display:flex; flex-direction:column; gap:12px; }
 .cpn-label { font-size:11px; font-weight:600; color:#5A5F6E; margin-bottom:4px; display:block; }
 .cpn-input { width:100%; height:34px; border:0.5px solid #E2DDD8; border-radius:7px; padding:0 10px; font-size:12px; font-family:inherit; color:#111318; outline:none; background:#FFFFFF; }
-.cpn-input:focus { border-color:#00843D; }
+.cpn-input:focus { border-color:#1C3969; }
 .cpn-textarea { width:100%; min-height:90px; border:0.5px solid #E2DDD8; border-radius:7px; padding:9px 10px; font-size:12px; font-family:inherit; color:#111318; outline:none; resize:vertical; background:#FFFFFF; }
-.cpn-textarea:focus { border-color:#00843D; }
+.cpn-textarea:focus { border-color:#1C3969; }
 </style>
     <div style="display:flex;align-items:center;gap:10px;padding:14px 24px 10px;flex-shrink:0;">
       <button class="cms-btn-ghost" onclick="cmsGoList()"><i class="ti ti-arrow-left"></i> Back to articles</button>
@@ -658,7 +658,7 @@ function cmsRenderPartNotes() {
       </div>
     </div>`;
 
-  const VENDOR_COLORS = { Skyjack:'#00843D', Caterpillar:'#C2410C', Toyota:'#185FA5', Bobcat:'#534AB7' };
+  const VENDOR_COLORS = { Skyjack:'#1C3969', Caterpillar:'#C2410C', Toyota:'#185FA5', Bobcat:'#534AB7' };
   let _cpnSearch = '';
 
   function renderCpnTree() {
@@ -758,7 +758,7 @@ function cmsRenderPartNotes() {
               <button class="cms-btn-ghost" onclick="document.getElementById('cpn-note-title').value='';document.getElementById('cpn-note-body').value='';">Clear</button>
               <button class="cms-btn-primary" id="cpn-save-note-btn"><i class="ti ti-send"></i> Save note</button>
             </div>
-            <div id="cpn-note-confirm" style="font-size:12px;color:#0F6E56;display:none;"><i class="ti ti-circle-check"></i> Note saved and visible on part page.</div>
+            <div id="cpn-note-confirm" style="font-size:12px;color:#1C3969;display:none;"><i class="ti ti-circle-check"></i> Note saved and visible on part page.</div>
           </div>
         </div>
       </div>`;

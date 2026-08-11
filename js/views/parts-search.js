@@ -547,10 +547,10 @@ function render_parts_search(el) {
     <rect x="134" y="198" width="112" height="6" fill="url(#hatch45)" opacity="0.6"/>
     <rect x="134" y="230" width="112" height="6" fill="url(#hatch45)" opacity="0.6"/>
     <!-- O-rings on piston -->
-    <ellipse cx="162" cy="217" rx="4" ry="2" fill="#0D2E18" opacity="0.6"/>
-    <ellipse cx="218" cy="217" rx="4" ry="2" fill="#0D2E18" opacity="0.6"/>
-    <line x1="162" y1="215" x2="162" y2="222" stroke="#0D2E18" stroke-width="0.5" opacity="0.5"/>
-    <line x1="218" y1="215" x2="218" y2="222" stroke="#0D2E18" stroke-width="0.5" opacity="0.5"/>
+    <ellipse cx="162" cy="217" rx="4" ry="2" fill="#0A1628" opacity="0.6"/>
+    <ellipse cx="218" cy="217" rx="4" ry="2" fill="#0A1628" opacity="0.6"/>
+    <line x1="162" y1="215" x2="162" y2="222" stroke="#0A1628" stroke-width="0.5" opacity="0.5"/>
+    <line x1="218" y1="215" x2="218" y2="222" stroke="#0A1628" stroke-width="0.5" opacity="0.5"/>
     <!-- Seal callout 2 -->
     <line x1="220" y1="217" x2="298" y2="208" stroke="#9CA3AF" stroke-width="0.75"/>
     <circle cx="307" cy="208" r="9" fill="#FFF" stroke="#9CA3AF" stroke-width="1.2"/>
@@ -812,14 +812,14 @@ function render_parts_search(el) {
     <!-- + and - terminals -->
     <circle cx="54" cy="180" r="6" fill="#D32F2F" stroke="#B71C1C" stroke-width="1.2"/>
     <text x="51" y="183" font-size="8" fill="#FFF" font-family="Inter,sans-serif">+</text>
-    <circle cx="100" cy="180" r="6" fill="#0D2E18" stroke="#3A3D4A" stroke-width="1.2"/>
+    <circle cx="100" cy="180" r="6" fill="#0A1628" stroke="#3A3D4A" stroke-width="1.2"/>
     <text x="97" y="183" font-size="8" fill="#FFF" font-family="Inter,sans-serif">−</text>
     <!-- Positive main bus -->
     <line x1="54" y1="174" x2="54" y2="140" stroke="#D32F2F" stroke-width="2"/>
     <line x1="54" y1="140" x2="480" y2="140" stroke="#D32F2F" stroke-width="2"/>
     <!-- Negative bus -->
-    <line x1="100" y1="174" x2="100" y2="280" stroke="#0D2E18" stroke-width="2"/>
-    <line x1="100" y1="280" x2="480" y2="280" stroke="#0D2E18" stroke-width="2"/>
+    <line x1="100" y1="174" x2="100" y2="280" stroke="#0A1628" stroke-width="2"/>
+    <line x1="100" y1="280" x2="480" y2="280" stroke="#0A1628" stroke-width="2"/>
     <!-- Main contactor -->
     <rect x="148" y="120" width="36" height="40" rx="3" fill="#ECEAE6" stroke="#5A5F6E" stroke-width="1.5"/>
     <line x1="162" y1="140" x2="172" y2="128" stroke="#3A3D4A" stroke-width="1.5"/>
@@ -834,7 +834,7 @@ function render_parts_search(el) {
     <text x="226" y="161" font-size="6" fill="#9CA3AF" font-family="Inter,sans-serif">400A peak</text>
     <!-- Controller connections -->
     <line x1="218" y1="140" x2="148" y2="140" stroke="#D32F2F" stroke-width="1.5"/>
-    <line x1="278" y1="280" x2="278" y2="176" stroke="#0D2E18" stroke-width="1.5"/>
+    <line x1="278" y1="280" x2="278" y2="176" stroke="#0A1628" stroke-width="1.5"/>
     <!-- Joystick controller -->
     <rect x="350" y="68" width="96" height="52" rx="4" fill="#ECEAE6" stroke="#5A5F6E" stroke-width="1.5"/>
     <text x="358" y="84" font-size="7.5" fill="#3A3D4A" font-family="Inter,sans-serif" font-weight="600">JOYSTICK ④</text>
@@ -847,7 +847,7 @@ function render_parts_search(el) {
     <rect x="390" y="168" width="80" height="40" rx="3" fill="#ECEAE6" stroke="#5A5F6E" stroke-width="1.5"/>
     <text x="395" y="184" font-size="7" fill="#3A3D4A" font-family="Inter,sans-serif" font-weight="600">LIMIT SW ⑤</text>
     <text x="395" y="198" font-size="6" fill="#9CA3AF" font-family="Inter,sans-serif">SKJ-LIM-504 ×4</text>
-    <line x1="430" y1="208" x2="430" y2="280" stroke="#0D2E18" stroke-width="1"/>
+    <line x1="430" y1="208" x2="430" y2="280" stroke="#0A1628" stroke-width="1"/>
     <!-- Drive motors -->
     <circle cx="440" cy="140" r="18" fill="#ECEAE6" stroke="#5A5F6E" stroke-width="1.5"/>
     <polygon points="432,140 448,132 448,148" fill="#5A5F6E"/>
@@ -863,7 +863,7 @@ function render_parts_search(el) {
     <line x1="74" y1="248" x2="74" y2="230" stroke="#3A3D4A" stroke-width="1.2"/>
     <!-- Labels for buses -->
     <text x="260" y="136" font-size="6" fill="#D32F2F" font-family="Inter,sans-serif">+24V BUS</text>
-    <text x="260" y="292" font-size="6" fill="#0D2E18" font-family="Inter,sans-serif">GND BUS</text>
+    <text x="260" y="292" font-size="6" fill="#0A1628" font-family="Inter,sans-serif">GND BUS</text>
     ` + svgTB('Electrical Schematic','SKJ-3219-ELC-001','N/A') + `</svg>`
       },
       { id:'controller-wiring', title:'Controller Wiring Diagram',
@@ -1004,8 +1004,8 @@ function render_parts_search(el) {
     <rect x="132" y="200" width="136" height="7" fill="url(#hatch45)" opacity="0.5"/>
     <rect x="132" y="237" width="136" height="7" fill="url(#hatch45)" opacity="0.5"/>
     <!-- O-rings -->
-    <ellipse cx="164" cy="221" rx="5" ry="2.5" fill="#0D2E18" opacity="0.6"/>
-    <ellipse cx="236" cy="221" rx="5" ry="2.5" fill="#0D2E18" opacity="0.6"/>
+    <ellipse cx="164" cy="221" rx="5" ry="2.5" fill="#0A1628" opacity="0.6"/>
+    <ellipse cx="236" cy="221" rx="5" ry="2.5" fill="#0A1628" opacity="0.6"/>
     ${leader(241,221,318,214,2)}
     <text x="322" y="218" font-size="6.5" fill="#7A7F8E" font-family="Inter,sans-serif">Seal kit</text>
     <!-- Piston rod -->
@@ -1105,8 +1105,8 @@ function render_parts_search(el) {
     ${dimH(40,360,142,'Ø548 O.D.')}
     ${dimH(70,330,160,'Ø416 I.D.')}
     <!-- Seal detail -->
-    <rect x="62" y="192" width="8" height="14" rx="2" fill="#0D2E18" opacity="0.6"/>
-    <rect x="330" y="192" width="8" height="14" rx="2" fill="#0D2E18" opacity="0.6"/>
+    <rect x="62" y="192" width="8" height="14" rx="2" fill="#0A1628" opacity="0.6"/>
+    <rect x="330" y="192" width="8" height="14" rx="2" fill="#0A1628" opacity="0.6"/>
     <text x="342" y="202" font-size="6" fill="#7A7F8E" font-family="Inter,sans-serif">Lip seals</text>
     <!-- Notes -->
     <rect x="6" y="310" width="220" height="70" fill="#ECEAE6" stroke="#8A8878" stroke-width="0.75"/>
@@ -1278,9 +1278,9 @@ function render_parts_search(el) {
     <rect x="50" y="90" width="88" height="54" rx="4" fill="#ECEAE6" stroke="#5A5F6E" stroke-width="1.2"/>
     <text x="56" y="108" font-size="7" fill="#3A3D4A" font-family="Inter,sans-serif" font-weight="600">PILOT PUMP</text>
     <text x="56" y="120" font-size="6" fill="#9CA3AF" font-family="Inter,sans-serif">36 bar / 30 L/min</text>
-    <line x1="94" y1="144" x2="94" y2="168" stroke="#00843D" stroke-width="1.2" stroke-dasharray="4,2"/>
-    <line x1="94" y1="168" x2="180" y2="168" stroke="#00843D" stroke-width="1.2" stroke-dasharray="4,2"/>
-    <text x="100" y="165" font-size="6" fill="#00843D" font-family="Inter,sans-serif">Pilot supply</text>
+    <line x1="94" y1="144" x2="94" y2="168" stroke="#1C3969" stroke-width="1.2" stroke-dasharray="4,2"/>
+    <line x1="94" y1="168" x2="180" y2="168" stroke="#1C3969" stroke-width="1.2" stroke-dasharray="4,2"/>
+    <text x="100" y="165" font-size="6" fill="#1C3969" font-family="Inter,sans-serif">Pilot supply</text>
     <!-- Notes -->
     <rect x="6" y="316" width="220" height="64" fill="#ECEAE6" stroke="#8A8878" stroke-width="0.75"/>
     <text x="10" y="328" font-size="7" fill="#3A3D4A" font-family="Inter,sans-serif" font-weight="700">NOTES</text>
@@ -1400,8 +1400,8 @@ function render_parts_search(el) {
     <circle cx="${x+42}" cy="164" r="8" fill="#D6D2CC" stroke="#5A5F6E" stroke-width="1.2"/>
     `;}).join('')}
     <!-- Master link highlight -->
-    <rect x="38" y="148" width="50" height="32" rx="4" fill="none" stroke="#00843D" stroke-width="2.5"/>
-    <text x="40" y="196" font-size="7" fill="#00843D" font-family="Inter,sans-serif" font-weight="600">Master link</text>
+    <rect x="38" y="148" width="50" height="32" rx="4" fill="none" stroke="#1C3969" stroke-width="2.5"/>
+    <text x="40" y="196" font-size="7" fill="#1C3969" font-family="Inter,sans-serif" font-weight="600">Master link</text>
     <!-- Track shoe on one link -->
     <rect x="38" y="180" width="50" height="18" rx="2" fill="#C8C3BC" stroke="#5A5F6E" stroke-width="1.2"/>
     <!-- Grouser bar -->
@@ -1420,8 +1420,8 @@ function render_parts_search(el) {
     <text x="360" y="142" font-size="7" fill="#7A7F8E" font-family="Inter,sans-serif">Track roller</text>
     <text x="360" y="154" font-size="6" fill="#9CA3AF" font-family="Inter,sans-serif">CAT-308-ROL</text>
     <!-- Shaft seal detail -->
-    <rect x="222" y="124" width="14" height="22" rx="2" fill="#0D2E18" opacity="0.5"/>
-    <rect x="286" y="124" width="14" height="22" rx="2" fill="#0D2E18" opacity="0.5"/>
+    <rect x="222" y="124" width="14" height="22" rx="2" fill="#0A1628" opacity="0.5"/>
+    <rect x="286" y="124" width="14" height="22" rx="2" fill="#0A1628" opacity="0.5"/>
     <text x="310" y="178" font-size="6.5" fill="#7A7F8E" font-family="Inter,sans-serif">Shaft seals (floating)</text>
     ${dimH(38,496,120,'Pitch 128 mm')}
     ${dimH(222,298,82,'Ø102 roller')}
@@ -1519,8 +1519,8 @@ function render_parts_search(el) {
     <rect x="150" y="190" width="108" height="40" fill="#C8C3BC" stroke="#3A3D4A" stroke-width="1.5"/>
     <rect x="150" y="190" width="108" height="7" fill="url(#hatch45)" opacity="0.5"/>
     <rect x="150" y="223" width="108" height="7" fill="url(#hatch45)" opacity="0.5"/>
-    <ellipse cx="178" cy="210" rx="5" ry="2.5" fill="#0D2E18" opacity="0.6"/>
-    <ellipse cx="230" cy="210" rx="5" ry="2.5" fill="#0D2E18" opacity="0.6"/>
+    <ellipse cx="178" cy="210" rx="5" ry="2.5" fill="#0A1628" opacity="0.6"/>
+    <ellipse cx="230" cy="210" rx="5" ry="2.5" fill="#0A1628" opacity="0.6"/>
     ${leader(235,210,310,200,2)}
     <text x="314" y="204" font-size="7" fill="#7A7F8E" font-family="Inter,sans-serif">Tilt cyl. seals</text>
     <text x="314" y="214" font-size="6" fill="#9CA3AF" font-family="Inter,sans-serif">TOY-TLT-203</text>
@@ -1678,7 +1678,7 @@ function render_parts_search(el) {
     <rect x="430" y="116" width="60" height="60" fill="url(#hatch45)" opacity="0.4"/>
     <!-- O-ring in groove -->
     <rect x="440" y="128" width="20" height="14" rx="3" fill="#F8F6F2" stroke="#5A5F6E" stroke-width="0.75"/>
-    <ellipse cx="450" cy="135" rx="8" ry="4" fill="#0D2E18" opacity="0.5" stroke="#0D2E18" stroke-width="0.5"/>
+    <ellipse cx="450" cy="135" rx="8" ry="4" fill="#0A1628" opacity="0.5" stroke="#0A1628" stroke-width="0.5"/>
     <text x="464" y="139" font-size="6" fill="#5A5F6E" font-family="Inter,sans-serif">O-ring</text>
     <!-- Backup ring -->
     <rect x="440" y="148" width="20" height="8" rx="2" fill="#B0AAFC" opacity="0.7" stroke="#534AB7" stroke-width="0.75"/>
@@ -1952,8 +1952,8 @@ function render_parts_search(el) {
     <rect x="122" y="200" width="136" height="8" fill="url(#hatch45)" opacity="0.5"/>
     <rect x="122" y="240" width="136" height="8" fill="url(#hatch45)" opacity="0.5"/>
     <!-- Piston seals visible -->
-    <ellipse cx="150" cy="224" rx="6" ry="3" fill="#0D2E18" opacity="0.6"/>
-    <ellipse cx="230" cy="224" rx="6" ry="3" fill="#0D2E18" opacity="0.6"/>
+    <ellipse cx="150" cy="224" rx="6" ry="3" fill="#0A1628" opacity="0.6"/>
+    <ellipse cx="230" cy="224" rx="6" ry="3" fill="#0A1628" opacity="0.6"/>
     <!-- Rod -->
     <rect x="168" y="248" width="44" height="84" fill="#D6D2CC" stroke="#3A3D4A" stroke-width="1.5"/>
     ${dimH(100,280,52,'Ø88 bore')}
@@ -1968,9 +1968,9 @@ function render_parts_search(el) {
     'SKJ': {
       displayName: 'Skyjack',
       tagline: 'Aerial Work Platforms',
-      color: '#00843D',
-      logo: `<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="48" rx="4" fill="#1F6B22"/><text x="14" y="32" font-size="22" font-weight="800" font-family="Inter,sans-serif" fill="#00843D" letter-spacing="-0.5">SKYJACK</text></svg>`,
-      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMinYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="120" fill="#1F6B22"/><defs><linearGradient id="skj-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#1F6B22"/><stop offset="100%" stop-color="#2A2210"/></linearGradient></defs><rect x="0" y="0" width="800" height="120" fill="url(#skj-grad)"/><text x="28" y="52" font-size="32" font-weight="800" font-family="Inter,sans-serif" fill="#00843D" letter-spacing="-1">SKYJACK</text><text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#8A8878" letter-spacing="2">AERIAL WORK PLATFORMS</text><rect x="28" y="88" width="64" height="3" rx="1.5" fill="#00843D"/></svg>`,
+      color: '#1C3969',
+      logo: `<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="48" rx="4" fill="#152B52"/><text x="14" y="32" font-size="22" font-weight="800" font-family="Inter,sans-serif" fill="#1C3969" letter-spacing="-0.5">SKYJACK</text></svg>`,
+      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMinYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="120" fill="#152B52"/><defs><linearGradient id="skj-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#152B52"/><stop offset="100%" stop-color="#2A2210"/></linearGradient></defs><rect x="0" y="0" width="800" height="120" fill="url(#skj-grad)"/><text x="28" y="52" font-size="32" font-weight="800" font-family="Inter,sans-serif" fill="#1C3969" letter-spacing="-1">SKYJACK</text><text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#8A8878" letter-spacing="2">AERIAL WORK PLATFORMS</text><rect x="28" y="88" width="64" height="3" rx="1.5" fill="#1C3969"/></svg>`,
       categories: [
         { icon:'ti-crane',    label:'Scissor Lifts',    sub:'SJIII, SJIV Series',     navModelId:'SKJ-SJIII3219', navComp:null },
         { icon:'ti-forklift', label:'Boom Lifts',       sub:'SJ45T, SJ66T',           navModelId:'SKJ-SJ45T',    navComp:null },
@@ -2001,9 +2001,9 @@ function render_parts_search(el) {
     'CAT': {
       displayName: 'Caterpillar',
       tagline: 'Heavy Construction Equipment',
-      color: '#00843D',
-      logo: `<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="48" rx="4" fill="#00843D"/><text x="14" y="33" font-size="20" font-weight="900" font-family="Inter,sans-serif" fill="#0D2E18" letter-spacing="-0.5">CAT</text><text x="60" y="33" font-size="11" font-weight="600" font-family="Inter,sans-serif" fill="#4A3600" letter-spacing="0.5">CATERPILLAR</text></svg>`,
-      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMinYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="120" fill="#1A0E00"/><defs><linearGradient id="cat-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#1A0E00"/><stop offset="100%" stop-color="#2A1800"/></linearGradient></defs><rect x="0" y="0" width="800" height="120" fill="url(#cat-grad)"/><text x="28" y="52" font-size="32" font-weight="900" font-family="Inter,sans-serif" fill="#00843D" letter-spacing="-1">CAT</text><text x="110" y="52" font-size="18" font-weight="600" font-family="Inter,sans-serif" fill="#D4880A" letter-spacing="2">CATERPILLAR</text><text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#6A5A38" letter-spacing="2">HEAVY CONSTRUCTION EQUIPMENT</text><rect x="28" y="88" width="64" height="3" rx="1.5" fill="#00843D"/></svg>`,
+      color: '#1C3969',
+      logo: `<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="48" rx="4" fill="#1C3969"/><text x="14" y="33" font-size="20" font-weight="900" font-family="Inter,sans-serif" fill="#0A1628" letter-spacing="-0.5">CAT</text><text x="60" y="33" font-size="11" font-weight="600" font-family="Inter,sans-serif" fill="#4A3600" letter-spacing="0.5">CATERPILLAR</text></svg>`,
+      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMinYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="120" fill="#1A0E00"/><defs><linearGradient id="cat-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#1A0E00"/><stop offset="100%" stop-color="#2A1800"/></linearGradient></defs><rect x="0" y="0" width="800" height="120" fill="url(#cat-grad)"/><text x="28" y="52" font-size="32" font-weight="900" font-family="Inter,sans-serif" fill="#1C3969" letter-spacing="-1">CAT</text><text x="110" y="52" font-size="18" font-weight="600" font-family="Inter,sans-serif" fill="#D4880A" letter-spacing="2">CATERPILLAR</text><text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#6A5A38" letter-spacing="2">HEAVY CONSTRUCTION EQUIPMENT</text><rect x="28" y="88" width="64" height="3" rx="1.5" fill="#1C3969"/></svg>`,
       categories: [
         { icon:'ti-backhoe',   label:'Excavators',        sub:'320, 323, 308',        navModelId:'CAT-320',  navComp:null },
         { icon:'ti-bulldozer', label:'Mini Excavators',   sub:'308 Series',           navModelId:'CAT-308',  navComp:null },
@@ -2134,9 +2134,9 @@ function render_parts_search(el) {
     const sm = size==='sm';
     const h = sm ? '20px' : '24px';
     const fs = sm ? '10px' : '11px';
-    const btnStyle = `width:${h};height:${h};border:1px solid #D4B483;border-radius:4px;background:#F5DEB5;color:#1B5E35;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit;padding:0;`;
-    const valStyle = `font-size:${fs};font-weight:700;color:#1B5E35;min-width:14px;text-align:center;`;
-    return `<div style="display:inline-flex;align-items:center;gap:3px;background:#E6F4EC;border-radius:5px;padding:${sm?'1px 4px':'3px 6px'};">
+    const btnStyle = `width:${h};height:${h};border:1px solid #D4B483;border-radius:4px;background:#F5DEB5;color:#1C3969;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit;padding:0;`;
+    const valStyle = `font-size:${fs};font-weight:700;color:#1C3969;min-width:14px;text-align:center;`;
+    return `<div style="display:inline-flex;align-items:center;gap:3px;background:#D6E4F7;border-radius:5px;padding:${sm?'1px 4px':'3px 6px'};">
       <button style="${btnStyle}" onclick="event.stopPropagation();psQtyAdj('${partId}',-1)">−</button>
       <span style="${valStyle}">${qty}</span>
       <button style="${btnStyle}" onclick="event.stopPropagation();psQtyAdj('${partId}',1)">+</button>
@@ -2184,12 +2184,12 @@ function render_parts_search(el) {
 .ps-search-area{padding:10px 20px;background:#FFFFFF;border-bottom:0.5px solid #E8E4DF;flex-shrink:0;}
 .search-mode-row{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap;}
 .smode-btn{padding:4px 10px;border-radius:6px;border:0.5px solid #E2DDD8;background:none;font-size:11px;font-weight:500;color:#5A5F6E;cursor:pointer;font-family:inherit;}
-.smode-btn.active{background:#1F6B22;color:#FFFFFF;border-color:#1F6B22;}
+.smode-btn.active{background:#152B52;color:#FFFFFF;border-color:#152B52;}
 .search-input-row{display:flex;gap:8px;align-items:center;}
 .search-input-wrap{position:relative;flex:1;}
 .search-icon-abs{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#B0AAA3;font-size:14px;pointer-events:none;}
 .ps-search-input{width:100%;height:36px;background:#F5F2EE;border:1.5px solid #E2DDD8;border-radius:8px;padding:0 10px 0 34px;font-size:13px;font-family:inherit;color:#111318;outline:none;}
-.ps-search-input:focus{border-color:#00843D;background:#FFFFFF;}
+.ps-search-input:focus{border-color:#1C3969;background:#FFFFFF;}
 .ps-search-input::placeholder{color:#B0AAA3;}
 .wo-mode-select{height:36px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;color:#111318;outline:none;background:#FFFFFF;flex:1;}
 .ps-breadcrumb{display:flex;align-items:center;padding:5px 20px;background:#FAFAF8;border-bottom:0.5px solid #E8E4DF;font-size:12px;color:#5C6070;gap:4px;flex-shrink:0;flex-wrap:wrap;}
@@ -2198,10 +2198,10 @@ function render_parts_search(el) {
 .ps-center-panel{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;}
 .ps-detail-panel{width:296px;min-width:296px;background:#FFFFFF;border-left:0.5px solid #E8E4DF;display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;}
 .tree-root-node{display:flex;align-items:center;gap:6px;padding:8px 14px;font-size:12px;font-weight:600;color:#3A3D4A;cursor:pointer;border-bottom:0.5px solid #F0ECE8;}
-.tree-root-node:hover,.tree-root-node.active{background:#E6F4EC;color:#1B5E35;}
+.tree-root-node:hover,.tree-root-node.active{background:#D6E4F7;color:#1C3969;}
 .tree-node{display:flex;align-items:center;gap:5px;font-size:12px;color:#3A3D4A;cursor:pointer;padding:5px 0;}
 .tree-node:hover{background:#F5F2EE;}
-.tree-node.active{background:#E6F4EC;color:#1B5E35;}
+.tree-node.active{background:#D6E4F7;color:#1C3969;}
 .tree-toggle{color:#9CA3AF;font-size:10px;width:12px;text-align:center;flex-shrink:0;cursor:pointer;}
 .tree-count{margin-left:auto;font-size:10px;color:#B0AAA3;padding-right:12px;}
 .tree-s{padding-left:10px;font-weight:600;}
@@ -2231,7 +2231,7 @@ function render_parts_search(el) {
 .m-card-name,.c-card-name{font-size:13px;font-weight:600;color:#111318;margin-bottom:3px;}
 .m-card-meta,.c-card-meta{font-size:11px;color:#9CA3AF;margin-bottom:5px;}
 .sub-chip{background:#F5F2EE;color:#7A7F8E;font-size:10px;border-radius:4px;padding:2px 5px;}
-.c-card-icon{font-size:16px;color:#00843D;margin-bottom:6px;}
+.c-card-icon{font-size:16px;color:#1C3969;margin-bottom:6px;}
 .sub-section{background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;overflow:hidden;margin-bottom:10px;}
 .sub-sec-hdr{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;background:#FAFAF8;border-bottom:0.5px solid #F0ECE8;}
 .sub-sec-hdr:hover{background:#F5F2EE;}
@@ -2247,19 +2247,19 @@ function render_parts_search(el) {
 .pdesc{font-size:12px;font-weight:500;color:#111318;margin-bottom:2px;}
 .pbadges{display:flex;gap:3px;flex-wrap:wrap;}
 .badge-oem{background:#F5F2EE;color:#5A5F6E;font-size:9px;font-weight:600;border-radius:4px;padding:1px 5px;}
-.badge-am{background:#E6F4EC;color:#1B5E35;font-size:9px;font-weight:600;border-radius:4px;padding:1px 5px;}
+.badge-am{background:#D6E4F7;color:#1C3969;font-size:9px;font-weight:600;border-radius:4px;padding:1px 5px;}
 .badge-rec{background:#EAF3DE;color:#3B6D11;font-size:9px;font-weight:600;border-radius:4px;padding:1px 5px;display:inline-flex;align-items:center;gap:2px;}
 .avdot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:3px;flex-shrink:0;}
 .avdot.g{background:#639922;}.avdot.a{background:#BA7517;}
-.avlbl.g{color:#3B6D11;}.avlbl.a{color:#1B5E35;}
-.incart-badge{background:#E6F4EC;color:#1B5E35;font-size:10px;font-weight:600;border-radius:5px;padding:3px 8px;}
-.add-btn{background:#00843D;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;color:#0D2E18;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;}
-.add-btn:hover{background:#006830;}
+.avlbl.g{color:#3B6D11;}.avlbl.a{color:#1C3969;}
+.incart-badge{background:#D6E4F7;color:#1C3969;font-size:10px;font-weight:600;border-radius:5px;padding:3px 8px;}
+.add-btn{background:#1C3969;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;color:#0A1628;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;}
+.add-btn:hover{background:#152B52;}
 .diag-wrap{display:flex;flex-direction:column;gap:0;flex:1;overflow:hidden;}
 .diag-tab-row{display:flex;gap:4px;padding:8px 14px;background:#FAFAF8;border-bottom:0.5px solid #E8E4DF;flex-wrap:wrap;flex-shrink:0;}
 .diag-tab{padding:5px 12px;border-radius:6px;border:0.5px solid #E2DDD8;background:#FFFFFF;font-size:11px;font-weight:500;color:#5A5F6E;cursor:pointer;font-family:inherit;}
 .diag-tab:hover{border-color:#C8C3BC;}
-.diag-tab.active{background:#1F6B22;color:#FFFFFF;border-color:#1F6B22;}
+.diag-tab.active{background:#152B52;color:#FFFFFF;border-color:#152B52;}
 .diag-svg-area{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:16px;background:#F8F6F2;}
 .diag-canvas{position:relative;display:inline-block;}
 .diag-legend{border-top:0.5px solid #E8E4DF;flex-shrink:0;max-height:200px;overflow-y:auto;}
@@ -2270,16 +2270,16 @@ function render_parts_search(el) {
 .legend-row.inc{background:#FFFBF2;}
 .legend-ref{width:20px;height:20px;border-radius:50%;background:#F5F2EE;border:1.5px solid #D1CBC4;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#3A3D4A;flex-shrink:0;}
 .legend-row.sel .legend-ref{background:#534AB7;border-color:#3B3497;color:#FFF;}
-.legend-row.inc .legend-ref{background:#00843D;border-color:#D4880A;color:#0D2E18;}
+.legend-row.inc .legend-ref{background:#1C3969;border-color:#D4880A;color:#0A1628;}
 .legend-name{flex:1;font-weight:500;color:#111318;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .legend-num{font-size:10px;color:#9CA3AF;min-width:76px;}
 .legend-price{font-weight:700;color:#111318;min-width:46px;text-align:right;}
-.add-sm{background:#00843D;border:none;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:600;color:#0D2E18;cursor:pointer;font-family:inherit;}
-.incart-sm{background:#E6F4EC;color:#1B5E35;font-size:10px;font-weight:600;border-radius:5px;padding:2px 6px;}
+.add-sm{background:#1C3969;border:none;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:600;color:#0A1628;cursor:pointer;font-family:inherit;}
+.incart-sm{background:#D6E4F7;color:#1C3969;font-size:10px;font-weight:600;border-radius:5px;padding:2px 6px;}
 .cbubble{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;border:2px solid;transition:transform .15s;box-shadow:0 2px 5px rgba(0,0,0,.14);}
 .cbubble:hover{transform:scale(1.15);}
 .cb-def{background:#FFF;border-color:#9CA3AF;color:#3A3D4A;}
-.cb-cart{background:#00843D;border-color:#D4880A;color:#0D2E18;}
+.cb-cart{background:#1C3969;border-color:#D4880A;color:#0A1628;}
 .cb-sel{background:#534AB7;border-color:#3B3497;color:#FFF;}
 .dp-header{display:flex;align-items:flex-start;gap:6px;padding:14px 14px 0;}
 .dp-title{flex:1;font-size:13px;font-weight:700;color:#111318;line-height:1.4;}
@@ -2292,12 +2292,12 @@ function render_parts_search(el) {
 .dp-lbl{font-size:11px;color:#9CA3AF;min-width:76px;flex-shrink:0;}
 .dp-val{font-size:12px;font-weight:500;color:#111318;}
 .dp-avail{display:flex;align-items:center;font-size:12px;font-weight:500;}
-.dp-avail.g{color:#3B6D11;}.dp-avail.a{color:#1B5E35;}
+.dp-avail.g{color:#3B6D11;}.dp-avail.a{color:#1C3969;}
 .dp-path{padding:4px 14px 8px;font-size:10px;color:#9CA3AF;line-height:1.6;display:flex;align-items:flex-start;gap:4px;}
 .dp-actions{padding:12px 14px;border-top:0.5px solid #F0ECE8;margin-top:auto;}
-.dp-add{width:100%;background:#00843D;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;color:#0D2E18;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
-.dp-add:hover{background:#006830;}
-.dp-incart{width:100%;background:#E6F4EC;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;color:#1B5E35;cursor:default;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
+.dp-add{width:100%;background:#1C3969;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;color:#0A1628;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
+.dp-add:hover{background:#152B52;}
+.dp-incart{width:100%;background:#D6E4F7;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;color:#1C3969;cursor:default;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
 .dp-sec-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#9CA3AF;padding:10px 14px 4px;}
 .dp-manref{display:flex;align-items:center;gap:6px;padding:4px 14px;font-size:11px;}
 .dp-manref-link{color:#534AB7;text-decoration:none;font-weight:500;flex:1;}
@@ -2335,8 +2335,8 @@ function render_parts_search(el) {
 .slp-wo-table td{padding:8px 10px;border-bottom:0.5px solid #F0ECE8;font-size:12px;color:#3A3D4A;}
 .slp-wo-table tr:hover td{background:#FAFAF8;cursor:pointer;}
 .wo-status-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;border-radius:4px;padding:2px 6px;}
-.wo-status-badge.active{background:#E6F4EC;color:#1B5E35;}
-.wo-ribbon{background:#1F6B22;padding:9px 22px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #185219;flex-shrink:0;flex-wrap:wrap;}
+.wo-status-badge.active{background:#D6E4F7;color:#1C3969;}
+.wo-ribbon{background:#152B52;padding:9px 22px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #0E1F3D;flex-shrink:0;flex-wrap:wrap;}
 .wr-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#8A8FA8;}
 .wr-item strong{color:#FFF;font-weight:600;}
 .wr-sep{color:#3C4052;}
@@ -2355,8 +2355,8 @@ function render_parts_search(el) {
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
       ${buildTopbarRight()}
     </div>
-    ${_impersonating ? `<div style="background:#FFF7ED;border-bottom:2px solid #00843D;padding:9px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:500;color:#1B5E35;flex-shrink:0;"><i class="ti ti-eye" style="font-size:13px;"></i> Viewing as <strong style="margin:0 3px;">${_impersonatingFleet || 'fleet'}</strong> — you are seeing this supplier page as this fleet would see it.<button onclick="Router.navigate('supplier-portal')" style="margin-left:auto;background:#1F6B22;color:#FFFFFF;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;">Exit impersonation</button></div>` : ''}
-    ${_wo ? `<div class="wo-ribbon"><div class="wr-item"><i class="ti ti-shopping-cart" style="color:#00843D;"></i> Adding to <strong>WO #${_wo.id}</strong></div><span class="wr-sep">·</span><div class="wr-item"><strong>${_wo.machine}</strong></div><span class="wr-sep">·</span><div class="wr-item"><strong>${_wo.asset}</strong></div><button onclick="sendPrompt('Work Order detail WO #${_wo.id}')" style="margin-left:auto;background:none;border:1px solid #3C4052;border-radius:6px;padding:4px 11px;font-size:11px;color:#8A8FA8;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;"><i class="ti ti-arrow-left" style="font-size:11px;"></i> Back to WO</button></div>` : ''}
+    ${_impersonating ? `<div style="background:#FFF7ED;border-bottom:2px solid #1C3969;padding:9px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:500;color:#1C3969;flex-shrink:0;"><i class="ti ti-eye" style="font-size:13px;"></i> Viewing as <strong style="margin:0 3px;">${_impersonatingFleet || 'fleet'}</strong> — you are seeing this supplier page as this fleet would see it.<button onclick="Router.navigate('supplier-portal')" style="margin-left:auto;background:#152B52;color:#FFFFFF;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;">Exit impersonation</button></div>` : ''}
+    ${_wo ? `<div class="wo-ribbon"><div class="wr-item"><i class="ti ti-shopping-cart" style="color:#1C3969;"></i> Adding to <strong>WO #${_wo.id}</strong></div><span class="wr-sep">·</span><div class="wr-item"><strong>${_wo.machine}</strong></div><span class="wr-sep">·</span><div class="wr-item"><strong>${_wo.asset}</strong></div><button onclick="sendPrompt('Work Order detail WO #${_wo.id}')" style="margin-left:auto;background:none;border:1px solid #3C4052;border-radius:6px;padding:4px 11px;font-size:11px;color:#8A8FA8;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;"><i class="ti ti-arrow-left" style="font-size:11px;"></i> Back to WO</button></div>` : ''}
     <div class="ps-search-area">
       <div class="search-mode-row" id="ps-mode-row"></div>
       <div class="search-input-row" id="ps-input-row"></div>
@@ -2389,7 +2389,7 @@ function render_parts_search(el) {
     if (_searchMode === 'wo') {
       const wos = Store.getWorkOrders('active');
       const opts = wos.map(w => `<option value="${w.id}" ${_woFilter == w.id ? 'selected' : ''}>${w.machine} — WO #${w.id} (${w.asset})</option>`).join('');
-      inputRow.innerHTML = `<select class="wo-mode-select" id="ps-wo-select"><option value="">Select a work order…</option>${opts}</select><button onclick="psApplyWoFilter()" style="background:#00843D;border:none;border-radius:7px;padding:0 14px;height:36px;font-size:12px;font-weight:600;color:#0D2E18;cursor:pointer;font-family:inherit;">Go</button>`;
+      inputRow.innerHTML = `<select class="wo-mode-select" id="ps-wo-select"><option value="">Select a work order…</option>${opts}</select><button onclick="psApplyWoFilter()" style="background:#1C3969;border:none;border-radius:7px;padding:0 14px;height:36px;font-size:12px;font-weight:600;color:#0A1628;cursor:pointer;font-family:inherit;">Go</button>`;
       document.getElementById('ps-wo-select').addEventListener('change', function() { _woFilter = this.value || null; });
     } else {
       const mode = MODES.find(m => m.id === _searchMode);
@@ -2515,7 +2515,7 @@ function render_parts_search(el) {
   function renderSupplier() {
     const s = CATALOG.find(x=>x.id===_nav.supplierId); if(!s) return;
     const pr = SUPPLIER_PROFILES[s.id] || {};
-    const accent = pr.color || '#00843D';
+    const accent = pr.color || '#1C3969';
     const activeWos = getWosForSupplier(s.id);
 
     const categoryTiles = (pr.categories || []).map(cat => {
@@ -2570,7 +2570,7 @@ function render_parts_search(el) {
         <td>${wo.asset||'—'}</td>
         <td>${wo.description||'—'}</td>
         <td><span class="wo-status-badge active">Active</span></td>
-        <td><button onclick="event.stopPropagation();psNavFromWo(${wo.id})" style="background:#00843D;border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:600;color:#0D2E18;cursor:pointer;font-family:inherit;">Browse Parts</button></td>
+        <td><button onclick="event.stopPropagation();psNavFromWo(${wo.id})" style="background:#1C3969;border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:600;color:#0A1628;cursor:pointer;font-family:inherit;">Browse Parts</button></td>
       </tr>`
     ).join('');
 
@@ -2835,7 +2835,7 @@ function render_parts_search(el) {
           }).join('');
       })()}
       <div class="dp-actions">${iC
-        ?`<div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;display:flex;align-items:center;gap:6px;background:#E6F4EC;border-radius:8px;padding:8px 12px;"><i class="ti ti-check" style="color:#1B5E35;font-size:13px;"></i><span style="font-size:13px;font-weight:600;color:#1B5E35;flex:1;">In cart</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#1B5E35;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',-1)">−</button><span style="font-size:14px;font-weight:700;color:#1B5E35;min-width:20px;text-align:center;">${cartQty(p.id)}</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#1B5E35;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',1)">+</button></div></div>`
+        ?`<div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;display:flex;align-items:center;gap:6px;background:#D6E4F7;border-radius:8px;padding:8px 12px;"><i class="ti ti-check" style="color:#1C3969;font-size:13px;"></i><span style="font-size:13px;font-weight:600;color:#1C3969;flex:1;">In cart</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#1C3969;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',-1)">−</button><span style="font-size:14px;font-weight:700;color:#1C3969;min-width:20px;text-align:center;">${cartQty(p.id)}</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#1C3969;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',1)">+</button></div></div>`
         :`<button class="dp-add" onclick="psAddPart('${p.id}')"><i class="ti ti-shopping-cart" style="font-size:13px;"></i> ${cartLabel}</button>`
       }</div>`;
   }

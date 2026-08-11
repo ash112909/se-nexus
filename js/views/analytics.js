@@ -27,7 +27,7 @@ function render_analytics(el) {
 .an-filter-sep { width:0.5px; height:20px; background:#E8E4DF; }
 .an-loc-pills { display:flex; gap:5px; flex-wrap:wrap; }
 .an-loc-pill { display:flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:0.5px solid #E0DBD5; color:#5A5F6E; background:#FFFFFF; transition:all 0.15s; white-space:nowrap; }
-.an-loc-pill.active { background:#E6F4EC; color:#1B5E35; border-color:#F5C97A; }
+.an-loc-pill.active { background:#D6E4F7; color:#1C3969; border-color:#F5C97A; }
 .an-loc-pill:hover:not(.active) { border-color:#9CA3AF; }
 .an-loc-dot { width:6px; height:6px; border-radius:50%; }
 .an-content { flex:1; padding:20px 24px 40px; overflow-y:auto; }
@@ -135,7 +135,7 @@ function render_analytics(el) {
           <i class="ti ti-stack-2" style="font-size:11px;"></i> All
         </div>
         ${locations.map((l, i) => {
-          const LC = ['#00843D','#185FA5','#3B6D11','#534AB7','#A32D2D'];
+          const LC = ['#1C3969','#185FA5','#3B6D11','#534AB7','#A32D2D'];
           const active = _anLocs.has(l.id);
           return `<div class="an-loc-pill ${active?'active':''}" onclick="anToggleLoc('${l.id}')">
             <div class="an-loc-dot" style="background:${LC[i%LC.length]};"></div>
@@ -185,7 +185,7 @@ window.anToggleLoc = function(id) {
 
 function _syncLocPills() {
   const locs = Store.getLocations();
-  const LC = ['#00843D','#185FA5','#3B6D11','#534AB7','#A32D2D'];
+  const LC = ['#1C3969','#185FA5','#3B6D11','#534AB7','#A32D2D'];
   const allActive = _anLocs.size === locs.length;
   document.querySelectorAll('.an-loc-pill').forEach((pill, i) => {
     if (i === 0) {
@@ -195,7 +195,7 @@ function _syncLocPills() {
       const loc = locs[i - 1];
       const active = loc && _anLocs.has(loc.id);
       pill.classList.toggle('active', active);
-      pill.style.cssText = active ? `background:#E6F4EC;color:#1B5E35;border-color:#F5C97A;` : '';
+      pill.style.cssText = active ? `background:#D6E4F7;color:#1C3969;border-color:#F5C97A;` : '';
     }
   });
 }
@@ -206,7 +206,7 @@ function anRenderContent() {
   if (!body) return;
 
   const locations = Store.getLocations();
-  const LC = ['#00843D','#185FA5','#3B6D11','#534AB7','#A32D2D'];
+  const LC = ['#1C3969','#185FA5','#3B6D11','#534AB7','#A32D2D'];
   const selLocs = locations.filter(l => _anLocs.has(l.id));
   const selLocNames = selLocs.map(l => l.name.split(' ')[0]).join(', ');
 
@@ -279,7 +279,7 @@ function anRenderContent() {
 
   // ── Mechanic spend (synthetic by mechanic) ─────────────────────────────
   const MECHANICS = [
-    { name: 'James W.',   avatar:'JW', color:'#00843D', textColor:'#0D2E18' },
+    { name: 'James W.',   avatar:'JW', color:'#1C3969', textColor:'#0A1628' },
     { name: 'Marcus T.',  avatar:'MT', color:'#185FA5', textColor:'#FFFFFF' },
     { name: 'Lena R.',    avatar:'LR', color:'#3B6D11', textColor:'#FFFFFF' },
     { name: 'Darius K.',  avatar:'DK', color:'#534AB7', textColor:'#FFFFFF' },
@@ -295,12 +295,12 @@ function anRenderContent() {
 
   // ── Vendor spend ──────────────────────────────────────────────────────────
   const VENDOR_SEED = [
-    { name:'Skyjack',     pct:0.38, color:'#00843D' },
+    { name:'Skyjack',     pct:0.38, color:'#1C3969' },
     { name:'Caterpillar', pct:0.24, color:'#185FA5' },
     { name:'Toyota',      pct:0.16, color:'#3B6D11' },
     { name:'Bobcat',      pct:0.12, color:'#534AB7' },
     { name:'Parker',      pct:0.06, color:'#A32D2D' },
-    { name:'Grainger',    pct:0.04, color:'#0F6E56' },
+    { name:'Grainger',    pct:0.04, color:'#1C3969' },
   ];
   const vendorData = VENDOR_SEED.map(v => ({ ...v, amount: Math.round(totalSpend * v.pct) }));
   const topVendorPct = Math.round(VENDOR_SEED[0].pct * 100);
@@ -323,10 +323,10 @@ function anRenderContent() {
   const CAT_DATA = [
     { name:'Hydraulic',   pct:0.32, color:'#185FA5' },
     { name:'Drive',       pct:0.22, color:'#3B6D11' },
-    { name:'Seals',       pct:0.18, color:'#00843D' },
+    { name:'Seals',       pct:0.18, color:'#1C3969' },
     { name:'Electrical',  pct:0.12, color:'#534AB7' },
     { name:'Filtration',  pct:0.09, color:'#A32D2D' },
-    { name:'Structure',   pct:0.07, color:'#0F6E56' },
+    { name:'Structure',   pct:0.07, color:'#1C3969' },
   ].map(c => ({ ...c, amount: Math.round(totalSpend * c.pct) }));
   const maxCat = Math.max(...CAT_DATA.map(c => c.amount), 1);
 
@@ -348,10 +348,10 @@ function anRenderContent() {
   // ── Smart insights ────────────────────────────────────────────────────────
   const INSIGHTS = [
     {
-      icon:'ti-trending-up', iconBg:'#E6F4EC', iconColor:'#1B5E35',
+      icon:'ti-trending-up', iconBg:'#D6E4F7', iconColor:'#1C3969',
       title:'Hydraulic spend trending up 34%',
       body:`Seal kits and cylinder assemblies account for 3 of your top 5 parts this period. Two active Cat 320 WOs are driving elevated hydraulic parts demand.`,
-      tag:'Watch', tagBg:'#FFF8EC', tagColor:'#1B5E35',
+      tag:'Watch', tagBg:'#FFF8EC', tagColor:'#1C3969',
     },
     {
       icon:'ti-alert-triangle', iconBg:'#FEF2F2', iconColor:'#A32D2D',
@@ -384,7 +384,7 @@ function anRenderContent() {
       : `$${spend.values[i]}`;
     return `<div class="an-bar-col">
       <div class="an-bar-amt">${isLast || spend.labels.length <= 5 ? amtStr : ''}</div>
-      <div class="an-bar-seg" style="height:${h}px;background:${isLast ? '#00843D' : '#E0DBD5'};"></div>
+      <div class="an-bar-seg" style="height:${h}px;background:${isLast ? '#1C3969' : '#E0DBD5'};"></div>
       <div class="an-bar-lbl">${lbl}</div>
     </div>`;
   }).join('');
@@ -443,7 +443,7 @@ function anRenderContent() {
   <div class="an-grid-3" style="margin-bottom:14px;">
     <div class="an-card" style="grid-column:1/3;">
       <div class="an-card-hdr">
-        <div class="an-card-title"><i class="ti ti-trending-up" style="font-size:13px;color:#00843D;"></i> Parts spend trend</div>
+        <div class="an-card-title"><i class="ti ti-trending-up" style="font-size:13px;color:#1C3969;"></i> Parts spend trend</div>
         <span class="an-card-sub">${selLocNames} · ${_anPeriod}</span>
       </div>
       <div class="an-card-body">
@@ -466,7 +466,7 @@ function anRenderContent() {
         </div>
         <div class="an-wo-stat">
           <span style="font-size:12px;color:#5A5F6E;">Pending</span>
-          <span class="an-wo-badge" style="background:#FFF8EC;color:#1B5E35;">${pendingWOs.length}</span>
+          <span class="an-wo-badge" style="background:#FFF8EC;color:#1C3969;">${pendingWOs.length}</span>
         </div>
         <div class="an-wo-stat">
           <span style="font-size:12px;color:#5A5F6E;">Closed</span>

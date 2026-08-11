@@ -153,7 +153,7 @@ function render_home(el) {
     'lift-parts':  svgBadge('#059669','LQ','#FFF',13),
     'lincoln-elc': svgFlat('#CC0000','LNE','#FFF',10),
     'link-belt':   svgFlat('#F59E0B','LBC','#1A1A1A',10),
-    'lubrizol':    svgFlat('#0F5132','LBZ','#FFF',10),
+    'lubrizol':    svgFlat('#152B52','LBZ','#FFF',10),
     'manitou':     svgSH('#E10600','#1A1A1A','MAN','#FFF',10),
     'manitowoc':   svgFlat('#003087','MTC','#FFF',10),
     'mcneilus':    svgFlat('#CC0000','MCN','#FFF',10),
@@ -175,7 +175,7 @@ function render_home(el) {
     'schaeffer':   svgFlat('#003087','SFR','#FFF',10),
     'shell-lub':   svgFlat('#FCD217','SHL','#CC0000',10),
     'skf':         svgFlat('#003DA5','SKF','#FEBD17',11),
-    'skyjack':     svgFlat('#1F6B22','SJ','#FFF',14),
+    'skyjack':     svgFlat('#152B52','SJ','#FFF',14),
     'stanley':     svgFlat('#FCD217','SWK','#1A1A1A',10),
     'sun-hyd':     svgBadge('#0052A5','SH','#FFF',13),
     'sunbelt-pts': svgFlat('#F97316','SBP','#FFF',10),
@@ -197,8 +197,8 @@ function render_home(el) {
 
   // Fallback letter avatar for unmapped suppliers
   const AV_COLORS = [
-    { bg:'#E6F4EC', fg:'#1B5E35' }, { bg:'#DBEAFE', fg:'#1D4ED8' }, { bg:'#FEE2E2', fg:'#B91C1C' },
-    { bg:'#EDE9FE', fg:'#534AB7' }, { bg:'#D1FAE5', fg:'#065F46' }, { bg:'#FEF3C7', fg:'#92400E' },
+    { bg:'#D6E4F7', fg:'#1C3969' }, { bg:'#DBEAFE', fg:'#1D4ED8' }, { bg:'#FEE2E2', fg:'#B91C1C' },
+    { bg:'#EDE9FE', fg:'#534AB7' }, { bg:'#DBEAFE', fg:'#1C3969' }, { bg:'#FEF3C7', fg:'#92400E' },
     { bg:'#F3F4F6', fg:'#374151' }, { bg:'#FFE4E6', fg:'#9F1239' }, { bg:'#E0F2FE', fg:'#0369A1' },
     { bg:'#FDF4FF', fg:'#7E22CE' },
   ];
@@ -223,10 +223,10 @@ function render_home(el) {
   }
 
   const TYPE_META = {
-    bulletin:{ label:'Service Bulletin', color:'#1B5E35', bg:'#E6F4EC', icon:'ti-alert-triangle' },
+    bulletin:{ label:'Service Bulletin', color:'#1C3969', bg:'#D6E4F7', icon:'ti-alert-triangle' },
     fleet:   { label:'Fleet Update',     color:'#185FA5', bg:'#DBEAFE', icon:'ti-building'       },
     supplier:{ label:'Supplier News',    color:'#534AB7', bg:'#EDE9FE', icon:'ti-news'            },
-    warranty:{ label:'Warranty',         color:'#0F6E56', bg:'#D1FAE5', icon:'ti-shield-check'   },
+    warranty:{ label:'Warranty',         color:'#1C3969', bg:'#DBEAFE', icon:'ti-shield-check'   },
     safety:  { label:'Safety Alert',     color:'#B91C1C', bg:'#FEE2E2', icon:'ti-alert-octagon'  },
     pricing: { label:'Pricing',          color:'#6B7280', bg:'#F3F4F6', icon:'ti-tag'            },
     training:{ label:'Training',         color:'#5B21B6', bg:'#EDE9FE', icon:'ti-certificate'    },
@@ -440,7 +440,7 @@ function render_home(el) {
 /* ── Welcome bar ──────────────────────────────────────── */
 .home-welcome { background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; padding:18px 28px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
 .hw-brand     { display:flex; align-items:center; gap:10px; flex-shrink:0; }
-.hw-mark      { width:38px; height:38px; background:#00843D; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.hw-mark      { width:38px; height:38px; background:#1C3969; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .hw-name      { font-size:15px; font-weight:800; color:#111318; letter-spacing:-.3px; line-height:1.15; }
 .hw-sub       { font-size:10px; color:#ABA6A0; margin-top:1px; }
 .hw-sep       { width:1px; height:30px; background:#E8E4DF; flex-shrink:0; }
@@ -451,8 +451,8 @@ function render_home(el) {
 .hw-stat      { text-align:center; padding:7px 14px; background:#F5F2EE; border-radius:8px; min-width:64px; }
 .hw-stat-val  { font-size:18px; font-weight:800; color:#111318; line-height:1; }
 .hw-stat-lbl  { font-size:9px; color:#9CA3AF; margin-top:2px; letter-spacing:.2px; white-space:nowrap; }
-.hw-cta       { background:#00843D; color:#0D2E18; border:none; border-radius:8px; padding:9px 18px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; flex-shrink:0; }
-.hw-cta:hover { background:#006830; }
+.hw-cta       { background:#1C3969; color:#0A1628; border:none; border-radius:8px; padding:9px 18px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; flex-shrink:0; }
+.hw-cta:hover { background:#152B52; }
 
 /* ── Two-col grid ─────────────────────────────────────── */
 .home-grid   { display:grid; grid-template-columns:1fr 340px; gap:20px; align-items:start; }
@@ -470,7 +470,7 @@ function render_home(el) {
 .home-slide.active { display:block; }
 .home-car-footer { display:flex; align-items:center; padding:0 4px 14px 4px; }
 .home-dot  { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.2); border:none; cursor:pointer; padding:0; margin-right:5px; transition:all .15s; }
-.home-dot.active { background:#00843D; width:16px; border-radius:3px; }
+.home-dot.active { background:#1C3969; width:16px; border-radius:3px; }
 .home-arr  { width:26px; height:26px; border:0.5px solid rgba(255,255,255,.12); border-radius:6px; background:rgba(255,255,255,.06); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; color:rgba(255,255,255,.5); margin-left:4px; }
 .home-arr:hover { background:rgba(255,255,255,.12); color:#FFF; }
 
@@ -541,7 +541,7 @@ function render_home(el) {
 
         <!-- Left: carousel + news -->
         <div class="home-left">
-          <div class="h-lbl"><i class="ti ti-speakerphone" style="color:#00843D;"></i> Fleet highlights</div>
+          <div class="h-lbl"><i class="ti ti-speakerphone" style="color:#1C3969;"></i> Fleet highlights</div>
           <div class="home-car-wrap">
             ${SLIDES.map((s, i) => `<div class="home-slide${i===0?' active':''}" style="background:${s.bg};" id="hslide-${i}">${s.html}</div>`).join('')}
             <div class="home-car-footer">

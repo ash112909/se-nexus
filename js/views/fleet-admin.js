@@ -10,8 +10,8 @@ function render_fleet_admin(el) {
   let _faFeaturesView = 'roles'; // 'roles' | userId
 
   const ROLE_LABELS = { mechanic: 'Mechanic', supervisor: 'Supervisor' };
-  const ROLE_COLORS = { mechanic: { color:'#534AB7', bg:'#EEEDFE' }, supervisor: { color:'#0F6E56', bg:'#E1F5EE' } };
-  const STATUS_COLORS = { active: { color:'#0F6E56', bg:'#E1F5EE' }, inactive: { color:'#5A5F6E', bg:'#F0ECE8' } };
+  const ROLE_COLORS = { mechanic: { color:'#534AB7', bg:'#EEEDFE' }, supervisor: { color:'#1C3969', bg:'#E1F5EE' } };
+  const STATUS_COLORS = { active: { color:'#1C3969', bg:'#E1F5EE' }, inactive: { color:'#5A5F6E', bg:'#F0ECE8' } };
 
   el.innerHTML = `
 <style>
@@ -82,7 +82,7 @@ function render_fleet_admin(el) {
 .fa-section-sub { font-size:12px; color:#7A7F8E; margin-bottom:16px; }
 
 /* ── Avatar ── */
-.fa-avatar { width:36px; height:36px; border-radius:50%; background:#1F6B22; color:#00843D; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.fa-avatar { width:36px; height:36px; border-radius:50%; background:#152B52; color:#1C3969; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 
 /* ── Location card ── */
 .fa-loc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
@@ -208,8 +208,8 @@ function render_fleet_admin(el) {
         const supOn  = Store.getRoleFeatures('supervisor')[f.id];
         return `<div class="fa-table-row" style="grid-template-columns:1fr 72px 80px;" onclick="faSetTab('features')" style="cursor:pointer;">
           <div class="fa-table-td" style="gap:7px;"><i class="ti ${f.icon}" style="font-size:14px;color:#9CA3AF;"></i><span style="font-size:13px;color:#111318;">${f.label}</span></div>
-          <div class="fa-table-td"><span style="font-size:11px;color:${mechOn?'#0F6E56':'#9CA3AF'};">${mechOn?'✓ Mech':'— Mech'}</span></div>
-          <div class="fa-table-td"><span style="font-size:11px;color:${supOn?'#0F6E56':'#9CA3AF'};">${supOn?'✓ Sup':'— Sup'}</span></div>
+          <div class="fa-table-td"><span style="font-size:11px;color:${mechOn?'#1C3969':'#9CA3AF'};">${mechOn?'✓ Mech':'— Mech'}</span></div>
+          <div class="fa-table-td"><span style="font-size:11px;color:${supOn?'#1C3969':'#9CA3AF'};">${supOn?'✓ Sup':'— Sup'}</span></div>
         </div>`;
       }).join('')}
     </div>
@@ -507,11 +507,11 @@ function render_fleet_admin(el) {
     document.getElementById('fa-topbar-title').textContent = 'Activity Log';
     const logs = [
       { icon:'ti-toggle-right', bg:'#EEEDFE', color:'#534AB7', text:'<strong>Analytics</strong> disabled for <strong>Marcus Taylor</strong> (user override)', meta:'Jul 29, 2026 · 10:14 AM · Admin User' },
-      { icon:'ti-user-plus',    bg:'#E1F5EE', color:'#0F6E56', text:'New user <strong>Rosa Flores</strong> added as Supervisor at San Marcos Branch', meta:'Jul 28, 2026 · 3:42 PM · Admin User' },
+      { icon:'ti-user-plus',    bg:'#E1F5EE', color:'#1C3969', text:'New user <strong>Rosa Flores</strong> added as Supervisor at San Marcos Branch', meta:'Jul 28, 2026 · 3:42 PM · Admin User' },
       { icon:'ti-toggle-right', bg:'#EEEDFE', color:'#534AB7', text:'<strong>Diagnostics Chat</strong> enabled for role <strong>Mechanic</strong> (role default updated)', meta:'Jul 27, 2026 · 11:05 AM · Admin User' },
       { icon:'ti-user-off',     bg:'#FEE2E2', color:'#B91C1C', text:'<strong>Thanh Nguyen</strong> deactivated', meta:'Jul 10, 2026 · 8:30 AM · Admin User' },
       { icon:'ti-toggle-right', bg:'#EEEDFE', color:'#534AB7', text:'<strong>Content Management</strong> disabled for role <strong>Mechanic</strong> (role default updated)', meta:'Jul 8, 2026 · 2:17 PM · Admin User' },
-      { icon:'ti-user-plus',    bg:'#E1F5EE', color:'#0F6E56', text:'New user <strong>Dana Kowalski</strong> added as Mechanic at Kyle Branch', meta:'Jul 5, 2026 · 9:00 AM · Admin User' },
+      { icon:'ti-user-plus',    bg:'#E1F5EE', color:'#1C3969', text:'New user <strong>Dana Kowalski</strong> added as Mechanic at Kyle Branch', meta:'Jul 5, 2026 · 9:00 AM · Admin User' },
     ];
     document.getElementById('fa-content').innerHTML = `
 <div class="fa-section-title">Activity Log</div>
