@@ -769,6 +769,30 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
 /* mob home indicator */
 .mob-home-bar{height:20px;background:#0F1117;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:0 0 32px 32px;}
 .mob-home-pill{width:100px;height:4px;background:#444;border-radius:2px;}
+/* mob sessions drawer */
+.mob-sessions-drawer{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  background:#F5F2EE;z-index:10;border-radius:44px;
+  display:flex;flex-direction:column;overflow:hidden;
+  transform:translateX(-100%);transition:transform .25s ease;
+}
+.mob-sessions-drawer.open{transform:translateX(0);}
+.mob-sessions-head{
+  background:#1F2330;padding:52px 16px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0;
+}
+.mob-sessions-back{width:32px;height:32px;background:rgba(255,255,255,.1);border:none;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#FFF;font-size:15px;cursor:pointer;flex-shrink:0;}
+.mob-sessions-title{font-size:14px;font-weight:700;color:#FFF;flex:1;}
+.mob-sessions-new{display:inline-flex;align-items:center;gap:4px;background:#00843D;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;color:#0D2E18;cursor:pointer;font-family:inherit;}
+.mob-sessions-list{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:4px;}
+.mob-sess-item{background:#FFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;}
+.mob-sess-item:hover,.mob-sess-item:active{background:#E6F4EC;border-color:#00843D40;}
+.mob-sess-item.active{background:#E6F4EC;border-color:#00843D;}
+.mob-sess-icon{width:28px;height:28px;border-radius:7px;background:#E6F4EC;display:flex;align-items:center;justify-content:center;font-size:13px;color:#00843D;flex-shrink:0;}
+.mob-sess-body{flex:1;min-width:0;}
+.mob-sess-title{font-size:12px;font-weight:600;color:#111318;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mob-sess-time{font-size:10px;color:#9CA3AF;margin-top:2px;}
+.mob-sess-del{width:28px;height:28px;background:none;border:none;border-radius:6px;color:#C0BAB3;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.mob-sess-del:hover{background:#FEE2E2;color:#B91C1C;}
 /* mob cart bottom sheet */
 .mob-cart-sheet{
   position:absolute;bottom:20px;left:0;right:0;
@@ -878,12 +902,14 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
     <div class="mob-screen">
       <!-- app topbar -->
       <div class="mob-topbar">
-        <div class="mob-topbar-icon"><i class="ti ti-sparkles"></i></div>
+        <button onclick="diagMobOpenSessions()" style="width:30px;height:30px;background:rgba(255,255,255,.08);border:none;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#A0A8C0;font-size:14px;cursor:pointer;flex-shrink:0;" title="All chats"><i class="ti ti-layout-sidebar"></i></button>
         <div class="mob-topbar-title">Diagnostic Assistant</div>
-        <button id="mob-cart-btn" onclick="diagMobToggleCart()" style="display:none;position:relative;width:32px;height:32px;background:#E6F4EC;border:1px solid #00843D40;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#1B5E35;cursor:pointer;flex-shrink:0;">
-          <i class="ti ti-shopping-cart"></i>
-          <span id="mob-cart-badge" style="position:absolute;top:-4px;right:-4px;background:#00843D;color:#FFF;border-radius:8px;padding:0 4px;font-size:9px;font-weight:800;display:none;"></span>
-        </button>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <div id="mob-cart-btn" onclick="diagMobToggleCart()" style="display:none;position:relative;width:32px;height:32px;background:#E6F4EC;border:1px solid #00843D40;border-radius:8px;align-items:center;justify-content:center;font-size:15px;color:#1B5E35;cursor:pointer;flex-shrink:0;">
+            <i class="ti ti-shopping-cart"></i>
+            <span id="mob-cart-badge" style="position:absolute;top:-4px;right:-4px;background:#00843D;color:#FFF;border-radius:8px;padding:0 4px;font-size:9px;font-weight:800;display:none;"></span>
+          </div>
+        </div>
       </div>
       <!-- context strip -->
       <div class="mob-ctx" id="mob-ctx-bar">
@@ -913,6 +939,15 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
       <div class="mob-cart-sheet-title"><i class="ti ti-shopping-cart" style="font-size:13px;"></i> Parts Cart</div>
       <div id="mob-cart-items"></div>
       <div class="mob-cart-footer" id="mob-cart-footer"></div>
+    </div>
+    <!-- sessions drawer (slides in from left over the screen) -->
+    <div class="mob-sessions-drawer" id="mob-sessions-drawer">
+      <div class="mob-sessions-head">
+        <button class="mob-sessions-back" onclick="diagMobCloseSessions()" title="Back"><i class="ti ti-arrow-left"></i></button>
+        <div class="mob-sessions-title">All chats</div>
+        <button class="mob-sessions-new" onclick="diagMobNewChat()"><i class="ti ti-plus" style="font-size:11px;"></i> New chat</button>
+      </div>
+      <div class="mob-sessions-list" id="mob-sessions-list"></div>
     </div>
     <!-- home bar -->
     <div class="mob-home-bar"><div class="mob-home-pill"></div></div>
@@ -966,6 +1001,19 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
         const stepsHtml = resp.steps && resp.steps.length
           ? `<div style="font-size:10px;font-weight:700;letter-spacing:.7px;color:#B0AAA3;text-transform:uppercase;margin:8px 0 4px;">Procedure</div>
              <ol class="mob-card-steps">${resp.steps.map(s=>`<li>${renderMd(s)}</li>`).join('')}</ol>` : '';
+        const manualsHtml = resp.manualRefs && resp.manualRefs.length
+          ? `<div style="font-size:10px;font-weight:700;letter-spacing:.7px;color:#B0AAA3;text-transform:uppercase;margin:8px 0 4px;">Manual References</div>
+             <div style="display:flex;flex-direction:column;gap:5px;">${resp.manualRefs.map(ref=>
+               `<div onclick="diagOpenManual('${ref.id}','${escHtml(ref.title)}')"
+                 style="display:flex;align-items:center;gap:8px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:7px;padding:8px 10px;cursor:pointer;">
+                 <i class="ti ti-book" style="font-size:13px;color:#185FA5;flex-shrink:0;"></i>
+                 <div style="flex:1;min-width:0;">
+                   <div style="font-size:10.5px;font-weight:600;color:#185FA5;line-height:1.3;">Ch.${ref.chapter} — ${escHtml(ref.title)}</div>
+                   <div style="font-size:10px;color:#6B9ECC;margin-top:1px;">Page ${ref.page}${ref.summary ? ' · ' + escHtml(ref.summary.slice(0,48)) + (ref.summary.length>48?'…':'') : ''}</div>
+                 </div>
+                 <i class="ti ti-external-link" style="font-size:11px;color:#93C5FD;flex-shrink:0;"></i>
+               </div>`
+             ).join('')}</div>` : '';
         const partsHtml = resp.parts && resp.parts.length
           ? `<div style="font-size:10px;font-weight:700;letter-spacing:.7px;color:#B0AAA3;text-transform:uppercase;margin:8px 0 4px;">Recommended Parts</div>
              <div class="mob-parts">${resp.parts.map(p => {
@@ -993,6 +1041,7 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
               ${fcHtml}
               <p style="margin:0;font-size:11.5px;color:#3A3D4A;line-height:1.6;">${renderMd(resp.body)}</p>
               ${stepsHtml}
+              ${manualsHtml}
               ${partsHtml}
             </div>
           </div>
@@ -1042,11 +1091,12 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
           <div style="display:flex;align-items:center;gap:2px;">
-            <button onclick="diagCartQty(${i},-1);renderMobileCart();" style="width:20px;height:20px;background:#F0EDE9;border:none;border-radius:4px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;">−</button>
-            <span style="font-size:11px;font-weight:600;color:#111318;width:18px;text-align:center;">${item.qty}</span>
-            <button onclick="diagCartQty(${i},1);renderMobileCart();" style="width:20px;height:20px;background:#F0EDE9;border:none;border-radius:4px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;">+</button>
+            <button onclick="diagCartQty(${i},-1);renderMobileCart();" style="width:22px;height:22px;background:#F0EDE9;border:none;border-radius:4px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">−</button>
+            <span style="font-size:11px;font-weight:600;color:#111318;width:20px;text-align:center;">${item.qty}</span>
+            <button onclick="diagCartQty(${i},1);renderMobileCart();" style="width:22px;height:22px;background:#F0EDE9;border:none;border-radius:4px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">+</button>
           </div>
           ${item.price ? `<span style="font-size:11px;font-weight:600;color:#111318;width:44px;text-align:right;">$${(item.price*item.qty).toFixed(2)}</span>` : ''}
+          <button onclick="diagCartRemove(${i});" title="Remove" style="width:24px;height:24px;background:none;border:none;border-radius:5px;cursor:pointer;color:#C0BAB3;display:flex;align-items:center;justify-content:center;font-size:13px;" onmouseover="this.style.background='#FEE2E2';this.style.color='#B91C1C'" onmouseout="this.style.background='none';this.style.color='#C0BAB3'"><i class="ti ti-x"></i></button>
         </div>
       </div>`).join('');
     footer.innerHTML = `
@@ -1103,6 +1153,67 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
     }, 500);
   };
 
+  function renderMobileSessions() {
+    const list = document.getElementById('mob-sessions-list');
+    if (!list) return;
+    const sessions = Store.getDiagSessions();
+    const active = Store.getActiveDiagSession();
+    const activeId = active ? active.id : null;
+    if (!sessions.length) {
+      list.innerHTML = `<div style="text-align:center;padding:32px 16px;font-size:12px;color:#9CA3AF;">No previous chats</div>`;
+      return;
+    }
+    list.innerHTML = sessions.map(s=>`
+      <div class="mob-sess-item ${s.id === activeId ? 'active' : ''}" onclick="diagMobSwitchSession('${s.id}')">
+        <div class="mob-sess-icon"><i class="ti ti-message-circle"></i></div>
+        <div class="mob-sess-body">
+          <div class="mob-sess-title">${escHtml(s.title)}</div>
+          <div class="mob-sess-time">${_relTime(s.createdAt)}</div>
+        </div>
+        <button class="mob-sess-del" onclick="event.stopPropagation();diagMobDeleteSession('${s.id}')" title="Delete">
+          <i class="ti ti-trash"></i>
+        </button>
+      </div>`).join('');
+  }
+
+  window.diagMobOpenSessions = function() {
+    renderMobileSessions();
+    const drawer = document.getElementById('mob-sessions-drawer');
+    if (drawer) drawer.classList.add('open');
+  };
+
+  window.diagMobCloseSessions = function() {
+    const drawer = document.getElementById('mob-sessions-drawer');
+    if (drawer) drawer.classList.remove('open');
+  };
+
+  window.diagMobNewChat = function() {
+    Store.createDiagSession('New chat');
+    renderSessions();
+    renderMessages();
+    renderMobileMessages();
+    renderMobileSessions();
+    diagMobCloseSessions();
+    document.getElementById('mob-chat-input')?.focus();
+  };
+
+  window.diagMobSwitchSession = function(id) {
+    Store.setActiveDiagSession(id);
+    renderSessions();
+    renderMessages();
+    renderMobileMessages();
+    renderMobileSessions();
+    diagMobCloseSessions();
+  };
+
+  window.diagMobDeleteSession = function(id) {
+    Store.deleteDiagSession(id);
+    renderSessions();
+    renderMessages();
+    renderMobileMessages();
+    renderMobileSessions();
+  };
+
   window.diagToggleMobile = function() {
     const ov = document.getElementById('diag-mobile-overlay');
     if (!ov) return;
@@ -1111,6 +1222,7 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
       renderMobileMessages();
       renderMobileCtxBar();
       renderMobileCart();
+      renderMobileSessions();
     }
   };
 
