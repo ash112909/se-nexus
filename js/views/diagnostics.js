@@ -691,6 +691,122 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
 .input-hints{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
 .hint-chip{background:#F5F2EE;border-radius:5px;padding:3px 9px;cursor:pointer;color:#7A7F8E;font-size:11px;}
 .hint-chip:hover{background:#E6F4EC;color:#1B5E35;}
+
+/* ── Mobile preview overlay ───────────────────────────── */
+#diag-mobile-overlay{
+  display:none;position:fixed;inset:0;z-index:900;
+  background:rgba(10,12,18,.72);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;
+}
+#diag-mobile-overlay.open{display:flex;}
+.mob-shell{
+  width:390px;height:780px;border-radius:44px;
+  background:#1A1C22;
+  box-shadow:0 0 0 10px #111,0 0 0 12px #2A2D35,0 32px 80px rgba(0,0,0,.7);
+  display:flex;flex-direction:column;overflow:hidden;position:relative;
+  flex-shrink:0;
+}
+/* notch */
+.mob-notch{
+  background:#111;height:28px;display:flex;align-items:center;justify-content:center;
+  border-radius:0 0 16px 16px;width:120px;margin:0 auto;flex-shrink:0;
+  position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:2;
+}
+.mob-notch-dot{width:10px;height:10px;border-radius:50%;background:#1A1C22;border:1.5px solid #333;}
+.mob-status{
+  height:44px;background:#0F1117;display:flex;align-items:flex-end;justify-content:space-between;
+  padding:0 20px 6px;font-size:11px;font-weight:600;color:#E0E0E0;flex-shrink:0;
+}
+.mob-status-icons{display:flex;gap:5px;align-items:center;}
+/* inner scrollable screen */
+.mob-screen{
+  flex:1;background:#F5F2EE;display:flex;flex-direction:column;overflow:hidden;
+  border-bottom-left-radius:32px;border-bottom-right-radius:32px;
+}
+/* mob topbar */
+.mob-topbar{
+  background:#1F2330;padding:10px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;
+}
+.mob-topbar-title{font-size:13px;font-weight:700;color:#FFF;flex:1;}
+.mob-topbar-icon{width:28px;height:28px;border-radius:7px;background:#00843D;display:flex;align-items:center;justify-content:center;font-size:14px;color:#0D2E18;}
+/* mob ctx strip */
+.mob-ctx{
+  background:#FFF;border-bottom:0.5px solid #E8E4DF;padding:7px 14px;display:flex;align-items:center;gap:6px;flex-shrink:0;
+}
+.mob-ctx-label{font-size:11px;font-weight:600;flex:1;}
+.mob-ctx-switch{font-size:10px;color:#9CA3AF;background:none;border:0.5px solid #E2DDD8;border-radius:5px;padding:2px 7px;cursor:pointer;font-family:inherit;}
+/* mob messages */
+.mob-chat{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:12px;}
+.mob-msg-user{display:flex;justify-content:flex-end;}
+.mob-msg-user-bub{background:#1B3A2B;color:#FFF;border-radius:14px 14px 4px 14px;padding:9px 13px;max-width:78%;font-size:12px;line-height:1.5;}
+.mob-msg-ai{display:flex;gap:8px;align-items:flex-start;}
+.mob-ai-av{width:26px;height:26px;background:#00843D;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#0D2E18;flex-shrink:0;margin-top:2px;}
+.mob-ai-card{background:#FFF;border:0.5px solid #E8E4DF;border-radius:10px;overflow:hidden;flex:1;min-width:0;}
+.mob-card-head{padding:9px 12px 8px;border-bottom:0.5px solid #F0EDE9;}
+.mob-card-tag{font-size:9px;font-weight:700;letter-spacing:.8px;color:#9CA3AF;text-transform:uppercase;margin-bottom:3px;}
+.mob-card-title{font-size:12px;font-weight:700;color:#111318;line-height:1.3;}
+.mob-card-body{padding:10px 12px;font-size:11.5px;color:#3A3D4A;line-height:1.6;}
+.mob-card-steps{margin:6px 0 0;padding-left:16px;display:flex;flex-direction:column;gap:4px;}
+.mob-card-steps li{font-size:11px;color:#3A3D4A;line-height:1.5;}
+.mob-parts{display:flex;flex-direction:column;gap:5px;margin-top:8px;}
+.mob-part-row{display:flex;align-items:center;gap:8px;background:#FAFAF8;border:0.5px solid #E8E4DF;border-radius:7px;padding:7px 9px;}
+.mob-part-no{font-size:10px;font-weight:700;color:#7C6FF7;font-family:monospace;flex-shrink:0;}
+.mob-part-desc{font-size:10.5px;color:#3A3D4A;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mob-part-price{font-size:10px;font-weight:600;color:#111318;flex-shrink:0;}
+.mob-add-btn{font-size:10px;font-weight:600;color:#185FA5;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:4px;padding:2px 7px;cursor:pointer;font-family:inherit;flex-shrink:0;white-space:nowrap;}
+.mob-add-btn.added{color:#15803D;background:#F0FDF4;border-color:#BBF7D0;cursor:default;}
+.mob-fc-chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;}
+.mob-fc-chip{font-size:10px;font-weight:600;background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;border-radius:4px;padding:2px 7px;cursor:pointer;}
+/* mob input */
+.mob-input-area{background:#FFF;border-top:0.5px solid #E8E4DF;padding:10px 14px 14px;flex-shrink:0;}
+.mob-hints{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px;}
+.mob-hint{background:#F5F2EE;border-radius:4px;padding:3px 7px;font-size:10px;color:#7A7F8E;cursor:pointer;}
+.mob-hint:hover{background:#E6F4EC;color:#1B5E35;}
+.mob-input-row{display:flex;gap:8px;align-items:flex-end;}
+.mob-input-box{flex:1;background:#F5F2EE;border:1.5px solid #E2DDD8;border-radius:10px;padding:9px 12px;font-size:12px;font-family:inherit;color:#111318;outline:none;resize:none;min-height:38px;max-height:80px;line-height:1.45;box-sizing:border-box;}
+.mob-input-box:focus{border-color:#00843D;background:#FFF;}
+.mob-send{width:38px;height:38px;background:#00843D;border:none;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:#0D2E18;flex-shrink:0;}
+/* mob home indicator */
+.mob-home-bar{height:20px;background:#0F1117;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:0 0 32px 32px;}
+.mob-home-pill{width:100px;height:4px;background:#444;border-radius:2px;}
+/* mob cart bottom sheet */
+.mob-cart-sheet{
+  position:absolute;bottom:20px;left:0;right:0;
+  background:#FFF;border-radius:20px 20px 0 0;
+  box-shadow:0 -4px 30px rgba(0,0,0,.25);
+  padding:14px 16px 20px;
+  transform:translateY(100%);transition:transform .25s ease;
+  max-height:60%;overflow-y:auto;
+}
+.mob-cart-sheet.open{transform:translateY(0);}
+.mob-cart-sheet-handle{width:36px;height:4px;background:#E0DAD4;border-radius:2px;margin:0 auto 12px;}
+.mob-cart-sheet-title{font-size:13px;font-weight:700;color:#111318;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.mob-cart-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid #F0EDE9;}
+.mob-cart-item-info{flex:1;min-width:0;}
+.mob-cart-item-no{font-size:10px;font-weight:700;color:#7C6FF7;font-family:monospace;}
+.mob-cart-item-desc{font-size:11px;color:#5C6070;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mob-cart-footer{margin-top:10px;}
+.mob-cart-total{font-size:12px;color:#3A3D4A;margin-bottom:8px;}
+.mob-cart-cta{width:100%;padding:11px;background:#00843D;color:#0D2E18;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+/* dismiss btn */
+.mob-overlay-close{
+  position:absolute;top:24px;right:24px;
+  width:36px;height:36px;background:rgba(255,255,255,.12);border:none;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:#FFF;font-size:16px;
+}
+.mob-overlay-close:hover{background:rgba(255,255,255,.22);}
+.mob-preview-label{
+  position:absolute;top:24px;left:24px;
+  font-size:11px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.8px;text-transform:uppercase;
+}
+/* mobile toggle btn in topbar */
+.mob-toggle-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  background:#1F2330;border:0.5px solid #3C4052;border-radius:7px;
+  padding:5px 11px;font-size:11px;font-weight:600;color:#A0A8C0;
+  cursor:pointer;font-family:inherit;
+}
+.mob-toggle-btn:hover{background:#2A2D3E;color:#FFF;border-color:#5A6080;}
 </style>
 <h2 class="sr-only">Diagnostic assistant</h2>
 <div class="shell">
@@ -703,6 +819,9 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
         <span style="color:#FFF;font-weight:500;">Diagnostic assistant</span>
       </div>
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
+      <button class="mob-toggle-btn" onclick="diagToggleMobile()" title="Preview mobile experience">
+        <i class="ti ti-device-mobile" style="font-size:13px;"></i> Mobile view
+      </button>
       ${buildTopbarRight()}
     </div>
     <div class="diag-ctx-strip" id="diag-ctx-bar"></div>
@@ -737,6 +856,67 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
       <div id="diag-cart-panel" style="display:none;"></div>
     </div>
   </div>
+</div>
+
+<!-- ── Mobile preview overlay ──────────────────────────────────────── -->
+<div id="diag-mobile-overlay">
+  <div class="mob-preview-label"><i class="ti ti-device-mobile" style="font-size:11px;"></i> &nbsp;Mobile preview</div>
+  <button class="mob-overlay-close" onclick="diagToggleMobile()" title="Close mobile view"><i class="ti ti-x"></i></button>
+  <div class="mob-shell">
+    <!-- notch -->
+    <div style="position:relative;height:44px;background:#0F1117;flex-shrink:0;">
+      <div class="mob-notch"><div class="mob-notch-dot"></div></div>
+      <div class="mob-status">
+        <span>9:41</span>
+        <div class="mob-status-icons">
+          <svg width="14" height="10" viewBox="0 0 14 10" fill="none"><rect x="0" y="3" width="2.5" height="7" rx="1" fill="#FFF" opacity=".4"/><rect x="3.5" y="2" width="2.5" height="8" rx="1" fill="#FFF" opacity=".6"/><rect x="7" y="0.5" width="2.5" height="9.5" rx="1" fill="#FFF" opacity=".8"/><rect x="10.5" y="0" width="3" height="10" rx="1" fill="#FFF"/></svg>
+          <svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M6 2C8.5 2 10.7 3 12 4.7L10.5 6.2C9.6 5 7.9 4.2 6 4.2S2.4 5 1.5 6.2L0 4.7C1.3 3 3.5 2 6 2Z" fill="#FFF" opacity=".5"/><path d="M6 5.5C7.4 5.5 8.6 6.1 9.5 7L8 8.5C7.4 8 6.7 7.7 6 7.7s-1.4.3-2 .8L2.5 7C3.4 6.1 4.6 5.5 6 5.5Z" fill="#FFF" opacity=".8"/><circle cx="6" cy="9.5" r="1" fill="#FFF"/></svg>
+          <svg width="22" height="11" viewBox="0 0 22 11" fill="none"><rect x=".5" y=".5" width="18" height="10" rx="3" stroke="#FFF" stroke-opacity=".35"/><rect x="1.5" y="1.5" width="14" height="8" rx="2" fill="#FFF"/><path d="M20 3.5v4a2 2 0 000-4Z" fill="#FFF" opacity=".4"/></svg>
+        </div>
+      </div>
+    </div>
+    <div class="mob-screen">
+      <!-- app topbar -->
+      <div class="mob-topbar">
+        <div class="mob-topbar-icon"><i class="ti ti-sparkles"></i></div>
+        <div class="mob-topbar-title">Diagnostic Assistant</div>
+        <button id="mob-cart-btn" onclick="diagMobToggleCart()" style="display:none;position:relative;width:32px;height:32px;background:#E6F4EC;border:1px solid #00843D40;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#1B5E35;cursor:pointer;flex-shrink:0;">
+          <i class="ti ti-shopping-cart"></i>
+          <span id="mob-cart-badge" style="position:absolute;top:-4px;right:-4px;background:#00843D;color:#FFF;border-radius:8px;padding:0 4px;font-size:9px;font-weight:800;display:none;"></span>
+        </button>
+      </div>
+      <!-- context strip -->
+      <div class="mob-ctx" id="mob-ctx-bar">
+        <i class="ti ti-message-circle" style="font-size:12px;color:#8A8FA8;flex-shrink:0;"></i>
+        <span class="mob-ctx-label" style="color:#8A8FA8;">General</span>
+        <button class="mob-ctx-switch" onclick="diagSwitchContext()">Switch</button>
+      </div>
+      <!-- chat area -->
+      <div class="mob-chat" id="mob-chat-area"></div>
+      <!-- input area -->
+      <div class="mob-input-area">
+        <div class="mob-hints">
+          <span class="mob-hint" onclick="diagMobSetInput('Fault code HYD-04 — platform won\\'t elevate')">HYD-04</span>
+          <span class="mob-hint" onclick="diagMobSetInput('Platform is drifting down slowly')">Platform drift</span>
+          <span class="mob-hint" onclick="diagMobSetInput('Hydraulic fluid leak near the cylinder')">Hyd leak</span>
+          <span class="mob-hint" onclick="diagMobSetInput('Machine won\\'t drive, wheels not turning')">Won't drive</span>
+        </div>
+        <div class="mob-input-row">
+          <textarea class="mob-input-box" id="mob-chat-input" rows="1" placeholder="Describe a fault or ask a question…"></textarea>
+          <button class="mob-send" onclick="diagMobSend()"><i class="ti ti-arrow-up"></i></button>
+        </div>
+      </div>
+    </div>
+    <!-- cart bottom sheet -->
+    <div class="mob-cart-sheet" id="mob-cart-sheet">
+      <div class="mob-cart-sheet-handle"></div>
+      <div class="mob-cart-sheet-title"><i class="ti ti-shopping-cart" style="font-size:13px;"></i> Parts Cart</div>
+      <div id="mob-cart-items"></div>
+      <div class="mob-cart-footer" id="mob-cart-footer"></div>
+    </div>
+    <!-- home bar -->
+    <div class="mob-home-bar"><div class="mob-home-pill"></div></div>
+  </div>
 </div>`;
 
   renderContextBar();
@@ -753,6 +933,196 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
       Store.clearDiagnosticHistory();
       renderMessages();
       renderSessions();
+      renderMobileMessages();
     });
   });
+
+  // ── Mobile preview ────────────────────────────────────────────────────────
+  let _mobCartOpen = false;
+
+  function renderMobileMessages() {
+    const area = document.getElementById('mob-chat-area');
+    if (!area) return;
+    const history = Store.getDiagnosticHistory();
+    if (!history.length) {
+      area.innerHTML = `<div style="text-align:center;padding:32px 14px;">
+        <div style="width:40px;height:40px;background:#E6F4EC;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#1B5E35;margin:0 auto 10px;"><i class="ti ti-sparkles"></i></div>
+        <div style="font-size:13px;font-weight:600;color:#111318;margin-bottom:5px;">SmartEquip AI</div>
+        <div style="font-size:11.5px;color:#9CA3AF;line-height:1.6;">Describe a fault code, symptom, or ask about a service interval.</div>
+      </div>`;
+      return;
+    }
+    area.innerHTML = history.map(msg => {
+      if (msg.role === 'system') {
+        return `<div style="text-align:center;font-size:10px;color:#B0AAA3;padding:2px 0;">${escHtml(msg.text)}</div>`;
+      }
+      if (msg.role === 'user') {
+        return `<div class="mob-msg-user"><div class="mob-msg-user-bub">${escHtml(msg.text)}</div></div>`;
+      }
+      if (msg.role === 'ai' && msg.resp) {
+        const resp = msg.resp;
+        const fcHtml = resp.faultCodes && resp.faultCodes.length
+          ? `<div class="mob-fc-chips">${resp.faultCodes.map(fc=>`<span class="mob-fc-chip" onclick="diagMobSetInput('Fault code ${fc}')">${fc}</span>`).join('')}</div>` : '';
+        const stepsHtml = resp.steps && resp.steps.length
+          ? `<div style="font-size:10px;font-weight:700;letter-spacing:.7px;color:#B0AAA3;text-transform:uppercase;margin:8px 0 4px;">Procedure</div>
+             <ol class="mob-card-steps">${resp.steps.map(s=>`<li>${renderMd(s)}</li>`).join('')}</ol>` : '';
+        const partsHtml = resp.parts && resp.parts.length
+          ? `<div style="font-size:10px;font-weight:700;letter-spacing:.7px;color:#B0AAA3;text-transform:uppercase;margin:8px 0 4px;">Recommended Parts</div>
+             <div class="mob-parts">${resp.parts.map(p => {
+               const pi = partInfo(p);
+               const inCart = cartHasItem(p);
+               return `<div class="mob-part-row" id="mob-pcard-${p.replace(/[^A-Za-z0-9]/g,'-')}">
+                 <span class="mob-part-no">${p}</span>
+                 <span class="mob-part-desc">${escHtml(pi.desc)}</span>
+                 ${pi.price ? `<span class="mob-part-price">$${pi.price.toFixed(2)}</span>` : ''}
+                 ${inCart
+                   ? `<span class="mob-add-btn added"><i class="ti ti-check" style="font-size:9px;"></i></span>`
+                   : `<button class="mob-add-btn" onclick="diagMobAddToCart('${p}')">+ Cart</button>`}
+               </div>`;
+             }).join('')}</div>` : '';
+        const sevColors = {critical:'#B91C1C',high:'#C2410C',medium:'#B45309',low:'#185FA5'};
+        const sevColor = sevColors[resp.severity] || sevColors.low;
+        return `<div class="mob-msg-ai">
+          <div class="mob-ai-av"><i class="ti ti-sparkles"></i></div>
+          <div class="mob-ai-card">
+            <div class="mob-card-head">
+              <div class="mob-card-tag">SmartEquip AI</div>
+              <div class="mob-card-title">${escHtml(resp.title || '')}</div>
+            </div>
+            <div class="mob-card-body">
+              ${fcHtml}
+              <p style="margin:0;font-size:11.5px;color:#3A3D4A;line-height:1.6;">${renderMd(resp.body)}</p>
+              ${stepsHtml}
+              ${partsHtml}
+            </div>
+          </div>
+        </div>`;
+      }
+      return '';
+    }).join('');
+    area.scrollTop = area.scrollHeight;
+  }
+
+  function renderMobileCtxBar() {
+    const bar = document.getElementById('mob-ctx-bar');
+    if (!bar) return;
+    const color = ctxColor(_ctx);
+    const icon  = ctxIcon(_ctx);
+    const label = ctxLabel(_ctx);
+    bar.innerHTML = `
+      <i class="ti ${icon}" style="font-size:12px;color:${color};flex-shrink:0;"></i>
+      <span class="mob-ctx-label" style="color:${color};">${label}</span>
+      <button class="mob-ctx-switch" onclick="diagSwitchContext()">Switch</button>`;
+  }
+
+  function renderMobileCart() {
+    const sheet  = document.getElementById('mob-cart-sheet');
+    const items  = document.getElementById('mob-cart-items');
+    const footer = document.getElementById('mob-cart-footer');
+    const badge  = document.getElementById('mob-cart-badge');
+    const btn    = document.getElementById('mob-cart-btn');
+    if (!sheet) return;
+    // badge
+    if (badge) {
+      badge.textContent = _diagCart.length || '';
+      badge.style.display = _diagCart.length ? 'block' : 'none';
+    }
+    if (btn) btn.style.display = _diagCart.length ? 'flex' : 'none';
+    // sheet
+    if (!_mobCartOpen || !_diagCart.length) {
+      sheet.classList.remove('open');
+      return;
+    }
+    sheet.classList.add('open');
+    items.innerHTML = _diagCart.map((item,i)=>`
+      <div class="mob-cart-item">
+        <div class="mob-cart-item-info">
+          <div class="mob-cart-item-no">${item.partNo}</div>
+          <div class="mob-cart-item-desc">${escHtml(item.desc)}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <div style="display:flex;align-items:center;gap:2px;">
+            <button onclick="diagCartQty(${i},-1);renderMobileCart();" style="width:20px;height:20px;background:#F0EDE9;border:none;border-radius:4px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;">−</button>
+            <span style="font-size:11px;font-weight:600;color:#111318;width:18px;text-align:center;">${item.qty}</span>
+            <button onclick="diagCartQty(${i},1);renderMobileCart();" style="width:20px;height:20px;background:#F0EDE9;border:none;border-radius:4px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;">+</button>
+          </div>
+          ${item.price ? `<span style="font-size:11px;font-weight:600;color:#111318;width:44px;text-align:right;">$${(item.price*item.qty).toFixed(2)}</span>` : ''}
+        </div>
+      </div>`).join('');
+    footer.innerHTML = `
+      <div class="mob-cart-total">Total estimate: <strong>$${cartTotal().toFixed(2)}</strong></div>
+      <button class="mob-cart-cta" onclick="diagCreateWO()">
+        <i class="ti ti-plus" style="font-size:13px;"></i> Create work order
+      </button>`;
+  }
+
+  // Override diagAddToCart to also refresh mobile
+  const _origAddToCart = window.diagAddToCart;
+  window.diagAddToCart = function(partNo) {
+    _origAddToCart(partNo);
+    renderMobileMessages();
+    renderMobileCart();
+  };
+  const _origCartRemove = window.diagCartRemove;
+  window.diagCartRemove = function(idx) {
+    _origCartRemove(idx);
+    renderMobileMessages();
+    renderMobileCart();
+  };
+
+  window.diagMobAddToCart = function(partNo) {
+    window.diagAddToCart(partNo);
+  };
+
+  window.diagMobToggleCart = function() {
+    _mobCartOpen = !_mobCartOpen;
+    renderMobileCart();
+  };
+
+  window.diagMobSetInput = function(text) {
+    const inp = document.getElementById('mob-chat-input');
+    if (inp) { inp.value = text; inp.focus(); }
+  };
+
+  window.diagMobSend = function() {
+    const inp = document.getElementById('mob-chat-input');
+    if (!inp) return;
+    const text = inp.value.trim();
+    if (!text) return;
+    Store.addDiagnosticMessage({ role: 'user', text, ctx: Object.assign({}, _ctx) });
+    inp.value = '';
+    renderMessages();
+    renderSessions();
+    renderMobileMessages();
+    renderMobileCtxBar();
+    setTimeout(function() {
+      const resp = diagGenerateResponse(text, _ctx);
+      Store.addDiagnosticMessage({ role: 'ai', resp });
+      renderMessages();
+      renderMobileMessages();
+    }, 500);
+  };
+
+  window.diagToggleMobile = function() {
+    const ov = document.getElementById('diag-mobile-overlay');
+    if (!ov) return;
+    const isOpen = ov.classList.toggle('open');
+    if (isOpen) {
+      renderMobileMessages();
+      renderMobileCtxBar();
+      renderMobileCart();
+    }
+  };
+
+  // Keep desktop ctx changes reflected in mobile bar
+  const _origSetCtx = window.diagSetCtx;
+  window.diagSetCtx = function(type, woId, partsQuery) {
+    _origSetCtx(type, woId, partsQuery);
+    renderMobileCtxBar();
+  };
+  const _origClearCtx = window.diagClearContext;
+  window.diagClearContext = function() {
+    _origClearCtx();
+    renderMobileCtxBar();
+  };
 }
