@@ -279,7 +279,7 @@ function anRenderContent() {
 
   // ── Mechanic spend (synthetic by mechanic) ─────────────────────────────
   const MECHANICS = [
-    { name: 'James W.',   avatar:'JW', color:'#1C3969', textColor:'#0A1628' },
+    { name: 'James W.',   avatar:'JW', color:'#1C3969', textColor:'#FFFFFF' },
     { name: 'Marcus T.',  avatar:'MT', color:'#185FA5', textColor:'#FFFFFF' },
     { name: 'Lena R.',    avatar:'LR', color:'#3B6D11', textColor:'#FFFFFF' },
     { name: 'Darius K.',  avatar:'DK', color:'#534AB7', textColor:'#FFFFFF' },

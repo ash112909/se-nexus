@@ -52,7 +52,7 @@ function render_supplier_portal(el) {
 .sp-fleet-actions { display: flex; gap: 8px; }
 .sp-btn { height: 32px; padding: 0 12px; border-radius: 7px; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; border: none; transition: opacity 0.1s; }
 .sp-btn:hover { opacity: 0.85; }
-.sp-btn-primary { background: #1C3969; color: #0A1628; }
+.sp-btn-primary { background: #1C3969; color: #FFFFFF; }
 .sp-btn-ghost { background: #FFFFFF; color: #3A3D4A; border: 1px solid #E2DDD8 !important; }
 .sp-table { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; overflow: hidden; }
 .sp-table-head { display: grid; grid-template-columns: 120px 1fr 100px 120px 90px 90px; padding: 0 18px; background: #FAFAF9; border-bottom: 1px solid #F0ECE8; }

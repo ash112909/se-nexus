@@ -171,7 +171,7 @@ function render_order_history(el) {
 .oh-select { height: 34px; background: #FFFFFF; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #3A3D4A; outline: none; cursor: pointer; }
 .oh-btn-ghost { height: 34px; background: #FFFFFF; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 12px; font-size: 12px; font-weight: 500; font-family: inherit; color: #3A3D4A; cursor: pointer; display: flex; align-items: center; gap: 5px; }
 .oh-btn-ghost:hover { background: #F5F2EE; }
-.oh-btn-primary { height: 34px; background: #1C3969; border: none; border-radius: 7px; padding: 0 14px; font-size: 12px; font-weight: 600; font-family: inherit; color: #0A1628; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+.oh-btn-primary { height: 34px; background: #1C3969; border: none; border-radius: 7px; padding: 0 14px; font-size: 12px; font-weight: 600; font-family: inherit; color: #FFFFFF; cursor: pointer; display: flex; align-items: center; gap: 5px; }
 .oh-btn-primary:hover { background: #152B52; }
 .oh-btn-ghost-ml { margin-left: auto; }
 .oh-table-wrap { flex: 1; overflow-y: auto; min-height: 0; }

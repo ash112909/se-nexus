@@ -305,7 +305,7 @@ function render_wo_detail(el) {
 .pill-high { background: #FCEBEB; color: #A32D2D; }
 .pill-med { background: #D6E4F7; color: #1C3969; }
 .pill-low { background: #EAF3DE; color: #3B6D11; }
-.btn-primary { background: #1C3969; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; color: #0A1628; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: #1C3969; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; color: #FFFFFF; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
 .btn-primary:hover { background: #152B52; }
 .btn-ghost { background: none; border: 0.5px solid #E2DDD8; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 500; color: #3A3D4A; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
 .btn-ghost:hover { background: #F5F2EE; }
@@ -331,7 +331,7 @@ function render_wo_detail(el) {
 .cart-group-hdr { font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: #9CA3AF; padding: 7px 12px; background: #FAFAF8; border-top: 1px solid #E8E4DF; display: flex; align-items: center; gap: 7px; }
 .cart-group-hdr:first-child { border-top: none; }
 .cart-section-title { font-size: 14px; font-weight: 600; color: #111318; display: flex; align-items: center; gap: 8px; }
-.cart-badge { background: #1C3969; color: #0A1628; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 8px; }
+.cart-badge { background: #1C3969; color: #FFFFFF; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 8px; }
 .add-parts-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #1C3969; background: #D6E4F7; border: none; border-radius: 7px; padding: 6px 12px; cursor: pointer; font-family: inherit; }
 .add-parts-btn:hover { background: #F5DEB5; }
 /* Cart table */
@@ -401,7 +401,7 @@ function render_wo_detail(el) {
 .note-input-row { display: flex; gap: 8px; margin-top: 14px; }
 .note-input { flex: 1; height: 36px; background: #F5F2EE; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 12px; font-size: 13px; font-family: inherit; color: #111318; outline: none; }
 .note-input:focus { border-color: #1C3969; background: #FFFFFF; }
-.note-add-btn { background: #1C3969; border: none; border-radius: 7px; padding: 0 14px; font-size: 12px; font-weight: 600; color: #0A1628; cursor: pointer; font-family: inherit; white-space: nowrap; }
+.note-add-btn { background: #1C3969; border: none; border-radius: 7px; padding: 0 14px; font-size: 12px; font-weight: 600; color: #FFFFFF; cursor: pointer; font-family: inherit; white-space: nowrap; }
 .tl-item { display: flex; gap: 12px; margin-bottom: 12px; }
 .tl-item:last-child { margin-bottom: 0; }
 .tl-dot-wrap { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }

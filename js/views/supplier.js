@@ -22,7 +22,7 @@ const SUPPLIER_DATA = {
   },
   caterpillar: {
     name:'Caterpillar', category:'OEM · Heavy Equipment',
-    icon:'ti-backhoe', color:'#0A1628', bg:'#1C3969', accent:'#152B52',
+    icon:'ti-backhoe', color:'#FFFFFF', bg:'#1C3969', accent:'#152B52',
     tagline:'Cat 320 excavators, undercarriage and track systems',
     description:'OEM parts for Cat heavy equipment. Orders processed through regional Cat dealer network with 2–3 day lead times on most components.',
     specialty:['Excavators','Track Systems','Undercarriage'],

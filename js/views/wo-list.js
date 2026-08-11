@@ -159,7 +159,7 @@ function render_wo_list(el) {
 .wol-filter-pill:hover:not(.active) { border-color: #C8C3BC; }
 .wol-search { height: 34px; background: #FFFFFF; border: 1px solid #E2DDD8; border-radius: 8px; padding: 0 12px; font-size: 13px; font-family: inherit; color: #111318; outline: none; width: 200px; }
 .wol-search:focus { border-color: #1C3969; }
-.wol-new-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: #1C3969; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: #0A1628; cursor: pointer; font-family: inherit; }
+.wol-new-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: #1C3969; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: #FFFFFF; cursor: pointer; font-family: inherit; }
 .wol-new-btn:hover { background: #152B52; }
 .wol-table { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; overflow: hidden; }
 .wol-thead { display: grid; gap: 0; border-bottom: 1px solid #F0ECE8; padding: 0 18px; background: #FAFAF9; }

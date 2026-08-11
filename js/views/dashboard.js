@@ -76,7 +76,7 @@ function render_dashboard(el) {
 .section-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #9CA3AF; margin-bottom: 10px; }
 .ai-strip { background: #152B52; border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 20px; cursor: pointer; }
 .ai-strip:hover { background: #0E1F3D; }
-.ai-icon { width: 36px; height: 36px; background: #1C3969; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; color: #0A1628; }
+.ai-icon { width: 36px; height: 36px; background: #1C3969; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; color: #FFFFFF; }
 .ai-text { flex: 1; }
 .ai-label { font-size: 13px; font-weight: 600; color: #FFFFFF; margin-bottom: 2px; }
 .ai-hint { font-size: 12px; color: #5C6070; }
@@ -107,7 +107,7 @@ function render_dashboard(el) {
 .wo-footer { display: flex; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 0.5px solid #F0ECE8; gap: 16px; flex-wrap: wrap; }
 .wo-stat { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #9CA3AF; }
 .wo-stat strong { color: #3A3D4A; font-weight: 600; }
-.wo-action-btn { margin-left: auto; background: #1C3969; border: none; border-radius: 7px; padding: 5px 13px; font-size: 12px; font-weight: 600; color: #0A1628; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: inherit; }
+.wo-action-btn { margin-left: auto; background: #1C3969; border: none; border-radius: 7px; padding: 5px 13px; font-size: 12px; font-weight: 600; color: #FFFFFF; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: inherit; }
 .wo-action-btn:hover { background: #152B52; }
 .wo-action-btn-ghost { margin-left: auto; background: none; border: 0.5px solid #E2DDD8; border-radius: 7px; padding: 5px 13px; font-size: 12px; font-weight: 500; color: #5A5F6E; cursor: pointer; display: flex; align-items: center; gap: 5px; font-family: inherit; }
 .wo-action-btn-ghost:hover { background: #F5F2EE; }
