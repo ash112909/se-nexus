@@ -181,6 +181,10 @@ function buildTopbarRight() {
     ? 'Fleet Administrator'
     : (loc ? loc.name : 'Austin Branch');
   return `<div class="topbar-right">
+    <button class="topbar-icon-btn" onclick="openFeedback()" title="Submit feedback" style="gap:5px;width:auto;padding:0 10px;font-size:12px;font-weight:600;color:#C8DDEF;">
+      <i class="ti ti-message-circle" style="font-size:15px;"></i>
+      <span style="font-size:12px;font-weight:600;">Feedback</span>
+    </button>
     <button class="topbar-icon-btn" id="up-btn-notif" onclick="UserPanel.openNotifications()" title="Notifications">
       <i class="ti ti-bell"></i>
       <span class="notif-dot" style="${unread > 0 ? '' : 'display:none;'}"></span>
@@ -196,3 +200,33 @@ function buildTopbarRight() {
     </button>
   </div>`;
 }
+
+window.openFeedback = function() {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+
+  const card = document.createElement('div');
+  card.style.cssText = 'background:#FFFFFF;border-radius:14px;width:100%;max-width:640px;height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.25);overflow:hidden;font-family:Inter,-apple-system,sans-serif;';
+
+  card.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:0.5px solid #F0ECE8;flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:28px;height:28px;background:#1C3969;border-radius:7px;display:flex;align-items:center;justify-content:center;">
+          <i class="ti ti-message-circle" style="font-size:14px;color:#FFFFFF;"></i>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#111318;">Share your feedback</div>
+          <div style="font-size:11px;color:#9CA3AF;">Help us improve SE Nexus</div>
+        </div>
+      </div>
+      <button onclick="this.closest('[style*=fixed]').remove()" style="width:28px;height:28px;background:#F5F2EE;border:none;border-radius:7px;cursor:pointer;font-size:14px;color:#5A5F6E;display:flex;align-items:center;justify-content:center;"><i class="ti ti-x"></i></button>
+    </div>
+    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSftO5RLlx9NLH_s5hwpYRh1mxTL8ryW3g8FrToAzVJ3amrICw/viewform?embedded=true"
+      style="flex:1;border:none;width:100%;" frameborder="0" marginheight="0" marginwidth="0">
+      Loading…
+    </iframe>`;
+
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+};
