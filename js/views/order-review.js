@@ -5,7 +5,7 @@ function render_order_review(el) {
   const wo = woId ? Store.getWorkOrder(woId) : null;
 
   if (!wo || !itemIds.length) {
-    el.innerHTML = `<div class="shell">${buildSidebar('wo')}<div class="main"><div style="padding:40px;color:#9CA3AF;font-size:14px;">No order data. <a style="color:#F5A623;cursor:pointer;" onclick="history.back()">Go back</a></div></div></div>`;
+    el.innerHTML = `<div class="shell">${buildSidebar('wo')}<div class="main"><div style="padding:40px;color:#9CA3AF;font-size:14px;">No order data. <a style="color:#1C3969;cursor:pointer;" onclick="history.back()">Go back</a></div></div></div>`;
     return;
   }
 
@@ -57,6 +57,28 @@ function render_order_review(el) {
 
   function subtotal() { return _items.reduce((s, c) => s + c.price * (c.qty || 1), 0); }
   function totalWeight() { return _items.reduce((s, c) => s + (c.weight || 0) * (c.qty || 1), 0); }
+
+  function renderSupplierMessages() {
+    if (!Store.getCmsArticles) return '';
+    const vendors = [...new Set(_items.map(c => c.vendor).filter(Boolean))];
+    const msgs = Store.getCmsArticles('published').filter(a => a.showOnOrders && a.vendorName && vendors.includes(a.vendorName));
+    if (!msgs.length) return '';
+    return `<div class="or-card">
+      <div class="or-card-header">
+        <div class="or-card-title"><i class="ti ti-speakerphone" style="font-size:15px;color:#534AB7;"></i> Messages from your supplier${msgs.length !== 1 ? 's' : ''}</div>
+      </div>
+      <div class="or-card-body" style="display:flex;flex-direction:column;gap:10px;">
+        ${msgs.map(a => `<div style="background:#F5F2EE;border-radius:9px;padding:12px 14px;border-left:3px solid #534AB7;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+            <span style="font-size:11px;font-weight:700;color:#534AB7;text-transform:uppercase;letter-spacing:.6px;">${a.vendorName}</span>
+            <span style="font-size:10px;color:#9CA3AF;">${a.date || ''}</span>
+          </div>
+          <div style="font-size:13px;font-weight:600;color:#111318;margin-bottom:3px;">${a.title}</div>
+          <div style="font-size:12px;color:#5A5F6E;line-height:1.55;">${a.body ? a.body.slice(0, 300) + (a.body.length > 300 ? '…' : '') : ''}</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }
 
   function renderItemsTable() {
     return `<table class="or-table">
@@ -123,7 +145,7 @@ function render_order_review(el) {
 
   function recBadgeColor(badge) {
     if (badge === 'Urgent') return 'background:#FCEBEB;color:#A32D2D;border:0.5px solid #F5C5C5;';
-    if (badge === 'Expedited') return 'background:#FAEEDA;color:#854F0B;border:0.5px solid #F5A623;';
+    if (badge === 'Expedited') return 'background:#D6E4F7;color:#1C3969;border:0.5px solid #1C3969;';
     return 'background:#EAF3DE;color:#3B6D11;border:0.5px solid #A8D888;';
   }
 
@@ -146,7 +168,7 @@ function render_order_review(el) {
 .or-src-line { font-size:10px; color:#3B6D11; margin-top:2px; display:flex; align-items:center; gap:3px; }
 .or-uom { font-size:10px; font-weight:700; background:#F0ECE8; color:#5A5F6E; border-radius:3px; padding:1px 5px; }
 .or-return-btn { background:none; border:none; color:#C8C3BC; cursor:pointer; padding:3px; border-radius:4px; }
-.or-return-btn:hover { background:#FAEEDA; color:#854F0B; }
+.or-return-btn:hover { background:#D6E4F7; color:#1C3969; }
 .or-items-footer { display:flex; align-items:center; padding:10px 16px; border-top:0.5px solid #F0ECE8; background:#FAFAF8; }
 .or-subtotal-row { display:flex; align-items:center; }
 /* Address */
@@ -157,14 +179,14 @@ function render_order_review(el) {
 .or-field-grow { flex:1; }
 .or-label { font-size:11px; color:#9CA3AF; display:block; margin-bottom:3px; }
 .or-input { width:100%; height:32px; border:1px solid #E2DDD8; border-radius:6px; padding:0 9px; font-size:12px; font-family:inherit; color:#111318; background:#FAFAF8; outline:none; }
-.or-input:focus { border-color:#F5A623; background:#FFFFFF; }
+.or-input:focus { border-color:#1C3969; background:#FFFFFF; }
 .or-input[readonly] { background:#F5F2EE; color:#7A7F8E; cursor:default; }
 .or-textarea { width:100%; border:1px solid #E2DDD8; border-radius:6px; padding:8px 9px; font-size:12px; font-family:inherit; color:#111318; background:#FAFAF8; outline:none; resize:vertical; min-height:68px; }
-.or-textarea:focus { border-color:#F5A623; background:#FFFFFF; }
+.or-textarea:focus { border-color:#1C3969; background:#FFFFFF; }
 /* Options grid */
 .or-opts-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 20px; }
 .or-select { width:100%; height:32px; border:1px solid #E2DDD8; border-radius:6px; padding:0 9px; font-size:12px; font-family:inherit; color:#111318; background:#FAFAF8; outline:none; cursor:pointer; }
-.or-select:focus { border-color:#F5A623; }
+.or-select:focus { border-color:#1C3969; }
 /* Shipping rec */
 .or-rec-banner { display:flex; align-items:center; gap:12px; padding:12px 14px; background:#EAF3DE; border:0.5px solid #A8D888; border-radius:9px; margin-bottom:14px; }
 .or-rec-icon { width:36px; height:36px; background:#3B6D11; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; color:#FFFFFF; flex-shrink:0; }
@@ -174,8 +196,8 @@ function render_order_review(el) {
 .or-ship-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 20px; }
 /* Action bar */
 .or-action-bar { display:flex; align-items:center; gap:8px; padding:14px 20px; background:#FFFFFF; border-top:0.5px solid #E8E4DF; position:sticky; bottom:0; z-index:10; }
-.or-btn-primary { background:#F5A623; border:none; border-radius:8px; padding:9px 20px; font-size:13px; font-weight:600; color:#1A1200; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; }
-.or-btn-primary:hover { background:#E8980F; }
+.or-btn-primary { background:#1C3969; border:none; border-radius:8px; padding:9px 20px; font-size:13px; font-weight:600; color:#FFFFFF; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; }
+.or-btn-primary:hover { background:#152B52; }
 .or-btn-ghost { background:none; border:0.5px solid #E2DDD8; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:500; color:#3A3D4A; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; }
 .or-btn-ghost:hover { background:#F5F2EE; }
 .or-btn-danger { background:none; border:0.5px solid #F5C5C5; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:500; color:#A32D2D; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; }
@@ -190,7 +212,7 @@ function render_order_review(el) {
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
         <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('dashboard')">Dashboard</a>
         <span style="color:#3C4052;">/</span>
-        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('Work orders')">Work orders</a>
+        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('Open orders list')">Orders</a>
         <span style="color:#3C4052;">/</span>
         <a style="color:#5C6070;cursor:pointer;" onclick="Router.navigate('wo-detail',{woId:${wo.id}})">WO #${wo.id}</a>
         <span style="color:#3C4052;">/</span>
@@ -208,13 +230,15 @@ function render_order_review(el) {
         <!-- Line items -->
         <div class="or-card">
           <div class="or-card-header">
-            <div class="or-card-title"><i class="ti ti-list" style="font-size:15px;color:#F5A623;"></i> Order items</div>
+            <div class="or-card-title"><i class="ti ti-list" style="font-size:15px;color:#1C3969;"></i> Order items</div>
             <button class="or-btn-ghost" style="font-size:11px;padding:5px 10px;" onclick="orReturnAll()"><i class="ti ti-arrow-back-up" style="font-size:12px;"></i> Return all to cart</button>
           </div>
           <div id="or-items-wrap">
             ${renderItemsTable()}
           </div>
         </div>
+
+        ${renderSupplierMessages()}
 
         <!-- Ship To / Bill To -->
         <div class="or-card">

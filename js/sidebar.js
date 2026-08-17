@@ -1,41 +1,158 @@
-function buildSidebar(activeItem) {
-  const loc = (typeof Store !== 'undefined' && Store.getCurrentLocation) ? Store.getCurrentLocation() : null;
-  const locName = loc ? loc.name : 'Mid-County Rental';
-  const user = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
+function buildSidebar(activeItem, opts) {
+  opts = opts || {};
+  const loc  = (typeof Store !== 'undefined' && Store.getCurrentLocation) ? Store.getCurrentLocation() : null;
+  const user = (typeof Store !== 'undefined' && Store.getCurrentUser)     ? Store.getCurrentUser()     : null;
   const role = user ? user.role : 'mechanic';
+  const pinned = (typeof localStorage !== 'undefined' && localStorage.getItem('sb-pinned') === '1');
+  const wrapCls = pinned ? ' sb-pinned' : '';
+  const pinCls  = pinned ? ' sb-pinned' : '';
+  const pinIcon = pinned ? 'ti-pin-filled' : 'ti-pin';
+  const pinLabel = pinned ? 'Pinned' : 'Pin sidebar';
+
+  // ── Impersonation-locked sidebar ──────────────────────────────────────────
+  if (opts.impersonating) {
+    const fleetName = opts.impersonatingFleet || 'Fleet';
+    return `
+  <div class="sb-wrap${wrapCls}">
+  <div class="sidebar${pinCls}">
+    <div class="sb-logo-area">
+      <img src="smartequiplogo.png" class="sb-logo-img"/>
+      <div class="sb-logo-sub">${fleetName} · Impersonation view</div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-section-label">Viewing as fleet</div>
+      <div class="sb-item active"><i class="ti ti-search"></i><span class="sb-lbl"> Search parts</span></div>
+    </div>
+    <div style="margin-top:auto;">
+      <div class="sb-item" onclick="Router.navigate('supplier-portal')" style="color:#1C3969;border-top:1px solid #0E1F3D;">
+        <i class="ti ti-arrow-left"></i><span class="sb-lbl"> Exit impersonation</span>
+      </div>
+      <div class="sb-pin-row" id="sb-pin-btn"><i class="ti ${pinIcon}"></i><span class="sb-pin-label">${pinLabel}</span></div>
+    </div>
+  </div>
+  </div>`;
+  }
+
+  // ── Supplier sidebar ──────────────────────────────────────────────────────
+  if (role === 'supplier') {
+    const supplierId   = (user.supplierIds || [])[0] || 'SKJ';
+    const NAMES        = { SKJ:'Skyjack', CAT:'Caterpillar', TOY:'Toyota', BOB:'Bobcat' };
+    const supplierName = NAMES[supplierId] || supplierId;
+    const pending      = (typeof Store !== 'undefined' && Store.getPriceRequests)
+                         ? Store.getPriceRequests(supplierId).filter(r => r.status === 'pending').length : 0;
+    return `
+  <div class="sb-wrap${wrapCls}">
+  <div class="sidebar${pinCls}">
+    <div class="sb-logo-area">
+      <img src="smartequiplogo.png" class="sb-logo-img"/>
+      <div class="sb-logo-sub">${supplierName} · Supplier Portal</div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-section-label">Portal</div>
+      <div class="sb-item ${activeItem==='sp-home'?'active':''}"     data-sp-tab="home"><i class="ti ti-home"></i><span class="sb-lbl"> Home</span></div>
+      <div class="sb-item ${activeItem==='sp-fleets'?'active':''}"   data-sp-tab="fleets"><i class="ti ti-building-warehouse"></i><span class="sb-lbl"> My Fleets</span></div>
+      <div class="sb-item ${activeItem==='sp-requests'?'active':''}" data-sp-tab="requests"><i class="ti ti-tag"></i><span class="sb-lbl"> Price Requests ${pending > 0 ? `<span class="sb-badge">${pending}</span>` : ''}</span></div>
+      <div class="sb-item ${activeItem==='sp-content'?'active':''}"  data-sp-tab="content"><i class="ti ti-pencil"></i><span class="sb-lbl"> Content</span></div>
+      <div class="sb-section-label">Knowledge</div>
+      <div class="sb-item ${activeItem==='sp-manuals'?'active':''}"  data-sp-tab="manuals"><i class="ti ti-book"></i><span class="sb-lbl"> Manuals &amp; Docs</span></div>
+      <div class="sb-item ${activeItem==='sp-news'?'active':''}"     data-sp-tab="news"><i class="ti ti-news"></i><span class="sb-lbl"> News &amp; Updates</span></div>
+      <div class="sb-section-label">Supplier Tools</div>
+      <div class="sb-item ${activeItem==='sp-doc-upload'?'active':''}"  data-sp-tab="doc-upload"><i class="ti ti-cloud-upload"></i><span class="sb-lbl"> Doc Ingestion</span></div>
+      <div class="sb-item ${activeItem==='sp-pricing'?'active':''}"     data-sp-tab="pricing"><i class="ti ti-list-numbers"></i><span class="sb-lbl"> Pricing Catalog</span></div>
+      <div class="sb-item ${activeItem==='sp-extractor'?'active':''}"   data-sp-tab="extractor"><i class="ti ti-cpu"></i><span class="sb-lbl"> Parts Extractor</span></div>
+      <div class="sb-section-label">Reports</div>
+      <div class="sb-item ${activeItem==='sp-analytics'?'active':''}" data-sp-tab="analytics"><i class="ti ti-chart-bar"></i><span class="sb-lbl"> Analytics</span></div>
+    </div>
+    <div class="sb-pin-row" id="sb-pin-btn"><i class="ti ${pinIcon}"></i><span class="sb-pin-label">${pinLabel}</span></div>
+  </div>
+  </div>`;
+  }
+
+  // ── Fleet Admin sidebar ───────────────────────────────────────────────────
+  if (role === 'fleet_admin') {
+    return `
+  <div class="sb-wrap${wrapCls}">
+  <div class="sidebar${pinCls}">
+    <div class="sb-logo-area">
+      <img src="smartequiplogo.png" class="sb-logo-img"/>
+      <div class="sb-logo-sub">Mid-County Rental · Admin</div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-section-label">Administration</div>
+      <div class="sb-item ${activeItem==='fa-home'?'active':''}"    data-fa-tab="home"><i class="ti ti-home"></i><span class="sb-lbl"> Home</span></div>
+      <div class="sb-item ${activeItem==='fa-users'?'active':''}"   data-fa-tab="users"><i class="ti ti-users"></i><span class="sb-lbl"> Users</span></div>
+      <div class="sb-item ${activeItem==='fa-features'?'active':''}" data-fa-tab="features"><i class="ti ti-toggle-right"></i><span class="sb-lbl"> Features</span></div>
+      <div class="sb-section-label">Fleet</div>
+      <div class="sb-item ${activeItem==='fa-locations'?'active':''}" data-fa-tab="locations"><i class="ti ti-map-pin"></i><span class="sb-lbl"> Locations</span></div>
+      <div class="sb-item ${activeItem==='fa-activity'?'active':''}"  data-fa-tab="activity"><i class="ti ti-activity"></i><span class="sb-lbl"> Activity Log</span></div>
+    </div>
+    <div class="sb-pin-row" id="sb-pin-btn"><i class="ti ${pinIcon}"></i><span class="sb-pin-label">${pinLabel}</span></div>
+  </div>
+  </div>`;
+  }
+
+  // ── Fleet sidebar (mechanic / supervisor) ─────────────────────────────────
   const isSupervisor = role === 'supervisor';
+  const locName      = loc ? loc.name : 'Mid-County Rental';
+
+  // Resolve effective feature access for this user
+  const _feat = (user && typeof Store !== 'undefined' && Store.getEffectiveFeatures)
+    ? Store.getEffectiveFeatures(user.id)
+    : {};
+  const _can = (id) => {
+    // If feature is explicitly in the map, respect it; otherwise fall back to role defaults
+    if (id in _feat) return _feat[id];
+    if (id === 'analytics' || id === 'cms' || id === 'approvals') return isSupervisor;
+    return true; // all other features on by default
+  };
+
   return `
-  <div class="sidebar">
-    <div class="sb-fleet">
-      <div class="sb-fleet-icon">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 13L9 5L15 13" stroke="#1A1200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="14" r="1.8" fill="#1A1200"/></svg>
-      </div>
-      <div>
-        <div class="sb-fleet-name">Mid-County Rental</div>
-        <div class="sb-fleet-sub">${locName}</div>
-      </div>
+  <div class="sb-wrap${wrapCls}">
+  <div class="sidebar${pinCls}">
+    <div class="sb-logo-area">
+      <img src="smartequiplogo.png" class="sb-logo-img"/>
+      <div class="sb-logo-sub">Mid-County Rental · ${locName}</div>
     </div>
     <div class="sb-nav">
       <div class="sb-section-label">${isSupervisor ? 'Operations' : 'My work'}</div>
-      <div class="sb-item ${activeItem==='home'?'active':''}" onclick="Router.navigate('home')"><i class="ti ti-home"></i> Home</div>
-      <div class="sb-item ${activeItem==='dashboard'?'active':''}" onclick="sendPrompt('Go back to dashboard')"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
-      <div class="sb-item ${activeItem==='wo'?'active':''}" onclick="sendPrompt('Open work orders list')"><i class="ti ti-clipboard-list"></i> Orders <span class="sb-badge">2</span></div>
-      <div class="sb-item ${activeItem==='order-history'?'active':''}" onclick="sendPrompt('Open order history')"><i class="ti ti-history"></i> Order history</div>
-      ${isSupervisor ? `
-      <div class="sb-item ${activeItem==='approvals'?'active':''}" onclick="sendPrompt('Open approvals')"><i class="ti ti-circle-check"></i> Approvals</div>
-      <div class="sb-item ${activeItem==='analytics'?'active':''}" onclick="sendPrompt('Open analytics')"><i class="ti ti-chart-bar"></i> Analytics</div>
-      <div class="sb-item ${activeItem==='cms'?'active':''}" onclick="Router.navigate('cms')"><i class="ti ti-pencil"></i> Content mgmt</div>
-      ` : ''}
+      <div class="sb-item ${activeItem==='home'?'active':''}" onclick="Router.navigate('home')"><i class="ti ti-home"></i><span class="sb-lbl"> Home</span></div>
+      <div class="sb-item ${activeItem==='dashboard'?'active':''}" onclick="sendPrompt('Go back to dashboard')"><i class="ti ti-layout-dashboard"></i><span class="sb-lbl"> Dashboard</span></div>
+      <div class="sb-item ${activeItem==='wo'?'active':''}" onclick="sendPrompt('Open orders list')"><i class="ti ti-clipboard-list"></i><span class="sb-lbl"> Orders <span class="sb-badge">2</span></span></div>
+      ${_can('order_history') ? `<div class="sb-item ${activeItem==='order-history'?'active':''}" onclick="sendPrompt('Open order history')"><i class="ti ti-history"></i><span class="sb-lbl"> Order history</span></div>` : ''}
+      ${_can('approvals') ? `<div class="sb-item ${activeItem==='approvals'?'active':''}" onclick="sendPrompt('Open approvals')"><i class="ti ti-circle-check"></i><span class="sb-lbl"> Approvals</span></div>` : ''}
+      ${_can('analytics') ? `<div class="sb-item ${activeItem==='analytics'?'active':''}" onclick="sendPrompt('Open analytics')"><i class="ti ti-chart-bar"></i><span class="sb-lbl"> Analytics</span></div>` : ''}
+      ${_can('cms') ? `<div class="sb-item ${activeItem==='cms'?'active':''}" onclick="Router.navigate('cms')"><i class="ti ti-pencil"></i><span class="sb-lbl"> Content mgmt</span></div>` : ''}
       <div class="sb-section-label">Parts</div>
-      <div class="sb-item ${activeItem==='parts'?'active':''}" onclick="sendPrompt('Open Parts Search scoped to WO #100094, Skyjack SJIII 3219 — diagram view, hydraulic lift cylinder')"><i class="ti ti-search"></i> Search parts</div>
-      <div class="sb-item ${activeItem==='recommended'?'active':''}" onclick="sendPrompt('Open recommended parts')"><i class="ti ti-star"></i> Recommended</div>
+      <div class="sb-item ${activeItem==='parts'?'active':''}" onclick="sendPrompt('Open Parts Search scoped to WO #100094, Skyjack SJIII 3219 — diagram view, hydraulic lift cylinder')"><i class="ti ti-search"></i><span class="sb-lbl"> Search parts</span></div>
+      ${_can('recommended') ? `<div class="sb-item ${activeItem==='recommended'?'active':''}" onclick="sendPrompt('Open recommended parts')"><i class="ti ti-star"></i><span class="sb-lbl"> Recommended</span></div>` : ''}
       <div class="sb-section-label">Knowledge</div>
-      <div class="sb-item ${activeItem==='manuals'?'active':''}" onclick="sendPrompt('Open manuals and docs')"><i class="ti ti-book"></i> Manuals &amp; docs</div>
-      <div class="sb-item ${activeItem==='diagnostics'?'active':''}" onclick="sendPrompt('Open diagnostic assistant')"><i class="ti ti-tool"></i> Diagnostics</div>
-      <div class="sb-item ${activeItem==='news'?'active':''}" onclick="sendPrompt('Open news and updates')"><i class="ti ti-news"></i> News &amp; updates</div>
+      ${_can('manuals') ? `<div class="sb-item ${activeItem==='manuals'?'active':''}" onclick="sendPrompt('Open manuals and docs')"><i class="ti ti-book"></i><span class="sb-lbl"> Manuals &amp; docs</span></div>` : ''}
+      ${_can('diagnostics') ? `<div class="sb-item ${activeItem==='diagnostics'?'active':''}" onclick="sendPrompt('Open diagnostic assistant')"><i class="ti ti-tool"></i><span class="sb-lbl"> Diagnostics</span></div>` : ''}
+      ${_can('news') ? `<div class="sb-item ${activeItem==='news'?'active':''}" onclick="sendPrompt('Open news and updates')"><i class="ti ti-news"></i><span class="sb-lbl"> News &amp; updates</span></div>` : ''}
     </div>
+    <div class="sb-pin-row" id="sb-pin-btn"><i class="ti ${pinIcon}"></i><span class="sb-pin-label">${pinLabel}</span></div>
+  </div>
   </div>`;
 }
+
+// ── Restore pin state on load ─────────────────────────────────────────────
+if (localStorage.getItem('sb-pinned') === '1') {
+  document.body.setAttribute('data-sb-pinned', '1');
+}
+
+// ── Pin toggle — event delegation, runs once ──────────────────────────────
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('#sb-pin-btn');
+  if (!btn) return;
+  const nowPinned = !document.body.hasAttribute('data-sb-pinned');
+  if (nowPinned) document.body.setAttribute('data-sb-pinned', '1');
+  else document.body.removeAttribute('data-sb-pinned');
+  localStorage.setItem('sb-pinned', nowPinned ? '1' : '');
+  const icon = btn.querySelector('i');
+  if (icon) icon.className = 'ti ' + (nowPinned ? 'ti-pin-filled' : 'ti-pin');
+  const lbl = btn.querySelector('.sb-pin-label');
+  if (lbl) lbl.textContent = nowPinned ? 'Pinned' : 'Pin sidebar';
+});
 
 function buildBanners() {
   if (typeof Store === 'undefined' || !Store.getActiveBanners) return '';
@@ -52,12 +169,17 @@ function buildBanners() {
 }
 
 function buildTopbarRight() {
-  const loc = (typeof Store !== 'undefined' && Store.getCurrentLocation) ? Store.getCurrentLocation() : null;
-  const locName = loc ? loc.name : 'Austin Branch';
-  const unread = (typeof Store !== 'undefined' && Store.getUnreadCount) ? Store.getUnreadCount() : 0;
-  const user = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
-  const avatar = user ? user.avatar : 'JW';
+  const loc      = (typeof Store !== 'undefined' && Store.getCurrentLocation) ? Store.getCurrentLocation() : null;
+  const user     = (typeof Store !== 'undefined' && Store.getCurrentUser)     ? Store.getCurrentUser()     : null;
+  const role     = user ? user.role : 'mechanic';
+  const unread   = (typeof Store !== 'undefined' && Store.getUnreadCount) ? Store.getUnreadCount() : 0;
+  const avatar   = user ? user.avatar   : 'JW';
   const shortName = user ? user.shortName : 'James W.';
+  const subLine  = role === 'supplier'
+    ? (user.email || 'Supplier')
+    : role === 'fleet_admin'
+    ? 'Fleet Administrator'
+    : (loc ? loc.name : 'Austin Branch');
   return `<div class="topbar-right">
     <button class="topbar-icon-btn" id="up-btn-notif" onclick="UserPanel.openNotifications()" title="Notifications">
       <i class="ti ti-bell"></i>
@@ -68,7 +190,7 @@ function buildTopbarRight() {
       <div class="tp-avatar">${avatar}</div>
       <div class="tp-info">
         <div class="tp-name">${shortName}</div>
-        <div class="tp-loc">${locName}</div>
+        <div class="tp-loc">${subLine}</div>
       </div>
       <i class="ti ti-selector" style="font-size:12px;color:#5C6070;flex-shrink:0;"></i>
     </button>

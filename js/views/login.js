@@ -59,15 +59,9 @@ function render_login(el) {
     <div class="login-glow"></div>
     <div class="fleet-logo-area">
       <div class="fleet-logo-lockup">
-        <div class="fleet-logo-icon">
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <path d="M6 20 L14 8 L22 20" stroke="#1A1200" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="14" cy="21" r="2.5" fill="#1A1200"/>
-          </svg>
-        </div>
+        <img src="smartequiplogo.png" style="height:44px;width:auto;object-fit:contain;display:block;"/>
         <div class="fleet-name">
-          <div class="fleet-name-primary">Mid-County Rental</div>
-          <div class="fleet-name-secondary">&amp; Sales</div>
+          <div class="fleet-name-secondary" style="margin-top:4px;">Mid-County Rental</div>
         </div>
       </div>
     </div>
@@ -190,6 +184,12 @@ function render_login(el) {
     // Suppliers go to their own portal
     if (user.role === 'supplier') {
       Router.navigate('supplier-portal');
+      return;
+    }
+
+    // Fleet admins go to the admin portal
+    if (user.role === 'fleet_admin') {
+      Router.navigate('fleet-admin');
       return;
     }
 

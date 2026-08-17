@@ -6,14 +6,15 @@ const Modal = (() => {
     _el = null;
   }
 
-  function show({ title, body, actions, wide } = {}) {
+  function show({ title, body, actions, wide, fullscreen } = {}) {
     close();
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;';
     overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
 
     const card = document.createElement('div');
-    card.style.cssText = `background:#FFFFFF;border-radius:14px;width:100%;max-width:${wide?680:480}px;box-shadow:0 20px 60px rgba(0,0,0,0.2);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;overflow:hidden;`;
+    const maxW = fullscreen ? 'calc(100vw - 40px)' : wide ? '860px' : '480px';
+    card.style.cssText = `background:#FFFFFF;border-radius:14px;width:100%;max-width:${maxW};${fullscreen?'height:calc(100vh - 40px);display:flex;flex-direction:column;':''}box-shadow:0 20px 60px rgba(0,0,0,0.2);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;overflow:hidden;`;
 
     const header = document.createElement('div');
     header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:0.5px solid #F0ECE8;';
@@ -30,7 +31,9 @@ const Modal = (() => {
 
     if (body) {
       const bodyEl = document.createElement('div');
-      bodyEl.style.cssText = 'padding:18px 20px;max-height:70vh;overflow-y:auto;';
+      bodyEl.style.cssText = fullscreen
+        ? 'flex:1;overflow:hidden;display:flex;flex-direction:column;'
+        : 'padding:18px 20px;max-height:70vh;overflow-y:auto;';
       if (typeof body === 'string') bodyEl.innerHTML = body;
       else bodyEl.appendChild(body);
       card.appendChild(bodyEl);
@@ -43,7 +46,7 @@ const Modal = (() => {
         const btn = document.createElement('button');
         btn.textContent = a.label;
         btn.style.cssText = a.primary
-          ? 'background:#F5A623;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;color:#1A1200;cursor:pointer;font-family:inherit;'
+          ? 'background:#1C3969;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;'
           : 'background:#FFFFFF;border:0.5px solid #E2DDD8;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:500;color:#3A3D4A;cursor:pointer;font-family:inherit;';
         btn.onclick = () => { if (a.onClick) a.onClick(); };
         footer.appendChild(btn);

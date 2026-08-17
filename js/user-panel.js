@@ -127,7 +127,31 @@ const UserPanel = (() => {
     const user = Store.getCurrentUser();
     const avatar = user ? user.avatar : 'JW';
     const name = user ? user.displayName : 'James Whitfield';
-    const roleLabel = user && user.role === 'supervisor' ? 'Fleet Supervisor' : 'Fleet Mechanic';
+    const roleLabel = user && user.role === 'supplier' ? 'Supplier Representative'
+                    : user && user.role === 'supervisor' ? 'Fleet Supervisor' : 'Fleet Mechanic';
+
+    const isSupplier = user && user.role === 'supplier';
+    const locationSection = isSupplier ? '' : `
+      <div class="up-panel-section-label">Branch / Location</div>
+      ${user && user.role === 'supervisor' ? `
+        <div class="up-loc-row ${!loc ? 'active' : ''}" onclick="UserPanel._switchLocation(null)">
+          <div class="up-loc-icon"><i class="ti ti-stack-2"></i></div>
+          <div class="up-loc-body">
+            <div class="up-loc-name">All locations</div>
+            <div class="up-loc-addr">Cross-location view</div>
+          </div>
+          ${!loc ? '<i class="ti ti-check" style="color:#1C3969;font-size:13px;flex-shrink:0;"></i>' : ''}
+        </div>` : ''}
+      ${locations.map(l => `
+        <div class="up-loc-row ${loc && loc.id===l.id ? 'active' : ''}" onclick="UserPanel._switchLocation('${l.id}')">
+          <div class="up-loc-icon"><i class="ti ti-map-pin"></i></div>
+          <div class="up-loc-body">
+            <div class="up-loc-name">${l.name}</div>
+            <div class="up-loc-addr">${l.address}</div>
+          </div>
+          ${loc && loc.id===l.id ? '<i class="ti ti-check" style="color:#1C3969;font-size:13px;flex-shrink:0;"></i>' : ''}
+        </div>`).join('')}
+      <div class="up-panel-divider"></div>`;
 
     p.innerHTML = `
       <div class="up-panel-arrow"></div>
@@ -139,26 +163,7 @@ const UserPanel = (() => {
         </div>
       </div>
       <div class="up-panel-divider"></div>
-      <div class="up-panel-section-label">Branch / Location</div>
-      ${user && user.role === 'supervisor' ? `
-        <div class="up-loc-row ${!loc ? 'active' : ''}" onclick="UserPanel._switchLocation(null)">
-          <div class="up-loc-icon"><i class="ti ti-stack-2"></i></div>
-          <div class="up-loc-body">
-            <div class="up-loc-name">All locations</div>
-            <div class="up-loc-addr">Cross-location view</div>
-          </div>
-          ${!loc ? '<i class="ti ti-check" style="color:#F5A623;font-size:13px;flex-shrink:0;"></i>' : ''}
-        </div>` : ''}
-      ${locations.map(l => `
-        <div class="up-loc-row ${loc && loc.id===l.id ? 'active' : ''}" onclick="UserPanel._switchLocation('${l.id}')">
-          <div class="up-loc-icon"><i class="ti ti-map-pin"></i></div>
-          <div class="up-loc-body">
-            <div class="up-loc-name">${l.name}</div>
-            <div class="up-loc-addr">${l.address}</div>
-          </div>
-          ${loc && loc.id===l.id ? '<i class="ti ti-check" style="color:#F5A623;font-size:13px;flex-shrink:0;"></i>' : ''}
-        </div>`).join('')}
-      <div class="up-panel-divider"></div>
+      ${locationSection}
       <div class="up-panel-action" onclick="UserPanel._signOut()"><i class="ti ti-logout"></i> Sign out</div>`;
 
     positionPanel(p, 'profile');
@@ -210,7 +215,7 @@ const UserPanel = (() => {
         <style>
           .loc-picker-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border:0.5px solid #E8E4DF;border-radius:10px;cursor:pointer;}
           .loc-picker-row:hover{background:#FAFAF8;border-color:#C8C3BC;}
-          .lpr-icon{width:36px;height:36px;background:#FAEEDA;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#854F0B;flex-shrink:0;}
+          .lpr-icon{width:36px;height:36px;background:#D6E4F7;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#1C3969;flex-shrink:0;}
           .lpr-body{flex:1;}.lpr-name{font-size:13px;font-weight:600;color:#111318;margin-bottom:2px;}
           .lpr-meta{font-size:11px;color:#9CA3AF;}
         </style>`,

@@ -1,7 +1,7 @@
 function render_manuals(el) {
   var _searchQuery = '';
   var _vendorFilter = (Router.context && Router.context.vendor) || null;
-  var _machineFilter = 'All';
+  var _machineFilter = new Set(); // empty = all
 
   var VENDORS = ['Skyjack', 'Caterpillar', 'Toyota', 'Bobcat'];
 
@@ -26,7 +26,7 @@ function render_manuals(el) {
   function getFiltered() {
     return Store.getManuals(_searchQuery).filter(function(m) {
       if (_vendorFilter && m.vendor !== _vendorFilter) return false;
-      if (_machineFilter !== 'All' && m.machine !== _machineFilter) return false;
+      if (_machineFilter.size > 0 && !_machineFilter.has(m.machine)) return false;
       return true;
     });
   }
@@ -94,7 +94,7 @@ function render_manuals(el) {
     list.querySelectorAll('.man-vendor-item').forEach(function(item) {
       item.addEventListener('click', function() {
         _vendorFilter = this.dataset.vendor || null;
-        _machineFilter = 'All';
+        _machineFilter = new Set();
         renderVendorList();
         renderMachineChips();
         renderGrid();
@@ -105,27 +105,58 @@ function render_manuals(el) {
   function renderMachineChips() {
     var row = document.getElementById('man-machine-chips');
     if (!row) return;
-    if (!_vendorFilter) {
-      row.style.display = 'none';
-      return;
-    }
     var machines = getMachinesForVendor(_vendorFilter);
-    if (machines.length <= 1) {
+    if (!_vendorFilter || machines.length <= 1) {
       row.style.display = 'none';
       return;
     }
     row.style.display = 'flex';
-    var chips = [{ label: 'All', value: 'All' }].concat(machines.map(function(m) { return { label: m, value: m }; }));
-    row.innerHTML = chips.map(function(c) {
-      var isActive = _machineFilter === c.value;
-      return '<button class="man-machine-chip' + (isActive ? ' active' : '') + '" data-machine="' + c.value + '">' + c.label + '</button>';
-    }).join('');
-    row.querySelectorAll('.man-machine-chip').forEach(function(chip) {
-      chip.addEventListener('click', function() {
-        _machineFilter = this.dataset.machine;
+    var selCount = _machineFilter.size;
+    var pillLabel = selCount === 0 ? 'All models' : selCount === 1 ? Array.from(_machineFilter)[0] : selCount + ' models';
+    row.innerHTML = '<div style="position:relative;">'
+      + '<button class="man-machine-chip' + (selCount > 0 ? ' active' : '') + '" id="man-model-pill" style="display:flex;align-items:center;gap:5px;">'
+      + '<i class="ti ti-adjustments-horizontal" style="font-size:12px;"></i>' + pillLabel
+      + '<i class="ti ti-chevron-down" style="font-size:10px;opacity:0.6;"></i></button>'
+      + '<div id="man-model-dropdown" style="display:none;position:absolute;top:calc(100% + 4px);left:0;z-index:200;background:#FFFFFF;border:0.5px solid #E2DDD8;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.1);min-width:200px;padding:6px 0;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 12px 4px;border-bottom:0.5px solid #F0ECE8;margin-bottom:2px;">'
+      + '<span style="font-size:10px;font-weight:600;color:#9CA3AF;letter-spacing:1px;text-transform:uppercase;">Models</span>'
+      + '<button id="man-model-clear" style="font-size:10px;color:#C08A1A;font-weight:500;background:none;border:none;cursor:pointer;font-family:inherit;padding:0;">Clear</button></div>'
+      + machines.map(function(m) {
+          var checked = _machineFilter.has(m);
+          return '<label style="display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;font-size:12px;color:#111318;" onmouseover="this.style.background=\'#FAFAF8\'" onmouseout="this.style.background=\'\'">'
+            + '<input type="checkbox" data-model="' + m + '"' + (checked ? ' checked' : '') + ' style="accent-color:#1C3969;cursor:pointer;"/>' + m + '</label>';
+        }).join('')
+      + '</div></div>';
+
+    document.getElementById('man-model-pill').addEventListener('click', function(e) {
+      e.stopPropagation();
+      var dd = document.getElementById('man-model-dropdown');
+      dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById('man-model-clear').addEventListener('click', function(e) {
+      e.stopPropagation();
+      _machineFilter = new Set();
+      renderMachineChips();
+      renderGrid();
+    });
+
+    row.querySelectorAll('input[data-model]').forEach(function(cb) {
+      cb.addEventListener('change', function(e) {
+        e.stopPropagation();
+        if (this.checked) _machineFilter.add(this.dataset.model);
+        else _machineFilter.delete(this.dataset.model);
         renderMachineChips();
         renderGrid();
       });
+    });
+
+    document.addEventListener('click', function closeDropdown(e) {
+      var dd = document.getElementById('man-model-dropdown');
+      if (!dd) { document.removeEventListener('click', closeDropdown); return; }
+      if (!dd.contains(e.target) && e.target.id !== 'man-model-pill') {
+        dd.style.display = 'none';
+      }
     });
   }
 
@@ -135,23 +166,23 @@ function render_manuals(el) {
     + '.mvp-label{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#9CA3AF;margin-bottom:10px;padding:0 14px;}'
     + '.man-vendor-item{display:flex;align-items:center;gap:8px;padding:6px 14px;cursor:pointer;margin-bottom:2px;}'
     + '.man-vendor-item:hover{background:#F5F2EE;}'
-    + '.man-vendor-item.active{background:#FAEEDA;}'
+    + '.man-vendor-item.active{background:#D6E4F7;}'
     + '.mvi-icon{width:26px;height:26px;background:#F5F2EE;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#9CA3AF;flex-shrink:0;}'
-    + '.man-vendor-item.active .mvi-icon{background:#F5A623;color:#1A1200;}'
+    + '.man-vendor-item.active .mvi-icon{background:#1C3969;color:#FFFFFF;}'
     + '.mvi-name{font-size:12px;font-weight:500;color:#3A3D4A;line-height:1.3;flex:1;}'
-    + '.man-vendor-item.active .mvi-name{color:#854F0B;font-weight:600;}'
+    + '.man-vendor-item.active .mvi-name{color:#1C3969;font-weight:600;}'
     + '.mvi-count{font-size:10px;color:#B0AAA3;}'
     + '.man-main-panel{flex:1;display:flex;flex-direction:column;min-width:0;}'
     + '.man-search-area{padding:12px 20px;background:#FFFFFF;border-bottom:0.5px solid #E8E4DF;}'
     + '.man-search-wrap{position:relative;}'
     + '.man-search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#9CA3AF;font-size:17px;pointer-events:none;}'
     + '.man-search-input{width:100%;height:40px;background:#F5F2EE;border:1.5px solid #E2DDD8;border-radius:10px;padding:0 14px 0 44px;font-size:14px;font-family:inherit;color:#111318;outline:none;box-sizing:border-box;}'
-    + '.man-search-input:focus{border-color:#F5A623;background:#FFFFFF;}'
+    + '.man-search-input:focus{border-color:#1C3969;background:#FFFFFF;}'
     + '.man-search-input::placeholder{color:#B0AAA3;}'
     + '.man-machine-chip-row{display:flex;align-items:center;gap:6px;padding:10px 20px;background:#FAFAF8;border-bottom:0.5px solid #E8E4DF;flex-wrap:wrap;}'
     + '.man-machine-chip{height:28px;padding:0 12px;border:1px solid #E2DDD8;border-radius:999px;background:#FFFFFF;font-size:12px;font-weight:500;color:#5A5F6E;cursor:pointer;font-family:inherit;white-space:nowrap;}'
     + '.man-machine-chip:hover{background:#F5F2EE;border-color:#C8C3BC;}'
-    + '.man-machine-chip.active{background:#FAEEDA;border-color:#F5A623;color:#854F0B;font-weight:600;}'
+    + '.man-machine-chip.active{background:#D6E4F7;border-color:#1C3969;color:#1C3969;font-weight:600;}'
     + '.man-content-body{flex:1;padding:20px;overflow-y:auto;}'
     + '.man-section-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#9CA3AF;margin-bottom:12px;}'
     + '.docs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:24px;}'
@@ -164,11 +195,11 @@ function render_manuals(el) {
     + '.doc-meta-sep{color:#D1CBC4;}'
     + '.doc-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;}'
     + '.doc-tag{font-size:10px;border-radius:4px;padding:2px 6px;font-weight:500;}'
-    + '.tag-type{background:#FAEEDA;color:#854F0B;}'
+    + '.tag-type{background:#D6E4F7;color:#1C3969;}'
     + '.doc-actions{display:flex;align-items:center;gap:6px;}'
     + '.doc-btn{font-size:11px;font-weight:500;border-radius:6px;padding:4px 10px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;}'
-    + '.doc-btn-primary{background:#F5A623;border:none;color:#1A1200;font-weight:600;}'
-    + '.doc-btn-primary:hover{background:#E8980F;}'
+    + '.doc-btn-primary{background:#1C3969;border:none;color:#FFFFFF;font-weight:600;}'
+    + '.doc-btn-primary:hover{background:#152B52;}'
     + '.doc-btn-ghost{background:none;border:0.5px solid #E2DDD8;color:#3A3D4A;}'
     + '.doc-btn-ghost:hover{background:#F5F2EE;}'
     + '</style>'
@@ -199,28 +230,66 @@ function render_manuals(el) {
 
   window.manClearVendor = function() {
     _vendorFilter = null;
-    _machineFilter = 'All';
+    _machineFilter = new Set();
     renderVendorList();
     renderMachineChips();
     renderGrid();
   };
 
   var _targetManualId = Router.context && Router.context.manualId;
+  var _targetPdfPage  = Router.context && Router.context.pdfPage;
+  var _targetHighlight = Router.context && Router.context.highlight;
+  // If arriving from diagnostics with sectionId, find the Skyjack operating manual
+  if (!_targetManualId && _targetHighlight) {
+    var _sjManual = Store.getManuals('').find(function(x) { return x.pdfFile; });
+    if (_sjManual) _targetManualId = _sjManual.id;
+  }
   if (_targetManualId) {
     var _target = Store.getManuals('').find(function(x) { return x.id === _targetManualId; });
     if (_target) {
       setTimeout(function() {
         var card = document.querySelector('[data-manual-id="' + _targetManualId + '"]');
-        if (card) { card.scrollIntoView({ behavior:'smooth', block:'center' }); card.style.borderColor = '#F5A623'; }
-        manViewManual(_targetManualId);
+        if (card) { card.scrollIntoView({ behavior:'smooth', block:'center' }); card.style.borderColor = '#1C3969'; }
+        manViewManual(_targetManualId, _targetPdfPage);
       }, 80);
     }
   }
 
-  window.manViewManual = function(id) {
+  window.manViewManual = function(id, pdfPage) {
     var m = Store.getManuals('').find(function(x) { return x.id === id; });
     if (!m) return;
-    Modal.show({ title: 'Viewing: ' + m.title, body: '<div style="text-align:center;padding:20px;"><i class="ti ti-file-text" style="font-size:48px;color:#9CA3AF;"></i><p style="margin-top:12px;font-size:13px;color:#7A7F8E;">' + m.machine + ' · ' + m.type + ' Manual · ' + m.pages + ' pages</p><p style="font-size:12px;color:#B0AAA3;margin-top:6px;">Document viewer opened — ' + m.size + '</p></div>', actions: [{ label: 'Close', onClick: function() { Modal.close(); } }] });
+    var pdfSrc = m.pdfFile ? (m.pdfFile + (pdfPage ? '#page=' + pdfPage : '')) : null;
+    var body;
+    if (pdfSrc) {
+      body = '<style>'
+        + '.pdf-viewer-wrap{display:flex;flex-direction:column;flex:1;overflow:hidden;}'
+        + '.pdf-viewer-toolbar{background:#152B52;padding:8px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}'
+        + '.pdf-viewer-meta{color:#9CA3AF;font-size:11px;flex:1;}'
+        + '.pdf-frame{flex:1;border:none;background:#525659;width:100%;}'
+        + '</style>'
+        + '<div class="pdf-viewer-wrap">'
+        + '<div class="pdf-viewer-toolbar">'
+        + '<i class="ti ti-book" style="color:#9CA3AF;font-size:13px;flex-shrink:0;"></i>'
+        + '<span class="pdf-viewer-meta">' + m.machine + ' · ' + m.type + ' Manual · ' + m.pages + ' pages</span>'
+        + (pdfPage ? '<span style="font-size:11px;color:#1C3969;display:flex;align-items:center;gap:4px;"><i class="ti ti-bookmark-filled" style="font-size:11px;"></i> Opened to page ' + pdfPage + '</span>' : '')
+        + '<a href="' + m.pdfFile + '" download style="font-size:11px;color:#9CA3AF;background:#0E1F3D;border:0.5px solid #3C4052;border-radius:5px;padding:4px 10px;text-decoration:none;display:flex;align-items:center;gap:4px;flex-shrink:0;"><i class="ti ti-download" style="font-size:11px;"></i> Download</a>'
+        + '</div>'
+        + '<iframe class="pdf-frame" src="' + pdfSrc + '" title="' + m.title + '"></iframe>'
+        + '</div>';
+    } else {
+      body = '<div style="text-align:center;padding:32px 20px;">'
+        + '<i class="ti ti-file-text" style="font-size:48px;color:#9CA3AF;"></i>'
+        + '<p style="margin-top:12px;font-size:13px;color:#7A7F8E;">' + m.machine + ' · ' + m.type + ' Manual · ' + m.pages + ' pages</p>'
+        + '<p style="font-size:12px;color:#B0AAA3;margin-top:6px;">' + m.size + '</p>'
+        + '</div>';
+    }
+    Modal.show({
+      title: m.title,
+      fullscreen: !!pdfSrc,
+      wide: !pdfSrc,
+      body: body,
+      actions: [{ label: 'Close', onClick: function() { Modal.close(); } }]
+    });
   };
 
   window.manDownloadManual = function(id) {

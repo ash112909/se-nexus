@@ -23,7 +23,7 @@ function render_wo_list(el) {
 
   const TYPE_META = {
     equipment: { label: 'Repair',  color: '#185FA5', bg: '#E6F1FB' },
-    pm:        { label: 'PM',      color: '#0F6E56', bg: '#E1F5EE' },
+    pm:        { label: 'PM',      color: '#1C3969', bg: '#E1F5EE' },
     stock:     { label: 'Stock',   color: '#534AB7', bg: '#EEEDFE' },
     other:     { label: 'General', color: '#6B7280', bg: '#F3F4F6' },
   };
@@ -76,11 +76,11 @@ function render_wo_list(el) {
   function renderRows(wos) {
     if (!wos.length) return '<div class="wol-empty">No orders found.</div>';
     return wos.map(wo => `
-      <div class="wol-row" style="grid-template-columns:${_cols};" onclick="sendPrompt('Show me the Work Order detail view for WO #${wo.id}')">
+      <div class="wol-row" style="grid-template-columns:${_cols};" onclick="sendPrompt('Show me the order detail view for Order #${wo.id}')">
         <div class="wol-td">
           <span class="wol-wo-id">#${wo.id}</span>
           ${wo.externalId ? `<div style="font-size:10px;color:#9CA3AF;margin-top:2px;">${wo.externalId}</div>` : ''}
-          ${isWorkOrder(wo) ? '<div style="font-size:9px;font-weight:700;letter-spacing:.6px;color:#C8A04A;text-transform:uppercase;margin-top:1px;">WO</div>' : ''}
+          ${isWorkOrder(wo) ? '<div style="font-size:9px;font-weight:700;letter-spacing:.6px;color:#4A9A6A;text-transform:uppercase;margin-top:1px;">WO</div>' : ''}
         </div>
         <div class="wol-td">${typePill(wo.woType)}</div>
         <div class="wol-td">
@@ -148,19 +148,19 @@ function render_wo_list(el) {
 
   el.innerHTML = `
 <style>
-.topbar-search { flex: 1; max-width: 380px; height: 32px; background: #2A2A2A; border: 1px solid #333; border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 0 10px; color: #5C6070; font-size: 13px; cursor: text; }
+.topbar-search { flex: 1; max-width: 380px; height: 32px; background: #0E1F3D; border: 1px solid #0E1F3D; border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 0 10px; color: #5C6070; font-size: 13px; cursor: text; }
 .wol-content { flex: 1; padding: 28px 28px 40px; overflow-y: auto; }
 .wol-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
 .wol-title { font-size: 18px; font-weight: 700; color: #111318; letter-spacing: -0.3px; }
 .wol-subtitle { font-size: 13px; color: #7A7F8E; margin-top: 2px; }
 .wol-filters { display: flex; align-items: center; gap: 8px; }
 .wol-filter-pill { display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid #E2DDD8; background: #FFFFFF; color: #5A5F6E; transition: all 0.12s; user-select: none; }
-.wol-filter-pill.active { background: #1E1E1E; color: #FFFFFF; border-color: #1E1E1E; }
+.wol-filter-pill.active { background: #152B52; color: #FFFFFF; border-color: #152B52; }
 .wol-filter-pill:hover:not(.active) { border-color: #C8C3BC; }
 .wol-search { height: 34px; background: #FFFFFF; border: 1px solid #E2DDD8; border-radius: 8px; padding: 0 12px; font-size: 13px; font-family: inherit; color: #111318; outline: none; width: 200px; }
-.wol-search:focus { border-color: #F5A623; }
-.wol-new-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: #F5A623; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: #1A1200; cursor: pointer; font-family: inherit; }
-.wol-new-btn:hover { background: #E8980F; }
+.wol-search:focus { border-color: #1C3969; }
+.wol-new-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: #1C3969; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: #FFFFFF; cursor: pointer; font-family: inherit; }
+.wol-new-btn:hover { background: #152B52; }
 .wol-table { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; overflow: hidden; }
 .wol-thead { display: grid; gap: 0; border-bottom: 1px solid #F0ECE8; padding: 0 18px; background: #FAFAF9; }
 .wol-th { font-size: 11px; font-weight: 600; color: #9CA3AF; letter-spacing: 0.8px; text-transform: uppercase; padding: 10px 8px; }
@@ -175,12 +175,12 @@ function render_wo_list(el) {
 .wol-machine-name { font-size: 13px; font-weight: 600; color: #111318; line-height: 1.3; }
 .wol-machine-issue { font-size: 12px; color: #7A7F8E; margin-top: 1px; }
 .wol-pill { display: inline-flex; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
-.wol-pill-ordered  { background: #FAEEDA; color: #854F0B; }
+.wol-pill-ordered  { background: #D6E4F7; color: #1C3969; }
 .wol-pill-open     { background: #E6F1FB; color: #185FA5; }
 .wol-pill-waiting  { background: #F1EEFE; color: #534AB7; }
 .wol-pill-done     { background: #F0ECE8; color: #5A5F6E; }
 .wol-priority-high { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; color: #A32D2D; }
-.wol-priority-med  { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; color: #854F0B; }
+.wol-priority-med  { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; color: #1C3969; }
 .wol-priority-low  { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; color: #3B6D11; }
 .wol-arrow { color: #C0BAB3; font-size: 14px; }
 .wol-empty { padding: 48px 24px; text-align: center; color: #9CA3AF; font-size: 13px; }
@@ -193,13 +193,13 @@ function render_wo_list(el) {
 .modal-form-label { font-size: 12px; font-weight: 600; color: #5A5F6E; margin-bottom: 5px; display: block; }
 .modal-form-label .lbl-opt { font-weight: 400; color: #9CA3AF; }
 .modal-form-input { width: 100%; height: 36px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; }
-.modal-form-input:focus { border-color: #F5A623; }
+.modal-form-input:focus { border-color: #1C3969; }
 .modal-form-select { width: 100%; height: 36px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; cursor: pointer; }
 .modal-field-error { font-size: 11px; color: #A32D2D; margin-top: 3px; display: none; }
 .modal-form-hint { font-size: 11px; color: #9CA3AF; margin-top: 3px; }
-.nwo-autofill-banner { font-size: 11px; color: #0F6E56; background: #E1F5EE; border-radius: 6px; padding: 5px 9px; margin-top: 4px; display: none; }
+.nwo-autofill-banner { font-size: 11px; color: #1C3969; background: #E1F5EE; border-radius: 6px; padding: 5px 9px; margin-top: 4px; display: none; }
 .wol-type-pick-card { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 20px 14px; background: #FAFAF9; border: 1.5px solid #E8E4DF; border-radius: 12px; cursor: pointer; transition: border-color 0.12s, background 0.12s; font-family: inherit; width: 100%; }
-.wol-type-pick-card:hover { border-color: #F5A623; background: #FFFBF2; }
+.wol-type-pick-card:hover { border-color: #1C3969; background: #FFFBF2; }
 </style>
 <h2 class="sr-only">Orders</h2>
 <div class="shell">
@@ -233,7 +233,7 @@ function render_wo_list(el) {
           <div class="wol-summary-label">Active orders</div>
         </div>
         <div class="wol-summary-card">
-          <div class="wol-summary-val" style="color:#854F0B;" id="wol-sum-parts">0</div>
+          <div class="wol-summary-val" style="color:#1C3969;" id="wol-sum-parts">0</div>
           <div class="wol-summary-label">Parts on order</div>
         </div>
         <div class="wol-summary-card">
@@ -241,7 +241,7 @@ function render_wo_list(el) {
           <div class="wol-summary-label">High priority</div>
         </div>
         <div class="wol-summary-card">
-          <div class="wol-summary-val" style="color:#0F6E56;" id="wol-sum-arriving">0</div>
+          <div class="wol-summary-val" style="color:#1C3969;" id="wol-sum-arriving">0</div>
           <div class="wol-summary-label">Parts arriving today</div>
         </div>
       </div>
@@ -286,17 +286,20 @@ function render_wo_list(el) {
     const formHtml = `
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div class="modal-form-field" style="grid-column:1/-1;">
-          <label class="modal-form-label">Work Order Type *</label>
+          <label class="modal-form-label">Order Type *</label>
           <select class="modal-form-select" id="nwo-type">
             <option value="equipment">Equipment Repair</option>
             <option value="pm">Scheduled PM</option>
+            <option value="stock">Stock / Parts</option>
+            <option value="other">Other / General</option>
           </select>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="nwo-equipment-section">
         <div class="modal-form-field" style="grid-column:1/-1;">
-          <label class="modal-form-label">Equipment # <span class="lbl-opt">(auto-populates make, model, serial)</span></label>
+          <label class="modal-form-label" id="nwo-asset-lbl">Equipment # * <span class="lbl-opt">(auto-populates make, model, serial)</span></label>
           <input class="modal-form-input" id="nwo-asset" type="text" placeholder="e.g. FL-094"/>
+          <div class="modal-field-error" id="nwo-asset-err">Required</div>
           <div class="nwo-autofill-banner" id="nwo-autofill-msg"></div>
         </div>
         <div class="modal-form-field">
@@ -313,7 +316,7 @@ function render_wo_list(el) {
         </div>
       </div>
       <div class="modal-form-field">
-        <label class="modal-form-label">Fault / Issue *</label>
+        <label class="modal-form-label" id="nwo-issue-lbl">Fault / Issue *</label>
         <input class="modal-form-input" id="nwo-issue" type="text" placeholder="Describe the fault or maintenance task"/>
         <div class="modal-field-error" id="nwo-issue-err">Required</div>
       </div>
@@ -327,7 +330,7 @@ function render_wo_list(el) {
           </select>
         </div>
         <div class="modal-form-field">
-          <label class="modal-form-label">Due Date *</label>
+          <label class="modal-form-label" id="nwo-due-lbl">Due Date *</label>
           <input class="modal-form-input" id="nwo-due" type="date"/>
           <div class="modal-field-error" id="nwo-due-err">Required</div>
         </div>
@@ -338,36 +341,38 @@ function render_wo_list(el) {
           </select>
         </div>
         <div class="modal-form-field">
-          <label class="modal-form-label">Work Order ID * <span class="lbl-opt" style="font-size:10px;">(RentalMan / ERP)</span></label>
+          <label class="modal-form-label">Order ID <span class="lbl-opt" style="font-size:10px;">(RentalMan / ERP — optional)</span></label>
           <input class="modal-form-input" id="nwo-extid" type="text" placeholder="e.g. RM-10122"/>
-          <div class="modal-field-error" id="nwo-extid-err">Required</div>
         </div>
       </div>`;
 
     Modal.show({
-      title: 'New Work Order',
+      title: 'New Order',
       body: formHtml,
       actions: [
         { label: 'Back', onClick: () => openTypePicker() },
         {
-          label: 'Create Work Order', primary: true, onClick: () => {
+          label: 'Create Order', primary: true, onClick: () => {
             const woType = document.getElementById('nwo-type').value;
+            const isWoType = woType === 'equipment' || woType === 'pm';
             const issue  = document.getElementById('nwo-issue').value.trim();
-            const extId  = document.getElementById('nwo-extid').value.trim();
+            const asset  = document.getElementById('nwo-asset').value.trim();
             const dueRaw = document.getElementById('nwo-due').value;
             const show   = (id, v) => { const e = document.getElementById(id); if (e) e.style.display = v ? 'block' : 'none'; };
             let valid = true;
-            show('nwo-issue-err', !issue); if (!issue) valid = false;
-            show('nwo-extid-err', !extId); if (!extId) valid = false;
-            show('nwo-due-err',   !dueRaw); if (!dueRaw) valid = false;
+            if (isWoType) {
+              show('nwo-asset-err', !asset); if (!asset) valid = false;
+              show('nwo-issue-err', !issue); if (!issue) valid = false;
+              show('nwo-due-err',   !dueRaw); if (!dueRaw) valid = false;
+            }
             if (!valid) return;
 
-            const asset   = document.getElementById('nwo-asset')?.value.trim() || '';
             const make    = document.getElementById('nwo-make')?.value.trim() || '';
             const model   = document.getElementById('nwo-model')?.value.trim() || '';
             const serial  = document.getElementById('nwo-serial')?.value.trim() || '';
             const machine = (make && model) ? `${make} ${model}` : asset || '';
-            const dueDate = new Date(dueRaw).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            const extId   = document.getElementById('nwo-extid').value.trim();
+            const dueDate = dueRaw ? new Date(dueRaw).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
 
             Store.addWorkOrder({ woType, asset, make, model, serial, machine, issue, dueDate,
               externalId: extId, priority: document.getElementById('nwo-priority').value,
@@ -379,6 +384,22 @@ function render_wo_list(el) {
     });
 
     setTimeout(() => {
+      function updateRequiredLabels() {
+        const woType = document.getElementById('nwo-type')?.value;
+        const isWoType = woType === 'equipment' || woType === 'pm';
+        const assetLbl = document.getElementById('nwo-asset-lbl');
+        const issueLbl = document.getElementById('nwo-issue-lbl');
+        const dueLbl   = document.getElementById('nwo-due-lbl');
+        if (assetLbl) assetLbl.innerHTML = isWoType
+          ? 'Equipment # * <span class="lbl-opt">(auto-populates make, model, serial)</span>'
+          : 'Equipment # <span class="lbl-opt">(optional — auto-populates make, model, serial)</span>';
+        if (issueLbl) issueLbl.textContent = isWoType ? 'Fault / Issue *' : 'Fault / Issue / Description';
+        if (dueLbl)   dueLbl.textContent   = isWoType ? 'Due Date *' : 'Due Date';
+      }
+
+      const typeSelect = document.getElementById('nwo-type');
+      if (typeSelect) typeSelect.addEventListener('change', updateRequiredLabels);
+
       const assetInput = document.getElementById('nwo-asset');
       if (!assetInput) return;
       assetInput.addEventListener('blur', function() {
@@ -409,6 +430,23 @@ function render_wo_list(el) {
         <div class="modal-field-error" id="nord-issue-err">Required</div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="modal-form-field" style="grid-column:1/-1;">
+          <label class="modal-form-label">Equipment # <span class="lbl-opt">(optional — auto-populates make, model, serial)</span></label>
+          <input class="modal-form-input" id="nord-asset" type="text" placeholder="e.g. FL-094"/>
+          <div class="nwo-autofill-banner" id="nord-autofill-msg"></div>
+        </div>
+        <div class="modal-form-field">
+          <label class="modal-form-label">Make <span class="lbl-opt">(optional)</span></label>
+          <input class="modal-form-input" id="nord-make" type="text" placeholder="e.g. Skyjack"/>
+        </div>
+        <div class="modal-form-field">
+          <label class="modal-form-label">Model <span class="lbl-opt">(optional)</span></label>
+          <input class="modal-form-input" id="nord-model" type="text" placeholder="e.g. SJIII 3219"/>
+        </div>
+        <div class="modal-form-field" style="grid-column:1/-1;">
+          <label class="modal-form-label">Serial # <span class="lbl-opt">(optional)</span></label>
+          <input class="modal-form-input" id="nord-serial" type="text" placeholder="e.g. SJ3219-00847"/>
+        </div>
         <div class="modal-form-field">
           <label class="modal-form-label">Priority</label>
           <select class="modal-form-select" id="nord-priority">
@@ -446,6 +484,11 @@ function render_wo_list(el) {
 
             const dueRaw  = document.getElementById('nord-due').value;
             const extId   = document.getElementById('nord-extid').value.trim();
+            const asset   = document.getElementById('nord-asset').value.trim();
+            const make    = document.getElementById('nord-make').value.trim();
+            const model   = document.getElementById('nord-model').value.trim();
+            const serial  = document.getElementById('nord-serial').value.trim();
+            const machine = (make && model) ? `${make} ${model}` : asset || '';
             const nextId  = Store.getWorkOrders('all').reduce((m, w) => Math.max(m, w.id), 100000) + 1;
             const dueDate = dueRaw
               ? new Date(dueRaw).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -455,12 +498,27 @@ function render_wo_list(el) {
               issue, dueDate, externalId: extId || `SE-${nextId}`,
               priority: document.getElementById('nord-priority').value,
               assignee: document.getElementById('nord-assignee').value,
-              machine: '', asset: '', make: '', model: '', serial: '' });
+              machine, asset, make, model, serial });
             Modal.close(); reRenderTable(); updateSummary();
           }
         }
       ]
     });
+
+    setTimeout(() => {
+      const assetInput = document.getElementById('nord-asset');
+      if (!assetInput) return;
+      assetInput.addEventListener('blur', function() {
+        const eq = EQUIPMENT_DB[this.value.trim().toUpperCase()] || EQUIPMENT_DB[this.value.trim()];
+        if (!eq) return;
+        document.getElementById('nord-make').value   = eq.make;
+        document.getElementById('nord-model').value  = eq.model;
+        document.getElementById('nord-serial').value = eq.serial;
+        const banner = document.getElementById('nord-autofill-msg');
+        banner.textContent = `Auto-filled from fleet: ${eq.make} ${eq.model} · ${eq.serial}`;
+        banner.style.display = 'block';
+      });
+    }, 50);
   }
 
   function openTypePicker() {
@@ -471,7 +529,7 @@ function render_wo_list(el) {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <button class="wol-type-pick-card" id="pick-wo">
             <i class="ti ti-clipboard-list" style="font-size:22px;color:#185FA5;margin-bottom:8px;"></i>
-            <div style="font-size:13px;font-weight:700;color:#111318;">Work Order</div>
+            <div style="font-size:13px;font-weight:700;color:#111318;">Order</div>
             <div style="font-size:11px;color:#7A7F8E;margin-top:3px;">Equipment repair or scheduled PM linked to a WO ID</div>
           </button>
           <button class="wol-type-pick-card" id="pick-ord">
@@ -490,3 +548,162 @@ function render_wo_list(el) {
 
   document.getElementById('wol-new-btn').addEventListener('click', () => openTypePicker());
 }
+
+// ── Global: open the WO creation form from anywhere (e.g. diagnostics cart) ──
+(function() {
+  const EQUIPMENT_DB_GLOBAL = {
+    'FL-094': { make: 'Skyjack',     model: 'SJIII 3219',        serial: 'SJ3219-00847'    },
+    'FL-017': { make: 'Caterpillar', model: '320 Excavator',     serial: 'CAT320-01044'    },
+    'FL-031': { make: 'Toyota',      model: '8FGU25',            serial: 'TOY8FGU-00391'   },
+    'FL-008': { make: 'Bobcat',      model: 'S650',              serial: 'BOB-S650-00814'  },
+    'SM-011': { make: 'Skyjack',     model: 'SJIII 4632',        serial: 'SJ4632-01122'    },
+    'SM-004': { make: 'Toyota',      model: '8FGU32',            serial: 'TOY8FGU32-00205' },
+    'KY-003': { make: 'Bobcat',      model: 'S770',              serial: 'BOB-S770-00301'  },
+    'KY-007': { make: 'Caterpillar', model: '308 Mini Excavator',serial: 'CAT308-00512'    },
+  };
+  const ASSIGNEES_GLOBAL = ['James W.','Marcus T.','Lena R.','Darius K.','Priya N.'];
+
+  window.openNewWOModal = function(prefill) {
+    prefill = prefill || {};
+    const user = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
+    const currentUser = user ? user.shortName : 'James W.';
+
+    const formHtml = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="modal-form-field" style="grid-column:1/-1;">
+          <label class="modal-form-label">Order Type *</label>
+          <select class="modal-form-select" id="nwo-type">
+            <option value="equipment" selected>Equipment Repair</option>
+            <option value="pm">Scheduled PM</option>
+            <option value="stock">Stock / Parts</option>
+            <option value="other">Other / General</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="nwo-equipment-section">
+        <div class="modal-form-field" style="grid-column:1/-1;">
+          <label class="modal-form-label">Equipment # * <span class="lbl-opt">(auto-populates make, model, serial)</span></label>
+          <input class="modal-form-input" id="nwo-asset" type="text" placeholder="e.g. FL-094" value="${prefill.asset || ''}"/>
+          <div class="modal-field-error" id="nwo-asset-err">Required</div>
+          <div class="nwo-autofill-banner" id="nwo-autofill-msg"></div>
+        </div>
+        <div class="modal-form-field">
+          <label class="modal-form-label">Make</label>
+          <input class="modal-form-input" id="nwo-make" type="text" placeholder="e.g. Skyjack" value="${prefill.make || ''}"/>
+        </div>
+        <div class="modal-form-field">
+          <label class="modal-form-label">Model</label>
+          <input class="modal-form-input" id="nwo-model" type="text" placeholder="e.g. SJIII 3219" value="${prefill.model || ''}"/>
+        </div>
+        <div class="modal-form-field" style="grid-column:1/-1;">
+          <label class="modal-form-label">Serial #</label>
+          <input class="modal-form-input" id="nwo-serial" type="text" placeholder="e.g. SJ3219-00847" value="${prefill.serial || ''}"/>
+        </div>
+      </div>
+      <div class="modal-form-field">
+        <label class="modal-form-label">Fault / Issue *</label>
+        <input class="modal-form-input" id="nwo-issue" type="text" placeholder="Describe the fault or maintenance task" value="${(prefill.issue || '').replace(/"/g,'&quot;')}"/>
+        <div class="modal-field-error" id="nwo-issue-err">Required</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="modal-form-field">
+          <label class="modal-form-label">Priority</label>
+          <select class="modal-form-select" id="nwo-priority">
+            <option value="high">High</option>
+            <option value="medium" selected>Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <div class="modal-form-field">
+          <label class="modal-form-label">Due Date *</label>
+          <input class="modal-form-input" id="nwo-due" type="date"/>
+          <div class="modal-field-error" id="nwo-due-err">Required</div>
+        </div>
+        <div class="modal-form-field">
+          <label class="modal-form-label">Assignee</label>
+          <select class="modal-form-select" id="nwo-assignee">
+            ${ASSIGNEES_GLOBAL.map(n => `<option${n === currentUser ? ' selected' : ''}>${n}</option>`).join('')}
+          </select>
+        </div>
+        <div class="modal-form-field">
+          <label class="modal-form-label">Order ID <span class="lbl-opt" style="font-size:10px;">(RentalMan / ERP — optional)</span></label>
+          <input class="modal-form-input" id="nwo-extid" type="text" placeholder="e.g. RM-10122"/>
+        </div>
+      </div>
+      ${prefill.cart && prefill.cart.length ? `
+      <div style="background:#F5F2EE;border-radius:8px;padding:10px 12px;font-size:12px;color:#7A7F8E;">
+        <strong style="color:#3A3D4A;">Parts from diagnostics cart (${prefill.cart.length}):</strong><br>
+        ${prefill.cart.map(i => `${i.partNo} ×${i.qty}`).join(', ')}
+      </div>` : ''}`;
+
+    Modal.show({
+      title: 'New Work Order',
+      body: formHtml,
+      actions: [
+        { label: 'Cancel', onClick: () => Modal.close() },
+        {
+          label: 'Create Order', primary: true, onClick: () => {
+            const asset  = document.getElementById('nwo-asset').value.trim();
+            const issue  = document.getElementById('nwo-issue').value.trim();
+            const dueRaw = document.getElementById('nwo-due').value;
+            const show   = (id, v) => { const e = document.getElementById(id); if (e) e.style.display = v ? 'block' : 'none'; };
+            let valid = true;
+            show('nwo-asset-err', !asset); if (!asset) valid = false;
+            show('nwo-issue-err', !issue); if (!issue) valid = false;
+            show('nwo-due-err',   !dueRaw); if (!dueRaw) valid = false;
+            if (!valid) return;
+
+            const make    = document.getElementById('nwo-make')?.value.trim() || '';
+            const model   = document.getElementById('nwo-model')?.value.trim() || '';
+            const serial  = document.getElementById('nwo-serial')?.value.trim() || '';
+            const machine = (make && model) ? `${make} ${model}` : asset || '';
+            const dueDate = new Date(dueRaw).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+            const newWO = Store.addWorkOrder({
+              woType: document.getElementById('nwo-type').value,
+              asset, make, model, serial, machine, issue, dueDate,
+              externalId: document.getElementById('nwo-extid').value.trim(),
+              priority: document.getElementById('nwo-priority').value,
+              assignee: document.getElementById('nwo-assignee').value,
+            });
+
+            if (prefill.cart && prefill.cart.length) {
+              Store.addPartsToWorkOrder(newWO.id, prefill.cart);
+            }
+
+            Modal.close();
+            if (typeof prefill.onCreated === 'function') prefill.onCreated(newWO);
+            else {
+              Modal.show({
+                title: 'Work order created',
+                body: `<div style="text-align:center;padding:12px 0;">
+                  <div style="font-size:32px;margin-bottom:8px;color:#1C3969;">✓</div>
+                  <div style="font-size:14px;font-weight:600;color:#111318;margin-bottom:4px;">Work Order #${newWO.id} created</div>
+                  <div style="font-size:13px;color:#7A7F8E;">${machine} · ${document.getElementById('nwo-priority') ? '' : 'Medium'} priority</div>
+                </div>`,
+                actions: [
+                  { label: 'Close', onClick: () => Modal.close() },
+                  { label: 'View orders', primary: true, onClick: () => { Modal.close(); if (typeof sendPrompt === 'function') sendPrompt('Open orders list'); } }
+                ]
+              });
+            }
+          }
+        }
+      ]
+    });
+
+    setTimeout(() => {
+      const assetInput = document.getElementById('nwo-asset');
+      if (!assetInput) return;
+      assetInput.addEventListener('blur', function() {
+        const eq = EQUIPMENT_DB_GLOBAL[this.value.trim().toUpperCase()] || EQUIPMENT_DB_GLOBAL[this.value.trim()];
+        if (!eq) return;
+        document.getElementById('nwo-make').value   = eq.make;
+        document.getElementById('nwo-model').value  = eq.model;
+        document.getElementById('nwo-serial').value = eq.serial;
+        const banner = document.getElementById('nwo-autofill-msg');
+        if (banner) { banner.textContent = `Auto-filled: ${eq.make} ${eq.model} · ${eq.serial}`; banner.style.display = 'block'; }
+      });
+    }, 50);
+  };
+})();

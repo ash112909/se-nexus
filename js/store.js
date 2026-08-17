@@ -91,7 +91,7 @@ const Store = (() => {
   const DEFAULT_MANUALS = [
     { id: 'man-1',  title: 'SJIII 3219 Service Manual — Hydraulic System',         machine: 'Skyjack SJIII 3219',     vendor: 'Skyjack',      type: 'Service',  year: 2019, pages: 312, size: '18 MB' },
     { id: 'man-2',  title: 'SJIII 3219 Parts Manual',                              machine: 'Skyjack SJIII 3219',     vendor: 'Skyjack',      type: 'Parts',    year: 2020, pages: 248, size: '24 MB' },
-    { id: 'man-3',  title: 'SJIII 3219 Operator Manual',                           machine: 'Skyjack SJIII 3219',     vendor: 'Skyjack',      type: 'Operator', year: 2021, pages: 96,  size: '8 MB'  },
+    { id: 'man-3',  title: 'SJIII Series Operating Manual (ANSI/CSA)',             machine: 'Skyjack SJIII 3219',     vendor: 'Skyjack',      type: 'Operator', year: 2008, pages: 93,  size: '16 MB', pdfFile: 'manuals/sjiii-operating-manual.pdf' },
     { id: 'man-4',  title: 'Service Bulletin SB-2847 — Lift Cylinder Seal Procedure', machine: 'Skyjack SJIII 3219', vendor: 'Skyjack',      type: 'Bulletin', year: 2026, pages: 4,   size: '1.2 MB'},
     { id: 'man-11', title: 'SJIII 4632 Service Manual — Hydraulic & Electrical',   machine: 'Skyjack SJIII 4632',     vendor: 'Skyjack',      type: 'Service',  year: 2021, pages: 288, size: '22 MB' },
     { id: 'man-12', title: 'SJIII 3219 Electrical System Manual',                  machine: 'Skyjack SJIII 3219',     vendor: 'Skyjack',      type: 'Service',  year: 2022, pages: 144, size: '11 MB' },
@@ -402,7 +402,8 @@ const Store = (() => {
       },
     ],
     cart: [],
-    diagnosticHistory: [],
+    diagSessions: [],
+    activeDiagSessionId: null,
     parts: DEFAULT_PARTS,
     manuals: DEFAULT_MANUALS,
   };
@@ -484,6 +485,19 @@ const Store = (() => {
       submittedOrders: [],
     }, fields);
     _data.workOrders.unshift(wo);
+    save(_data);
+    return wo;
+  }
+
+  function addPartsToWorkOrder(id, parts) {
+    const wo = getWorkOrder(id);
+    if (!wo) return null;
+    if (!wo.cart) wo.cart = [];
+    for (const p of parts) {
+      const existing = wo.cart.find(i => i.partNo === p.partNo);
+      if (existing) existing.qty = (existing.qty || 1) + p.qty;
+      else wo.cart.push(Object.assign({}, p));
+    }
     save(_data);
     return wo;
   }
@@ -725,10 +739,53 @@ const Store = (() => {
     return order;
   }
 
-  // --- Diagnostics ---
-  function addDiagnosticMessage(msg) { _data.diagnosticHistory.push(msg); save(_data); }
-  function getDiagnosticHistory() { return _data.diagnosticHistory; }
-  function clearDiagnosticHistory() { _data.diagnosticHistory = []; save(_data); }
+  // --- Diagnostics sessions ---
+  function _ensureSessions() {
+    if (!Array.isArray(_data.diagSessions)) _data.diagSessions = [];
+  }
+  function createDiagSession(title) {
+    _ensureSessions();
+    const id = 'ds-' + Date.now();
+    const session = { id, title: title || 'New chat', createdAt: Date.now(), messages: [] };
+    _data.diagSessions.unshift(session);
+    _data.activeDiagSessionId = id;
+    save(_data);
+    return session;
+  }
+  function getDiagSessions() { _ensureSessions(); return _data.diagSessions; }
+  function getActiveDiagSession() {
+    _ensureSessions();
+    return _data.diagSessions.find(s => s.id === _data.activeDiagSessionId) || null;
+  }
+  function setActiveDiagSession(id) { _data.activeDiagSessionId = id; save(_data); }
+  function renameDiagSession(id, title) {
+    const s = _data.diagSessions.find(x => x.id === id);
+    if (s) { s.title = title; save(_data); }
+  }
+  function deleteDiagSession(id) {
+    _data.diagSessions = _data.diagSessions.filter(s => s.id !== id);
+    if (_data.activeDiagSessionId === id) _data.activeDiagSessionId = _data.diagSessions[0]?.id || null;
+    save(_data);
+  }
+  function addDiagnosticMessage(msg) {
+    _ensureSessions();
+    let session = getActiveDiagSession();
+    if (!session) session = createDiagSession('New chat');
+    session.messages.push(msg);
+    // Auto-title from first user message
+    if (msg.role === 'user' && session.title === 'New chat') {
+      session.title = msg.text.length > 40 ? msg.text.slice(0, 40) + '…' : msg.text;
+    }
+    save(_data);
+  }
+  function getDiagnosticHistory() {
+    const s = getActiveDiagSession();
+    return s ? s.messages : [];
+  }
+  function clearDiagnosticHistory() {
+    const s = getActiveDiagSession();
+    if (s) { s.messages = []; save(_data); }
+  }
 
   // --- Parts ---
   function getParts(query, category) {
@@ -799,6 +856,17 @@ const Store = (() => {
       phone: '(416) 555-0210',
       avatar: 'AC',
     },
+    {
+      id: 'user-admin',
+      username: 'admin',
+      password: 'MCR-admin-01',
+      displayName: 'Admin User',
+      shortName: 'Admin',
+      role: 'fleet_admin',
+      email: 'admin@midcountyrental.com',
+      phone: '(512) 555-0100',
+      avatar: 'AD',
+    },
   ];
 
   // Fleets each supplier is onboarded to (supplier-visible relationships only)
@@ -815,20 +883,148 @@ const Store = (() => {
     ],
   };
 
+  // ── Fleet admin: managed users and feature flags ───────────────────────────
+  // Features that can be toggled per role or per individual user
+  const MANAGED_FEATURES = [
+    { id: 'analytics',    label: 'Analytics',          icon: 'ti-chart-bar',       description: 'Access to the analytics dashboard and fleet reporting.' },
+    { id: 'cms',          label: 'Content Management', icon: 'ti-pencil',           description: 'Create and publish service bulletins, news, and parts notes.' },
+    { id: 'diagnostics',  label: 'Diagnostics Chat',   icon: 'ti-tool',             description: 'AI-powered diagnostic assistant for troubleshooting.' },
+    { id: 'approvals',    label: 'Order Approvals',    icon: 'ti-circle-check',     description: 'Approve, edit, or return purchase orders submitted by techs.' },
+    { id: 'recommended',  label: 'Recommended Parts',  icon: 'ti-star',             description: 'View AI-curated recommended parts based on fleet history.' },
+    { id: 'news',         label: 'News & Updates',     icon: 'ti-news',             description: 'Access supplier news, bulletins, and product updates.' },
+    { id: 'manuals',      label: 'Manuals & Docs',     icon: 'ti-book',             description: 'Browse and download machine manuals and technical docs.' },
+    { id: 'order_history',label: 'Order History',      icon: 'ti-history',          description: 'View historical parts orders across the fleet.' },
+  ];
+
+  // Default feature sets per role (true = enabled by default)
+  const _roleFeatures = {
+    mechanic: {
+      analytics: false, cms: false, diagnostics: true, approvals: false,
+      recommended: true, news: true, manuals: true, order_history: true,
+    },
+    supervisor: {
+      analytics: true, cms: true, diagnostics: true, approvals: true,
+      recommended: true, news: true, manuals: true, order_history: true,
+    },
+  };
+
+  // Per-user feature overrides: { userId: { featureId: true|false } }
+  // null means "follow role default"
+  const _userFeatureOverrides = {};
+
+  // Managed users list (fleet users only — not supplier, not admin)
+  const _managedUsers = [
+    {
+      id: 'user-james-w', username: 'james.w', displayName: 'James Whitfield',
+      shortName: 'James W.', role: 'mechanic', avatar: 'JW',
+      email: 'james.w@midcountyrental.com', phone: '(512) 555-0182',
+      location: 'Austin Branch', status: 'active', lastSeen: 'Jul 28, 2026',
+    },
+    {
+      id: 'user-sarah-m', username: 'sarah.m', displayName: 'Sarah Martinez',
+      shortName: 'Sarah M.', role: 'supervisor', avatar: 'SM',
+      email: 'sarah.m@midcountyrental.com', phone: '(512) 555-0140',
+      location: 'Austin Branch', status: 'active', lastSeen: 'Jul 29, 2026',
+    },
+    {
+      id: 'user-marcus-t', username: 'marcus.t', displayName: 'Marcus Taylor',
+      shortName: 'Marcus T.', role: 'mechanic', avatar: 'MT',
+      email: 'marcus.t@midcountyrental.com', phone: '(512) 555-0193',
+      location: 'San Marcos Branch', status: 'active', lastSeen: 'Jul 27, 2026',
+    },
+    {
+      id: 'user-d-kowalski', username: 'd.kowalski', displayName: 'Dana Kowalski',
+      shortName: 'D. Kowalski', role: 'mechanic', avatar: 'DK',
+      email: 'd.kowalski@midcountyrental.com', phone: '(512) 555-0177',
+      location: 'Kyle Branch', status: 'active', lastSeen: 'Jul 25, 2026',
+    },
+    {
+      id: 'user-r-flores', username: 'r.flores', displayName: 'Rosa Flores',
+      shortName: 'R. Flores', role: 'supervisor', avatar: 'RF',
+      email: 'r.flores@midcountyrental.com', phone: '(512) 555-0155',
+      location: 'San Marcos Branch', status: 'active', lastSeen: 'Jul 29, 2026',
+    },
+    {
+      id: 'user-t-nguyen', username: 't.nguyen', displayName: 'Thanh Nguyen',
+      shortName: 'T. Nguyen', role: 'mechanic', avatar: 'TN',
+      email: 't.nguyen@midcountyrental.com', phone: '(512) 555-0168',
+      location: 'Austin Branch', status: 'inactive', lastSeen: 'Jul 10, 2026',
+    },
+  ];
+
+  function getManagedUsers() { return _managedUsers; }
+  function getManagedFeatures() { return MANAGED_FEATURES; }
+  function getRoleFeatures(role) { return { ...(_roleFeatures[role] || {}) }; }
+  function setRoleFeature(role, featureId, enabled) {
+    if (!_roleFeatures[role]) _roleFeatures[role] = {};
+    _roleFeatures[role][featureId] = enabled;
+  }
+  function getUserFeatureOverrides(userId) { return { ...(_userFeatureOverrides[userId] || {}) }; }
+  function setUserFeatureOverride(userId, featureId, value) {
+    // value: true | false | null (null = clear override, follow role)
+    if (!_userFeatureOverrides[userId]) _userFeatureOverrides[userId] = {};
+    if (value === null) delete _userFeatureOverrides[userId][featureId];
+    else _userFeatureOverrides[userId][featureId] = value;
+  }
+  function getEffectiveFeatures(userId) {
+    const u = _managedUsers.find(x => x.id === userId);
+    if (!u) return {};
+    const roleDefaults = getRoleFeatures(u.role);
+    const overrides = _userFeatureOverrides[userId] || {};
+    const result = { ...roleDefaults };
+    for (const [k, v] of Object.entries(overrides)) result[k] = v;
+    return result;
+  }
+  function addManagedUser(fields) {
+    const id = 'user-' + fields.username.replace(/\./g, '-') + '-' + Date.now();
+    _managedUsers.push({ id, status: 'active', lastSeen: 'Never', ...fields });
+    return id;
+  }
+  function updateManagedUser(id, fields) {
+    const u = _managedUsers.find(x => x.id === id);
+    if (u) Object.assign(u, fields);
+  }
+
   // Price requests — created by fleet, responded to by supplier
   const _priceRequests = [
     { id:'pr-001', partNum:'SKJ-HYD-999', partDesc:'Custom hydraulic manifold block — SJIII series',
-      supplierId:'SKJ', fleetId:'mcr', fleetName:'Mid-County Rental',
-      requestedBy:'James W.', requestedDate:'Jul 10, 2026', qty:1, notes:'Need for WO #100094 — not in current catalog',
-      status:'pending', response:null },
+      supplierId:'SKJ', fleetId:'mcr', fleetName:'Mid-County Rental', location:'Phoenix, AZ',
+      requestedBy:'James W.', requestedDate:'Jul 10, 2026', submittedAt: new Date('2026-07-10').getTime(),
+      qty:1, notes:'Need for WO #100094 — not in current catalog',
+      status:'pending', response:null,
+      comments:[
+        { id:'c-001', author:'James W.', authorRole:'fleet', text:'This is blocking WO #100094 — machine is down. Please prioritize.', date:'Jul 10, 2026', ts: new Date('2026-07-10T10:22:00').getTime() },
+      ]
+    },
     { id:'pr-002', partNum:'SKJ-ELC-477', partDesc:'Control board assembly — SJ45T Boom',
-      supplierId:'SKJ', fleetId:'mcr', fleetName:'Mid-County Rental',
-      requestedBy:'Marcus T.', requestedDate:'Jul 8, 2026', qty:2, notes:'',
-      status:'needs_info', response:{ message:'Can you confirm the serial number of the unit? Multiple variants exist for this model year.' } },
+      supplierId:'SKJ', fleetId:'mcr', fleetName:'Mid-County Rental', location:'Phoenix, AZ',
+      requestedBy:'Marcus T.', requestedDate:'Jul 8, 2026', submittedAt: new Date('2026-07-08').getTime(),
+      qty:2, notes:'',
+      status:'needs_info', response:{ message:'Can you confirm the serial number of the unit? Multiple variants exist for this model year.' },
+      comments:[
+        { id:'c-002', author:'Alex Chen', authorRole:'supplier', text:'Can you confirm the serial number of the unit? Multiple variants exist for this model year.', date:'Jul 9, 2026', ts: new Date('2026-07-09T09:00:00').getTime() },
+      ]
+    },
     { id:'pr-003', partNum:'SKJ-STR-104', partDesc:'Steering cylinder seal kit',
-      supplierId:'SKJ', fleetId:'boels', fleetName:'Boels Rental',
-      requestedBy:'D. Kowalski', requestedDate:'Jul 5, 2026', qty:4, notes:'Bulk order for fleet PM',
-      status:'quoted', response:{ price: 38.50, message:'Available. Lead time 3–5 business days.' } },
+      supplierId:'SKJ', fleetId:'boels', fleetName:'Boels Rental', location:'Dallas, TX',
+      requestedBy:'D. Kowalski', requestedDate:'Jul 5, 2026', submittedAt: new Date('2026-07-05').getTime(),
+      qty:4, notes:'Bulk order for fleet PM',
+      status:'quoted', response:{ price: 38.50, message:'Available. Lead time 3–5 business days.' },
+      comments:[
+        { id:'c-003', author:'D. Kowalski', authorRole:'fleet', text:'Can you do $35 if we commit to 10 units per quarter?', date:'Jul 6, 2026', ts: new Date('2026-07-06T14:00:00').getTime() },
+        { id:'c-004', author:'Alex Chen', authorRole:'supplier', text:'Happy to discuss volume pricing — let me loop in our account team. Quoted price stands for this order. Lead time 3–5 business days.', date:'Jul 7, 2026', ts: new Date('2026-07-07T10:30:00').getTime() },
+      ]
+    },
+    { id:'pr-004', partNum:'SKJ-BRK-221', partDesc:'Brake caliper assembly — scissor lifts',
+      supplierId:'SKJ', fleetId:'sunbelt', fleetName:'Sunbelt Rentals', location:'Charlotte, NC',
+      requestedBy:'R. Flores', requestedDate:'Jul 12, 2026', submittedAt: new Date('2026-07-12').getTime(),
+      qty:6, notes:'Replacement for aging fleet — need best pricing on qty',
+      status:'pending', response:null, comments:[] },
+    { id:'pr-005', partNum:'SKJ-OIL-088', partDesc:'Hydraulic oil filter kit (5-pack)',
+      supplierId:'SKJ', fleetId:'unitedrent', fleetName:'United Rentals', location:'Atlanta, GA',
+      requestedBy:'T. Nguyen', requestedDate:'Jul 14, 2026', submittedAt: new Date('2026-07-14').getTime(),
+      qty:20, notes:'PM program quarterly order — price not in system',
+      status:'pending', response:null, comments:[] },
   ];
 
   function getSupplierFleets(supplierId) {
@@ -839,12 +1035,25 @@ const Store = (() => {
   }
   function addPriceRequest(fields) {
     const id = 'pr-' + String(_priceRequests.length + 1).padStart(3, '0');
-    _priceRequests.push({ id, status: 'pending', response: null, ...fields });
+    _priceRequests.push({ id, status: 'pending', response: null, comments: [], submittedAt: Date.now(), ...fields });
     return id;
   }
   function respondToPriceRequest(id, response) {
     const r = _priceRequests.find(x => x.id === id);
     if (r) { r.status = response.status; r.response = response; }
+  }
+  function addPriceRequestComment(id, comment) {
+    const r = _priceRequests.find(x => x.id === id);
+    if (!r) return;
+    if (!r.comments) r.comments = [];
+    r.comments.push({
+      id: 'c-' + Date.now(),
+      author: comment.author,
+      authorRole: comment.authorRole || 'supplier',
+      text: comment.text,
+      date: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }),
+      ts: Date.now(),
+    });
   }
 
   let _currentUser = null;
@@ -1018,17 +1227,22 @@ const Store = (() => {
   }
 
   return {
-    getWorkOrders, getWorkOrder, addWorkOrder, updateWorkOrder, addWoNote, closeWorkOrder,
+    getWorkOrders, getWorkOrder, addWorkOrder, addPartsToWorkOrder, updateWorkOrder, addWoNote, closeWorkOrder,
     getOrders, addOrder, updateOrder,
     getCart, addToCart, removeFromCart, updateCartQty, clearCart, submitCart,
     getWoCart, addToWoCart, removeFromWoCart, updateWoCartQty, submitWoCart,
     swapWoCartItem, setWoCartItemSource, setWoCartItemSources, submitWoCartItems,
     addDiagnosticMessage, getDiagnosticHistory, clearDiagnosticHistory,
+    createDiagSession, getDiagSessions, getActiveDiagSession, setActiveDiagSession,
+    renameDiagSession, deleteDiagSession,
     getParts, getManuals,
     getUsers, authenticate, setCurrentUser, getCurrentUser, logout,
     getLocations, getCurrentLocation, setCurrentLocation,
     getOrgConfig, getOrderTerms,
-    getSupplierFleets, getPriceRequests, addPriceRequest, respondToPriceRequest,
+    getManagedUsers, getManagedFeatures, getRoleFeatures, setRoleFeature,
+    getUserFeatureOverrides, setUserFeatureOverride, getEffectiveFeatures,
+    addManagedUser, updateManagedUser,
+    getSupplierFleets, getPriceRequests, addPriceRequest, respondToPriceRequest, addPriceRequestComment,
     getNotifications, markNotificationRead, markAllNotificationsRead, getUnreadCount,
     getCmsArticles, getCmsArticle, saveCmsArticle, deleteCmsArticle, getActiveBanners, dismissBanner,
     reset,

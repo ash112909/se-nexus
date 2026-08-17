@@ -11,14 +11,14 @@ function render_wo_detail(el) {
   <div class="main">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
-        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('Work orders')">Work orders</a>
+        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('Open orders list')">Orders</a>
         <span>/</span><span style="color:#FFFFFF;">WO not found</span>
       </div>
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
       ${buildTopbarRight()}
     </div>
     <div style="padding:40px;color:#9CA3AF;font-size:14px;">
-      <p>Work order not found. <a style="color:#F5A623;cursor:pointer;" onclick="sendPrompt('Work orders')">Return to work orders list</a></p>
+      <p>Work order not found. <a style="color:#1C3969;cursor:pointer;" onclick="sendPrompt('Open orders list')">Return to orders</a></p>
     </div>
   </div>
 </div>`;
@@ -80,7 +80,7 @@ function render_wo_detail(el) {
     if (!container) return;
 
     if (!cart.length) {
-      container.innerHTML = `<div style="padding:24px;text-align:center;color:#9CA3AF;font-size:13px;">No items in cart. <a style="color:#F5A623;cursor:pointer;" onclick="sendPrompt('Open Parts Search scoped to WO #${wo.id}')">Search parts to add</a></div>`;
+      container.innerHTML = `<div style="padding:24px;text-align:center;color:#9CA3AF;font-size:13px;">No items in cart. <a style="color:#1C3969;cursor:pointer;" onclick="sendPrompt('Open Parts Search scoped to WO #${wo.id}')">Search parts to add</a></div>`;
       document.getElementById('wod-cart-total-row').style.display = 'none';
       return;
     }
@@ -187,7 +187,7 @@ function render_wo_detail(el) {
       sourcing: [
         { key: 'local',    label: 'In-location stock',   icon: 'ti-map-pin',       color: '#3B6D11' },
         { key: 'nearby',   label: 'Nearby branches',     icon: 'ti-building',      color: '#185FA5' },
-        { key: 'external', label: 'External order',      icon: 'ti-truck',         color: '#854F0B' },
+        { key: 'external', label: 'External order',      icon: 'ti-truck',         color: '#1C3969' },
       ],
       status: [
         { key: 'available',     label: 'Available',       icon: 'ti-circle-check', color: '#3B6D11' },
@@ -268,7 +268,7 @@ function render_wo_detail(el) {
     const statusStyle = {
       submitted: 'background:#E6F1FB;color:#185FA5;',
       backordered: 'background:#FEF3C7;color:#92400E;',
-      delivered: 'background:#E1F5EE;color:#0F6E56;',
+      delivered: 'background:#E1F5EE;color:#1C3969;',
     };
     container.innerHTML = orders.map(ord => `
       <div class="ord-block">
@@ -298,15 +298,15 @@ function render_wo_detail(el) {
 .wo-detail-meta { font-size: 13px; color: #7A7F8E; margin-top: 3px; }
 .wo-status-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 .pill { font-size: 11px; font-weight: 600; border-radius: 999px; padding: 3px 10px; }
-.pill-ordered { background: #FAEEDA; color: #854F0B; }
+.pill-ordered { background: #D6E4F7; color: #1C3969; }
 .pill-open { background: #E6F1FB; color: #185FA5; }
 .pill-pending { background: #F1EEFE; color: #534AB7; }
 .pill-closed { background: #F0ECE8; color: #5A5F6E; }
 .pill-high { background: #FCEBEB; color: #A32D2D; }
-.pill-med { background: #FAEEDA; color: #854F0B; }
+.pill-med { background: #D6E4F7; color: #1C3969; }
 .pill-low { background: #EAF3DE; color: #3B6D11; }
-.btn-primary { background: #F5A623; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; color: #1A1200; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
-.btn-primary:hover { background: #E8980F; }
+.btn-primary { background: #1C3969; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; color: #FFFFFF; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary:hover { background: #152B52; }
 .btn-ghost { background: none; border: 0.5px solid #E2DDD8; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 500; color: #3A3D4A; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
 .btn-ghost:hover { background: #F5F2EE; }
 .btn-danger { background: none; border: 0.5px solid #F5C5C5; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 500; color: #A32D2D; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
@@ -317,9 +317,9 @@ function render_wo_detail(el) {
 .wo-field { margin-bottom: 10px; }
 .wo-field-label { font-size: 11px; color: #9CA3AF; margin-bottom: 2px; }
 .wo-field-value { font-size: 13px; font-weight: 500; color: #111318; }
-.warranty-badge { display: inline-flex; align-items: center; gap: 5px; background: #E1F5EE; border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 600; color: #0F6E56; position: relative; cursor: default; }
-.warranty-badge .wb-tip { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #1E1E1E; color: #FFFFFF; font-size: 12px; font-weight: 400; border-radius: 8px; padding: 8px 12px; white-space: nowrap; pointer-events: none; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
-.warranty-badge .wb-tip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #1E1E1E; }
+.warranty-badge { display: inline-flex; align-items: center; gap: 5px; background: #E1F5EE; border-radius: 999px; padding: 3px 10px; font-size: 12px; font-weight: 600; color: #1C3969; position: relative; cursor: default; }
+.warranty-badge .wb-tip { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #152B52; color: #FFFFFF; font-size: 12px; font-weight: 400; border-radius: 8px; padding: 8px 12px; white-space: nowrap; pointer-events: none; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
+.warranty-badge .wb-tip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #152B52; }
 .warranty-badge:hover .wb-tip { display: block; }
 /* Cart */
 .cart-section { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
@@ -331,8 +331,8 @@ function render_wo_detail(el) {
 .cart-group-hdr { font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: #9CA3AF; padding: 7px 12px; background: #FAFAF8; border-top: 1px solid #E8E4DF; display: flex; align-items: center; gap: 7px; }
 .cart-group-hdr:first-child { border-top: none; }
 .cart-section-title { font-size: 14px; font-weight: 600; color: #111318; display: flex; align-items: center; gap: 8px; }
-.cart-badge { background: #F5A623; color: #1A1200; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 8px; }
-.add-parts-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #854F0B; background: #FAEEDA; border: none; border-radius: 7px; padding: 6px 12px; cursor: pointer; font-family: inherit; }
+.cart-badge { background: #1C3969; color: #FFFFFF; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 8px; }
+.add-parts-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #1C3969; background: #D6E4F7; border: none; border-radius: 7px; padding: 6px 12px; cursor: pointer; font-family: inherit; }
 .add-parts-btn:hover { background: #F5DEB5; }
 /* Cart table */
 .wod-cart-table { width: 100%; border-collapse: collapse; }
@@ -354,7 +354,7 @@ function render_wo_detail(el) {
 .ci-warn { color: #BA7517; }
 .ci-err { color: #A32D2D; }
 /* Fixed-position tooltip — appended to body so it escapes overflow:hidden */
-#wod-float-tip { position: fixed; background: #1E1E1E; color: #FFFFFF; font-size: 11px; font-weight: 400; border-radius: 7px; padding: 6px 10px; white-space: nowrap; pointer-events: none; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,.25); display: none; }
+#wod-float-tip { position: fixed; background: #152B52; color: #FFFFFF; font-size: 11px; font-weight: 400; border-radius: 7px; padding: 6px 10px; white-space: nowrap; pointer-events: none; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,.25); display: none; }
 /* Part # cell */
 .ci-partnum { font-family: 'SF Mono','Consolas',monospace; font-size: 11px; color: #3A3D4A; font-weight: 600; }
 .ci-vendor-line { font-size: 10px; color: #9CA3AF; margin-top: 2px; display: flex; align-items: center; gap: 4px; }
@@ -363,7 +363,7 @@ function render_wo_detail(el) {
 .ci-desc-name { font-size: 13px; font-weight: 500; color: #111318; line-height: 1.3; }
 /* Cross-ref badges */
 .ci-xref { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; border: none; border-radius: 4px; padding: 2px 7px; cursor: pointer; font-family: inherit; }
-.ci-xref-mand { background: #FAEEDA; color: #854F0B; }
+.ci-xref-mand { background: #D6E4F7; color: #1C3969; }
 .ci-xref-mand:hover { background: #F5DEB5; }
 .ci-xref-opt { background: #EEEDFE; color: #534AB7; }
 .ci-xref-opt:hover { background: #DDD9FE; }
@@ -400,23 +400,23 @@ function render_wo_detail(el) {
 .notes-section { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
 .note-input-row { display: flex; gap: 8px; margin-top: 14px; }
 .note-input { flex: 1; height: 36px; background: #F5F2EE; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 12px; font-size: 13px; font-family: inherit; color: #111318; outline: none; }
-.note-input:focus { border-color: #F5A623; background: #FFFFFF; }
-.note-add-btn { background: #F5A623; border: none; border-radius: 7px; padding: 0 14px; font-size: 12px; font-weight: 600; color: #1A1200; cursor: pointer; font-family: inherit; white-space: nowrap; }
+.note-input:focus { border-color: #1C3969; background: #FFFFFF; }
+.note-add-btn { background: #1C3969; border: none; border-radius: 7px; padding: 0 14px; font-size: 12px; font-weight: 600; color: #FFFFFF; cursor: pointer; font-family: inherit; white-space: nowrap; }
 .tl-item { display: flex; gap: 12px; margin-bottom: 12px; }
 .tl-item:last-child { margin-bottom: 0; }
 .tl-dot-wrap { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
-.tl-dot { width: 10px; height: 10px; border-radius: 50%; background: #F5A623; flex-shrink: 0; margin-top: 4px; }
+.tl-dot { width: 10px; height: 10px; border-radius: 50%; background: #1C3969; flex-shrink: 0; margin-top: 4px; }
 .tl-dot.done { background: #3B6D11; }
 .tl-line { flex: 1; width: 1px; background: #F0ECE8; margin: 3px 0; min-height: 16px; }
 .tl-body { flex: 1; }
 .tl-title { font-size: 13px; font-weight: 500; color: #111318; margin-bottom: 1px; }
 .tl-meta { font-size: 11px; color: #9CA3AF; }
 .status-select { height: 34px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; cursor: pointer; }
-.status-select:focus { border-color: #F5A623; }
+.status-select:focus { border-color: #1C3969; }
 .field-select { height: 30px; border: 1px solid #E2DDD8; border-radius: 6px; padding: 0 8px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; cursor: pointer; font-weight: 500; }
-.field-select:focus { border-color: #F5A623; }
+.field-select:focus { border-color: #1C3969; }
 .field-date { height: 30px; border: 1px solid #E2DDD8; border-radius: 6px; padding: 0 8px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; }
-.field-date:focus { border-color: #F5A623; }
+.field-date:focus { border-color: #1C3969; }
 </style>
 <h2 class="sr-only">Work Order #${wo.id} — ${wo.machine}</h2>
 <div class="shell">
@@ -426,7 +426,7 @@ function render_wo_detail(el) {
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
         <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('dashboard')">Dashboard</a>
         <span style="color:#3C4052;">/</span>
-        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('Work orders')">Work orders</a>
+        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('Open orders list')">Orders</a>
         <span style="color:#3C4052;">/</span>
         <span style="color:#FFFFFF;font-weight:500;">WO #${wo.id}</span>
       </div>
@@ -451,7 +451,7 @@ function render_wo_detail(el) {
               <option value="closed" ${wo.status === 'closed' ? 'selected' : ''}>Closed</option>
             </select>
           </div>
-          <button class="btn-ghost" onclick="sendPrompt('Work orders')"><i class="ti ti-arrow-left" style="font-size:14px;"></i> Back</button>
+          <button class="btn-ghost" onclick="sendPrompt('Open orders list')"><i class="ti ti-arrow-left" style="font-size:14px;"></i> Back</button>
           ${wo.status !== 'closed' ? `<button class="btn-danger" id="wod-close-btn"><i class="ti ti-x" style="font-size:14px;"></i> Close WO</button>` : ''}
         </div>
       </div>
@@ -493,7 +493,7 @@ function render_wo_detail(el) {
       <div class="cart-section">
         <div class="cart-section-header">
           <div class="cart-section-title">
-            <i class="ti ti-shopping-cart" style="font-size:16px;color:#F5A623;"></i>
+            <i class="ti ti-shopping-cart" style="font-size:16px;color:#1C3969;"></i>
             Active cart
             <span class="cart-badge" id="wod-cart-badge">${(Store.getWoCart(wo.id) || []).length}</span>
           </div>
@@ -592,7 +592,7 @@ function render_wo_detail(el) {
     closeBtn.addEventListener('click', function() {
       Modal.confirm('Close Work Order #' + wo.id + '? This cannot be undone.', () => {
         Store.closeWorkOrder(wo.id);
-        sendPrompt('Work orders');
+        sendPrompt('Open orders list');
       });
     });
   }
@@ -652,7 +652,7 @@ function render_wo_detail(el) {
         });
       } else if (st === 'blocked') {
         flags.push({ item: c, flag: 'blocked',
-          icon: 'ti-lock', iconColor: '#854F0B', iconBg: '#FAEEDA',
+          icon: 'ti-lock', iconColor: '#1C3969', iconBg: '#D6E4F7',
           flagMsg: 'Mandatory cross-reference unresolved — fleet policy requires a substitute.',
           recText: 'Open the cross-reference panel and select the required substitute part.',
           primaryLabel: 'Resolve cross-ref', primaryStyle: 'warn',
@@ -706,7 +706,7 @@ function render_wo_detail(el) {
     const STYLES = {
       primary: 'background:#111318;color:#FFFFFF;border:none;',
       danger:  'background:#FCEBEB;color:#A32D2D;border:0.5px solid #F5C5C5;',
-      warn:    'background:#FAEEDA;color:#854F0B;border:0.5px solid #F5A623;',
+      warn:    'background:#D6E4F7;color:#1C3969;border:0.5px solid #1C3969;',
       neutral: 'background:#F5F2EE;color:#3A3D4A;border:0.5px solid #E2DDD8;',
     };
 
@@ -857,7 +857,7 @@ function render_wo_detail(el) {
     refs.forEach(function(r, i) { _xrefMap[i] = r; });
     const body = `
       ${hasMand
-        ? '<div style="display:flex;align-items:center;gap:8px;background:#FAEEDA;border:0.5px solid #F5A623;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#854F0B;"><i class="ti ti-alert-triangle" style="flex-shrink:0;"></i><span>Fleet policy requires using the substitute below. Select it to unblock this item in the cart.</span></div>'
+        ? '<div style="display:flex;align-items:center;gap:8px;background:#D6E4F7;border:0.5px solid #1C3969;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#1C3969;"><i class="ti ti-alert-triangle" style="flex-shrink:0;"></i><span>Fleet policy requires using the substitute below. Select it to unblock this item in the cart.</span></div>'
         : '<div style="display:flex;align-items:center;gap:8px;background:#F0ECE8;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#5A5F6E;"><i class="ti ti-info-circle" style="flex-shrink:0;"></i><span>These are optional alternatives — no action required. You can swap to one if preferred, or ignore and order the original.</span></div>'
       }
       <div style="margin-bottom:14px;font-size:12px;color:#7A7F8E;">Original part: <strong style="color:#111318;">${item.partNum}</strong> — ${item.description}</div>
@@ -878,7 +878,7 @@ function render_wo_detail(el) {
             <td style="padding:9px 12px;text-align:center;border-bottom:0.5px solid #F0ECE8;"><span style="font-size:10px;background:#F0ECE8;color:#5A5F6E;border-radius:4px;padding:2px 6px;font-weight:700;">${r.uom || 'EA'}</span></td>
             <td style="padding:9px 12px;text-align:right;font-size:13px;font-weight:700;color:#111318;border-bottom:0.5px solid #F0ECE8;">$${r.price.toFixed(2)}</td>
             <td style="padding:9px 12px;border-bottom:0.5px solid #F0ECE8;">
-              <button style="font-size:11px;font-weight:600;background:${r.mandatory ? '#F5A623' : '#F0ECE8'};border:${r.mandatory ? 'none' : '0.5px solid #E2DDD8'};border-radius:6px;padding:5px 12px;color:${r.mandatory ? '#1A1200' : '#3A3D4A'};cursor:pointer;font-family:inherit;" onclick="wodSwapCrossRef('${item.id}',${refs.indexOf(r)})">${r.mandatory ? 'Use this instead' : 'Swap to this'}</button>
+              <button style="font-size:11px;font-weight:600;background:${r.mandatory ? '#1C3969' : '#F0ECE8'};border:${r.mandatory ? 'none' : '0.5px solid #E2DDD8'};border-radius:6px;padding:5px 12px;color:${r.mandatory ? '#0A1628' : '#3A3D4A'};cursor:pointer;font-family:inherit;" onclick="wodSwapCrossRef('${item.id}',${refs.indexOf(r)})">${r.mandatory ? 'Use this instead' : 'Swap to this'}</button>
             </td>
           </tr>`).join('')}
         </tbody>

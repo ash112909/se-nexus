@@ -4,53 +4,45 @@ function render_supplier_portal(el) {
 
   const _supplierId = (_user.supplierIds || [])[0] || 'SKJ';
   const _fleets = Store.getSupplierFleets(_supplierId);
-  let _activeTab = 'fleets';
+  const SUPPLIER_NAMES = { SKJ: 'Skyjack', CAT: 'Caterpillar', TOY: 'Toyota', BOB: 'Bobcat' };
+  const _supplierName = SUPPLIER_NAMES[_supplierId] || _supplierId;
+  let _activeTab = 'home';
 
-  // Status meta for price requests
+  // Analytics state (persists across tab switches)
+  let _spPeriod = '30D';
+  let _spFleetIds = null; // null = all; Set<fleetId> = specific selection
+
+  // Manuals state
+  let _spManType = null; // null = all
+  let _spManMachine = 'All';
+  let _spManSearch = '';
+
+  // News state
+  let _spNewsSearch = '';
+  let _spNewsType = 'all';
+  let _spNewsPoster = 'all';
+  let _spNewsPriority = 'all';
+  let _spNewsSortDir = 'desc';
+  let _spNewsShowSaved = false;
+  let _spNewsSaved = new Set(JSON.parse(localStorage.getItem('se-news-saved') || '[]'));
+  let _spNewsReported = new Set(JSON.parse(localStorage.getItem('se-news-reported') || '[]'));
+
   const PR_STATUS = {
-    pending:    { label: 'Awaiting response', color: '#854F0B', bg: '#FAEEDA' },
+    pending:    { label: 'Awaiting response', color: '#1C3969', bg: '#D6E4F7' },
     needs_info: { label: 'More info needed',  color: '#534AB7', bg: '#EEEDFE' },
-    quoted:     { label: 'Quoted',            color: '#0F6E56', bg: '#E1F5EE' },
+    quoted:     { label: 'Quoted',            color: '#1C3969', bg: '#E1F5EE' },
     rejected:   { label: 'Not available',     color: '#5A5F6E', bg: '#F0ECE8' },
   };
 
-  const SUPPLIER_NAMES = { SKJ: 'Skyjack', CAT: 'Caterpillar', TOY: 'Toyota', BOB: 'Bobcat' };
-  const supplierName = SUPPLIER_NAMES[_supplierId] || _supplierId;
-
   el.innerHTML = `
 <style>
-.sp-shell { display: flex; height: 100vh; overflow: hidden; }
-.sp-sidebar { width: 220px; min-width: 220px; background: #1E1E1E; display: flex; flex-direction: column; padding: 0; overflow-y: auto; flex-shrink: 0; }
-.sp-sb-header { padding: 20px 16px 14px; border-bottom: 1px solid #2A2A2A; }
-.sp-sb-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-.sp-sb-logo-icon { width: 32px; height: 32px; background: #F5A623; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #1A1200; flex-shrink: 0; }
-.sp-sb-name { font-size: 13px; font-weight: 700; color: #FFFFFF; }
-.sp-sb-role { font-size: 11px; color: #6B7080; margin-top: 1px; }
-.sp-sb-nav { padding: 12px 10px; flex: 1; }
-.sp-sb-label { font-size: 10px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: #4A4E5A; padding: 0 6px; margin: 14px 0 6px; }
-.sp-sb-item { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 7px; font-size: 13px; color: #9CA3AF; cursor: pointer; transition: background 0.1s, color 0.1s; margin-bottom: 2px; }
-.sp-sb-item:hover { background: #2A2A2A; color: #FFFFFF; }
-.sp-sb-item.active { background: #2E2E2E; color: #FFFFFF; }
-.sp-sb-item i { font-size: 15px; flex-shrink: 0; }
-.sp-sb-badge { margin-left: auto; background: #F5A623; color: #1A1200; font-size: 10px; font-weight: 700; border-radius: 999px; padding: 1px 6px; }
-.sp-sb-footer { padding: 12px 10px; border-top: 1px solid #2A2A2A; }
-.sp-sb-user { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 7px; cursor: pointer; }
-.sp-sb-user:hover { background: #2A2A2A; }
-.sp-sb-avatar { width: 28px; height: 28px; background: #3A3D4A; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #FFFFFF; flex-shrink: 0; }
-.sp-sb-uname { font-size: 12px; font-weight: 600; color: #FFFFFF; }
-.sp-sb-uemail { font-size: 11px; color: #6B7080; }
-.sp-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #F5F2EE; }
-.sp-topbar { height: 52px; background: #FFFFFF; border-bottom: 1px solid #E8E4DF; display: flex; align-items: center; padding: 0 24px; gap: 12px; flex-shrink: 0; }
-.sp-topbar-title { font-size: 14px; font-weight: 600; color: #111318; flex: 1; }
-.sp-topbar-pill { display: inline-flex; align-items: center; gap: 5px; background: #FAEEDA; color: #854F0B; border-radius: 999px; font-size: 11px; font-weight: 600; padding: 3px 10px; }
-.sp-content { flex: 1; overflow-y: auto; padding: 28px; }
+/* ── Supplier portal base ─── */
 .sp-page-title { font-size: 20px; font-weight: 700; color: #111318; letter-spacing: -0.3px; margin-bottom: 4px; }
 .sp-page-sub { font-size: 13px; color: #7A7F8E; margin-bottom: 24px; }
-/* Fleet cards */
 .sp-fleet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 32px; }
 .sp-fleet-card { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
 .sp-fleet-card-header { display: flex; align-items: center; gap: 12px; }
-.sp-fleet-logo { width: 40px; height: 40px; background: #1E1E1E; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #F5A623; flex-shrink: 0; letter-spacing: .5px; }
+.sp-fleet-logo { width: 40px; height: 40px; background: #152B52; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #1C3969; flex-shrink: 0; letter-spacing: .5px; }
 .sp-fleet-name { font-size: 14px; font-weight: 700; color: #111318; }
 .sp-fleet-city { font-size: 12px; color: #9CA3AF; }
 .sp-fleet-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -60,9 +52,8 @@ function render_supplier_portal(el) {
 .sp-fleet-actions { display: flex; gap: 8px; }
 .sp-btn { height: 32px; padding: 0 12px; border-radius: 7px; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; border: none; transition: opacity 0.1s; }
 .sp-btn:hover { opacity: 0.85; }
-.sp-btn-primary { background: #F5A623; color: #1A1200; }
+.sp-btn-primary { background: #1C3969; color: #FFFFFF; }
 .sp-btn-ghost { background: #FFFFFF; color: #3A3D4A; border: 1px solid #E2DDD8 !important; }
-/* Price requests table */
 .sp-table { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; overflow: hidden; }
 .sp-table-head { display: grid; grid-template-columns: 120px 1fr 100px 120px 90px 90px; padding: 0 18px; background: #FAFAF9; border-bottom: 1px solid #F0ECE8; }
 .sp-table-th { font-size: 10px; font-weight: 600; color: #9CA3AF; letter-spacing: .8px; text-transform: uppercase; padding: 10px 8px; }
@@ -70,68 +61,251 @@ function render_supplier_portal(el) {
 .sp-table-row:last-child { border-bottom: none; }
 .sp-table-td { padding: 12px 8px; font-size: 13px; color: #3A3D4A; }
 .sp-status-pill { display: inline-flex; font-size: 10px; font-weight: 700; border-radius: 4px; padding: 2px 7px; white-space: nowrap; }
-/* Content composer */
 .sp-compose-card { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; padding: 22px; max-width: 680px; }
 .sp-compose-field { margin-bottom: 16px; }
 .sp-compose-label { font-size: 12px; font-weight: 600; color: #5A5F6E; margin-bottom: 5px; display: block; }
 .sp-compose-input { width: 100%; height: 36px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; }
-.sp-compose-input:focus { border-color: #F5A623; }
+.sp-compose-input:focus { border-color: #1C3969; }
 .sp-compose-textarea { width: 100%; min-height: 100px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; resize: vertical; }
-.sp-compose-textarea:focus { border-color: #F5A623; }
+.sp-compose-textarea:focus { border-color: #1C3969; }
 .sp-compose-select { width: 100%; height: 36px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; cursor: pointer; }
 .sp-fleet-check-row { display: flex; flex-direction: column; gap: 7px; padding: 10px; background: #FAFAF9; border: 1px solid #E8E4DF; border-radius: 7px; }
 .sp-fleet-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #3A3D4A; cursor: pointer; }
-.sp-fleet-check input { accent-color: #F5A623; }
-/* Impersonation banner */
-.sp-impersonate-banner { background: #FFF7ED; border-bottom: 2px solid #F5A623; padding: 9px 20px; display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 500; color: #854F0B; flex-shrink: 0; }
-.sp-impersonate-exit { margin-left: auto; background: #1E1E1E; color: #FFFFFF; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 600; font-family: inherit; cursor: pointer; }
+.sp-fleet-check input { accent-color: #1C3969; }
+/* ── Manuals CSS ─── */
+.man-content-row { display:flex; flex:1; min-height:0; overflow:hidden; }
+.man-vendor-panel { width:200px; min-width:200px; background:#FFFFFF; border-right:0.5px solid #E8E4DF; display:flex; flex-direction:column; padding:16px 0; overflow-y:auto; }
+.mvp-label { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#9CA3AF; margin-bottom:10px; padding:0 14px; }
+.man-vendor-item { display:flex; align-items:center; gap:8px; padding:6px 14px; cursor:pointer; margin-bottom:2px; }
+.man-vendor-item:hover { background:#F5F2EE; }
+.man-vendor-item.active { background:#D6E4F7; }
+.mvi-icon { width:26px; height:26px; background:#F5F2EE; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:13px; color:#9CA3AF; flex-shrink:0; }
+.man-vendor-item.active .mvi-icon { background:#1C3969; color:#FFFFFF; }
+.mvi-name { font-size:12px; font-weight:500; color:#3A3D4A; line-height:1.3; flex:1; }
+.man-vendor-item.active .mvi-name { color:#1C3969; font-weight:600; }
+.mvi-count { font-size:10px; color:#B0AAA3; }
+.man-main-panel { flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden; }
+.man-search-area { padding:12px 20px; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; flex-shrink:0; }
+.man-search-wrap { position:relative; }
+.man-search-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:17px; pointer-events:none; }
+.man-search-input { width:100%; height:40px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:10px; padding:0 14px 0 44px; font-size:14px; font-family:inherit; color:#111318; outline:none; box-sizing:border-box; }
+.man-search-input:focus { border-color:#1C3969; background:#FFFFFF; }
+.man-search-input::placeholder { color:#B0AAA3; }
+.man-machine-chip-row { display:flex; align-items:center; gap:6px; padding:10px 20px; background:#FAFAF8; border-bottom:0.5px solid #E8E4DF; flex-wrap:wrap; flex-shrink:0; }
+.man-machine-chip { height:28px; padding:0 12px; border:1px solid #E2DDD8; border-radius:999px; background:#FFFFFF; font-size:12px; font-weight:500; color:#5A5F6E; cursor:pointer; font-family:inherit; white-space:nowrap; }
+.man-machine-chip:hover { background:#F5F2EE; border-color:#C8C3BC; }
+.man-machine-chip.active { background:#D6E4F7; border-color:#1C3969; color:#1C3969; font-weight:600; }
+.man-content-body { flex:1; padding:20px; overflow-y:auto; }
+.man-section-label { font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#9CA3AF; margin-bottom:12px; }
+.docs-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:10px; margin-bottom:24px; }
+.doc-card { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; padding:14px; display:flex; gap:12px; cursor:pointer; transition:border-color 0.12s; }
+.doc-card:hover { border-color:#C8C3BC; }
+.doc-icon-wrap { width:42px; height:42px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.doc-body { flex:1; min-width:0; }
+.doc-title { font-size:13px; font-weight:600; color:#111318; margin-bottom:3px; line-height:1.3; }
+.doc-meta { font-size:11px; color:#9CA3AF; margin-bottom:6px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.doc-meta-sep { color:#D1CBC4; }
+.doc-tags { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:6px; }
+.doc-tag { font-size:10px; border-radius:4px; padding:2px 6px; font-weight:500; }
+.tag-type { background:#D6E4F7; color:#1C3969; }
+.doc-actions { display:flex; align-items:center; gap:6px; }
+.doc-btn { font-size:11px; font-weight:500; border-radius:6px; padding:4px 10px; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:4px; }
+.doc-btn-primary { background:#1C3969; border:none; color:#FFFFFF; font-weight:600; }
+.doc-btn-primary:hover { background:#152B52; }
+.doc-btn-ghost { background:none; border:0.5px solid #E2DDD8; color:#3A3D4A; }
+.doc-btn-ghost:hover { background:#F5F2EE; }
+/* ── News CSS ─── */
+.news-shell { display:flex; flex:1; min-height:0; overflow:hidden; }
+.news-filter-panel { width:220px; min-width:220px; background:#FFFFFF; border-right:0.5px solid #E8E4DF; display:flex; flex-direction:column; padding:16px 0; overflow-y:auto; flex-shrink:0; }
+.nfp-section { padding:0 14px; margin-bottom:18px; }
+.nfp-label { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#9CA3AF; margin-bottom:8px; }
+.nfp-item { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:7px; cursor:pointer; font-size:12px; color:#5A5F6E; margin-bottom:2px; }
+.nfp-item:hover { background:#F5F2EE; }
+.nfp-item.active { background:#D6E4F7; color:#1C3969; font-weight:600; }
+.nfp-item-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.nfp-poster { display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:7px; cursor:pointer; font-size:12px; color:#5A5F6E; margin-bottom:2px; }
+.nfp-poster:hover { background:#F5F2EE; }
+.nfp-poster.active { background:#D6E4F7; color:#1C3969; font-weight:600; }
+.news-main { flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden; }
+.news-toolbar { padding:14px 20px; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:10px; flex-wrap:wrap; flex-shrink:0; }
+.news-search-wrap { position:relative; flex:1; min-width:200px; max-width:360px; }
+.news-search-icon { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:15px; pointer-events:none; }
+.news-search-input { width:100%; height:36px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:9px; padding:0 12px 0 34px; font-size:13px; font-family:inherit; color:#111318; outline:none; }
+.news-search-input:focus { border-color:#1C3969; background:#FFFFFF; }
+.news-search-input::placeholder { color:#B0AAA3; }
+.news-sort-btn { display:flex; align-items:center; gap:5px; height:36px; padding:0 12px; background:#FFFFFF; border:0.5px solid #E2DDD8; border-radius:9px; font-size:12px; font-weight:500; color:#5A5F6E; cursor:pointer; font-family:inherit; white-space:nowrap; }
+.news-sort-btn:hover { background:#F5F2EE; }
+.news-count-label { font-size:12px; color:#9CA3AF; margin-left:auto; white-space:nowrap; }
+.news-body { flex:1; padding:16px 20px; overflow-y:auto; }
+.news-card { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; padding:15px; margin-bottom:10px; transition:border-color .12s, box-shadow .12s; }
+.news-card:hover { border-color:#C8C3BC; box-shadow:0 2px 8px rgba(0,0,0,.05); }
+.nc-top { display:flex; align-items:flex-start; gap:10px; margin-bottom:10px; }
+.nc-icon { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.nc-meta { flex:1; display:flex; flex-direction:column; gap:3px; }
+.nc-poster { font-size:11px; color:#9CA3AF; }
+.nc-date { font-size:11px; color:#C0BAB3; white-space:nowrap; flex-shrink:0; }
+.nc-title { font-size:13px; font-weight:600; color:#111318; line-height:1.45; margin-bottom:5px; }
+.nc-summary { font-size:12px; color:#7A7F8E; line-height:1.6; margin-bottom:10px; }
+.nc-tags { display:flex; gap:5px; flex-wrap:wrap; }
+.nc-tag { font-size:10px; background:#F5F2EE; color:#7A7F8E; border-radius:4px; padding:2px 7px; }
+.nc-actions { display:flex; align-items:center; gap:8px; margin-top:10px; padding-top:10px; border-top:0.5px solid #F0ECE8; }
+.nc-action-btn { display:inline-flex; align-items:center; gap:5px; padding:5px 11px; border-radius:7px; border:0.5px solid #E2DDD8; background:#FFFFFF; color:#5A5F6E; font-size:11px; font-weight:500; cursor:pointer; font-family:inherit; }
+.nc-action-btn:hover { background:#F5F2EE; }
+.nc-saved { background:#D6E4F7; color:#1C3969; border-color:#1C3969; }
+.nc-saved:hover { background:#F5DFC0; }
+.nc-report-btn:hover { background:#FFF5F5; color:#B91C1C; border-color:#FCA5A5; }
+.nc-reported { color:#9CA3AF; border-color:#E2DDD8; cursor:default; }
+/* ── Analytics CSS ─── */
+.an-main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.an-filter-bar { display:flex; align-items:center; gap:12px; padding:10px 24px; border-bottom:0.5px solid #E8E4DF; background:#FAFAF8; flex-shrink:0; flex-wrap:wrap; }
+.an-filter-label { font-size:11px; font-weight:600; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.8px; white-space:nowrap; }
+.an-period-pills { display:flex; gap:4px; }
+.an-period-pill { padding:4px 11px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:0.5px solid #E0DBD5; color:#5A5F6E; background:#FFFFFF; transition:all 0.15s; white-space:nowrap; }
+.an-period-pill.active { background:#111318; color:#FFFFFF; border-color:#111318; }
+.an-period-pill:hover:not(.active) { border-color:#9CA3AF; color:#111318; }
+.an-filter-sep { width:0.5px; height:20px; background:#E8E4DF; }
+.an-loc-pills { display:flex; gap:5px; flex-wrap:wrap; }
+.an-loc-pill { display:flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:0.5px solid #E0DBD5; color:#5A5F6E; background:#FFFFFF; transition:all 0.15s; white-space:nowrap; }
+.an-loc-pill.active { background:#D6E4F7; color:#1C3969; border-color:#F5C97A; }
+.an-loc-pill:hover:not(.active) { border-color:#9CA3AF; }
+.an-content { flex:1; padding:20px 24px 40px; overflow-y:auto; }
+.an-kpi-row { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:18px; }
+.an-kpi { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; padding:14px 16px; }
+.an-kpi-val { font-size:22px; font-weight:700; color:#111318; letter-spacing:-0.5px; line-height:1.1; }
+.an-kpi-label { font-size:11px; color:#9CA3AF; margin-top:3px; line-height:1.3; }
+.an-kpi-delta { font-size:11px; margin-top:4px; font-weight:600; }
+.an-kpi-delta.up { color:#3B6D11; } .an-kpi-delta.down { color:#A32D2D; } .an-kpi-delta.neutral { color:#9CA3AF; }
+.an-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+.an-grid-3 { display:grid; grid-template-columns:2fr 1fr; gap:14px; margin-bottom:14px; }
+.an-grid-insight { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+.an-card { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
+.an-card-hdr { padding:11px 16px; border-bottom:0.5px solid #F0ECE8; display:flex; align-items:center; justify-content:space-between; }
+.an-card-title { font-size:12px; font-weight:600; color:#111318; display:flex; align-items:center; gap:6px; }
+.an-card-sub { font-size:10px; color:#9CA3AF; }
+.an-card-body { padding:14px 16px; }
+.an-trend-wrap { display:flex; align-items:flex-end; gap:5px; height:100px; }
+.an-bar-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:default; }
+.an-bar-col:hover .an-bar-seg { opacity:0.8; }
+.an-bar-seg { width:100%; border-radius:3px 3px 0 0; transition:height 0.3s; min-height:2px; }
+.an-bar-lbl { font-size:9px; color:#9CA3AF; }
+.an-bar-amt { font-size:8px; font-weight:600; color:#5A5F6E; }
+.an-mech-row { display:flex; align-items:center; gap:9px; margin-bottom:9px; }
+.an-mech-row:last-child { margin-bottom:0; }
+.an-avatar { width:26px; height:26px; border-radius:50%; font-size:9px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.an-name { font-size:12px; font-weight:500; color:#111318; min-width:80px; }
+.an-bar-inline { flex:1; height:6px; background:#F5F2EE; border-radius:3px; overflow:hidden; }
+.an-bar-fill { height:100%; border-radius:3px; }
+.an-val { font-size:11px; font-weight:700; color:#111318; text-align:right; min-width:52px; }
+.an-cnt { font-size:10px; color:#9CA3AF; text-align:right; min-width:40px; }
+.an-vendor-row { display:flex; align-items:center; gap:8px; margin-bottom:9px; }
+.an-vendor-row:last-child { margin-bottom:0; }
+.an-vdot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.an-vname { font-size:12px; font-weight:500; color:#111318; min-width:72px; }
+.an-vpct { font-size:10px; color:#9CA3AF; min-width:30px; text-align:right; }
+.an-vval { font-size:11px; font-weight:700; color:#111318; min-width:54px; text-align:right; }
+.an-part-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.an-part-row:last-child { margin-bottom:0; }
+.an-rank { width:17px; height:17px; border-radius:4px; background:#F5F2EE; font-size:9px; font-weight:700; color:#9CA3AF; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.an-part-info { flex:1; min-width:0; }
+.an-part-desc { font-size:11px; font-weight:500; color:#111318; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.an-part-meta { font-size:9px; color:#9CA3AF; margin-top:1px; }
+.an-part-qty { font-size:11px; font-weight:700; color:#111318; min-width:24px; text-align:right; }
+.an-trend-arrow { font-size:10px; }
+.an-trend-up { color:#3B6D11; } .an-trend-down { color:#A32D2D; } .an-trend-flat { color:#9CA3AF; }
+.an-wo-stat { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:0.5px solid #F5F2EE; }
+.an-wo-stat:last-child { border-bottom:none; }
+.an-wo-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; }
+.an-cat-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.an-cat-row:last-child { margin-bottom:0; }
+.an-cat-name { font-size:11px; font-weight:500; color:#111318; min-width:80px; }
+.an-cat-val { font-size:11px; font-weight:700; color:#111318; min-width:52px; text-align:right; }
+.an-donut-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.an-donut-row:last-child { margin-bottom:0; }
+.an-donut-swatch { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
+.an-donut-label { font-size:12px; color:#111318; flex:1; }
+.an-donut-pct { font-size:11px; font-weight:700; color:#111318; }
+.an-donut-val { font-size:10px; color:#9CA3AF; min-width:48px; text-align:right; }
+.an-insight { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; gap:6px; }
+.an-insight-icon { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+.an-insight-title { font-size:12px; font-weight:600; color:#111318; }
+.an-insight-body { font-size:11px; color:#5A5F6E; line-height:1.55; }
+.an-insight-tag { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; margin-top:2px; width:fit-content; }
+.an-empty { color:#9CA3AF; font-size:12px; padding:8px 0; }
 </style>
-
-<div class="sp-shell">
-  <div class="sp-sidebar">
-    <div class="sp-sb-header">
-      <div class="sp-sb-logo">
-        <div class="sp-sb-logo-icon">${_supplierId}</div>
-        <div>
-          <div class="sp-sb-name">${supplierName}</div>
-          <div class="sp-sb-role">Supplier Portal</div>
-        </div>
+<div class="shell">
+  ${buildSidebar('sp-home')}
+  <div class="main" style="display:flex;flex-direction:column;overflow:hidden;">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
+        <span style="color:#FFFFFF;font-weight:500;" id="sp-topbar-title">Home</span>
       </div>
+      <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
+      ${buildTopbarRight()}
     </div>
-    <div class="sp-sb-nav">
-      <div class="sp-sb-label">Portal</div>
-      <div class="sp-sb-item ${_activeTab==='fleets'?'active':''}" data-tab="fleets"><i class="ti ti-building-warehouse"></i> My Fleets</div>
-      <div class="sp-sb-item ${_activeTab==='requests'?'active':''}" data-tab="requests"><i class="ti ti-tag"></i> Price Requests <span class="sp-sb-badge" id="sp-pr-badge">0</span></div>
-      <div class="sp-sb-item ${_activeTab==='content'?'active':''}" data-tab="content"><i class="ti ti-pencil"></i> Post Content</div>
-    </div>
-    <div class="sp-sb-footer">
-      <div class="sp-sb-user" onclick="Store.logout();Router.navigate('login');">
-        <div class="sp-sb-avatar">${_user.avatar}</div>
-        <div>
-          <div class="sp-sb-uname">${_user.shortName}</div>
-          <div class="sp-sb-uemail">Sign out</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="sp-main">
-    <div class="sp-topbar">
-      <div class="sp-topbar-title" id="sp-topbar-title">My Fleets</div>
-      <span class="sp-topbar-pill"><i class="ti ti-shield-check" style="font-size:11px;"></i> Supplier view</span>
-    </div>
-    <div class="sp-content" id="sp-content"></div>
+    <div id="sp-content" style="flex:1;overflow-y:auto;padding:28px;"></div>
   </div>
 </div>`;
 
-  const pendingCount = Store.getPriceRequests(_supplierId).filter(r => r.status === 'pending').length;
-  const badge = document.getElementById('sp-pr-badge');
-  if (badge) badge.textContent = pendingCount;
+  // ── Helpers ──────────────────────────────────────────────────────────────────
+
+  function spBar(pct, color) {
+    return `<div class="an-bar-inline"><div class="an-bar-fill" style="width:${Math.max(2, Math.round(pct*100))}%;background:${color};"></div></div>`;
+  }
 
   // ── Tab rendering ────────────────────────────────────────────────────────────
 
+  function renderHome() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Home';
+    const pending = Store.getPriceRequests(_supplierId).filter(r => r.status === 'pending').length;
+    const myArticles = (Store.getCmsArticles ? Store.getCmsArticles('published') : []).filter(a => a.supplierId === _supplierId);
+    const recentReqs = Store.getPriceRequests(_supplierId).slice(0, 3);
+    document.getElementById('sp-content').innerHTML = `
+      <div class="sp-page-title">Welcome back, ${_user.displayName.split(' ')[0]}</div>
+      <div class="sp-page-sub">Here's a summary of your supplier activity.</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:28px;">
+        <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:18px;">
+          <div style="font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;">Onboarded Fleets</div>
+          <div style="font-size:28px;font-weight:700;color:#111318;">${_fleets.length}</div>
+        </div>
+        <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:18px;">
+          <div style="font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;">Open Price Requests</div>
+          <div style="font-size:28px;font-weight:700;color:${pending > 0 ? '#1C3969' : '#111318'};">${pending}</div>
+        </div>
+        <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:18px;">
+          <div style="font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;">Content Published</div>
+          <div style="font-size:28px;font-weight:700;color:#111318;">${myArticles.length}</div>
+        </div>
+        <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:18px;">
+          <div style="font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;">Total Requests</div>
+          <div style="font-size:28px;font-weight:700;color:#111318;">${Store.getPriceRequests(_supplierId).length}</div>
+        </div>
+      </div>
+      ${recentReqs.length ? `
+      <div style="font-size:14px;font-weight:700;color:#111318;margin-bottom:12px;">Recent Price Requests</div>
+      <div class="sp-table" style="margin-bottom:24px;">
+        ${recentReqs.map(r => {
+          const s = PR_STATUS[r.status] || PR_STATUS.pending;
+          return `<div class="sp-table-row" style="grid-template-columns:1fr 110px 130px 80px;">
+            <div class="sp-table-td">
+              <div style="font-weight:500;color:#111318;">${r.partDesc}</div>
+              <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">${r.partNum} · ${r.fleetName}</div>
+            </div>
+            <div class="sp-table-td" style="font-size:12px;color:#7A7F8E;">${r.requestedDate}</div>
+            <div class="sp-table-td"><span class="sp-status-pill" style="background:${s.bg};color:${s.color};">${s.label}</span></div>
+            <div class="sp-table-td"><button class="sp-btn sp-btn-ghost" onclick="spPrOpenRequest('${r.id}')">View</button></div>
+          </div>`;
+        }).join('')}
+      </div>` : ''}
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="sp-btn sp-btn-primary" onclick="document.querySelector('.sb-item[data-sp-tab=fleets]').click()"><i class="ti ti-building-warehouse" style="font-size:12px;"></i> View My Fleets</button>
+        <button class="sp-btn sp-btn-ghost" onclick="document.querySelector('.sb-item[data-sp-tab=content]').click()"><i class="ti ti-pencil" style="font-size:12px;"></i> My Content</button>
+      </div>`;
+  }
+
   function renderFleets() {
-    document.getElementById('sp-topbar-title').textContent = 'My Fleets';
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'My Fleets';
     const openRequests = Store.getPriceRequests(_supplierId).filter(r => r.status === 'pending').length;
     document.getElementById('sp-content').innerHTML = `
       <div class="sp-page-title">My Fleets</div>
@@ -163,122 +337,1749 @@ function render_supplier_portal(el) {
       </div>`;
   }
 
+  // ── Price Requests state ─────────────────────────────────────────────────────
+  let _prFilter = { fleet: 'all', status: 'all', location: 'all', user: '', dateFrom: '', dateTo: '' };
+  let _prDetailId = null; // currently open detail panel
+
   function renderRequests() {
-    document.getElementById('sp-topbar-title').textContent = 'Price Requests';
-    const reqs = Store.getPriceRequests(_supplierId);
-    document.getElementById('sp-content').innerHTML = `
-      <div class="sp-page-title">Price Requests</div>
-      <div class="sp-page-sub">${reqs.length} total · ${reqs.filter(r=>r.status==='pending').length} awaiting response</div>
-      <div class="sp-table">
-        <div class="sp-table-head">
-          <div class="sp-table-th">Part #</div>
-          <div class="sp-table-th">Description</div>
-          <div class="sp-table-th">Fleet</div>
-          <div class="sp-table-th">Requested by</div>
-          <div class="sp-table-th">Qty</div>
-          <div class="sp-table-th">Status</div>
-          <div></div>
-        </div>
-        ${reqs.length ? reqs.map(r => {
-          const s = PR_STATUS[r.status] || PR_STATUS.pending;
-          return `<div class="sp-table-row" style="grid-template-columns:120px 1fr 100px 120px 50px 130px 80px;">
-            <div class="sp-table-td"><span style="font-size:11px;font-weight:600;font-family:monospace;color:#111318;">${r.partNum}</span></div>
-            <div class="sp-table-td">
-              <div style="font-size:13px;color:#111318;font-weight:500;">${r.partDesc}</div>
-              ${r.notes ? `<div style="font-size:11px;color:#9CA3AF;margin-top:2px;">${r.notes}</div>` : ''}
-            </div>
-            <div class="sp-table-td" style="font-size:12px;">${r.fleetName}</div>
-            <div class="sp-table-td" style="font-size:12px;">${r.requestedBy}<div style="font-size:10px;color:#9CA3AF;">${r.requestedDate}</div></div>
-            <div class="sp-table-td">${r.qty}</div>
-            <div class="sp-table-td"><span class="sp-status-pill" style="background:${s.bg};color:${s.color};">${s.label}</span></div>
-            <div class="sp-table-td"><button class="sp-btn sp-btn-ghost" onclick="spRespondToRequest('${r.id}')">Respond</button></div>
-          </div>`;
-        }).join('') : '<div style="padding:40px;text-align:center;color:#9CA3AF;font-size:13px;">No price requests yet.</div>'}
-      </div>`;
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Price Requests';
+    const contentEl = document.getElementById('sp-content');
+    contentEl.style.cssText = 'flex:1;overflow-y:auto;padding:28px;';
+
+    const allReqs = Store.getPriceRequests(_supplierId);
+
+    // Build filter option lists
+    const fleets    = [...new Set(allReqs.map(r => r.fleetName))].sort();
+    const locations = [...new Set(allReqs.map(r => r.location).filter(Boolean))].sort();
+
+    let reqs = _prFilteredReqs();
+
+    const pending = allReqs.filter(r => r.status === 'pending').length;
+
+    contentEl.innerHTML = `
+<style>
+.pr-filter-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+.pr-filter-select { height:32px; border:1px solid #E2E5EE; border-radius:7px; padding:0 10px; font-size:12px; color:#111318; background:#fff; cursor:pointer; }
+.pr-filter-input  { height:32px; border:1px solid #E2E5EE; border-radius:7px; padding:0 10px; font-size:12px; color:#111318; background:#fff; width:140px; }
+.pr-filter-input::placeholder { color:#B0B5C3; }
+.pr-filter-date   { height:32px; border:1px solid #E2E5EE; border-radius:7px; padding:0 8px; font-size:12px; color:#111318; background:#fff; }
+.pr-clear-btn { height:32px; padding:0 10px; border:none; border-radius:7px; background:transparent; font-size:12px; color:#7A7F8E; cursor:pointer; white-space:nowrap; }
+.pr-clear-btn:hover { background:#F5F2EE; color:#111318; }
+
+.pr-table { border:1px solid #E8E4DF; border-radius:10px; overflow:hidden; background:#fff; }
+.pr-table-head { display:grid; grid-template-columns:130px 1fr 140px 130px 56px 140px 46px 120px; background:#F9F8F7; border-bottom:1px solid #E8E4DF; }
+.pr-table-th { padding:9px 14px; font-size:11px; font-weight:600; color:#9CA3AF; letter-spacing:.5px; text-transform:uppercase; }
+.pr-table-row { display:grid; grid-template-columns:130px 1fr 140px 130px 56px 140px 46px 120px; border-bottom:1px solid #F0ECE8; cursor:pointer; transition:background .12s; }
+.pr-table-row:last-child { border-bottom:none; }
+.pr-table-row:hover { background:#FAFAF9; }
+.pr-table-row.pr-row-open { background:#F5F2EE; }
+.pr-table-td { padding:12px 14px; font-size:12px; color:#4B5268; display:flex; align-items:center; }
+
+.pr-detail-panel { border:1px solid #E8E4DF; border-radius:10px; overflow:hidden; background:#fff; margin-top:0; animation:prSlideIn .18s ease; }
+@keyframes prSlideIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+.pr-detail-header { padding:16px 20px; background:#F9F8F7; border-bottom:1px solid #E8E4DF; display:flex; align-items:flex-start; gap:16px; }
+.pr-detail-body { display:grid; grid-template-columns:1fr 320px; }
+.pr-detail-main { padding:20px; border-right:1px solid #F0ECE8; }
+.pr-detail-sidebar { padding:20px; }
+.pr-comment-list { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+.pr-comment { border-radius:8px; padding:11px 13px; }
+.pr-comment.supplier { background:#EAF3FC; }
+.pr-comment.fleet    { background:#F5F2EE; }
+.pr-comment-meta { font-size:11px; font-weight:600; color:#7A7F8E; margin-bottom:4px; display:flex; justify-content:space-between; }
+.pr-comment-text { font-size:13px; color:#111318; line-height:1.5; }
+.pr-compose { border:1px solid #E2E5EE; border-radius:8px; overflow:hidden; }
+.pr-compose-top { display:flex; gap:6px; padding:8px; border-bottom:1px solid #F0ECE8; background:#F9F8F7; }
+.pr-compose-tab { padding:4px 10px; border:none; border-radius:5px; font-size:12px; font-weight:500; cursor:pointer; background:transparent; color:#7A7F8E; }
+.pr-compose-tab.active { background:#fff; color:#111318; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+.pr-compose textarea { width:100%; border:none; outline:none; resize:none; padding:10px 12px; font-size:13px; font-family:inherit; color:#111318; background:#fff; height:80px; box-sizing:border-box; }
+.pr-compose-footer { padding:8px 10px; display:flex; align-items:center; justify-content:space-between; border-top:1px solid #F0ECE8; background:#F9F8F7; }
+.pr-not-resolvable-link { font-size:11px; color:#B0B5C3; background:none; border:none; cursor:pointer; padding:0; text-decoration:underline; }
+.pr-not-resolvable-link:hover { color:#5A5F6E; }
+</style>
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+  <div>
+    <div class="sp-page-title">Price Requests</div>
+    <div class="sp-page-sub">${allReqs.length} total · <strong>${pending}</strong> awaiting response</div>
+  </div>
+  <button class="sp-btn sp-btn-primary" onclick="spPrAddPrice()" style="display:flex;align-items:center;gap:6px;">
+    <i class="ti ti-plus" style="font-size:14px;"></i> Add Price
+  </button>
+</div>
+
+<div class="pr-filter-bar">
+  <select class="pr-filter-select" id="pr-f-fleet" onchange="spPrApplyFilter()">
+    <option value="all">All fleets</option>
+    ${fleets.map(f => `<option value="${f}" ${_prFilter.fleet===f?'selected':''}>${f}</option>`).join('')}
+  </select>
+  <select class="pr-filter-select" id="pr-f-status" onchange="spPrApplyFilter()">
+    <option value="all">All statuses</option>
+    ${Object.entries(PR_STATUS).map(([k,v]) => `<option value="${k}" ${_prFilter.status===k?'selected':''}>${v.label}</option>`).join('')}
+  </select>
+  <select class="pr-filter-select" id="pr-f-location" onchange="spPrApplyFilter()">
+    <option value="all">All locations</option>
+    ${locations.map(l => `<option value="${l}" ${_prFilter.location===l?'selected':''}>${l}</option>`).join('')}
+  </select>
+  <input class="pr-filter-input" id="pr-f-user" placeholder="Search by user…" value="${_prFilter.user}" oninput="spPrFilterUser()" />
+  <span style="font-size:12px;color:#9CA3AF;white-space:nowrap;">From</span>
+  <input class="pr-filter-date" id="pr-f-from" type="date" value="${_prFilter.dateFrom}" onchange="spPrApplyFilter()" />
+  <span style="font-size:12px;color:#9CA3AF;">to</span>
+  <input class="pr-filter-date" id="pr-f-to" type="date" value="${_prFilter.dateTo}" onchange="spPrApplyFilter()" />
+  <button class="pr-clear-btn" onclick="spPrClearFilters()">Clear filters</button>
+</div>
+
+<div id="pr-list-wrap">
+  ${_renderPrTable(reqs)}
+</div>`;
+
+    // Re-open detail panel if one was open
+    if (_prDetailId) {
+      const stillExists = reqs.find(r => r.id === _prDetailId);
+      if (stillExists) _renderPrDetail(_prDetailId);
+      else _prDetailId = null;
+    }
   }
 
+  function _renderPrTable(reqs) {
+    if (!reqs.length) return '<div style="padding:48px;text-align:center;color:#9CA3AF;font-size:13px;">No price requests match the current filters.</div>';
+    return `
+<div class="pr-table">
+  <div class="pr-table-head">
+    <div class="pr-table-th">Part #</div>
+    <div class="pr-table-th">Description</div>
+    <div class="pr-table-th">Fleet</div>
+    <div class="pr-table-th">Requested by</div>
+    <div class="pr-table-th">Qty</div>
+    <div class="pr-table-th">Status</div>
+    <div class="pr-table-th" title="Comments"></div>
+    <div class="pr-table-th"></div>
+  </div>
+  ${reqs.map(r => {
+    const s = PR_STATUS[r.status] || PR_STATUS.pending;
+    const cCount = (r.comments || []).length;
+    const isOpen = _prDetailId === r.id;
+    return `<div class="pr-table-row${isOpen?' pr-row-open':''}" onclick="spPrToggleDetail('${r.id}')">
+      <div class="pr-table-td"><span style="font-size:11px;font-weight:600;font-family:monospace;color:#111318;">${r.partNum}</span></div>
+      <div class="pr-table-td" style="flex-direction:column;align-items:flex-start;gap:2px;">
+        <span style="font-size:13px;color:#111318;font-weight:500;">${r.partDesc}</span>
+        ${r.notes ? `<span style="font-size:11px;color:#9CA3AF;">${r.notes}</span>` : ''}
+      </div>
+      <div class="pr-table-td" style="flex-direction:column;align-items:flex-start;gap:1px;">
+        <span>${r.fleetName}</span>
+        ${r.location ? `<span style="font-size:11px;color:#9CA3AF;">${r.location}</span>` : ''}
+      </div>
+      <div class="pr-table-td" style="flex-direction:column;align-items:flex-start;gap:1px;">
+        <span>${r.requestedBy}</span>
+        <span style="font-size:11px;color:#9CA3AF;">${r.requestedDate}</span>
+      </div>
+      <div class="pr-table-td">${r.qty}</div>
+      <div class="pr-table-td"><span class="sp-status-pill" style="background:${s.bg};color:${s.color};">${s.label}</span></div>
+      <div class="pr-table-td" style="justify-content:center;">
+        ${cCount ? `<span style="font-size:11px;color:#7A7F8E;display:flex;align-items:center;gap:3px;"><i class="ti ti-message" style="font-size:12px;"></i>${cCount}</span>` : ''}
+      </div>
+      <div class="pr-table-td" style="justify-content:flex-end;gap:6px;" onclick="event.stopPropagation()">
+        ${r.status === 'pending' || r.status === 'needs_info' ? `<button class="sp-btn sp-btn-primary" style="font-size:11px;padding:4px 10px;" onclick="spRespondToRequest('${r.id}')">Add Price</button>` : ''}
+        <i class="ti ti-chevron-${_prDetailId===r.id?'up':'down'}" style="font-size:14px;color:#9CA3AF;cursor:pointer;" onclick="spPrToggleDetail('${r.id}')"></i>
+      </div>
+    </div>`;
+  }).join('')}
+</div>`;
+  }
+
+  function _renderPrDetail(id) {
+    const allReqs = Store.getPriceRequests(_supplierId);
+    const r = allReqs.find(x => x.id === id);
+    if (!r) return;
+    const s = PR_STATUS[r.status] || PR_STATUS.pending;
+    const comments = r.comments || [];
+    const currentUser = Store.getCurrentUser();
+
+    // Insert detail panel after the table row in the list
+    const wrap = document.getElementById('pr-list-wrap');
+    if (!wrap) return;
+
+    // Remove existing detail panel
+    const existing = document.getElementById('pr-detail-panel');
+    if (existing) existing.remove();
+
+    const panel = document.createElement('div');
+    panel.id = 'pr-detail-panel';
+    panel.style.cssText = 'margin-top:2px;margin-bottom:8px;';
+    panel.innerHTML = `
+<div class="pr-detail-panel">
+  <div class="pr-detail-header">
+    <div style="flex:1;">
+      <div style="font-size:15px;font-weight:700;color:#111318;margin-bottom:2px;">${r.partDesc}</div>
+      <div style="font-size:12px;color:#7A7F8E;">${r.partNum} · Qty ${r.qty} · ${r.fleetName}${r.location ? ' · ' + r.location : ''}</div>
+      ${r.notes ? `<div style="font-size:12px;color:#7A7F8E;margin-top:4px;font-style:italic;">"${r.notes}"</div>` : ''}
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+      <span class="sp-status-pill" style="background:${s.bg};color:${s.color};">${s.label}</span>
+      ${r.status === 'pending' || r.status === 'needs_info'
+        ? `<button class="sp-btn sp-btn-primary" style="font-size:12px;" onclick="spRespondToRequest('${r.id}')">Add Price</button>`
+        : ''}
+      ${r.response && r.response.price ? `<div style="font-size:14px;font-weight:700;color:#1C3969;">$${parseFloat(r.response.price).toFixed(2)} / unit</div>` : ''}
+    </div>
+  </div>
+  <div class="pr-detail-body">
+    <div class="pr-detail-main">
+      <div style="font-size:12px;font-weight:600;color:#9CA3AF;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;">Comments & thread</div>
+      <div class="pr-comment-list" id="pr-comment-list-${id}">
+        ${comments.length ? comments.map(c => `
+          <div class="pr-comment ${c.authorRole}">
+            <div class="pr-comment-meta">
+              <span>${c.author} ${c.authorRole === 'supplier' ? '· You' : '· Fleet'}</span>
+              <span>${c.date}</span>
+            </div>
+            <div class="pr-comment-text">${c.text}</div>
+          </div>`).join('') : `<div style="font-size:13px;color:#B0B5C3;padding:8px 0;">No comments yet — start the conversation below.</div>`}
+      </div>
+      <div class="pr-compose">
+        <div class="pr-compose-top">
+          <button class="pr-compose-tab active" id="pr-tab-comment" onclick="spPrSwitchCompose('comment','${id}')">Comment</button>
+          <button class="pr-compose-tab" id="pr-tab-info" onclick="spPrSwitchCompose('info','${id}')">Request info</button>
+        </div>
+        <textarea id="pr-compose-text-${id}" placeholder="Add a comment or question for the fleet…"></textarea>
+        <div class="pr-compose-footer">
+          <button class="pr-not-resolvable-link" onclick="spPrMarkUnresolvable('${id}')">Mark as not resolvable</button>
+          <button class="sp-btn sp-btn-primary" style="font-size:12px;" onclick="spPrSendComment('${id}')">Send</button>
+        </div>
+      </div>
+    </div>
+    <div class="pr-detail-sidebar">
+      <div style="font-size:12px;font-weight:600;color:#9CA3AF;letter-spacing:.5px;text-transform:uppercase;margin-bottom:12px;">Request details</div>
+      ${[
+        ['Fleet', r.fleetName],
+        ['Location', r.location || '—'],
+        ['Requested by', r.requestedBy],
+        ['Date submitted', r.requestedDate],
+        ['Part number', r.partNum],
+        ['Qty requested', r.qty],
+        ['Status', s.label],
+      ].map(([label, val]) => `
+        <div style="margin-bottom:10px;">
+          <div style="font-size:11px;color:#9CA3AF;margin-bottom:2px;">${label}</div>
+          <div style="font-size:13px;color:#111318;font-weight:500;">${val}</div>
+        </div>`).join('')}
+      ${r.response && r.response.price ? `
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid #F0ECE8;">
+          <div style="font-size:11px;color:#9CA3AF;margin-bottom:2px;">Quoted price</div>
+          <div style="font-size:20px;font-weight:700;color:#1C3969;">$${parseFloat(r.response.price).toFixed(2)}</div>
+          <div style="font-size:11px;color:#9CA3AF;">per unit</div>
+        </div>` : ''}
+    </div>
+  </div>
+</div>`;
+
+    wrap.appendChild(panel);
+  }
+
+  // ── Supplier content management state ────────────────────────────────────
+  let _spcView = 'list';     // 'list' | 'editor'
+  let _spcEditId = null;     // null = new
+  let _spcFilter = 'all';    // 'all' | 'published' | 'draft' | 'scheduled' | 'expired'
+  let _spcSearch = '';
+  let _spcAiMode = null;
+  let _spPtSelectedPartId = null;
+  let _spPtExpandedCats = new Set();
+
+  const SP_CONTENT_TYPES = {
+    bulletin: { label:'Service Bulletin', icon:'ti-alert-triangle', color:'#1C3969', bg:'#D6E4F7' },
+    news:     { label:'Product News',     icon:'ti-news',           color:'#534AB7', bg:'#EEEDFE' },
+    safety:   { label:'Safety Notice',    icon:'ti-alert-octagon',  color:'#B91C1C', bg:'#FEE2E2' },
+    promo:    { label:'Promotion',        icon:'ti-tag',            color:'#1C3969', bg:'#E1F5EE' },
+    training: { label:'Training',         icon:'ti-certificate',    color:'#5B21B6', bg:'#EDE9FE' },
+    pricing:  { label:'Pricing Update',   icon:'ti-coin',           color:'#6B7280', bg:'#F3F4F6' },
+  };
+  const SP_CONTENT_SUBTYPES = {
+    bulletin: ['Mandatory','Advisory','Recall'],
+    news:     ['Product Launch','Feature Update','Availability'],
+    safety:   ['Compliance','Hazard','PPE','Procedure'],
+    promo:    ['Seasonal','Volume Discount','New Customer'],
+    training: ['Required','Optional','Certification'],
+    pricing:  ['Increase','Decrease','Promotional'],
+  };
+  const SP_PRIORITIES = [
+    { value:'critical', label:'Critical', color:'#B91C1C', bg:'#FEE2E2' },
+    { value:'high',     label:'High',     color:'#C2410C', bg:'#FFF7ED' },
+    { value:'medium',   label:'Medium',   color:'#B45309', bg:'#FFFBEB' },
+    { value:'low',      label:'Low',      color:'#6B7280', bg:'#F9FAFB' },
+  ];
+  const SP_LANGUAGES = [
+    { value:'en', label:'English' },
+    { value:'es', label:'Spanish (Español)' },
+    { value:'fr', label:'French (Français)' },
+    { value:'pt', label:'Portuguese (Português)' },
+  ];
+  const SP_AI_REWRITES = {
+    rewrite: t => t + '\n\n[AI enhanced: improved clarity and professional tone.]',
+    simplify: t => t.split(/[.!?]+/).filter(s=>s.trim().length>10).slice(0,3).map(s=>s.trim()).join('. ') + '.\n\n[AI simplified: reduced to key points.]',
+    translate_es: t => '[Traducción al Español]\n\n' + t.split(' ').map(w => {
+      const map = { required:'requerido',inspection:'inspección',safety:'seguridad',all:'todos',before:'antes de',must:'debe',complete:'completar',operators:'operadores',units:'unidades',please:'por favor',and:'y',the:'el' };
+      const c = w.toLowerCase().replace(/[^a-z]/g,''); return map[c] ? w.replace(c,map[c]) : w;
+    }).join(' '),
+  };
+
+  function escSpc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
   function renderContent() {
-    document.getElementById('sp-topbar-title').textContent = 'Post Content';
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Content';
+
+    const contentEl = document.getElementById('sp-content');
+    contentEl.innerHTML = `
+<style>
+/* ── Supplier CMS shared ─── */
+.spc-btn-primary { display:inline-flex; align-items:center; gap:6px; padding:7px 16px; background:#111318; color:#FFFFFF; border:none; border-radius:8px; font-size:12px; font-weight:600; font-family:inherit; cursor:pointer; }
+.spc-btn-primary:hover { background:#2A2D3A; }
+.spc-btn-ghost { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; background:#FFFFFF; color:#3A3D4A; border:0.5px solid #E2DDD8; border-radius:8px; font-size:12px; font-weight:500; font-family:inherit; cursor:pointer; }
+.spc-btn-ghost:hover { background:#F5F2EE; }
+.spc-btn-danger { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; background:#FEE2E2; color:#B91C1C; border:none; border-radius:8px; font-size:12px; font-weight:600; font-family:inherit; cursor:pointer; }
+.spc-btn-danger:hover { background:#FCA5A5; }
+/* ── List view ─── */
+.spc-list-hdr { padding:16px 0 12px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.spc-list-title { font-size:17px; font-weight:700; color:#111318; }
+.spc-list-sub { font-size:12px; color:#9CA3AF; margin-top:2px; }
+.spc-filter-bar { display:flex; align-items:center; gap:8px; padding:0 0 12px; border-bottom:0.5px solid #E8E4DF; flex-wrap:wrap; }
+.spc-ftab { padding:5px 13px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:0.5px solid transparent; color:#5A5F6E; transition:all .15s; }
+.spc-ftab.active { background:#111318; color:#FFFFFF; }
+.spc-ftab:hover:not(.active) { background:#F5F2EE; }
+.spc-count { font-size:10px; font-weight:700; background:#F0ECE8; color:#5A5F6E; border-radius:10px; padding:1px 6px; margin-left:3px; }
+.spc-search-wrap { position:relative; margin-bottom:12px; max-width:400px; }
+.spc-search-icon { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:15px; pointer-events:none; }
+.spc-search-input { width:100%; height:36px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:9px; padding:0 12px 0 34px; font-size:13px; font-family:inherit; color:#111318; outline:none; }
+.spc-search-input:focus { border-color:#1C3969; background:#FFFFFF; }
+.spc-row { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; padding:14px 16px; display:flex; align-items:flex-start; gap:14px; cursor:pointer; transition:border-color .15s; margin-bottom:8px; }
+.spc-row:hover { border-color:#C8C3BC; }
+.spc-row-icon { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.spc-row-body { flex:1; min-width:0; }
+.spc-row-title { font-size:13px; font-weight:600; color:#111318; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.spc-row-meta { font-size:11px; color:#9CA3AF; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.spc-row-actions { display:flex; gap:6px; flex-shrink:0; }
+.spc-chip { display:inline-flex; align-items:center; gap:3px; padding:2px 7px; border-radius:6px; font-size:10px; font-weight:600; }
+.spc-status-published { background:#DBEAFE; color:#1C3969; }
+.spc-status-draft     { background:#F0ECE8; color:#5A5F6E; }
+.spc-status-scheduled { background:#DBEAFE; color:#1D4ED8; }
+.spc-status-expired   { background:#FEE2E2; color:#B91C1C; }
+/* ── Editor ─── */
+.spc-editor-grid { display:grid; grid-template-columns:1fr 320px; gap:18px; align-items:start; padding-bottom:40px; }
+.spc-panel { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
+.spc-panel-hdr { padding:11px 16px; border-bottom:0.5px solid #F0ECE8; font-size:12px; font-weight:600; color:#111318; display:flex; align-items:center; gap:6px; }
+.spc-panel-body { padding:16px; display:flex; flex-direction:column; gap:13px; }
+.spc-field { display:flex; flex-direction:column; gap:5px; }
+.spc-label { font-size:11px; font-weight:600; color:#5A5F6E; text-transform:uppercase; letter-spacing:.6px; }
+.spc-input { width:100%; padding:8px 10px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:13px; font-family:inherit; color:#111318; outline:none; background:#FFFFFF; }
+.spc-input:focus { border-color:#1C3969; }
+.spc-textarea { width:100%; padding:10px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:13px; font-family:inherit; color:#111318; outline:none; resize:vertical; min-height:130px; line-height:1.6; background:#FFFFFF; }
+.spc-textarea:focus { border-color:#1C3969; }
+.spc-select { width:100%; padding:8px 10px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:13px; font-family:inherit; color:#111318; outline:none; background:#FFFFFF; cursor:pointer; }
+.spc-select:focus { border-color:#1C3969; }
+.spc-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.spc-check-list { display:flex; flex-direction:column; gap:7px; padding:10px; background:#FAFAF9; border:1px solid #E8E4DF; border-radius:7px; }
+.spc-check-item { display:flex; align-items:center; gap:8px; font-size:13px; color:#3A3D4A; cursor:pointer; }
+.spc-check-item input { accent-color:#1C3969; }
+.spc-post-opt { display:flex; align-items:center; gap:8px; padding:8px 10px; border:0.5px solid #E2DDD8; border-radius:8px; cursor:pointer; font-size:12px; color:#3A3D4A; transition:all .15s; }
+.spc-post-opt.selected { border-color:#1C3969; background:#D6E4F7; color:#1C3969; font-weight:600; }
+.spc-post-opt input { accent-color:#1C3969; display:none; }
+.spc-ai-btn { display:flex; align-items:center; gap:7px; padding:8px 12px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:12px; font-weight:500; font-family:inherit; cursor:pointer; background:#FFFFFF; color:#3A3D4A; transition:all .15s; width:100%; }
+.spc-ai-btn:hover { background:#F5F2EE; border-color:#C8C3BC; }
+.spc-ai-btn .ai-icon { width:22px; height:22px; border-radius:6px; background:#111318; color:#1C3969; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; }
+.spc-ai-preview { background:#F5F2EE; border:0.5px solid #E2DDD8; border-radius:8px; padding:12px; font-size:12px; color:#3A3D4A; line-height:1.6; margin-top:2px; white-space:pre-wrap; }
+.spc-action-bar { display:flex; align-items:center; gap:8px; padding:14px 0 0; border-top:0.5px solid #E8E4DF; margin-top:4px; }
+/* ── Part tree (in editor) ─── */
+.spc-tree-panel { background:#FAFAF9; border:0.5px solid #E8E4DF; border-radius:8px; overflow:hidden; margin-top:4px; }
+.spc-tree-search-wrap { position:relative; padding:10px; border-bottom:0.5px solid #F0ECE8; }
+.spc-tree-search-icon { position:absolute; left:20px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:13px; pointer-events:none; }
+.spc-tree-search { width:100%; height:30px; background:#FFFFFF; border:1px solid #E2DDD8; border-radius:7px; padding:0 8px 0 28px; font-size:12px; font-family:inherit; color:#111318; outline:none; }
+.spc-tree-search:focus { border-color:#1C3969; }
+.spc-tree-body { max-height:280px; overflow-y:auto; padding:6px 0; }
+.spc-cat-hdr { display:flex; align-items:center; gap:6px; padding:5px 12px; cursor:pointer; font-size:10px; font-weight:700; color:#5A5F6E; letter-spacing:.3px; text-transform:uppercase; }
+.spc-cat-hdr:hover { background:#F5F2EE; }
+.spc-cat-chevron { font-size:9px; color:#B0AAA3; margin-left:auto; transition:transform .15s; }
+.spc-cat-chevron.open { transform:rotate(90deg); }
+.spc-part-item { display:flex; flex-direction:column; padding:5px 12px 5px 26px; cursor:pointer; border-left:2px solid transparent; }
+.spc-part-item:hover { background:#F5F2EE; border-left-color:#E2DDD8; }
+.spc-part-item.selected { background:#D6E4F7; border-left-color:#1C3969; }
+.spc-part-pnum { font-size:10px; font-weight:700; color:#9CA3AF; font-family:monospace; }
+.spc-part-item.selected .spc-part-pnum { color:#1C3969; }
+.spc-part-desc { font-size:11px; font-weight:500; color:#3A3D4A; line-height:1.3; }
+.spc-part-item.selected .spc-part-desc { color:#111318; }
+.spc-selected-banner { background:#D6E4F7; border:1px solid #F5C97A; border-radius:7px; padding:8px 11px; display:flex; align-items:center; gap:8px; margin-top:6px; }
+.spc-banner-pnum { font-size:10px; font-weight:700; color:#1C3969; font-family:monospace; }
+.spc-banner-desc { font-size:11px; color:#3A3D4A; margin-top:1px; }
+</style>
+<div id="spc-body" style="padding:0 28px 28px;"></div>`;
+
+    window.spCmsGoList = function() { _spcView = 'list'; _spcEditId = null; _spPtSelectedPartId = null; renderContent(); };
+    window.spCmsNewArticle = function() { _spcView = 'editor'; _spcEditId = null; _spPtSelectedPartId = null; renderContent(); };
+    window.spCmsEditArticle = function(id) { _spcView = 'editor'; _spcEditId = id; _spPtSelectedPartId = null; renderContent(); };
+    window.spCmsSetFilter = function(f) { _spcFilter = f; renderSpcList(); };
+
+    if (_spcView === 'editor') renderSpcEditor();
+    else renderSpcList();
+  }
+
+  function renderSpcList() {
+    const body = document.getElementById('spc-body');
+    if (!body) return;
+    const now = new Date();
+    const myArticles = (Store.getCmsArticles ? Store.getCmsArticles('all') : []).filter(a => a.supplierId === _supplierId);
+    function getStatus(a) {
+      if (a.status === 'draft') return 'draft';
+      if (a.status === 'scheduled') return 'scheduled';
+      if (a.expiryDate && new Date(a.expiryDate) < now) return 'expired';
+      return 'published';
+    }
+    const counts = { all: myArticles.length, published:0, draft:0, scheduled:0, expired:0 };
+    myArticles.forEach(a => { const s = getStatus(a); if (counts[s] !== undefined) counts[s]++; });
+    const q = _spcSearch.toLowerCase().trim();
+    const filtered = myArticles
+      .filter(a => _spcFilter === 'all' || getStatus(a) === _spcFilter)
+      .filter(a => !q || a.title.toLowerCase().includes(q) || (a.body||'').toLowerCase().includes(q) || (a.subtype||'').toLowerCase().includes(q));
+
+    body.innerHTML = `
+      <div class="spc-list-hdr">
+        <div>
+          <div class="spc-list-title">My Content</div>
+          <div class="spc-list-sub">Manage your published articles, bulletins, and part messages</div>
+        </div>
+        <button class="spc-btn-primary" onclick="spCmsNewArticle()"><i class="ti ti-plus"></i> New article</button>
+      </div>
+      <div class="spc-search-wrap">
+        <i class="ti ti-search spc-search-icon"></i>
+        <input class="spc-search-input" id="spc-search-input" type="text" placeholder="Search your content…" value="${escSpc(_spcSearch)}"/>
+      </div>
+      <div class="spc-filter-bar">
+        ${[['all','All'],['published','Published'],['draft','Draft'],['scheduled','Scheduled'],['expired','Expired']].map(([v,l]) =>
+          `<div class="spc-ftab ${_spcFilter===v?'active':''}" onclick="spCmsSetFilter('${v}')">${l}<span class="spc-count">${counts[v]||0}</span></div>`
+        ).join('')}
+      </div>
+      <div id="spc-list-rows">
+        ${filtered.length === 0 ? `<div style="text-align:center;padding:48px;color:#9CA3AF;font-size:13px;">${q ? 'No articles match your search.' : 'No ' + (_spcFilter !== 'all' ? _spcFilter + ' ' : '') + 'articles yet. <button class="spc-btn-primary" style="margin-left:8px;" onclick="spCmsNewArticle()"><i class="ti ti-plus"></i> New article</button>'}</div>` :
+          filtered.map(a => {
+            const status = getStatus(a);
+            const tm = SP_CONTENT_TYPES[a.subtype] || SP_CONTENT_TYPES[a.type] || SP_CONTENT_TYPES.bulletin;
+            const pri = SP_PRIORITIES.find(p => p.value === a.priority) || SP_PRIORITIES[3];
+            const partLabel = a.showOnPartPage && a.targetPartDesc ? `<span class="spc-chip" style="background:#EEEDFE;color:#534AB7;"><i class="ti ti-tag" style="font-size:9px;"></i> ${a.targetPartDesc.slice(0,30)}…</span>` : '';
+            return `<div class="spc-row" onclick="spCmsEditArticle('${a.id}')">
+              <div class="spc-row-icon" style="background:${tm.bg};color:${tm.color};"><i class="ti ${tm.icon}"></i></div>
+              <div class="spc-row-body">
+                <div class="spc-row-title">${a.title}</div>
+                <div class="spc-row-meta">
+                  <span class="spc-chip spc-status-${status}">${status.charAt(0).toUpperCase()+status.slice(1)}</span>
+                  <span class="spc-chip" style="background:${pri.bg};color:${pri.color};">${pri.label}</span>
+                  <span class="spc-chip" style="background:${tm.bg};color:${tm.color};"><i class="ti ${tm.icon}" style="font-size:10px;"></i> ${tm.label}</span>
+                  ${partLabel}
+                  ${a.showOnOrders ? `<span class="spc-chip" style="background:#E6F1FB;color:#185FA5;"><i class="ti ti-shopping-cart" style="font-size:9px;"></i> Orders</span>` : ''}
+                  <span>${a.date || a.postedDate || ''}</span>
+                  ${a.expiryDate ? `<span>Expires ${a.expiryDate}</span>` : ''}
+                </div>
+              </div>
+              <div class="spc-row-actions" onclick="event.stopPropagation()">
+                <button class="spc-btn-ghost" style="padding:5px 9px;" onclick="spCmsEditArticle('${a.id}')"><i class="ti ti-pencil"></i></button>
+                <button class="spc-btn-danger" style="padding:5px 9px;" onclick="spCmsDeleteArticle('${a.id}')"><i class="ti ti-trash"></i></button>
+              </div>
+            </div>`;
+          }).join('')}
+      </div>`;
+
+    document.getElementById('spc-search-input').addEventListener('input', function() {
+      _spcSearch = this.value;
+      renderSpcList();
+    });
+
+    window.spCmsDeleteArticle = function(id) {
+      Modal.show({
+        title: 'Delete article',
+        body: '<p style="font-size:13px;color:#5A5F6E;">This will permanently remove the article. This cannot be undone.</p>',
+        actions: [
+          { label: 'Delete', style:'danger', onClick: () => { Store.deleteCmsArticle(id); Modal.close(); renderSpcList(); } },
+          { label: 'Cancel', onClick: () => Modal.close() },
+        ],
+      });
+    };
+  }
+
+  function renderSpcEditor() {
+    const body = document.getElementById('spc-body');
+    if (!body) return;
+
+    const existing = _spcEditId ? (Store.getCmsArticle ? Store.getCmsArticle(_spcEditId) : null) : null;
+    const today = new Date().toISOString().slice(0,10);
+    const a = existing || {
+      id: 'cms-sup-' + Date.now(),
+      type: 'bulletin', subtype: 'bulletin',
+      priority: 'low', status: 'draft', postAs: 'news',
+      title: '', summary: '', body: '',
+      postedDate: today, expiryDate: '', language: 'en',
+      tags: [], targetFleet: 'all',
+      showOnOrders: false, showOnPartPage: false,
+      targetPartNum: '', targetPartDesc: '',
+      supplierId: _supplierId, vendorName: _supplierName,
+    };
+
+    // Build part tree for part-page targeting
+    const myParts = Store.getParts('', '').filter(p => p.vendor === _supplierName);
+    const partCats = {};
+    myParts.forEach(p => {
+      const cat = p.category || 'General';
+      if (!partCats[cat]) partCats[cat] = [];
+      partCats[cat].push(p);
+    });
+
+    // Restore selected part from article
+    if (a.targetPartNum && !_spPtSelectedPartId) {
+      _spPtSelectedPartId = a.targetPartNum;
+    }
+
+    const fleetAllChecked = !a.targetFleet || a.targetFleet === 'all';
+    const fleetSelected = fleetAllChecked ? new Set() : new Set((a.targetFleet||'').split(','));
+
     const fleetOpts = [
-      `<label class="sp-fleet-check"><input type="radio" name="sp-fleet-target" value="all" checked/> All onboarded fleets</label>`,
-      ...(_fleets.map(f => `<label class="sp-fleet-check"><input type="radio" name="sp-fleet-target" value="${f.fleetId}"/> ${f.fleetName} only</label>`))
+      `<label class="spc-check-item" id="spc-fc-all-wrap"><input type="checkbox" id="spc-fc-all" value="all" ${fleetAllChecked?'checked':''}/> All onboarded fleets</label>`,
+      ..._fleets.map(f => `<label class="spc-check-item spc-fc-individual"><input type="checkbox" class="spc-fc-fleet" value="${f.fleetId}" ${fleetAllChecked||fleetSelected.has(f.fleetId)?'checked':''} ${fleetAllChecked?'disabled':''}/> ${f.fleetName}</label>`)
     ].join('');
-    document.getElementById('sp-content').innerHTML = `
-      <div class="sp-page-title">Post Content</div>
-      <div class="sp-page-sub">Publish news, bulletins, or product updates to your fleet customers.</div>
-      <div class="sp-compose-card">
-        <div class="sp-compose-field">
-          <label class="sp-compose-label">Content type</label>
-          <select class="sp-compose-select" id="sp-ctype">
-            <option value="bulletin">Service bulletin</option>
-            <option value="news">Product news</option>
-            <option value="safety">Safety notice</option>
-            <option value="promo">Promotion</option>
-          </select>
+
+    const typeOpts = Object.entries(SP_CONTENT_TYPES).map(([v,t]) =>
+      `<option value="${v}" ${(a.subtype||a.type)===v?'selected':''}>${t.label}</option>`).join('');
+    const subTypeKey = a.subtype || a.type || 'bulletin';
+    const subtypeOpts = (SP_CONTENT_SUBTYPES[subTypeKey]||[]).map(s =>
+      `<option value="${s}" ${a.subtype===s?'selected':''}>${s}</option>`).join('');
+
+    const selectedPart = _spPtSelectedPartId ? myParts.find(p => p.id === _spPtSelectedPartId) : null;
+
+    body.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;padding:16px 0 14px;">
+        <button class="spc-btn-ghost" onclick="spCmsGoList()"><i class="ti ti-arrow-left"></i> My content</button>
+        <div style="font-size:16px;font-weight:700;color:#111318;">${_spcEditId ? 'Edit article' : 'New article'}</div>
+      </div>
+      <div class="spc-editor-grid">
+
+        <!-- Left: content -->
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="spc-panel">
+            <div class="spc-panel-hdr"><i class="ti ti-article" style="color:#9CA3AF;"></i> Article content</div>
+            <div class="spc-panel-body">
+              <div class="spc-field">
+                <label class="spc-label">Title *</label>
+                <input class="spc-input" id="spc-f-title" placeholder="Clear, specific headline" value="${escSpc(a.title)}"/>
+              </div>
+              <div class="spc-field">
+                <label class="spc-label">Summary / teaser</label>
+                <input class="spc-input" id="spc-f-summary" placeholder="One-sentence description shown in the news feed" value="${escSpc(a.summary||'')}"/>
+              </div>
+              <div class="spc-field">
+                <label class="spc-label">Body *</label>
+                <textarea class="spc-textarea" id="spc-f-body" rows="8" placeholder="Full article content…">${escSpc(a.body)}</textarea>
+              </div>
+              <div class="spc-field">
+                <label class="spc-label">Tags <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9CA3AF;">(comma-separated)</span></label>
+                <input class="spc-input" id="spc-f-tags" placeholder="e.g. hydraulics, safety, skyjack" value="${escSpc((a.tags||[]).join(', '))}"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- Placement -->
+          <div class="spc-panel">
+            <div class="spc-panel-hdr"><i class="ti ti-layout-distribute-vertical" style="color:#9CA3AF;"></i> Placement</div>
+            <div class="spc-panel-body">
+              <div class="spc-field">
+                <label class="spc-label">Where this content appears</label>
+                <div class="spc-check-list">
+                  <label class="spc-check-item"><input type="checkbox" id="spc-place-news" ${a.postAs!=='banner'||!a.showOnOrders&&!a.showOnPartPage?'checked':''}/> Fleet news feed</label>
+                  <label class="spc-check-item"><input type="checkbox" id="spc-place-orders" ${a.showOnOrders?'checked':''}/> Order confirmation &amp; history pages</label>
+                  <label class="spc-check-item"><input type="checkbox" id="spc-place-part" ${a.showOnPartPage?'checked':''}  onchange="spCmsTogglePartTree(this.checked)"/> Part page message</label>
+                </div>
+              </div>
+              <div id="spc-part-tree-section" style="${a.showOnPartPage?'':'display:none;'}">
+                <label class="spc-label" style="margin-bottom:6px;display:block;">Target part <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9CA3AF;">— select from your catalog</span></label>
+                ${selectedPart ? `<div class="spc-selected-banner"><i class="ti ti-tag" style="font-size:13px;color:#1C3969;flex-shrink:0;"></i><div><div class="spc-banner-pnum">${selectedPart.partNum}</div><div class="spc-banner-desc">${selectedPart.description}</div></div><button class="spc-btn-ghost" style="margin-left:auto;padding:3px 8px;font-size:11px;" onclick="spCmsClearPart()">✕ Clear</button></div>` : ''}
+                <div class="spc-tree-panel">
+                  <div class="spc-tree-search-wrap">
+                    <i class="ti ti-search spc-tree-search-icon"></i>
+                    <input class="spc-tree-search" id="spc-pt-search" type="text" placeholder="Search parts…"/>
+                  </div>
+                  <div class="spc-tree-body" id="spc-pt-tree"></div>
+                </div>
+              </div>
+              <div class="spc-field">
+                <label class="spc-label">Post as</label>
+                <div style="display:flex;flex-direction:column;gap:5px;">
+                  <label class="spc-post-opt ${a.postAs==='news'||!a.postAs?'selected':''}" onclick="spcSelectPostAs('news')"><input type="radio" name="spc-post-as" value="news" ${a.postAs==='news'||!a.postAs?'checked':''}/><i class="ti ti-news" style="font-size:14px;color:#9CA3AF;"></i> News &amp; updates feed only</label>
+                  <label class="spc-post-opt ${a.postAs==='banner'?'selected':''}" onclick="spcSelectPostAs('banner')"><input type="radio" name="spc-post-as" value="banner" ${a.postAs==='banner'?'checked':''}/><i class="ti ti-speakerphone" style="font-size:14px;color:#9CA3AF;"></i> Site-wide banner only</label>
+                  <label class="spc-post-opt ${a.postAs==='both'?'selected':''}" onclick="spcSelectPostAs('both')"><input type="radio" name="spc-post-as" value="both" ${a.postAs==='both'?'checked':''}/><i class="ti ti-layout-board" style="font-size:14px;color:#9CA3AF;"></i> News feed + banner</label>
+                </div>
+              </div>
+              <div id="spc-banner-opts" style="${a.postAs==='news'||!a.postAs?'display:none;':''}">
+                <div class="spc-field">
+                  <label class="spc-label">Banner text</label>
+                  <input class="spc-input" id="spc-f-banner-text" placeholder="Short message shown in the banner" value="${escSpc(a.bannerText||a.summary||'')}"/>
+                </div>
+                <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:#5A5F6E;margin-top:6px;cursor:pointer;">
+                  <input type="checkbox" id="spc-f-dismissible" ${a.bannerDismissible!==false?'checked':''}/> Users can dismiss banner
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI tools -->
+          <div class="spc-panel">
+            <div class="spc-panel-hdr"><i class="ti ti-sparkles" style="color:#1C3969;"></i> AI writing tools</div>
+            <div class="spc-panel-body" style="gap:8px;">
+              <button class="spc-ai-btn" onclick="spcAiAction('rewrite')"><div class="ai-icon"><i class="ti ti-wand"></i></div><div><div style="font-weight:600;">Rewrite &amp; improve</div><div style="font-size:10px;color:#9CA3AF;">Enhance clarity and professional tone</div></div></button>
+              <button class="spc-ai-btn" onclick="spcAiAction('simplify')"><div class="ai-icon"><i class="ti ti-list-check"></i></div><div><div style="font-weight:600;">Simplify</div><div style="font-size:10px;color:#9CA3AF;">Reduce to key action items</div></div></button>
+              <button class="spc-ai-btn" onclick="spcAiAction('translate')"><div class="ai-icon"><i class="ti ti-language"></i></div><div><div style="font-weight:600;">Translate</div><div style="font-size:10px;color:#9CA3AF;">Convert to selected language</div></div></button>
+              <div id="spc-ai-preview-area" style="display:none;">
+                <div class="spc-ai-preview" id="spc-ai-preview-text"></div>
+                <div style="display:flex;gap:6px;margin-top:8px;">
+                  <button class="spc-btn-primary" style="font-size:11px;padding:5px 11px;" onclick="spcAiApply()"><i class="ti ti-check"></i> Apply</button>
+                  <button class="spc-btn-ghost" style="font-size:11px;padding:5px 11px;" onclick="spcAiDismiss()">Discard</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="spc-action-bar">
+            <button class="spc-btn-ghost" onclick="spCmsGoList()"><i class="ti ti-arrow-left"></i> Cancel</button>
+            <div style="flex:1;"></div>
+            <button class="spc-btn-ghost" onclick="spcSaveDraft()"><i class="ti ti-device-floppy"></i> Save draft</button>
+            <button class="spc-btn-ghost" onclick="spcSchedule()"><i class="ti ti-calendar-event"></i> Schedule</button>
+            <button class="spc-btn-primary" onclick="spcPublish()"><i class="ti ti-send"></i> Publish now</button>
+          </div>
         </div>
-        <div class="sp-compose-field">
-          <label class="sp-compose-label">Title *</label>
-          <input class="sp-compose-input" id="sp-ctitle" type="text" placeholder="e.g. SJIII 3219 hydraulic seal kit now available"/>
-          <div id="sp-ctitle-err" style="font-size:11px;color:#A32D2D;margin-top:3px;display:none;">Required</div>
-        </div>
-        <div class="sp-compose-field">
-          <label class="sp-compose-label">Body *</label>
-          <textarea class="sp-compose-textarea" id="sp-cbody" placeholder="Write your content here…"></textarea>
-          <div id="sp-cbody-err" style="font-size:11px;color:#A32D2D;margin-top:3px;display:none;">Required</div>
-        </div>
-        <div class="sp-compose-field">
-          <label class="sp-compose-label">Post to</label>
-          <div class="sp-fleet-check-row">${fleetOpts}</div>
-        </div>
-        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px;">
-          <button class="sp-btn sp-btn-ghost" onclick="document.getElementById('sp-ctitle').value='';document.getElementById('sp-cbody').value='';">Clear</button>
-          <button class="sp-btn sp-btn-primary" id="sp-publish-btn"><i class="ti ti-send" style="font-size:12px;"></i> Publish</button>
-        </div>
-        <div id="sp-publish-confirm" style="margin-top:12px;font-size:12px;color:#0F6E56;display:none;">
-          <i class="ti ti-circle-check"></i> Content published successfully.
+
+        <!-- Right: settings -->
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="spc-panel">
+            <div class="spc-panel-hdr"><i class="ti ti-tags" style="color:#9CA3AF;"></i> Classification</div>
+            <div class="spc-panel-body">
+              <div class="spc-field">
+                <label class="spc-label">Content type</label>
+                <select class="spc-select" id="spc-f-type" onchange="spcTypeChange(this.value)">
+                  ${typeOpts}
+                </select>
+              </div>
+              <div class="spc-field">
+                <label class="spc-label">Sub-type</label>
+                <select class="spc-select" id="spc-f-subtype">${subtypeOpts}</select>
+              </div>
+              <div class="spc-field">
+                <label class="spc-label">Priority</label>
+                <select class="spc-select" id="spc-f-priority">
+                  ${SP_PRIORITIES.map(p => `<option value="${p.value}" ${a.priority===p.value?'selected':''}>${p.label}</option>`).join('')}
+                </select>
+              </div>
+              <div class="spc-row-2">
+                <div class="spc-field">
+                  <label class="spc-label">Publish date</label>
+                  <input class="spc-input" type="date" id="spc-f-date" value="${a.postedDate||today}"/>
+                </div>
+                <div class="spc-field">
+                  <label class="spc-label">Expiry date</label>
+                  <input class="spc-input" type="date" id="spc-f-expiry" value="${a.expiryDate||''}"/>
+                </div>
+              </div>
+              <div class="spc-field">
+                <label class="spc-label">Language</label>
+                <select class="spc-select" id="spc-f-language">
+                  ${SP_LANGUAGES.map(l => `<option value="${l.value}" ${(a.language||'en')===l.value?'selected':''}>${l.label}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="spc-panel">
+            <div class="spc-panel-hdr"><i class="ti ti-send" style="color:#9CA3AF;"></i> Distribution</div>
+            <div class="spc-panel-body">
+              <div class="spc-field">
+                <label class="spc-label">Post to fleets</label>
+                <div class="spc-check-list">${fleetOpts}</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>`;
 
-    document.getElementById('sp-publish-btn').addEventListener('click', function() {
-      const title = document.getElementById('sp-ctitle').value.trim();
-      const body  = document.getElementById('sp-cbody').value.trim();
-      document.getElementById('sp-ctitle-err').style.display = title ? 'none' : 'block';
-      document.getElementById('sp-cbody-err').style.display  = body  ? 'none' : 'block';
-      if (!title || !body) return;
-
-      const target = document.querySelector('input[name="sp-fleet-target"]:checked')?.value || 'all';
-      const typeMap = { bulletin:'bulletin', news:'bulletin', safety:'bulletin', promo:'bulletin' };
-
-      Store.saveCmsArticle({
-        id: 'cms-sup-' + Date.now(),
-        type: typeMap[document.getElementById('sp-ctype').value] || 'bulletin',
-        subtype: document.getElementById('sp-ctype').value,
-        status: 'published',
-        postAs: 'news',
-        title,
-        body,
-        author: _user.displayName,
-        supplierId: _supplierId,
-        targetFleet: target,
-        date: 'Jul 2026',
-        priority: 'low',
-        locations: [target === 'all' ? 'all' : target],
+    // Fleet checkbox logic
+    const fcAll = document.getElementById('spc-fc-all');
+    if (fcAll) {
+      fcAll.addEventListener('change', function() {
+        document.querySelectorAll('.spc-fc-fleet').forEach(cb => { cb.checked = this.checked; cb.disabled = this.checked; });
       });
-
-      document.getElementById('sp-ctitle').value = '';
-      document.getElementById('sp-cbody').value = '';
-      document.getElementById('sp-publish-confirm').style.display = 'block';
-      setTimeout(() => {
-        const el = document.getElementById('sp-publish-confirm');
-        if (el) el.style.display = 'none';
-      }, 3500);
+    }
+    document.querySelectorAll('.spc-fc-fleet').forEach(cb => {
+      cb.addEventListener('change', function() {
+        const all = document.querySelectorAll('.spc-fc-fleet');
+        const checked = document.querySelectorAll('.spc-fc-fleet:checked');
+        if (checked.length === all.length) {
+          if (fcAll) { fcAll.checked = true; all.forEach(c => { c.checked = true; c.disabled = true; }); }
+        }
+      });
     });
+
+    // Part tree rendering
+    let _ptSearch = '';
+    function renderSpcPartTree() {
+      const treeEl = document.getElementById('spc-pt-tree');
+      if (!treeEl) return;
+      const q = _ptSearch.toLowerCase().trim();
+      let html = '';
+      Object.entries(partCats).forEach(([cat, parts]) => {
+        const visible = q ? parts.filter(p => p.description.toLowerCase().includes(q) || p.partNum.toLowerCase().includes(q)) : parts;
+        if (!visible.length) return;
+        const isOpen = _spPtExpandedCats.has(cat) || !!q;
+        html += `<div class="spc-cat-hdr" onclick="spTogglePtCat('${cat.replace(/'/g,"\\'")}')">
+          <i class="ti ti-folder" style="font-size:11px;color:#B0AAA3;"></i><span>${cat}</span>
+          <span style="font-size:9px;color:#C0BAB3;margin-left:4px;">${visible.length}</span>
+          ${!q?`<i class="ti ti-chevron-right spc-cat-chevron ${isOpen?'open':''}"></i>`:''}
+        </div>`;
+        if (isOpen || q) {
+          visible.forEach(p => {
+            html += `<div class="spc-part-item ${_spPtSelectedPartId===p.id?'selected':''}" onclick="spSelectPtPart('${p.id}')">
+              <span class="spc-part-pnum">${p.partNum}</span><span class="spc-part-desc">${p.description}</span>
+            </div>`;
+          });
+        }
+      });
+      if (!html) html = '<div style="padding:18px;text-align:center;color:#B0AAA3;font-size:11px;">No parts match.</div>';
+      treeEl.innerHTML = html;
+    }
+
+    window.spTogglePtCat = function(cat) {
+      if (_spPtExpandedCats.has(cat)) { _spPtExpandedCats.delete(cat); } else { _spPtExpandedCats.add(cat); }
+      renderSpcPartTree();
+    };
+    window.spSelectPtPart = function(partId) {
+      _spPtSelectedPartId = partId;
+      renderSpcPartTree();
+      // Update the selected banner above tree
+      const section = document.getElementById('spc-part-tree-section');
+      if (section) {
+        const part = myParts.find(p => p.id === partId);
+        let bannerEl = section.querySelector('.spc-selected-banner');
+        if (!bannerEl) {
+          bannerEl = document.createElement('div');
+          section.insertBefore(bannerEl, section.querySelector('.spc-tree-panel'));
+        }
+        bannerEl.className = 'spc-selected-banner';
+        bannerEl.innerHTML = `<i class="ti ti-tag" style="font-size:13px;color:#1C3969;flex-shrink:0;"></i><div><div class="spc-banner-pnum">${part.partNum}</div><div class="spc-banner-desc">${part.description}</div></div><button class="spc-btn-ghost" style="margin-left:auto;padding:3px 8px;font-size:11px;" onclick="spCmsClearPart()">✕ Clear</button>`;
+      }
+    };
+    window.spCmsClearPart = function() {
+      _spPtSelectedPartId = null;
+      const section = document.getElementById('spc-part-tree-section');
+      if (section) { const b = section.querySelector('.spc-selected-banner'); if (b) b.remove(); }
+      renderSpcPartTree();
+    };
+
+    const ptSearchEl = document.getElementById('spc-pt-search');
+    if (ptSearchEl) {
+      ptSearchEl.addEventListener('input', function() { _ptSearch = this.value; renderSpcPartTree(); });
+    }
+    if (a.showOnPartPage) renderSpcPartTree();
+
+    window.spCmsTogglePartTree = function(show) {
+      const sec = document.getElementById('spc-part-tree-section');
+      if (sec) sec.style.display = show ? '' : 'none';
+      if (show) renderSpcPartTree();
+      else { _spPtSelectedPartId = null; }
+    };
+
+    window.spcSelectPostAs = function(val) {
+      document.querySelectorAll('.spc-post-opt').forEach(el => el.classList.toggle('selected', el.querySelector('input').value === val));
+      const bOpts = document.getElementById('spc-banner-opts');
+      if (bOpts) bOpts.style.display = val === 'news' ? 'none' : '';
+    };
+
+    window.spcTypeChange = function(type) {
+      const st = document.getElementById('spc-f-subtype');
+      if (st) st.innerHTML = (SP_CONTENT_SUBTYPES[type]||[]).map(s=>`<option>${s}</option>`).join('');
+    };
+
+    window.spcAiAction = function(action) {
+      const bodyEl = document.getElementById('spc-f-body');
+      if (!bodyEl || !bodyEl.value.trim()) { alert('Add body content first.'); return; }
+      _spcAiMode = action;
+      let result;
+      if (action === 'translate') {
+        const lang = (document.getElementById('spc-f-language')||{}).value || 'en';
+        result = lang === 'es' ? SP_AI_REWRITES.translate_es(bodyEl.value)
+               : lang === 'en' ? bodyEl.value + '\n\n[Content is already in English.]'
+               : `[Translation to ${lang.toUpperCase()} would appear here.]\n\n` + bodyEl.value;
+      } else {
+        result = SP_AI_REWRITES[action](bodyEl.value);
+      }
+      const preview = document.getElementById('spc-ai-preview-text');
+      const area = document.getElementById('spc-ai-preview-area');
+      if (preview) preview.textContent = result;
+      if (area) area.style.display = '';
+    };
+    window.spcAiApply = function() {
+      const b = document.getElementById('spc-f-body'), p = document.getElementById('spc-ai-preview-text');
+      if (b && p) b.value = p.textContent;
+      spcAiDismiss();
+    };
+    window.spcAiDismiss = function() {
+      const area = document.getElementById('spc-ai-preview-area');
+      if (area) area.style.display = 'none';
+      _spcAiMode = null;
+    };
+
+    function spcCollectForm(status) {
+      const g = id => (document.getElementById(id)||{}).value || '';
+      const title = g('spc-f-title').trim();
+      if (!title) { alert('Title is required.'); return null; }
+      const bodyVal = g('spc-f-body').trim();
+      if (!bodyVal) { alert('Body content is required.'); return null; }
+      const postAs = (document.querySelector('.spc-post-opt.selected input')||{}).value || 'news';
+      const allChecked = !!(document.getElementById('spc-fc-all')||{}).checked;
+      const selectedFleets = allChecked ? ['all'] : [...document.querySelectorAll('.spc-fc-fleet:checked')].map(cb=>cb.value);
+      const target = allChecked ? 'all' : (selectedFleets.length===1 ? selectedFleets[0] : selectedFleets.join(','));
+      const showOnOrders = !!(document.getElementById('spc-place-orders')||{}).checked;
+      const showOnPartPage = !!(document.getElementById('spc-place-part')||{}).checked;
+      const typeVal = g('spc-f-type');
+      const sub = g('spc-f-subtype');
+      const postedDate = g('spc-f-date') || today;
+      return {
+        id: existing ? existing.id : ('cms-sup-' + Date.now()),
+        type: typeVal, subtype: sub || typeVal,
+        priority: g('spc-f-priority') || 'low',
+        status, postAs,
+        title, summary: g('spc-f-summary'), body: bodyVal,
+        author: _user.displayName,
+        poster: _user.displayName,
+        supplierId: _supplierId,
+        vendorName: _supplierName,
+        targetFleet: target,
+        showOnOrders,
+        showOnPartPage,
+        targetPartNum: showOnPartPage ? (_spPtSelectedPartId || '') : '',
+        targetPartDesc: showOnPartPage && _spPtSelectedPartId ? (myParts.find(p=>p.id===_spPtSelectedPartId)||{}).description||'' : '',
+        postedDate, date: postedDate,
+        expiryDate: g('spc-f-expiry'),
+        language: g('spc-f-language') || 'en',
+        tags: g('spc-f-tags').split(',').map(t=>t.trim()).filter(Boolean),
+        locations: [target === 'all' ? 'all' : (selectedFleets[0]||'all')],
+        banner: postAs !== 'news',
+        bannerDismissible: (document.getElementById('spc-f-dismissible')||{}).checked !== false,
+        bannerText: g('spc-f-banner-text'),
+      };
+    }
+
+    window.spcSaveDraft = function() {
+      const art = spcCollectForm('draft');
+      if (!art) return;
+      Store.saveCmsArticle(art);
+      _spcView = 'list'; _spcEditId = null; renderContent();
+    };
+    window.spcPublish = function() {
+      const art = spcCollectForm('published');
+      if (!art) return;
+      Store.saveCmsArticle(art);
+      _spcView = 'list'; _spcEditId = null; renderContent();
+    };
+    window.spcSchedule = function() {
+      const art = spcCollectForm('scheduled');
+      if (!art) return;
+      Store.saveCmsArticle(art);
+      _spcView = 'list'; _spcEditId = null; renderContent();
+    };
+  }
+
+  // ── Manuals ──────────────────────────────────────────────────────────────────
+
+  function renderManuals() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Manuals & Docs';
+
+    const contentEl = document.getElementById('sp-content');
+    contentEl.innerHTML = `
+      <div class="man-content-row" style="flex:1;display:flex;overflow:hidden;">
+        <div class="man-vendor-panel">
+          <div class="mvp-label">Doc Type</div>
+          <div id="sp-man-type-list"></div>
+        </div>
+        <div class="man-main-panel">
+          <div class="man-search-area">
+            <div class="man-search-wrap">
+              <i class="ti ti-search man-search-icon"></i>
+              <input class="man-search-input" id="sp-man-search" type="text" placeholder="Search manuals, bulletins, specs…" value="${_spManSearch}"/>
+            </div>
+          </div>
+          <div class="man-machine-chip-row" id="sp-man-machine-chips" style="display:none;"></div>
+          <div class="man-content-body">
+            <div class="man-section-label">${_supplierName} — Manuals &amp; Documentation</div>
+            <div class="docs-grid" id="sp-man-grid"></div>
+          </div>
+        </div>
+      </div>`;
+
+    function typeBackground(type) {
+      if (type === 'Service') return 'background:#FCEBEB;color:#A32D2D;';
+      if (type === 'Parts') return 'background:#EEEDFE;color:#534AB7;';
+      if (type === 'Operator') return 'background:#E6F1FB;color:#185FA5;';
+      return 'background:#EAF3DE;color:#3B6D11;';
+    }
+    function typeIconClass(type) {
+      if (type === 'Service') return 'ti-file-text';
+      if (type === 'Parts') return 'ti-schema';
+      if (type === 'Operator') return 'ti-book';
+      return 'ti-file';
+    }
+
+    function getMyManuals() {
+      return Store.getManuals(_spManSearch).filter(m => m.vendor === _supplierName);
+    }
+
+    function getFiltered() {
+      return getMyManuals().filter(m => {
+        if (_spManType && m.type !== _spManType) return false;
+        if (_spManMachine !== 'All' && m.machine !== _spManMachine) return false;
+        return true;
+      });
+    }
+
+    function getMachines() {
+      const seen = {};
+      const machines = [];
+      getMyManuals().filter(m => !_spManType || m.type === _spManType).forEach(m => {
+        if (m.machine && !seen[m.machine]) { seen[m.machine] = true; machines.push(m.machine); }
+      });
+      return machines;
+    }
+
+    function renderTypeList() {
+      const list = document.getElementById('sp-man-type-list');
+      if (!list) return;
+      const allMans = getMyManuals();
+      const types = ['Service', 'Parts', 'Operator', 'Bulletin'];
+      const allItem = `<div class="man-vendor-item ${!_spManType ? 'active' : ''}" data-type="">
+        <div class="mvi-icon"><i class="ti ti-books"></i></div>
+        <div class="mvi-name">All types</div>
+        <div class="mvi-count">${allMans.length}</div>
+      </div>`;
+      const typeItems = types.map(t => {
+        const count = allMans.filter(m => m.type === t).length;
+        if (!count) return '';
+        const icons = { Service:'ti-file-text', Parts:'ti-schema', Operator:'ti-book', Bulletin:'ti-alert-triangle' };
+        return `<div class="man-vendor-item ${_spManType === t ? 'active' : ''}" data-type="${t}">
+          <div class="mvi-icon"><i class="ti ${icons[t] || 'ti-file'}"></i></div>
+          <div class="mvi-name">${t}</div>
+          <div class="mvi-count">${count}</div>
+        </div>`;
+      }).join('');
+      list.innerHTML = allItem + typeItems;
+      list.querySelectorAll('.man-vendor-item').forEach(item => {
+        item.addEventListener('click', function() {
+          _spManType = this.dataset.type || null;
+          _spManMachine = 'All';
+          renderTypeList();
+          renderMachineChips();
+          renderGrid();
+        });
+      });
+    }
+
+    function renderMachineChips() {
+      const row = document.getElementById('sp-man-machine-chips');
+      if (!row) return;
+      const machines = getMachines();
+      if (machines.length <= 1) { row.style.display = 'none'; return; }
+      row.style.display = 'flex';
+      const chips = [{ label: 'All', value: 'All' }].concat(machines.map(m => ({ label: m, value: m })));
+      row.innerHTML = chips.map(c => `<button class="man-machine-chip ${_spManMachine === c.value ? 'active' : ''}" data-machine="${c.value}">${c.label}</button>`).join('');
+      row.querySelectorAll('.man-machine-chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+          _spManMachine = this.dataset.machine;
+          renderMachineChips();
+          renderGrid();
+        });
+      });
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('sp-man-grid');
+      if (!grid) return;
+      const manuals = getFiltered();
+      if (!manuals.length) {
+        grid.innerHTML = '<div style="padding:40px;text-align:center;color:#9CA3AF;font-size:13px;">No manuals found.</div>';
+        return;
+      }
+      grid.innerHTML = manuals.map(m =>
+        `<div class="doc-card" data-manual-id="${m.id}">
+          <div class="doc-icon-wrap" style="${typeBackground(m.type)}"><i class="ti ${typeIconClass(m.type)}"></i></div>
+          <div class="doc-body">
+            <div class="doc-title">${m.title}</div>
+            <div class="doc-meta"><span>${m.machine}</span><span class="doc-meta-sep">·</span><span>${m.year}</span><span class="doc-meta-sep">·</span><span>${m.pages} pages</span><span class="doc-meta-sep">·</span><span>${m.size}</span></div>
+            <div class="doc-tags"><span class="doc-tag tag-type">${m.type}</span></div>
+            <div class="doc-actions">
+              <button class="doc-btn doc-btn-primary" onclick="manViewManual('${m.id}')"><i class="ti ti-eye" style="font-size:12px;"></i> View</button>
+              <button class="doc-btn doc-btn-ghost" onclick="manDownloadManual('${m.id}')"><i class="ti ti-download" style="font-size:12px;"></i> Download</button>
+            </div>
+          </div>
+        </div>`
+      ).join('');
+    }
+
+    renderTypeList();
+    renderMachineChips();
+    renderGrid();
+
+    document.getElementById('sp-man-search').addEventListener('input', function() {
+      _spManSearch = this.value;
+      renderTypeList();
+      renderGrid();
+    });
+  }
+
+  // ── News ─────────────────────────────────────────────────────────────────────
+
+  function renderNews() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'News & Updates';
+
+    // Supplier's own articles from NEWS_ARTICLES (where poster === supplierName)
+    const supplierNewsArticles = (typeof NEWS_ARTICLES !== 'undefined' ? NEWS_ARTICLES : []).filter(n => n.poster === _supplierName);
+
+    // CMS articles published by this supplier
+    const cmsArticles = (Store.getCmsArticles ? Store.getCmsArticles('published') : [])
+      .filter(a => a.supplierId === _supplierId)
+      .map(a => ({
+        id: a.id, type: a.subtype || a.type || 'supplier', poster: _supplierName,
+        date: a.date || '2026-07-01', dateLabel: a.date || 'Jul 2026',
+        priority: a.priority || 'low', title: a.title,
+        summary: a.body ? a.body.slice(0, 120) + (a.body.length > 120 ? '…' : '') : '',
+        body: a.body || '', tags: a.tags || [],
+      }));
+
+    // SmartEquip platform news
+    const PLATFORM_NEWS = [
+      { id:'sp-pn-01', type:'supplier', poster:'SmartEquip', date:'2026-07-10', dateLabel:'Jul 10, 2026', priority:'low',
+        title:'SmartEquip v4.2 — Supplier Analytics Dashboard',
+        summary:'Suppliers now have access to a dedicated analytics tab with fleet-level price request tracking and content engagement metrics.',
+        body:'The latest SmartEquip release includes a full analytics dashboard for suppliers. Track price request volume, quote conversion rates, average response times, and content engagement across your onboarded fleets. All data is available with period filters (7D, 30D, 90D, 12M) and per-fleet breakdowns.',
+        tags:['platform','analytics','update'] },
+      { id:'sp-pn-02', type:'supplier', poster:'SmartEquip', date:'2026-06-28', dateLabel:'Jun 28, 2026', priority:'low',
+        title:'Price Request response SLA reporting now live',
+        summary:'Average response times are now tracked and visible in your analytics. Fleet customers can view supplier responsiveness scores.',
+        body:'SmartEquip now tracks average response time to price requests and exposes this data in the supplier analytics dashboard. Fleet customers can also see a supplier responsiveness score when browsing available vendors. This encourages timely quoting and helps fleets make informed purchasing decisions.',
+        tags:['platform','sla','response-time'] },
+      { id:'sp-pn-03', type:'supplier', poster:'SmartEquip', date:'2026-06-15', dateLabel:'Jun 15, 2026', priority:'low',
+        title:'New: Target specific fleets when posting content',
+        summary:'You can now select individual fleets as targets when posting bulletins or product news, rather than broadcasting to all.',
+        body:'The Post Content feature now supports fleet-specific targeting. When publishing a bulletin, safety notice, or product update, you can choose to send it to all onboarded fleets or restrict visibility to individual fleet accounts. This allows more relevant, targeted communication with your fleet customers.',
+        tags:['platform','content','targeting'] },
+      { id:'sp-pn-04', type:'supplier', poster:'SmartEquip', date:'2026-05-30', dateLabel:'May 30, 2026', priority:'low',
+        title:'3 new fleets added to the SmartEquip network this month',
+        summary:'H&E Equipment Services, Maxim Crane Works, and Neff Rental have been added to the SmartEquip network.',
+        body:'SmartEquip has onboarded three new fleet customers this month: H&E Equipment Services (multi-region), Maxim Crane Works (Northeast), and Neff Rental (Southeast). As a Skyjack supplier, you may receive price requests from these fleets. Ensure your parts catalog is up to date.',
+        tags:['platform','network','fleet'] },
+    ];
+
+    const ALL_SP_NEWS = [...cmsArticles, ...supplierNewsArticles, ...PLATFORM_NEWS];
+    const TYPE_META = typeof NEWS_TYPE_META !== 'undefined' ? NEWS_TYPE_META : {};
+    const PRIORITY_META = typeof NEWS_PRIORITY_META !== 'undefined' ? NEWS_PRIORITY_META : {};
+
+    function typeChip(type) {
+      const m = TYPE_META[type] || { label: type, color: '#374151', bg: '#F3F4F6', icon: 'ti-news' };
+      return `<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;background:${m.bg};color:${m.color};border-radius:4px;padding:2px 7px;"><i class="ti ${m.icon}" style="font-size:11px;"></i>${m.label}</span>`;
+    }
+    function priorityChip(priority) {
+      const p = PRIORITY_META[priority] || { label: priority, color: '#6B7280', bg: '#F9FAFB' };
+      return `<span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;letter-spacing:.5px;background:${p.bg};color:${p.color};border-radius:4px;padding:2px 7px;"><span style="width:6px;height:6px;border-radius:50%;background:${p.color};display:inline-block;flex-shrink:0;"></span>${p.label}</span>`;
+    }
+
+    function filteredNews() {
+      let items = ALL_SP_NEWS.slice();
+      if (_spNewsShowSaved) items = items.filter(n => _spNewsSaved.has(n.id));
+      if (_spNewsType !== 'all') items = items.filter(n => n.type === _spNewsType);
+      if (_spNewsPoster !== 'all') items = items.filter(n => n.poster === _spNewsPoster);
+      if (_spNewsPriority !== 'all') items = items.filter(n => n.priority === _spNewsPriority);
+      if (_spNewsSearch.trim()) {
+        const q = _spNewsSearch.toLowerCase();
+        items = items.filter(n =>
+          n.title.toLowerCase().includes(q) ||
+          (n.summary || '').toLowerCase().includes(q) ||
+          (n.tags || []).some(t => t.includes(q)) ||
+          (n.poster || '').toLowerCase().includes(q)
+        );
+      }
+      items.sort((a, b) => _spNewsSortDir === 'desc' ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date));
+      return items;
+    }
+
+    function renderNewsCards() {
+      const items = filteredNews();
+      const grid = document.getElementById('sp-news-grid');
+      if (!grid) return;
+      const countEl = document.getElementById('sp-news-count');
+      if (countEl) countEl.textContent = `${items.length} article${items.length !== 1 ? 's' : ''}`;
+      if (!items.length) {
+        grid.innerHTML = '<div style="padding:32px 0;text-align:center;color:#9CA3AF;font-size:13px;">No articles match your filters.</div>';
+        return;
+      }
+      grid.innerHTML = items.map(n => {
+        const m = TYPE_META[n.type] || { bg: '#F3F4F6', color: '#374151', icon: 'ti-news' };
+        const saved = _spNewsSaved.has(n.id);
+        const reported = _spNewsReported.has(n.id);
+        return `<div class="news-card" id="spnc-${n.id}">
+          <div class="nc-top" onclick="newsOpenArticle('${n.id}')" style="cursor:pointer;">
+            <div class="nc-icon" style="background:${m.bg};color:${m.color};"><i class="ti ${m.icon}"></i></div>
+            <div class="nc-meta">
+              <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">${typeChip(n.type)}${priorityChip(n.priority)}</div>
+              <span class="nc-poster">${n.poster}</span>
+            </div>
+            <span class="nc-date">${n.dateLabel}</span>
+          </div>
+          <div class="nc-title" onclick="newsOpenArticle('${n.id}')" style="cursor:pointer;">${n.title}</div>
+          <div class="nc-summary" onclick="newsOpenArticle('${n.id}')" style="cursor:pointer;">${n.summary}</div>
+          <div class="nc-tags" onclick="newsOpenArticle('${n.id}')" style="cursor:pointer;">${(n.tags||[]).map(t => `<span class="nc-tag">${t}</span>`).join('')}</div>
+          <div class="nc-actions">
+            <button class="nc-action-btn ${saved ? 'nc-saved' : ''}" onclick="event.stopPropagation();spNewsSave('${n.id}')" title="${saved ? 'Remove from saved' : 'Save article'}">
+              <i class="ti ${saved ? 'ti-bookmark-filled' : 'ti-bookmark'}"></i> ${saved ? 'Saved' : 'Save'}
+            </button>
+            <button class="nc-action-btn nc-report-btn ${reported ? 'nc-reported' : ''}" onclick="event.stopPropagation();spNewsReport('${n.id}')" title="Report a problem">
+              <i class="ti ti-flag"></i> ${reported ? 'Reported' : 'Report'}
+            </button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    window.spNewsSave = function(id) {
+      if (_spNewsSaved.has(id)) { _spNewsSaved.delete(id); } else { _spNewsSaved.add(id); }
+      try { localStorage.setItem('se-news-saved', JSON.stringify([..._spNewsSaved])); } catch(e) {}
+      renderNewsCards();
+      const lbl = document.getElementById('sp-nfp-saved-count');
+      if (lbl) lbl.textContent = _spNewsSaved.size > 0 ? ` (${_spNewsSaved.size})` : '';
+    };
+
+    window.spNewsReport = function(id) {
+      if (_spNewsReported.has(id)) {
+        Modal.show({ title: 'Already reported', body: '<p style="font-size:13px;color:#3A3D4A;">You have already submitted a report for this article.</p>', actions: [{ label: 'OK', onClick: () => Modal.close() }] });
+        return;
+      }
+      const n = ALL_SP_NEWS.find(x => x.id === id);
+      Modal.show({
+        title: 'Report a problem',
+        body: `<p style="font-size:13px;color:#7A7F8E;margin-bottom:16px;">Let us know what's wrong with "<strong style="color:#111318;">${n ? n.title.slice(0,60)+'…' : 'this article'}</strong>"</p>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+            ${['Inaccurate or incorrect information','Outdated — information no longer applies','Duplicate post','Inappropriate or irrelevant content','Other'].map((reason, i) => `
+              <label style="display:flex;align-items:center;gap:9px;padding:9px 12px;border:0.5px solid #E2DDD8;border-radius:8px;cursor:pointer;font-size:13px;color:#3A3D4A;">
+                <input type="radio" name="sp-report-reason" value="${reason}" ${i===0?'checked':''} style="accent-color:#1C3969;"/> ${reason}
+              </label>`).join('')}
+          </div>
+          <textarea id="sp-report-notes" placeholder="Additional notes (optional)" style="width:100%;height:72px;padding:9px 12px;border:0.5px solid #E2DDD8;border-radius:8px;font-size:13px;font-family:inherit;color:#111318;resize:none;outline:none;"></textarea>`,
+        actions: [
+          { label: 'Cancel', onClick: () => Modal.close() },
+          { label: 'Submit report', onClick: () => {
+            const reason = document.querySelector('input[name="sp-report-reason"]:checked')?.value || 'Other';
+            _spNewsReported.add(id);
+            try { localStorage.setItem('se-news-reported', JSON.stringify([..._spNewsReported])); } catch(e) {}
+            renderNewsCards();
+            Modal.close();
+            setTimeout(() => Modal.show({
+              title: 'Report submitted',
+              body: `<p style="font-size:13px;color:#3A3D4A;line-height:1.7;">Thanks for flagging this. Your report has been sent to the content team.<br><span style="color:#9CA3AF;font-size:12px;">Reason: ${reason}</span></p>`,
+              actions: [{ label: 'Done', onClick: () => Modal.close() }]
+            }), 80);
+          }}
+        ]
+      });
+    };
+
+    const SP_NEWS_POSTERS = ['all', _supplierName, 'SmartEquip'];
+    const posterLabels = { all: 'All sources', [_supplierName]: _supplierName, 'SmartEquip': 'SmartEquip' };
+
+    const contentEl = document.getElementById('sp-content');
+    contentEl.innerHTML = `
+      <div class="news-shell">
+        <div class="news-filter-panel">
+          <div class="nfp-section">
+            <div class="nfp-item ${_spNewsShowSaved ? 'active' : ''}" id="sp-nfp-saved-filter" onclick="spNewsFilter('saved','')">
+              <i class="ti ti-bookmark" style="font-size:13px;"></i> Saved<span id="sp-nfp-saved-count">${_spNewsSaved.size > 0 ? ' (' + _spNewsSaved.size + ')' : ''}</span>
+            </div>
+          </div>
+          <div class="nfp-section">
+            <div class="nfp-label">Priority</div>
+            <div class="nfp-item ${_spNewsPriority==='all'?'active':''}" id="sp-nfpr-all" onclick="spNewsFilter('priority','all')"><div class="nfp-item-dot" style="background:#D1D5DB;"></div>All priorities</div>
+            <div class="nfp-item ${_spNewsPriority==='critical'?'active':''}" id="sp-nfpr-critical" onclick="spNewsFilter('priority','critical')"><div class="nfp-item-dot" style="background:#B91C1C;"></div>Critical</div>
+            <div class="nfp-item ${_spNewsPriority==='high'?'active':''}" id="sp-nfpr-high" onclick="spNewsFilter('priority','high')"><div class="nfp-item-dot" style="background:#C2410C;"></div>High</div>
+            <div class="nfp-item ${_spNewsPriority==='medium'?'active':''}" id="sp-nfpr-medium" onclick="spNewsFilter('priority','medium')"><div class="nfp-item-dot" style="background:#B45309;"></div>Medium</div>
+            <div class="nfp-item ${_spNewsPriority==='low'?'active':''}" id="sp-nfpr-low" onclick="spNewsFilter('priority','low')"><div class="nfp-item-dot" style="background:#6B7280;"></div>Low</div>
+          </div>
+          <div class="nfp-section">
+            <div class="nfp-label">Category</div>
+            <div class="nfp-item ${_spNewsType==='all'?'active':''}" id="sp-nft-all" onclick="spNewsFilter('type','all')"><div class="nfp-item-dot" style="background:#D1D5DB;"></div>All types</div>
+            <div class="nfp-item ${_spNewsType==='bulletin'?'active':''}" id="sp-nft-bulletin" onclick="spNewsFilter('type','bulletin')"><div class="nfp-item-dot" style="background:#1C3969;"></div>Service Bulletin</div>
+            <div class="nfp-item ${_spNewsType==='supplier'?'active':''}" id="sp-nft-supplier" onclick="spNewsFilter('type','supplier')"><div class="nfp-item-dot" style="background:#8B5CF6;"></div>Supplier / Platform</div>
+            <div class="nfp-item ${_spNewsType==='safety'?'active':''}" id="sp-nft-safety" onclick="spNewsFilter('type','safety')"><div class="nfp-item-dot" style="background:#EF4444;"></div>Safety Alert</div>
+          </div>
+          <div class="nfp-section">
+            <div class="nfp-label">Posted by</div>
+            ${SP_NEWS_POSTERS.map(p => `<div class="nfp-poster ${_spNewsPoster===p?'active':''}" id="sp-nfp-${p.replace(/\s+/g,'-').toLowerCase()}" onclick="spNewsFilter('poster','${p}')">${posterLabels[p]||p}</div>`).join('')}
+          </div>
+        </div>
+        <div class="news-main">
+          <div class="news-toolbar">
+            <div class="news-search-wrap">
+              <i class="ti ti-search news-search-icon"></i>
+              <input class="news-search-input" id="sp-news-search" type="text" placeholder="Search by keyword, tag, or title…" value="${_spNewsSearch}"/>
+            </div>
+            <button class="news-sort-btn" onclick="spNewsToggleSort()" id="sp-news-sort-btn">
+              <i class="ti ti-arrow-${_spNewsSortDir==='desc'?'down':'up'}"></i> ${_spNewsSortDir==='desc'?'Newest':'Oldest'} first
+            </button>
+            <span class="news-count-label" id="sp-news-count">${ALL_SP_NEWS.length} articles</span>
+          </div>
+          <div class="news-body">
+            <div id="sp-news-grid"></div>
+          </div>
+        </div>
+      </div>`;
+
+    renderNewsCards();
+
+    document.getElementById('sp-news-search').addEventListener('input', function() {
+      _spNewsSearch = this.value;
+      renderNewsCards();
+    });
+
+    window.spNewsFilter = function(dimension, value) {
+      if (dimension === 'saved') {
+        _spNewsShowSaved = !_spNewsShowSaved;
+        document.getElementById('sp-nfp-saved-filter')?.classList.toggle('active', _spNewsShowSaved);
+      } else if (dimension === 'priority') {
+        _spNewsPriority = value;
+        document.querySelectorAll('[id^="sp-nfpr-"]').forEach(e => e.classList.remove('active'));
+        document.getElementById(`sp-nfpr-${value}`)?.classList.add('active');
+      } else if (dimension === 'type') {
+        _spNewsType = value;
+        document.querySelectorAll('[id^="sp-nft-"]').forEach(e => e.classList.remove('active'));
+        document.getElementById(`sp-nft-${value}`)?.classList.add('active');
+      } else {
+        _spNewsPoster = value;
+        document.querySelectorAll('[id^="sp-nfp-"]').forEach(e => e.classList.remove('active'));
+        document.getElementById(`sp-nfp-${value.replace(/\s+/g,'-').toLowerCase()}`)?.classList.add('active');
+      }
+      renderNewsCards();
+    };
+
+    window.spNewsToggleSort = function() {
+      _spNewsSortDir = _spNewsSortDir === 'desc' ? 'asc' : 'desc';
+      const btn = document.getElementById('sp-news-sort-btn');
+      if (btn) btn.innerHTML = `<i class="ti ti-arrow-${_spNewsSortDir==='desc'?'down':'up'}"></i> ${_spNewsSortDir==='desc'?'Newest':'Oldest'} first`;
+      renderNewsCards();
+    };
+  }
+
+  // ── Analytics ─────────────────────────────────────────────────────────────────
+
+  function renderAnalytics() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Analytics';
+
+    const contentEl = document.getElementById('sp-content');
+    const FLEET_COLORS = ['#1C3969','#185FA5','#3B6D11','#534AB7','#A32D2D'];
+
+    contentEl.innerHTML = `
+      <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+        <div class="an-filter-bar">
+          <span class="an-filter-label">Period</span>
+          <div class="an-period-pills">
+            ${['7D','30D','90D','12M'].map(p => `<div class="an-period-pill ${_spPeriod===p?'active':''}" onclick="spAnSetPeriod('${p}')">${p}</div>`).join('')}
+          </div>
+          <div class="an-filter-sep"></div>
+          <span class="an-filter-label">Fleet</span>
+          <div class="an-loc-pills" id="sp-an-fleet-pills">
+            ${renderFleetPills()}
+          </div>
+        </div>
+        <div class="an-content" id="sp-an-body"></div>
+      </div>`;
+
+    renderSpAnalyticsContent();
+  }
+
+  function renderFleetPills() {
+    const FLEET_COLORS = ['#1C3969','#185FA5','#3B6D11','#534AB7','#A32D2D'];
+    const allActive = !_spFleetIds;
+    return `<div class="an-loc-pill ${allActive?'active':''}" onclick="spAnToggleAllFleets()" style="${allActive?'background:#111318;color:#FFFFFF;border-color:#111318;':''}">
+        <i class="ti ti-stack-2" style="font-size:11px;"></i> All fleets
+      </div>
+      ${_fleets.map((f, i) => {
+        const active = !_spFleetIds || _spFleetIds.has(f.fleetId);
+        return `<div class="an-loc-pill ${active?'active':''}" onclick="spAnToggleFleet('${f.fleetId}')" style="${active?`background:#D6E4F7;color:#1C3969;border-color:#F5C97A;`:''}">
+          <div class="an-loc-dot" style="background:${FLEET_COLORS[i%FLEET_COLORS.length]};"></div>
+          ${f.fleetName.split(' ')[0]}
+        </div>`;
+      }).join('')}`;
+  }
+
+  window.spAnSetPeriod = function(p) {
+    _spPeriod = p;
+    document.querySelectorAll('.an-period-pill').forEach(el => {
+      el.classList.toggle('active', el.textContent.trim() === p);
+    });
+    renderSpAnalyticsContent();
+  };
+
+  window.spAnToggleAllFleets = function() {
+    _spFleetIds = null; // null = all selected
+    const pillsEl = document.getElementById('sp-an-fleet-pills');
+    if (pillsEl) pillsEl.innerHTML = renderFleetPills();
+    renderSpAnalyticsContent();
+  };
+
+  window.spAnToggleFleet = function(fleetId) {
+    if (!_spFleetIds) {
+      // Currently all selected — deselect all except this one
+      _spFleetIds = new Set([fleetId]);
+    } else if (_spFleetIds.has(fleetId)) {
+      if (_spFleetIds.size === 1) {
+        // Last one — reset to all
+        _spFleetIds = null;
+      } else {
+        _spFleetIds.delete(fleetId);
+      }
+    } else {
+      _spFleetIds.add(fleetId);
+      // If all are now selected, reset to null (all)
+      if (_spFleetIds.size === _fleets.length) _spFleetIds = null;
+    }
+    const pillsEl = document.getElementById('sp-an-fleet-pills');
+    if (pillsEl) pillsEl.innerHTML = renderFleetPills();
+    renderSpAnalyticsContent();
+  };
+
+  function renderSpAnalyticsContent() {
+    const body = document.getElementById('sp-an-body');
+    if (!body) return;
+
+    const allReqs = Store.getPriceRequests(_supplierId);
+    const filteredReqs = _spFleetIds ? allReqs.filter(r => _spFleetIds.has(r.fleetId)) : allReqs;
+    const filteredFleets = _spFleetIds ? _fleets.filter(f => _spFleetIds.has(f.fleetId)) : _fleets;
+    const myArticles = (Store.getCmsArticles ? Store.getCmsArticles('published') : []).filter(a => a.supplierId === _supplierId);
+
+    // KPI calculations
+    const totalReqs = filteredReqs.length;
+    const quoted = filteredReqs.filter(r => r.status === 'quoted').length;
+    const pending = filteredReqs.filter(r => r.status === 'pending').length;
+    const convRate = totalReqs > 0 ? Math.round(quoted / totalReqs * 100) : 0;
+    const periodMult = { '7D':0.065, '30D':0.28, '90D':0.78, '12M':1 }[_spPeriod] || 0.28;
+    const avgRespTime = (1.2 + Math.random() * 0.4).toFixed(1);
+    const activeFleetCount = filteredFleets.length;
+
+    // Requests trend data
+    const TREND_DATA = {
+      '7D':  { labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], values:[2,4,3,5,3,1,1] },
+      '30D': { labels:['Wk 1','Wk 2','Wk 3','Wk 4'], values:[7,11,9,12] },
+      '90D': { labels:['May','Jun','Jul'], values:[28,35,31] },
+      '12M': { labels:['Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul'], values:[18,22,20,25,19,24,28,30,27,35,31,28] },
+    };
+    const trend = TREND_DATA[_spPeriod] || TREND_DATA['30D'];
+    const scaledValues = trend.values.map(v => Math.round(v * (filteredFleets.length / Math.max(_fleets.length, 1))));
+    const maxTrendVal = Math.max(...scaledValues, 1);
+
+    const trendBars = trend.labels.map((lbl, i) => {
+      const h = Math.max(4, Math.round((scaledValues[i] / maxTrendVal) * 90));
+      const isLast = i === trend.labels.length - 1;
+      return `<div class="an-bar-col">
+        <div class="an-bar-amt">${isLast || trend.labels.length <= 5 ? scaledValues[i] : ''}</div>
+        <div class="an-bar-seg" style="height:${h}px;background:${isLast?'#1C3969':'#E0DBD5'};"></div>
+        <div class="an-bar-lbl">${lbl}</div>
+      </div>`;
+    }).join('');
+
+    // By fleet breakdown
+    const FLEET_COLORS = ['#1C3969','#185FA5','#3B6D11','#534AB7','#A32D2D'];
+    const byFleetData = _fleets.map((f, i) => {
+      const fReqs = allReqs.filter(r => r.fleetId === f.fleetId);
+      return { name: f.fleetName, total: fReqs.length, quoted: fReqs.filter(r=>r.status==='quoted').length,
+               pending: fReqs.filter(r=>r.status==='pending').length, color: FLEET_COLORS[i%FLEET_COLORS.length] };
+    }).filter(f => f.total > 0).sort((a, b) => b.total - a.total);
+    const maxFleetReqs = Math.max(...byFleetData.map(f => f.total), 1);
+
+    // Most requested parts
+    const partCounts = {};
+    filteredReqs.forEach(r => {
+      if (!partCounts[r.partNum]) partCounts[r.partNum] = { desc: r.partDesc, pn: r.partNum, qty: 0 };
+      partCounts[r.partNum].qty++;
+    });
+    const topParts = Object.values(partCounts).sort((a, b) => b.qty - a.qty).slice(0, 6);
+    const maxPartQty = Math.max(...topParts.map(p => p.qty), 1);
+
+    // Content by type
+    const contentByType = [
+      { type: 'bulletin', label: 'Service Bulletins', color: '#1C3969' },
+      { type: 'news', label: 'Product News', color: '#185FA5' },
+      { type: 'safety', label: 'Safety Notices', color: '#A32D2D' },
+      { type: 'promo', label: 'Promotions', color: '#3B6D11' },
+    ].map(t => ({ ...t, count: myArticles.filter(a => a.subtype === t.type || a.type === t.type).length }))
+     .filter(t => t.count > 0);
+    const maxContent = Math.max(...contentByType.map(t => t.count), 1);
+
+    // Insights
+    const convRateDelta = convRate - 58;
+    const topFleetReq = byFleetData[0];
+    const INSIGHTS = [
+      {
+        icon: convRate >= 60 ? 'ti-trending-up' : 'ti-trending-down',
+        iconBg: convRate >= 60 ? '#F0FDF4' : '#FEF2F2',
+        iconColor: convRate >= 60 ? '#3B6D11' : '#A32D2D',
+        title: `${convRate}% quote conversion rate`,
+        body: convRate >= 60
+          ? `Your quote-to-request conversion is above the SmartEquip supplier average of 58%. Fast response times and competitive pricing are driving wins.`
+          : `Your conversion rate is ${Math.abs(convRateDelta)}% below the supplier average of 58%. Consider reviewing pricing on pending requests and responding faster to pending items.`,
+        tag: convRate >= 60 ? 'Above average' : 'Below average',
+        tagBg: convRate >= 60 ? '#F0FDF4' : '#FEF2F2',
+        tagColor: convRate >= 60 ? '#3B6D11' : '#A32D2D',
+      },
+      {
+        icon: pending > 3 ? 'ti-alert-triangle' : 'ti-circle-check',
+        iconBg: pending > 3 ? '#FFF8EC' : '#F0FDF4',
+        iconColor: pending > 3 ? '#1C3969' : '#3B6D11',
+        title: pending > 0 ? `${pending} request${pending !== 1 ? 's' : ''} awaiting response` : 'All requests responded to',
+        body: pending > 0
+          ? `${pending} price request${pending !== 1 ? 's are' : ' is'} awaiting your response. Fleets expect a reply within 24 hours — late responses can affect your responsiveness score.`
+          : 'Great work — you\'re fully caught up on price requests. Your responsiveness score is strong.',
+        tag: pending > 3 ? 'Action needed' : (pending > 0 ? 'In progress' : 'Up to date'),
+        tagBg: pending > 3 ? '#FFF8EC' : (pending > 0 ? '#EDE9FE' : '#F0FDF4'),
+        tagColor: pending > 3 ? '#1C3969' : (pending > 0 ? '#534AB7' : '#3B6D11'),
+      },
+      {
+        icon: 'ti-building-warehouse',
+        iconBg: '#EDE9FE',
+        iconColor: '#534AB7',
+        title: topFleetReq ? `${topFleetReq.name} is your most active fleet` : `${activeFleetCount} active fleet${activeFleetCount !== 1 ? 's' : ''}`,
+        body: topFleetReq
+          ? `${topFleetReq.name} has submitted ${topFleetReq.total} price request${topFleetReq.total !== 1 ? 's' : ''}, making them your highest-volume fleet customer. ${topFleetReq.quoted > 0 ? `${topFleetReq.quoted} have been quoted.` : 'Consider prioritising their open requests.'}`
+          : `You have ${activeFleetCount} onboarded fleet${activeFleetCount !== 1 ? 's' : ''} with no requests yet. Reach out with product updates to drive engagement.`,
+        tag: 'Fleet insight',
+        tagBg: '#EDE9FE',
+        tagColor: '#534AB7',
+      },
+    ];
+
+    body.innerHTML = `
+    <!-- KPI strip -->
+    <div class="an-kpi-row">
+      <div class="an-kpi">
+        <div class="an-kpi-val">${totalReqs}</div>
+        <div class="an-kpi-label">Price requests · ${_spPeriod}</div>
+        <div class="an-kpi-delta neutral">${pending} pending response</div>
+      </div>
+      <div class="an-kpi">
+        <div class="an-kpi-val">${quoted}</div>
+        <div class="an-kpi-label">Quotes sent</div>
+        <div class="an-kpi-delta neutral">${totalReqs - quoted - pending} closed / declined</div>
+      </div>
+      <div class="an-kpi">
+        <div class="an-kpi-val">${convRate}%</div>
+        <div class="an-kpi-label">Quote conversion rate</div>
+        <div class="an-kpi-delta ${convRate >= 58 ? 'up' : 'down'}">${convRate >= 58 ? '↑' : '↓'} vs 58% avg</div>
+      </div>
+      <div class="an-kpi">
+        <div class="an-kpi-val">${avgRespTime}d</div>
+        <div class="an-kpi-label">Avg response time</div>
+        <div class="an-kpi-delta ${parseFloat(avgRespTime) <= 1.5 ? 'up' : 'down'}">${parseFloat(avgRespTime) <= 1.5 ? 'Within SLA' : 'Exceeds SLA'}</div>
+      </div>
+      <div class="an-kpi">
+        <div class="an-kpi-val">${myArticles.length}</div>
+        <div class="an-kpi-label">Content published</div>
+        <div class="an-kpi-delta neutral">${contentByType.length} type${contentByType.length !== 1 ? 's' : ''}</div>
+      </div>
+      <div class="an-kpi">
+        <div class="an-kpi-val">${activeFleetCount}</div>
+        <div class="an-kpi-label">Active fleets</div>
+        <div class="an-kpi-delta neutral">${_fleets.length} total onboarded</div>
+      </div>
+    </div>
+
+    <!-- Insights -->
+    <div class="an-grid-insight" style="margin-bottom:14px;">
+      ${INSIGHTS.map(ins => `
+        <div class="an-insight">
+          <div style="display:flex;align-items:flex-start;gap:10px;">
+            <div class="an-insight-icon" style="background:${ins.iconBg};color:${ins.iconColor};"><i class="ti ${ins.icon}"></i></div>
+            <div style="flex:1;min-width:0;">
+              <div class="an-insight-title">${ins.title}</div>
+              <div class="an-insight-body">${ins.body}</div>
+              <div class="an-insight-tag" style="background:${ins.tagBg};color:${ins.tagColor};">${ins.tag}</div>
+            </div>
+          </div>
+        </div>`).join('')}
+    </div>
+
+    <!-- Trend + Request status -->
+    <div class="an-grid-3" style="margin-bottom:14px;">
+      <div class="an-card" style="grid-column:1/2;">
+        <div class="an-card-hdr">
+          <div class="an-card-title"><i class="ti ti-trending-up" style="font-size:13px;color:#1C3969;"></i> Price request trend</div>
+          <span class="an-card-sub">${!_spFleetIds ? 'All fleets' : filteredFleets.map(f=>f.fleetName.split(' ')[0]).join(', ')} · ${_spPeriod}</span>
+        </div>
+        <div class="an-card-body">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;">
+            <div style="font-size:20px;font-weight:700;color:#111318;letter-spacing:-0.5px;">${scaledValues.reduce((a,b)=>a+b,0)} requests</div>
+            <div style="font-size:11px;color:#9CA3AF;">${_spPeriod} period</div>
+          </div>
+          <div class="an-trend-wrap">${trendBars}</div>
+        </div>
+      </div>
+
+      <div class="an-card">
+        <div class="an-card-hdr">
+          <div class="an-card-title"><i class="ti ti-tag" style="font-size:13px;color:#9CA3AF;"></i> Request status</div>
+        </div>
+        <div class="an-card-body" style="padding:10px 16px;">
+          <div class="an-wo-stat">
+            <span style="font-size:12px;color:#5A5F6E;">Quoted</span>
+            <span class="an-wo-badge" style="background:#E1F5EE;color:#1C3969;">${quoted}</span>
+          </div>
+          <div class="an-wo-stat">
+            <span style="font-size:12px;color:#5A5F6E;">Pending response</span>
+            <span class="an-wo-badge" style="background:#D6E4F7;color:#1C3969;">${pending}</span>
+          </div>
+          <div class="an-wo-stat">
+            <span style="font-size:12px;color:#5A5F6E;">More info needed</span>
+            <span class="an-wo-badge" style="background:#EEEDFE;color:#534AB7;">${filteredReqs.filter(r=>r.status==='needs_info').length}</span>
+          </div>
+          <div class="an-wo-stat">
+            <span style="font-size:12px;color:#5A5F6E;">Not available</span>
+            <span class="an-wo-badge" style="background:#F0ECE8;color:#5A5F6E;">${filteredReqs.filter(r=>r.status==='rejected').length}</span>
+          </div>
+          <div style="margin-top:12px;padding-top:10px;border-top:0.5px solid #F0ECE8;">
+            <div style="height:10px;background:#F0ECE8;border-radius:5px;overflow:hidden;display:flex;">
+              ${totalReqs > 0 ? `
+              <div style="width:${Math.round(quoted/totalReqs*100)}%;background:#1C3969;"></div>
+              <div style="width:${Math.round(pending/totalReqs*100)}%;background:#1C3969;"></div>
+              <div style="width:${Math.round(filteredReqs.filter(r=>r.status==='needs_info').length/totalReqs*100)}%;background:#534AB7;"></div>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- By fleet + Most requested parts -->
+    <div class="an-grid-2" style="margin-bottom:14px;">
+      <div class="an-card">
+        <div class="an-card-hdr">
+          <div class="an-card-title"><i class="ti ti-building-warehouse" style="font-size:13px;color:#9CA3AF;"></i> Requests by fleet</div>
+          <span class="an-card-sub">${_spPeriod}</span>
+        </div>
+        <div class="an-card-body">
+          ${byFleetData.length ? byFleetData.map(f => `
+            <div class="an-mech-row">
+              <div class="an-avatar" style="background:${f.color};color:#FFFFFF;font-size:8px;">${f.name.slice(0,2).toUpperCase()}</div>
+              <div class="an-name" style="min-width:100px;">${f.name.split(' ')[0]}</div>
+              ${spBar(f.total / maxFleetReqs, f.color)}
+              <div class="an-cnt">${f.quoted}/${f.total} quoted</div>
+              <div class="an-val">${f.total}</div>
+            </div>`).join('')
+          : '<div class="an-empty">No requests in this period.</div>'}
+        </div>
+      </div>
+
+      <div class="an-card">
+        <div class="an-card-hdr">
+          <div class="an-card-title"><i class="ti ti-repeat" style="font-size:13px;color:#9CA3AF;"></i> Most requested parts</div>
+          <span class="an-card-sub">By request count</span>
+        </div>
+        <div class="an-card-body">
+          ${topParts.length ? topParts.map((p, i) => `
+            <div class="an-part-row">
+              <div class="an-rank">${i+1}</div>
+              <div class="an-part-info">
+                <div class="an-part-desc">${p.desc}</div>
+                <div class="an-part-meta">${p.pn}</div>
+                <div style="margin-top:3px;height:4px;background:#F5F2EE;border-radius:2px;overflow:hidden;">
+                  <div style="height:100%;width:${Math.round(p.qty/maxPartQty*100)}%;background:#534AB7;border-radius:2px;"></div>
+                </div>
+              </div>
+              <div class="an-part-qty">${p.qty}×</div>
+            </div>`).join('')
+          : '<div class="an-empty">No parts data yet.</div>'}
+        </div>
+      </div>
+    </div>
+
+    <!-- Content breakdown -->
+    <div class="an-grid-2" style="margin-bottom:14px;">
+      <div class="an-card">
+        <div class="an-card-hdr">
+          <div class="an-card-title"><i class="ti ti-pencil" style="font-size:13px;color:#9CA3AF;"></i> Content by type</div>
+          <span class="an-card-sub">${myArticles.length} total published</span>
+        </div>
+        <div class="an-card-body">
+          ${contentByType.length ? contentByType.map(t => `
+            <div class="an-cat-row">
+              <div style="width:9px;height:9px;border-radius:2px;background:${t.color};flex-shrink:0;"></div>
+              <div class="an-cat-name">${t.label}</div>
+              ${spBar(t.count / maxContent, t.color)}
+              <div class="an-cat-val">${t.count}</div>
+            </div>`).join('')
+          : '<div class="an-empty">No content published yet. Use Post Content to get started.</div>'}
+        </div>
+      </div>
+
+      <div class="an-card">
+        <div class="an-card-hdr">
+          <div class="an-card-title"><i class="ti ti-users" style="font-size:13px;color:#9CA3AF;"></i> Fleet engagement</div>
+          <span class="an-card-sub">Onboarded fleets</span>
+        </div>
+        <div class="an-card-body">
+          ${_fleets.map((f, i) => {
+            const fReqs = allReqs.filter(r => r.fleetId === f.fleetId);
+            const fQuoted = fReqs.filter(r => r.status === 'quoted').length;
+            return `<div class="an-mech-row">
+              <div class="an-avatar" style="background:${FLEET_COLORS[i%FLEET_COLORS.length]};color:#FFFFFF;font-size:8px;">${f.logoText}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:12px;font-weight:500;color:#111318;">${f.fleetName}</div>
+                <div style="font-size:10px;color:#9CA3AF;">${f.city} · ${fReqs.length} requests</div>
+              </div>
+              <div style="font-size:11px;font-weight:600;color:#1C3969;">${fQuoted} quoted</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
   }
 
   // ── Impersonation ────────────────────────────────────────────────────────────
 
   window.spImpersonate = function(fleetId, fleetName) {
     Router.navigate('parts-search', { supplierId: _supplierId, impersonating: true, impersonatingFleet: fleetName });
+  };
+
+  // ── Price request global handlers ────────────────────────────────────────────
+
+  function _prFilteredReqs() {
+    return Store.getPriceRequests(_supplierId).filter(r => {
+      if (_prFilter.fleet !== 'all' && r.fleetName !== _prFilter.fleet) return false;
+      if (_prFilter.status !== 'all' && r.status !== _prFilter.status) return false;
+      if (_prFilter.location !== 'all' && r.location !== _prFilter.location) return false;
+      if (_prFilter.user && !r.requestedBy.toLowerCase().includes(_prFilter.user.toLowerCase())) return false;
+      if (_prFilter.dateFrom && r.submittedAt < new Date(_prFilter.dateFrom).getTime()) return false;
+      if (_prFilter.dateTo && r.submittedAt > new Date(_prFilter.dateTo).getTime() + 86400000) return false;
+      return true;
+    });
+  }
+
+  function _prRefreshTable() {
+    const wrap = document.getElementById('pr-list-wrap');
+    if (!wrap) return;
+    wrap.innerHTML = _renderPrTable(_prFilteredReqs());
+    if (_prDetailId) _renderPrDetail(_prDetailId);
+  }
+
+  window.spPrOpenRequest = function(id) {
+    _prDetailId = id;
+    setTab('requests');
+  };
+
+  window.spPrApplyFilter = function() {
+    _prFilter.fleet    = document.getElementById('pr-f-fleet')?.value    || 'all';
+    _prFilter.status   = document.getElementById('pr-f-status')?.value   || 'all';
+    _prFilter.location = document.getElementById('pr-f-location')?.value || 'all';
+    _prFilter.dateFrom = document.getElementById('pr-f-from')?.value     || '';
+    _prFilter.dateTo   = document.getElementById('pr-f-to')?.value       || '';
+    _prRefreshTable();
+  };
+
+  window.spPrFilterUser = function() {
+    _prFilter.user = document.getElementById('pr-f-user')?.value || '';
+    _prRefreshTable();
+  };
+
+  window.spPrClearFilters = function() {
+    _prFilter = { fleet:'all', status:'all', location:'all', user:'', dateFrom:'', dateTo:'' };
+    renderRequests();
+  };
+
+  window.spPrToggleDetail = function(id) {
+    if (_prDetailId === id) {
+      _prDetailId = null;
+      const panel = document.getElementById('pr-detail-panel');
+      if (panel) panel.remove();
+      // Refresh row highlight
+      document.querySelectorAll('.pr-table-row').forEach(row => row.classList.remove('pr-row-open'));
+    } else {
+      _prDetailId = id;
+      _prRefreshTable();
+    }
+  };
+
+  window.spPrSwitchCompose = function(tab, id) {
+    document.getElementById('pr-tab-comment')?.classList.toggle('active', tab === 'comment');
+    document.getElementById('pr-tab-info')?.classList.toggle('active', tab === 'info');
+    const ta = document.getElementById('pr-compose-text-' + id);
+    if (ta) ta.placeholder = tab === 'info'
+      ? 'Describe the information you need from the fleet to complete this request…'
+      : 'Add a comment or question for the fleet…';
+  };
+
+  window.spPrSendComment = function(id) {
+    const ta = document.getElementById('pr-compose-text-' + id);
+    const text = ta?.value?.trim();
+    if (!text) { if (ta) { ta.style.borderColor='#A32D2D'; setTimeout(()=>ta.style.borderColor='',1200); } return; }
+    const currentUser = Store.getCurrentUser();
+    Store.addPriceRequestComment(id, {
+      author: currentUser?.name || currentUser?.username || 'You',
+      authorRole: 'supplier',
+      text,
+    });
+    _prDetailId = id;
+    // Also mark as needs_info if it was pending and not already quoted
+    const reqs = Store.getPriceRequests(_supplierId);
+    const r = reqs.find(x => x.id === id);
+    if (r && r.status === 'pending') {
+      Store.respondToPriceRequest(id, { status: 'needs_info', message: text });
+    }
+    renderRequests();
+  };
+
+  window.spPrMarkUnresolvable = function(id) {
+    Modal.show({
+      title: 'Mark as not resolvable',
+      body: `
+        <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:12px 14px;margin-bottom:16px;">
+          <div style="font-size:13px;color:#7F1D1D;line-height:1.5;">Marking this request as not resolvable will close it and notify the fleet that you cannot fulfill it. This should be a last resort — consider requesting more information or providing an alternative part first.</div>
+        </div>
+        <div class="modal-form-field">
+          <label class="modal-form-label">Reason <span style="color:#A32D2D;">*</span></label>
+          <textarea class="modal-form-input" id="pr-unresolvable-reason" style="height:72px;resize:none;padding-top:8px;" placeholder="Explain why this request cannot be fulfilled…"></textarea>
+          <div id="pr-unresolvable-err" style="font-size:11px;color:#A32D2D;margin-top:3px;display:none;">A reason is required</div>
+        </div>`,
+      actions: [
+        { label: 'Go back', onClick: () => Modal.close() },
+        { label: 'Mark not resolvable', danger: true, onClick: () => {
+          const reason = document.getElementById('pr-unresolvable-reason')?.value?.trim();
+          if (!reason) { document.getElementById('pr-unresolvable-err').style.display='block'; return; }
+          Store.respondToPriceRequest(id, { status: 'rejected', message: reason });
+          Modal.close();
+          _prDetailId = null;
+          renderRequests();
+        }},
+      ]
+    });
+  };
+
+  window.spPrAddPrice = function() {
+    // Navigate to supplier catalog for price assignment
+    Modal.show({
+      title: 'Add pricing via catalog',
+      body: `
+        <div style="font-size:13px;color:#4B5268;line-height:1.6;margin-bottom:16px;">To assign pricing to a specific part, navigate to your parts catalog where you can set or update prices at the part level. Changes will reflect on future requests and fleet-visible pricing.</div>
+        <div style="background:#F5F2EE;border-radius:8px;padding:12px 14px;">
+          <div style="font-size:12px;font-weight:600;color:#111318;margin-bottom:4px;">Tip</div>
+          <div style="font-size:12px;color:#7A7F8E;">You can also respond directly to a specific price request from the list — use "Add Price" on the request row to provide an ad-hoc quote without updating the catalog.</div>
+        </div>`,
+      actions: [
+        { label: 'Cancel', onClick: () => Modal.close() },
+        { label: 'Open Catalog', primary: true, onClick: () => { Modal.close(); setTab('content'); } },
+      ]
+    });
   };
 
   // ── Respond to price request ─────────────────────────────────────────────────
@@ -332,18 +2133,25 @@ function render_supplier_portal(el) {
               price: type === 'quoted' ? price : null,
               message: msg,
             });
+            // Also add the response as a comment so it appears in the thread
+            if (msg || type === 'quoted') {
+              const currentUser = Store.getCurrentUser();
+              Store.addPriceRequestComment(reqId, {
+                author: currentUser?.name || currentUser?.username || 'You',
+                authorRole: 'supplier',
+                text: type === 'quoted'
+                  ? `Quoted at $${price.toFixed(2)}/unit.${msg ? ' ' + msg : ''}`
+                  : msg,
+              });
+            }
             Modal.close();
+            if (_prDetailId) _prDetailId = reqId;
             renderRequests();
-            // refresh badge
-            const pending = Store.getPriceRequests(_supplierId).filter(r => r.status === 'pending').length;
-            const b = document.getElementById('sp-pr-badge');
-            if (b) b.textContent = pending;
           }
         }
       ]
     });
 
-    // Toggle price row based on response type
     setTimeout(() => {
       const typeEl = document.getElementById('sp-resp-type');
       const priceRow = document.getElementById('sp-price-row');
@@ -368,19 +2176,1174 @@ function render_supplier_portal(el) {
 
   // ── Tab switching ─────────────────────────────────────────────────────────────
 
-  function setTab(tab) {
-    _activeTab = tab;
-    el.querySelectorAll('.sp-sb-item').forEach(item => {
-      item.classList.toggle('active', item.dataset.tab === tab);
-    });
-    if (tab === 'fleets')   renderFleets();
-    if (tab === 'requests') renderRequests();
-    if (tab === 'content')  renderContent();
+  // ── Doc Ingestion ────────────────────────────────────────────────────────────
+  let _docUploads = [
+    { id:'du1', name:'SJIII-3219-Service-Manual.pdf',   machine:'Skyjack SJIII 3219', type:'Service Manual', version:'Rev 4', size:'8.4 MB', status:'indexed',    uploaded:'2026-07-12', pages:312 },
+    { id:'du2', name:'SJ6832RT-Parts-Catalog-2025.pdf', machine:'Skyjack SJ6832 RT',  type:'Parts Catalog',  version:'2025', size:'5.1 MB', status:'indexed',    uploaded:'2026-07-01', pages:187 },
+    { id:'du3', name:'SJIII-4632-Safety-Notices.pdf',   machine:'Skyjack SJIII 4632', type:'Safety Notice',  version:'1.0',  size:'1.2 MB', status:'processing', uploaded:'2026-08-03', pages:null },
+    { id:'du4', name:'Skyjack-Hydraulics-Guide.pdf',    machine:'All',                type:'Technical Guide',version:'2.1',  size:'3.7 MB', status:'queued',     uploaded:'2026-08-04', pages:null },
+  ];
+
+  function renderDocUpload() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Doc Ingestion';
+    const contentEl = document.getElementById('sp-content');
+
+    const STATUS_CFG = {
+      indexed:    { label:'Indexed',    color:'#1C3969', bg:'#D6E4F7', icon:'ti-circle-check' },
+      processing: { label:'Processing', color:'#B45309', bg:'#FFFBEB', icon:'ti-loader-2' },
+      queued:     { label:'Queued',     color:'#534AB7', bg:'#EEEDFE', icon:'ti-clock' },
+      error:      { label:'Error',      color:'#B91C1C', bg:'#FEE2E2', icon:'ti-alert-circle' },
+    };
+
+    const DOC_TYPES = ['Service Manual','Parts Catalog','Safety Notice','Technical Guide','Training Material','Warranty Policy'];
+    const MACHINES  = ['All','Skyjack SJIII 3219','Skyjack SJ6832 RT','Skyjack SJIII 4632','Skyjack SJ3246E'];
+
+    contentEl.innerHTML = `
+<style>
+.du-shell { display:flex; flex:1; min-height:0; overflow:hidden; }
+.du-main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.du-toolbar { padding:14px 24px; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.du-title-area { padding:0; }
+.du-body { flex:1; padding:20px 24px; overflow-y:auto; }
+.du-upload-zone { border:2px dashed #C8C3BC; border-radius:12px; background:#FAFAF8; padding:36px; text-align:center; cursor:pointer; transition:border-color .15s, background .15s; margin-bottom:20px; }
+.du-upload-zone:hover { border-color:#1C3969; background:#F0FAF3; }
+.du-upload-icon { font-size:36px; color:#C8C3BC; margin-bottom:10px; }
+.du-upload-zone:hover .du-upload-icon { color:#1C3969; }
+.du-upload-title { font-size:14px; font-weight:600; color:#3A3D4A; margin-bottom:4px; }
+.du-upload-sub { font-size:12px; color:#9CA3AF; }
+.du-table { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
+.du-table-head { display:grid; grid-template-columns:2fr 160px 130px 80px 90px 80px 100px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 18px; }
+.du-th { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.8px; text-transform:uppercase; padding:9px 8px; }
+.du-row { display:grid; grid-template-columns:2fr 160px 130px 80px 90px 80px 100px; padding:0 18px; border-bottom:0.5px solid #F5F2EE; align-items:center; transition:background .12s; }
+.du-row:last-child { border-bottom:none; }
+.du-row:hover { background:#FAFAF9; }
+.du-td { padding:12px 8px; font-size:13px; color:#3A3D4A; }
+.du-doc-name { font-size:13px; font-weight:500; color:#111318; }
+.du-doc-meta { font-size:11px; color:#9CA3AF; margin-top:2px; }
+.du-status-pill { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:700; border-radius:4px; padding:2px 8px; white-space:nowrap; }
+.du-progress-bar { height:4px; background:#F0ECE8; border-radius:2px; margin-top:4px; overflow:hidden; }
+.du-progress-fill { height:100%; border-radius:2px; background:#1C3969; animation:duPulse 1.4s ease-in-out infinite; }
+@keyframes duPulse { 0%,100%{opacity:.6;} 50%{opacity:1;} }
+@keyframes spin { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+</style>
+<div class="du-shell">
+  <div class="du-main">
+    <div class="du-toolbar">
+      <div style="flex:1;">
+        <div style="font-size:16px;font-weight:700;color:#111318;">Document Ingestion</div>
+        <div style="font-size:12px;color:#9CA3AF;margin-top:1px;">Upload manuals, parts catalogs, and technical docs for indexing</div>
+      </div>
+      <button class="sp-btn sp-btn-primary" onclick="duOpenUpload()"><i class="ti ti-upload" style="font-size:13px;"></i> Upload document</button>
+    </div>
+    <div class="du-body">
+      <div class="du-upload-zone" onclick="duOpenUpload()">
+        <div class="du-upload-icon"><i class="ti ti-cloud-upload"></i></div>
+        <div class="du-upload-title">Drag &amp; drop files here, or click to browse</div>
+        <div class="du-upload-sub">Supports PDF, DOCX, XLSX — up to 100 MB per file</div>
+      </div>
+      <div style="font-size:14px;font-weight:700;color:#111318;margin-bottom:12px;">Uploaded documents <span style="font-size:12px;font-weight:400;color:#9CA3AF;">(${_docUploads.length})</span></div>
+      <div class="du-table">
+        <div class="du-table-head">
+          <div class="du-th">Document</div>
+          <div class="du-th">Machine</div>
+          <div class="du-th">Type</div>
+          <div class="du-th">Size</div>
+          <div class="du-th">Uploaded</div>
+          <div class="du-th">Pages</div>
+          <div class="du-th">Status</div>
+        </div>
+        ${_docUploads.map(d => {
+          const s = STATUS_CFG[d.status] || STATUS_CFG.queued;
+          return `<div class="du-row">
+            <div class="du-td">
+              <div class="du-doc-name"><i class="ti ti-file-type-pdf" style="color:#B91C1C;margin-right:5px;font-size:14px;"></i>${d.name}</div>
+              <div class="du-doc-meta">v${d.version}</div>
+            </div>
+            <div class="du-td" style="font-size:12px;">${d.machine}</div>
+            <div class="du-td" style="font-size:12px;">${d.type}</div>
+            <div class="du-td" style="font-size:12px;color:#7A7F8E;">${d.size}</div>
+            <div class="du-td" style="font-size:12px;color:#7A7F8E;">${d.uploaded}</div>
+            <div class="du-td" style="font-size:12px;color:#7A7F8E;">${d.pages ? d.pages.toLocaleString() : '—'}</div>
+            <div class="du-td">
+              <span class="du-status-pill" style="background:${s.bg};color:${s.color};">
+                <i class="ti ${s.icon}" style="font-size:10px;"></i>${s.label}
+              </span>
+              ${d.status === 'processing' ? '<div class="du-progress-bar"><div class="du-progress-fill" style="width:60%;"></div></div>' : ''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>
+</div>`;
+
+    window.duOpenUpload = function() {
+      Modal.show({
+        title: 'Upload document',
+        wide: true,
+        body: `
+<div style="display:flex;flex-direction:column;gap:14px;">
+  <div class="modal-form-field">
+    <label class="modal-form-label">File <span class="lbl-opt">(PDF, DOCX, XLSX)</span></label>
+    <div style="border:2px dashed #C8C3BC;border-radius:8px;padding:22px;text-align:center;cursor:pointer;background:#FAFAF8;" onclick="document.getElementById('du-file-input').click()">
+      <i class="ti ti-cloud-upload" style="font-size:26px;color:#9CA3AF;display:block;margin-bottom:6px;"></i>
+      <div style="font-size:13px;color:#5A5F6E;">Click to select a file</div>
+      <div style="font-size:11px;color:#B0AAA3;margin-top:3px;">Up to 100 MB</div>
+    </div>
+    <input id="du-file-input" type="file" accept=".pdf,.docx,.xlsx" style="display:none;"/>
+  </div>
+  <div class="modal-form-field">
+    <label class="modal-form-label">Document title</label>
+    <input id="du-f-title" class="modal-form-input" placeholder="e.g. SJIII 3219 Service Manual Rev 5"/>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="modal-form-field">
+      <label class="modal-form-label">Document type</label>
+      <select id="du-f-type" class="modal-form-select">
+        ${DOC_TYPES.map(t => `<option>${t}</option>`).join('')}
+      </select>
+    </div>
+    <div class="modal-form-field">
+      <label class="modal-form-label">Associated machine</label>
+      <select id="du-f-machine" class="modal-form-select">
+        ${MACHINES.map(m => `<option>${m}</option>`).join('')}
+      </select>
+    </div>
+  </div>
+  <div class="modal-form-field">
+    <label class="modal-form-label">Version / revision <span class="lbl-opt">(optional)</span></label>
+    <input id="du-f-version" class="modal-form-input" placeholder="e.g. Rev 5, 2026"/>
+  </div>
+</div>`,
+        actions: [
+          { label: 'Upload & queue', style: 'primary', onClick: () => {
+            const title   = document.getElementById('du-f-title').value.trim() || 'Untitled document.pdf';
+            const type    = document.getElementById('du-f-type').value;
+            const machine = document.getElementById('du-f-machine').value;
+            const version = document.getElementById('du-f-version').value.trim() || '1.0';
+            _docUploads.unshift({
+              id: 'du' + Date.now(), name: title.endsWith('.pdf') ? title : title + '.pdf',
+              machine, type, version, size: (Math.random()*8+1).toFixed(1) + ' MB',
+              status: 'queued', uploaded: new Date().toISOString().slice(0,10), pages: null,
+            });
+            Modal.close();
+            renderDocUpload();
+          }},
+          { label: 'Cancel', onClick: () => Modal.close() },
+        ],
+      });
+    };
   }
 
-  el.querySelectorAll('.sp-sb-item[data-tab]').forEach(item => {
-    item.addEventListener('click', () => setTab(item.dataset.tab));
+  // ── Pricing Catalog ───────────────────────────────────────────────────────────
+  // Pricing catalog: keyed by fleetId ('default' = baseline for all fleets)
+  let _pricingData = {
+    'default': [
+      { id:'pr1', partNum:'1520539', desc:'Hydraulic Lift Cylinder',  machine:'Skyjack SJIII 3219', category:'Hydraulics', listPrice:487.50, contractPrice:438.75, currency:'USD', effectiveDate:'2026-01-01', expiryDate:'', active:true  },
+      { id:'pr2', partNum:'2641032', desc:'Drive Motor Assembly',      machine:'Skyjack SJIII 3219', category:'Drive',      listPrice:1240.00,contractPrice:1116.00,currency:'USD', effectiveDate:'2026-01-01', expiryDate:'', active:true  },
+      { id:'pr3', partNum:'1100156', desc:'Control Board — ACLE',      machine:'All',                category:'Electrical', listPrice:895.00, contractPrice:805.50, currency:'USD', effectiveDate:'2026-03-01', expiryDate:'2026-12-31', active:true  },
+      { id:'pr4', partNum:'1520119', desc:'Main Seal Kit',             machine:'Skyjack SJ6832 RT',  category:'Hydraulics', listPrice:145.00, contractPrice:130.50, currency:'USD', effectiveDate:'2025-06-01', expiryDate:'', active:false },
+      { id:'pr5', partNum:'3310087', desc:'Platform Chain Set',        machine:'Skyjack SJIII 4632', category:'Structure',  listPrice:320.00, contractPrice:288.00, currency:'USD', effectiveDate:'2026-02-15', expiryDate:'', active:true  },
+    ],
+    'FL-MCR': [
+      { id:'pr6', partNum:'1520539', desc:'Hydraulic Lift Cylinder',   machine:'Skyjack SJIII 3219', category:'Hydraulics', listPrice:487.50, contractPrice:415.00, currency:'USD', effectiveDate:'2026-01-01', expiryDate:'', active:true  },
+      { id:'pr7', partNum:'2641032', desc:'Drive Motor Assembly',      machine:'Skyjack SJIII 3219', category:'Drive',      listPrice:1240.00,contractPrice:1054.00,currency:'USD', effectiveDate:'2026-01-01', expiryDate:'', active:true  },
+      { id:'pr8', partNum:'1100156', desc:'Control Board — ACLE',      machine:'All',                category:'Electrical', listPrice:895.00, contractPrice:760.75, currency:'USD', effectiveDate:'2026-03-01', expiryDate:'', active:true  },
+    ],
+    'FL-SBR': [
+      { id:'pr9', partNum:'1520539', desc:'Hydraulic Lift Cylinder',   machine:'Skyjack SJIII 3219', category:'Hydraulics', listPrice:487.50, contractPrice:460.00, currency:'USD', effectiveDate:'2026-04-01', expiryDate:'', active:true  },
+      { id:'pr10',partNum:'3310087', desc:'Platform Chain Set',        machine:'Skyjack SJIII 4632', category:'Structure',  listPrice:320.00, contractPrice:304.00, currency:'USD', effectiveDate:'2026-04-01', expiryDate:'', active:true  },
+    ],
+  };
+  let _pricingFleetId = 'default';
+  let _pricingSearch = '';
+  let _pricingFilter = 'all';
+
+  function renderPricing() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Pricing Catalog';
+    const contentEl = document.getElementById('sp-content');
+
+    // Build fleet list: "Default" + actual onboarded fleets
+    const fleetList = [
+      { id:'default', name:'Default pricing', sub:'Baseline for all fleets', logoText:'ALL' },
+      ..._fleets.map(f => ({ id:f.fleetId, name:f.fleetName, sub:f.city, logoText:f.logoText })),
+    ];
+
+    const activeFl = fleetList.find(f => f.id === _pricingFleetId) || fleetList[0];
+    const activeRowCount = (_pricingData[_pricingFleetId] || []).length;
+
+    contentEl.innerHTML = `
+<style>
+.pc-shell { display:flex; flex:1; flex-direction:column; min-height:0; overflow:hidden; }
+.pc-toolbar { padding:10px 20px; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:8px; flex-shrink:0; flex-wrap:wrap; }
+.pc-body { flex:1; padding:16px 20px 40px; overflow-y:auto; }
+/* Fleet picker button */
+.pc-fleet-btn { display:flex; align-items:center; gap:8px; height:36px; padding:0 10px 0 6px; background:#FFFFFF; border:1px solid #E2DDD8; border-radius:9px; cursor:pointer; font-family:inherit; transition:border-color .15s, background .15s; max-width:260px; }
+.pc-fleet-btn:hover { border-color:#9CA3AF; background:#FAFAF8; }
+.pc-fleet-btn.open { border-color:#1C3969; background:#F0FAF3; }
+.pc-fl-logo { width:24px; height:24px; border-radius:6px; background:#152B52; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:700; color:#8AAFD4; flex-shrink:0; }
+.pc-fl-label { display:flex; flex-direction:column; text-align:left; min-width:0; }
+.pc-fl-name { font-size:12px; font-weight:600; color:#111318; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px; }
+.pc-fl-sub { font-size:10px; color:#9CA3AF; }
+.pc-fl-chevron { font-size:12px; color:#9CA3AF; flex-shrink:0; margin-left:2px; }
+/* Dropdown popover */
+.pc-fleet-drop { position:fixed; z-index:8000; background:#FFFFFF; border:0.5px solid #E2DDD8; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,.14); width:300px; display:flex; flex-direction:column; overflow:hidden; }
+.pc-drop-search-wrap { padding:10px; border-bottom:0.5px solid #F0ECE8; flex-shrink:0; position:relative; }
+.pc-drop-search-icon { position:absolute; left:19px; top:50%; transform:translateY(-50%); font-size:14px; color:#9CA3AF; pointer-events:none; }
+.pc-drop-search { width:100%; height:34px; border:1px solid #E2DDD8; border-radius:8px; padding:0 10px 0 32px; font-size:13px; font-family:inherit; color:#111318; outline:none; background:#F5F2EE; }
+.pc-drop-search:focus { border-color:#1C3969; background:#FFFFFF; }
+.pc-drop-list { overflow-y:auto; max-height:300px; padding:4px 0; }
+.pc-drop-item { display:flex; align-items:center; gap:9px; padding:8px 12px; cursor:pointer; }
+.pc-drop-item:hover { background:#F5F2EE; }
+.pc-drop-item.active { background:#D6E4F7; }
+.pc-drop-logo { width:26px; height:26px; border-radius:6px; background:#152B52; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:700; color:#8AAFD4; flex-shrink:0; }
+.pc-drop-item.active .pc-drop-logo { background:#1C3969; color:#FFFFFF; }
+.pc-drop-name { font-size:12px; font-weight:600; color:#3A3D4A; flex:1; }
+.pc-drop-item.active .pc-drop-name { color:#1C3969; }
+.pc-drop-city { font-size:10px; color:#B0AAA3; }
+.pc-drop-count { font-size:10px; font-weight:700; background:#F0ECE8; color:#7A7F8E; border-radius:10px; padding:1px 6px; flex-shrink:0; }
+.pc-drop-item.active .pc-drop-count { background:#C5EAC3; color:#1C3969; }
+.pc-drop-empty { padding:16px; text-align:center; font-size:12px; color:#9CA3AF; }
+.pc-drop-divider { height:0.5px; background:#F0ECE8; margin:4px 0; }
+/* Search & filters */
+.pc-search-wrap { position:relative; }
+.pc-search-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:14px; pointer-events:none; }
+.pc-search-input { width:220px; height:34px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:9px; padding:0 10px 0 30px; font-size:12px; font-family:inherit; color:#111318; outline:none; }
+.pc-search-input:focus { border-color:#1C3969; background:#FFFFFF; }
+.pc-search-input::placeholder { color:#B0AAA3; }
+.pc-ftab { padding:4px 11px; border-radius:20px; font-size:11px; font-weight:500; cursor:pointer; border:0.5px solid transparent; color:#5A5F6E; white-space:nowrap; }
+.pc-ftab.active { background:#111318; color:#FFFFFF; }
+.pc-ftab:hover:not(.active) { background:#F5F2EE; }
+/* Table */
+.pc-table { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
+.pc-table-head { display:grid; grid-template-columns:110px 1fr 160px 110px 110px 90px 76px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
+.pc-th { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.7px; text-transform:uppercase; padding:9px 7px; }
+.pc-row { display:grid; grid-template-columns:110px 1fr 160px 110px 110px 90px 76px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; }
+.pc-row:last-child { border-bottom:none; }
+.pc-row:hover { background:#FAFAF9; }
+.pc-td { padding:11px 7px; font-size:12px; color:#3A3D4A; }
+.pc-discount { font-size:10px; font-weight:700; color:#1C3969; background:#D6E4F7; border-radius:4px; padding:1px 5px; margin-left:4px; }
+.pc-inherited-row { background:#FAFFF8; }
+.pc-inherited-tag { font-size:9px; color:#9CA3AF; font-style:italic; margin-top:1px; }
+</style>
+<div class="pc-shell">
+  <div class="pc-toolbar">
+    <!-- Fleet picker -->
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;">Fleet</span>
+      <button class="pc-fleet-btn" id="pc-fleet-btn" onclick="pcToggleDrop(event)">
+        <div class="pc-fl-logo">${activeFl.logoText}</div>
+        <div class="pc-fl-label">
+          <div class="pc-fl-name">${activeFl.name}</div>
+          <div class="pc-fl-sub">${activeRowCount} price${activeRowCount!==1?'s':''} set${_pricingFleetId==='default'?'':' · '+activeFl.sub}</div>
+        </div>
+        <i class="ti ti-chevron-down pc-fl-chevron"></i>
+      </button>
+    </div>
+    <div style="width:0.5px;height:22px;background:#E8E4DF;flex-shrink:0;"></div>
+    <!-- Part search -->
+    <div class="pc-search-wrap">
+      <i class="ti ti-search pc-search-icon"></i>
+      <input class="pc-search-input" id="pc-search" type="text" placeholder="Search part # or description…" value="${_pricingSearch}"/>
+    </div>
+    <!-- Status filter -->
+    <div style="display:flex;gap:3px;">
+      ${[['all','All'],['active','Active'],['inactive','Inactive']].map(([v,l]) =>
+        `<div class="pc-ftab ${_pricingFilter===v?'active':''}" onclick="pcSetFilter('${v}')">${l}</div>`
+      ).join('')}
+    </div>
+    <!-- Actions -->
+    <div style="margin-left:auto;display:flex;gap:6px;">
+      <button class="sp-btn sp-btn-ghost" onclick="pcImportCSV()"><i class="ti ti-table-import" style="font-size:12px;"></i> Import</button>
+      <button class="sp-btn sp-btn-ghost" onclick="pcExportCSV()"><i class="ti ti-download" style="font-size:12px;"></i> Export</button>
+      <button class="sp-btn sp-btn-primary" onclick="pcAddRow()"><i class="ti ti-plus" style="font-size:12px;"></i> Add price</button>
+    </div>
+  </div>
+  <div class="pc-body">
+    ${_pricingFleetId !== 'default' ? `
+    <div style="display:flex;align-items:center;gap:8px;background:#FFFBF2;border:0.5px solid #F5C97A;border-radius:8px;padding:9px 13px;margin-bottom:14px;font-size:12px;color:#7A7F8E;">
+      <i class="ti ti-info-circle" style="color:#B45309;font-size:14px;flex-shrink:0;"></i>
+      Parts not listed here <strong style="color:#111318;">inherit default pricing</strong>. Add a row to set a fleet-specific contract price that overrides the default.
+    </div>` : ''}
+    <div id="pc-table-wrap"></div>
+  </div>
+</div>`;
+
+    document.getElementById('pc-search').addEventListener('input', function() {
+      _pricingSearch = this.value;
+      pcRenderTable();
+    });
+
+    // ── Fleet picker dropdown ─────────────────────────────────────────────────
+    let _pcDropOpen = false;
+    function pcCloseDrop() {
+      const drop = document.getElementById('pc-fleet-drop');
+      if (drop) drop.remove();
+      const btn = document.getElementById('pc-fleet-btn');
+      if (btn) btn.classList.remove('open');
+      _pcDropOpen = false;
+    }
+    window.pcToggleDrop = function(e) {
+      e.stopPropagation();
+      if (_pcDropOpen) { pcCloseDrop(); return; }
+      _pcDropOpen = true;
+      const btn = document.getElementById('pc-fleet-btn');
+      btn.classList.add('open');
+      const rect = btn.getBoundingClientRect();
+      const drop = document.createElement('div');
+      drop.id = 'pc-fleet-drop';
+      drop.className = 'pc-fleet-drop';
+      drop.style.cssText = `top:${rect.bottom+4}px;left:${rect.left}px;`;
+      drop.innerHTML = `
+        <div class="pc-drop-search-wrap">
+          <i class="ti ti-search pc-drop-search-icon"></i>
+          <input class="pc-drop-search" id="pc-drop-search" type="text" placeholder="Search fleets…" autocomplete="off"/>
+        </div>
+        <div class="pc-drop-list" id="pc-drop-list"></div>`;
+      document.body.appendChild(drop);
+      const searchEl = document.getElementById('pc-drop-search');
+      searchEl.focus();
+      function renderDropList(q) {
+        const list = document.getElementById('pc-drop-list');
+        if (!list) return;
+        const filtered = fleetList.filter(f => !q || f.name.toLowerCase().includes(q) || (f.sub||'').toLowerCase().includes(q));
+        if (!filtered.length) { list.innerHTML = '<div class="pc-drop-empty">No fleets match</div>'; return; }
+        // Default always first, then rest
+        const def = filtered.find(f => f.id === 'default');
+        const rest = filtered.filter(f => f.id !== 'default');
+        list.innerHTML = [
+          ...(def ? [def] : []),
+          ...(def && rest.length ? ['divider'] : []),
+          ...rest,
+        ].map(f => {
+          if (f === 'divider') return '<div class="pc-drop-divider"></div>';
+          const cnt = (_pricingData[f.id] || []).length;
+          return `<div class="pc-drop-item ${_pricingFleetId===f.id?'active':''}" onclick="pcSelectFleet('${f.id}')">
+            <div class="pc-drop-logo">${f.logoText}</div>
+            <div style="flex:1;min-width:0;">
+              <div class="pc-drop-name">${f.name}</div>
+              ${f.sub ? `<div class="pc-drop-city">${f.sub}</div>` : ''}
+            </div>
+            <span class="pc-drop-count">${cnt}</span>
+          </div>`;
+        }).join('');
+      }
+      renderDropList('');
+      searchEl.addEventListener('input', () => renderDropList(searchEl.value.toLowerCase()));
+      drop.addEventListener('click', e => e.stopPropagation());
+      document.addEventListener('click', pcCloseDrop, { once: true });
+    };
+    window.pcSelectFleet = function(id) { pcCloseDrop(); _pricingFleetId = id; _pricingSearch = ''; renderPricing(); };
+    window.pcSetFilter   = function(v) { _pricingFilter = v; renderPricing(); };
+    window.pcImportCSV   = function() {
+      Modal.show({ title:'Import pricing CSV', body:'<p style="font-size:13px;color:#5A5F6E;">Upload a CSV with columns <code>partNum, description, listPrice, contractPrice, effectiveDate</code>. Rows will be added to the currently selected fleet. Demo only.</p>', actions:[{label:'Close',onClick:()=>Modal.close()}] });
+    };
+    window.pcExportCSV = function() {
+      const rows = _pricingData[_pricingFleetId] || [];
+      const fleetName = fleetList.find(f => f.id === _pricingFleetId)?.name || _pricingFleetId;
+      const lines = ['partNum,description,machine,category,listPrice,contractPrice,currency,effectiveDate,active',
+        ...rows.map(r => `${r.partNum},"${r.desc}","${r.machine}","${r.category}",${r.listPrice},${r.contractPrice},${r.currency},${r.effectiveDate},${r.active}`)];
+      const a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(lines.join('\n'));
+      a.download = `pricing-${_pricingFleetId}.csv`; a.click();
+    };
+    window.pcAddRow = function(editId) {
+      const rows = _pricingData[_pricingFleetId] || [];
+      const existing = editId ? rows.find(r => r.id === editId) : null;
+      const defaultRows = _pricingData['default'] || [];
+      const prefill = window._pcPrefill; window._pcPrefill = null;
+      const a = existing || prefill || { partNum:'', desc:'', machine:'All', category:'', listPrice:'', contractPrice:'', currency:'USD', effectiveDate:new Date().toISOString().slice(0,10), expiryDate:'', active:true };
+      const fleetLabel = fleetList.find(f => f.id === _pricingFleetId)?.name || 'this fleet';
+      Modal.show({
+        title: editId ? 'Edit price' : `Add price — ${fleetLabel}`,
+        wide: true,
+        body: `
+<div style="display:flex;flex-direction:column;gap:12px;">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="modal-form-field"><label class="modal-form-label">Part number</label><input id="pc-f-pnum" class="modal-form-input" placeholder="e.g. 1520539" value="${a.partNum}" oninput="pcLookupDefault(this.value)"/></div>
+    <div class="modal-form-field"><label class="modal-form-label">Category</label><input id="pc-f-cat" class="modal-form-input" placeholder="e.g. Hydraulics" value="${a.category}"/></div>
+  </div>
+  <div class="modal-form-field"><label class="modal-form-label">Description</label><input id="pc-f-desc" class="modal-form-input" placeholder="Part description" value="${a.desc}"/></div>
+  <div class="modal-form-field"><label class="modal-form-label">Associated machine</label><input id="pc-f-machine" class="modal-form-input" placeholder="e.g. Skyjack SJIII 3219 or All" value="${a.machine}"/></div>
+  <div id="pc-default-banner" style="display:none;background:#D6E4F7;border:0.5px solid #1C396940;border-radius:7px;padding:8px 11px;font-size:11px;color:#1C3969;"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:12px;">
+    <div class="modal-form-field"><label class="modal-form-label">List price (MSRP)</label><input id="pc-f-list" class="modal-form-input" type="number" step="0.01" min="0" placeholder="0.00" value="${a.listPrice}"/></div>
+    <div class="modal-form-field"><label class="modal-form-label">Contract price <span class="lbl-opt">(for ${fleetLabel})</span></label><input id="pc-f-fleet" class="modal-form-input" type="number" step="0.01" min="0" placeholder="0.00" value="${a.contractPrice}"/></div>
+    <div class="modal-form-field"><label class="modal-form-label">Currency</label><select id="pc-f-currency" class="modal-form-select"><option>USD</option><option>CAD</option><option>EUR</option></select></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="modal-form-field"><label class="modal-form-label">Effective date</label><input id="pc-f-eff" class="modal-form-input" type="date" value="${a.effectiveDate}"/></div>
+    <div class="modal-form-field"><label class="modal-form-label">Expiry date <span class="lbl-opt">(optional)</span></label><input id="pc-f-exp" class="modal-form-input" type="date" value="${a.expiryDate||''}"/></div>
+  </div>
+  <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#3A3D4A;cursor:pointer;"><input type="checkbox" id="pc-f-active" ${a.active?'checked':''} style="accent-color:#1C3969;"/> Active (visible to this fleet)</label>
+</div>`,
+        actions: [
+          { label: editId ? 'Save changes' : 'Add price', style:'primary', onClick: () => {
+            if (!_pricingData[_pricingFleetId]) _pricingData[_pricingFleetId] = [];
+            const row = {
+              id: editId || 'pr' + Date.now(),
+              partNum:       document.getElementById('pc-f-pnum').value.trim(),
+              desc:          document.getElementById('pc-f-desc').value.trim(),
+              machine:       document.getElementById('pc-f-machine').value.trim() || 'All',
+              category:      document.getElementById('pc-f-cat').value.trim(),
+              listPrice:     parseFloat(document.getElementById('pc-f-list').value) || 0,
+              contractPrice: parseFloat(document.getElementById('pc-f-fleet').value) || 0,
+              currency:      document.getElementById('pc-f-currency').value,
+              effectiveDate: document.getElementById('pc-f-eff').value,
+              expiryDate:    document.getElementById('pc-f-exp').value,
+              active:        document.getElementById('pc-f-active').checked,
+            };
+            const arr = _pricingData[_pricingFleetId];
+            if (editId) { const i = arr.findIndex(r => r.id === editId); if (i >= 0) arr[i] = row; }
+            else arr.unshift(row);
+            Modal.close();
+            pcRenderTable();
+          }},
+          { label: 'Cancel', onClick: () => Modal.close() },
+        ],
+      });
+      // Auto-fill from default catalog when part # matches
+      window.pcLookupDefault = function(pnum) {
+        const match = defaultRows.find(r => r.partNum.toLowerCase() === pnum.toLowerCase());
+        const banner = document.getElementById('pc-default-banner');
+        if (match) {
+          document.getElementById('pc-f-desc').value    = match.desc;
+          document.getElementById('pc-f-cat').value     = match.category;
+          document.getElementById('pc-f-machine').value = match.machine;
+          document.getElementById('pc-f-list').value    = match.listPrice;
+          if (banner) { banner.style.display = ''; banner.innerHTML = `<i class="ti ti-circle-check" style="margin-right:4px;"></i>Pre-filled from default catalog — set the contract price for this fleet below.`; }
+        } else {
+          if (banner) banner.style.display = 'none';
+        }
+      };
+    };
+    window.pcDeleteRow = function(id) {
+      if (_pricingData[_pricingFleetId]) _pricingData[_pricingFleetId] = _pricingData[_pricingFleetId].filter(r => r.id !== id);
+      pcRenderTable();
+    };
+
+    pcRenderTable();
+  }
+
+  function pcRenderTable() {
+    const wrap = document.getElementById('pc-table-wrap');
+    if (!wrap) return;
+    const q = _pricingSearch.toLowerCase();
+    const isDefault = _pricingFleetId === 'default';
+    let rows = (_pricingData[_pricingFleetId] || [])
+      .filter(r => _pricingFilter === 'all' || ((_pricingFilter === 'active') === r.active))
+      .filter(r => !q || r.partNum.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q));
+
+    // For fleet-specific views, also show inherited defaults not overridden
+    let inheritedRows = [];
+    if (!isDefault && _pricingFilter !== 'inactive') {
+      const overriddenNums = new Set(rows.map(r => r.partNum));
+      inheritedRows = (_pricingData['default'] || [])
+        .filter(r => r.active && !overriddenNums.has(r.partNum))
+        .filter(r => !q || r.partNum.toLowerCase().includes(q) || r.desc.toLowerCase().includes(q));
+    }
+
+    if (!rows.length && !inheritedRows.length) {
+      wrap.innerHTML = '<div style="padding:48px;text-align:center;color:#9CA3AF;font-size:13px;">No pricing entries match the filter. <button class="sp-btn sp-btn-primary" style="margin-left:8px;height:28px;font-size:11px;" onclick="pcAddRow()"><i class="ti ti-plus"></i> Add price</button></div>';
+      return;
+    }
+
+    wrap.innerHTML = `
+<div class="pc-table">
+  <div class="pc-table-head">
+    <div class="pc-th">Part #</div>
+    <div class="pc-th">Description</div>
+    <div class="pc-th">Machine</div>
+    <div class="pc-th">List (MSRP)</div>
+    <div class="pc-th">Contract price</div>
+    <div class="pc-th">Effective</div>
+    <div class="pc-th"></div>
+  </div>
+  ${rows.map(r => {
+    const disc = r.listPrice > 0 ? Math.round((1 - r.contractPrice/r.listPrice)*100) : 0;
+    return `<div class="pc-row" style="${!r.active?'opacity:0.45;':''}">
+      <div class="pc-td"><span style="font-family:monospace;font-size:11px;font-weight:700;color:#111318;">${r.partNum}</span></div>
+      <div class="pc-td">${r.desc}${r.category?`<div style="font-size:10px;color:#B0AAA3;margin-top:1px;">${r.category}</div>`:''}
+      </div>
+      <div class="pc-td" style="color:#7A7F8E;">${r.machine}</div>
+      <div class="pc-td" style="font-weight:600;">$${r.listPrice.toFixed(2)}</div>
+      <div class="pc-td">
+        <span style="font-size:13px;font-weight:700;color:#1C3969;">$${r.contractPrice.toFixed(2)}</span>
+        ${disc>0?`<span class="pc-discount">-${disc}%</span>`:''}
+      </div>
+      <div class="pc-td" style="color:#7A7F8E;">${r.effectiveDate}</div>
+      <div class="pc-td" style="display:flex;gap:3px;justify-content:flex-end;">
+        <button class="sp-btn sp-btn-ghost" style="height:26px;padding:0 7px;font-size:11px;" onclick="pcAddRow('${r.id}')"><i class="ti ti-pencil"></i></button>
+        <button class="sp-btn" style="height:26px;padding:0 7px;font-size:11px;background:#FEE2E2;color:#B91C1C;" onclick="pcDeleteRow('${r.id}')"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>`;
+  }).join('')}
+  ${inheritedRows.map(r => {
+    const disc = r.listPrice > 0 ? Math.round((1 - r.contractPrice/r.listPrice)*100) : 0;
+    return `<div class="pc-row pc-inherited-row">
+      <div class="pc-td"><span style="font-family:monospace;font-size:11px;font-weight:700;color:#111318;">${r.partNum}</span></div>
+      <div class="pc-td">${r.desc}<div class="pc-inherited-tag">inherited default</div></div>
+      <div class="pc-td" style="color:#7A7F8E;">${r.machine}</div>
+      <div class="pc-td" style="font-weight:600;color:#9CA3AF;">$${r.listPrice.toFixed(2)}</div>
+      <div class="pc-td">
+        <span style="font-size:12px;font-weight:600;color:#9CA3AF;">$${r.contractPrice.toFixed(2)}</span>
+        ${disc>0?`<span class="pc-discount" style="opacity:0.6;">-${disc}%</span>`:''}
+      </div>
+      <div class="pc-td" style="color:#9CA3AF;">${r.effectiveDate}</div>
+      <div class="pc-td" style="display:flex;gap:3px;justify-content:flex-end;">
+        <button class="sp-btn sp-btn-ghost" style="height:26px;padding:0 7px;font-size:11px;" onclick="pcOverrideRow('${r.partNum}')" title="Set fleet-specific price"><i class="ti ti-adjustments-alt"></i></button>
+      </div>
+    </div>`;
+  }).join('')}
+</div>`;
+
+    window.pcOverrideRow = function(partNum) {
+      const def = (_pricingData['default'] || []).find(r => r.partNum === partNum);
+      if (!def) return;
+      // Pre-populate add modal with default values so supplier just edits the price
+      const tmp = { ...def, id: null, contractPrice: def.contractPrice };
+      // Trigger the add modal with prefilled data by temporarily setting a global
+      window._pcPrefill = tmp;
+      pcAddRow(null);
+    };
+  }
+
+  // ── Parts Extractor ───────────────────────────────────────────────────────────
+  let _exJobs = [
+    { id:'ex1', name:'SJIII-3219-Service-Manual.pdf',   pages:312, status:'classified', pagesClassified:312, bomPages:18, partsFound:184, steps:{ upload:1, ocr:1, classify:1, extract:1 }, uploadedAt:'2026-07-12 09:14' },
+    { id:'ex2', name:'SJ6832RT-Parts-Catalog-2025.pdf', pages:187, status:'extracting', pagesClassified:187, bomPages:14, partsFound:null, steps:{ upload:1, ocr:1, classify:1, extract:0.55 }, uploadedAt:'2026-08-03 14:32' },
+    { id:'ex3', name:'Hydraulics-Overhaul-Guide.pdf',   pages:98,  status:'classifying',pagesClassified:67,  bomPages:null, partsFound:null, steps:{ upload:1, ocr:1, classify:0.68, extract:0 }, uploadedAt:'2026-08-04 08:51' },
+    { id:'ex4', name:'SJIII-4632-Parts-Manual-v3.pdf',  pages:241, status:'queued',     pagesClassified:0,   bomPages:null, partsFound:null, steps:{ upload:1, ocr:0, classify:0, extract:0 }, uploadedAt:'2026-08-04 11:03' },
+  ];
+  let _exActiveJobId = 'ex1';
+  let _exView = 'queue'; // 'queue' | 'classify' | 'bom'
+  let _exBomFilter = 'all'; // 'all' | 'issues' | 'clean'
+  let _exBomPage = 'all';   // 'all' | page num string
+  let _exPageTypes = {};    // mutable per-page type overrides: idx -> type
+
+  // SVG thumbnails for each page type
+  function exThumbSVG(type, label) {
+    const svgs = {
+      cover:   `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#152B52"/><rect x="8" y="18" width="64" height="6" rx="1" fill="#fff" opacity=".9"/><rect x="8" y="28" width="48" height="3" rx="1" fill="#fff" opacity=".5"/><rect x="8" y="34" width="36" height="3" rx="1" fill="#fff" opacity=".5"/><rect x="8" y="60" width="30" height="2" rx="1" fill="#9DD89A" opacity=".8"/><rect x="8" y="65" width="22" height="2" rx="1" fill="#9DD89A" opacity=".6"/></svg>`,
+      toc:     `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#F5F2EE"/><rect x="8" y="8" width="40" height="4" rx="1" fill="#9CA3AF"/><rect x="8" y="18" width="32" height="2" rx="1" fill="#C8C3BC"/><line x1="40" y1="19" x2="62" y2="19" stroke="#E2DDD8" stroke-width="1" stroke-dasharray="2,2"/><rect x="62" y="18" width="8" height="2" rx="1" fill="#C8C3BC"/><rect x="12" y="24" width="26" height="2" rx="1" fill="#C8C3BC"/><line x1="38" y1="25" x2="62" y2="25" stroke="#E2DDD8" stroke-width="1" stroke-dasharray="2,2"/><rect x="62" y="24" width="8" height="2" rx="1" fill="#C8C3BC"/><rect x="8" y="32" width="34" height="2" rx="1" fill="#C8C3BC"/><line x1="42" y1="33" x2="62" y2="33" stroke="#E2DDD8" stroke-width="1" stroke-dasharray="2,2"/><rect x="62" y="32" width="8" height="2" rx="1" fill="#C8C3BC"/><rect x="12" y="38" width="28" height="2" rx="1" fill="#C8C3BC"/><line x1="40" y1="39" x2="62" y2="39" stroke="#E2DDD8" stroke-width="1" stroke-dasharray="2,2"/><rect x="62" y="38" width="8" height="2" rx="1" fill="#C8C3BC"/><rect x="8" y="46" width="36" height="2" rx="1" fill="#C8C3BC"/><line x1="44" y1="47" x2="62" y2="47" stroke="#E2DDD8" stroke-width="1" stroke-dasharray="2,2"/><rect x="62" y="46" width="8" height="2" rx="1" fill="#C8C3BC"/></svg>`,
+      diagram: `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#EFF6FF"/><rect x="28" y="12" width="24" height="14" rx="2" fill="#BFDBFE" stroke="#3B82F6" stroke-width="1"/><rect x="6" y="42" width="20" height="12" rx="2" fill="#BFDBFE" stroke="#3B82F6" stroke-width="1"/><rect x="30" y="42" width="20" height="12" rx="2" fill="#BFDBFE" stroke="#3B82F6" stroke-width="1"/><rect x="54" y="42" width="20" height="12" rx="2" fill="#DBEAFE" stroke="#3B82F6" stroke-width="0.5"/><line x1="40" y1="26" x2="16" y2="42" stroke="#3B82F6" stroke-width="1"/><line x1="40" y1="26" x2="40" y2="42" stroke="#3B82F6" stroke-width="1"/><line x1="40" y1="26" x2="64" y2="42" stroke="#3B82F6" stroke-width="1"/><rect x="14" y="62" width="12" height="10" rx="1" fill="#DBEAFE" stroke="#3B82F6" stroke-width="0.5"/><rect x="34" y="62" width="12" height="10" rx="1" fill="#DBEAFE" stroke="#3B82F6" stroke-width="0.5"/><line x1="16" y1="54" x2="20" y2="62" stroke="#93C5FD" stroke-width="0.8"/><line x1="40" y1="54" x2="40" y2="62" stroke="#93C5FD" stroke-width="0.8"/><circle cx="8" cy="48" r="3" fill="#1D4ED8" opacity=".7"/><circle cx="32" cy="48" r="3" fill="#1D4ED8" opacity=".7"/><circle cx="56" cy="48" r="3" fill="#1D4ED8" opacity=".5"/></svg>`,
+      bom:     `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#F0FDF4"/><rect x="4" y="8" width="72" height="7" rx="1" fill="#86EFAC"/><rect x="4" y="8" width="12" height="7" rx="1" fill="#4ADE80"/><rect x="4" y="17" width="12" height="6" rx="0" fill="#DCFCE7"/><rect x="4" y="17" width="72" height="6" rx="0" fill="none" stroke="#BBF7D0" stroke-width="0.5"/><rect x="4" y="23" width="12" height="6" rx="0" fill="#F0FDF4"/><rect x="4" y="23" width="72" height="6" rx="0" fill="none" stroke="#BBF7D0" stroke-width="0.5"/><rect x="4" y="29" width="12" height="6" rx="0" fill="#DCFCE7"/><rect x="4" y="29" width="72" height="6" rx="0" fill="none" stroke="#BBF7D0" stroke-width="0.5"/><rect x="4" y="35" width="12" height="6" rx="0" fill="#F0FDF4"/><rect x="4" y="35" width="72" height="6" rx="0" fill="none" stroke="#BBF7D0" stroke-width="0.5"/><rect x="4" y="41" width="12" height="6" rx="0" fill="#DCFCE7"/><rect x="4" y="41" width="72" height="6" rx="0" fill="none" stroke="#BBF7D0" stroke-width="0.5"/><rect x="4" y="47" width="12" height="6" rx="0" fill="#F0FDF4"/><rect x="4" y="47" width="72" height="6" rx="0" fill="none" stroke="#BBF7D0" stroke-width="0.5"/><rect x="16" y="8" width="0.5" height="45" fill="#86EFAC"/><rect x="40" y="8" width="0.5" height="45" fill="#86EFAC"/><rect x="58" y="8" width="0.5" height="45" fill="#86EFAC"/></svg>`,
+      text:    `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#FAFAF8"/><rect x="8" y="8" width="52" height="3" rx="1" fill="#9CA3AF"/><rect x="8" y="15" width="64" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="20" width="60" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="25" width="56" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="30" width="64" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="35" width="40" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="43" width="64" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="48" width="58" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="53" width="64" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="58" width="44" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="66" width="64" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="71" width="62" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="76" width="30" height="2" rx="1" fill="#E2DDD8"/></svg>`,
+      ignore:  `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#F9FAFB"/><rect x="8" y="8" width="64" height="3" rx="1" fill="#E5E7EB"/><rect x="8" y="15" width="52" height="2" rx="1" fill="#F3F4F6"/><rect x="8" y="20" width="60" height="2" rx="1" fill="#F3F4F6"/><rect x="8" y="25" width="44" height="2" rx="1" fill="#F3F4F6"/><line x1="4" y1="4" x2="76" y2="96" stroke="#FCA5A5" stroke-width="1.5" opacity=".4"/></svg>`,
+    };
+    return svgs[type] || svgs.text;
+  }
+
+  const EX_SAMPLE_PAGES = [
+    { num:1,   type:'cover',   label:'Cover Page',              conf:0.99, section:'Front Matter' },
+    { num:2,   type:'toc',     label:'Table of Contents',       conf:0.97, section:'Front Matter' },
+    { num:3,   type:'text',    label:'Safety Warnings',         conf:0.95, section:'Front Matter' },
+    { num:4,   type:'text',    label:'General Information',     conf:0.91, section:'Front Matter' },
+    { num:11,  type:'diagram', label:'Hydraulic System Overview',conf:0.96, section:'Hydraulics' },
+    { num:12,  type:'diagram', label:'Cylinder Detail — Stage 1',conf:0.93, section:'Hydraulics' },
+    { num:13,  type:'bom',     label:'Hydraulic Parts List',    conf:0.98, section:'Hydraulics' },
+    { num:14,  type:'diagram', label:'Pump & Valve Assembly',   conf:0.91, section:'Hydraulics' },
+    { num:15,  type:'bom',     label:'Pump Assembly Parts',     conf:0.97, section:'Hydraulics' },
+    { num:22,  type:'diagram', label:'Drive Motor — Exploded',  conf:0.94, section:'Drive System' },
+    { num:23,  type:'bom',     label:'Drive Motor Parts',       conf:0.99, section:'Drive System' },
+    { num:24,  type:'diagram', label:'Wheel Hub Assembly',      conf:0.89, section:'Drive System' },
+    { num:25,  type:'bom',     label:'Wheel Hub Parts',         conf:0.96, section:'Drive System' },
+    { num:36,  type:'diagram', label:'Platform Frame — Top View',conf:0.92, section:'Platform' },
+    { num:37,  type:'diagram', label:'Guardrail Weldment',      conf:0.88, section:'Platform' },
+    { num:38,  type:'bom',     label:'Platform & Rail Parts',   conf:0.98, section:'Platform' },
+    { num:44,  type:'text',    label:'Electrical Schematic Notes',conf:0.85, section:'Electrical' },
+    { num:45,  type:'diagram', label:'Main Wiring Harness',     conf:0.90, section:'Electrical' },
+    { num:46,  type:'bom',     label:'Electrical Parts',        conf:0.96, section:'Electrical' },
+    { num:47,  type:'ignore',  label:'Warranty / Legal',        conf:0.94, section:'Back Matter' },
+    { num:48,  type:'ignore',  label:'Index',                   conf:0.91, section:'Back Matter' },
+  ];
+
+  const EX_SAMPLE_BOM = [
+    // Hydraulics — page 13
+    { row:1,  callout:'1',  partNum:'1520539', desc:'Hydraulic Lift Cylinder, 2-Stage', qty:'1',  uom:'EA',  notes:'',                   conf:0.98, issues:[],                    srcPage:13, inCatalog:true  },
+    { row:2,  callout:'2',  partNum:'1520540', desc:'Cylinder Seal Kit',                qty:'1',  uom:'KIT', notes:'Inspect at 500h',     conf:0.96, issues:[],                    srcPage:13, inCatalog:true  },
+    { row:3,  callout:'3',  partNum:'HYD-0812',desc:'Hydraulic Hose 3/8" × 36"',       qty:'2',  uom:'EA',  notes:'',                    conf:0.91, issues:['low_conf'],          srcPage:13, inCatalog:false },
+    { row:4,  callout:'4',  partNum:'',        desc:'Fitting, 90° Swivel JIC #8',       qty:'4',  uom:'EA',  notes:'',                    conf:0.73, issues:['no_partnum','low_conf'], srcPage:13, inCatalog:false },
+    { row:5,  callout:'5',  partNum:'1520119', desc:'Main Pump Assembly',               qty:'1',  uom:'EA',  notes:'',                    conf:0.99, issues:[],                    srcPage:13, inCatalog:true  },
+    // Pump assembly — page 15
+    { row:6,  callout:'1',  partNum:'1520245', desc:'Relief Valve, 3000 PSI',           qty:'1',  uom:'EA',  notes:'Torque to 35 ft-lb',  conf:0.97, issues:[],                    srcPage:15, inCatalog:true  },
+    { row:7,  callout:'2',  partNum:'1520246', desc:'Check Valve Assembly',             qty:'2',  uom:'EA',  notes:'',                    conf:0.95, issues:[],                    srcPage:15, inCatalog:true  },
+    { row:8,  callout:'3',  partNum:'FL-FILT', desc:'Hydraulic Return Filter',          qty:'1',  uom:'EA',  notes:'Replace at 1000h',    conf:0.88, issues:['low_conf'],          srcPage:15, inCatalog:false },
+    { row:9,  callout:'4',  partNum:'',        desc:'O-Ring, -212, Buna-N',             qty:'6',  uom:'EA',  notes:'',                    conf:0.71, issues:['no_partnum','low_conf'], srcPage:15, inCatalog:false },
+    // Drive motor — page 23
+    { row:10, callout:'1',  partNum:'2641032', desc:'Drive Motor Assembly, 24V DC',     qty:'2',  uom:'EA',  notes:'',                    conf:0.99, issues:[],                    srcPage:23, inCatalog:true  },
+    { row:11, callout:'2',  partNum:'2641045', desc:'Motor Brush Set',                  qty:'1',  uom:'SET', notes:'Replace at 2000h',    conf:0.94, issues:[],                    srcPage:23, inCatalog:false },
+    { row:12, callout:'3',  partNum:'2641089', desc:'Drive Chain, #50 × 82 Links',      qty:'2',  uom:'EA',  notes:'',                    conf:0.96, issues:[],                    srcPage:23, inCatalog:false },
+    { row:13, callout:'4',  partNum:'',        desc:'Sprocket, 15T, 1" Bore',           qty:'2',  uom:'EA',  notes:'',                    conf:0.68, issues:['no_partnum','low_conf'], srcPage:23, inCatalog:false },
+    // Wheel hub — page 25
+    { row:14, callout:'1',  partNum:'2641102', desc:'Wheel Hub Assembly, RH',           qty:'1',  uom:'EA',  notes:'',                    conf:0.98, issues:[],                    srcPage:25, inCatalog:false },
+    { row:15, callout:'2',  partNum:'2641103', desc:'Wheel Hub Assembly, LH',           qty:'1',  uom:'EA',  notes:'',                    conf:0.98, issues:[],                    srcPage:25, inCatalog:false },
+    { row:16, callout:'3',  partNum:'WHL-0044',desc:'Drive Tyre 15×5–8',               qty:'4',  uom:'EA',  notes:'',                    conf:0.93, issues:[],                    srcPage:25, inCatalog:true  },
+    // Platform — page 38
+    { row:17, callout:'1',  partNum:'3310087', desc:'Platform Chain Set',               qty:'1',  uom:'SET', notes:'',                    conf:0.99, issues:[],                    srcPage:38, inCatalog:true  },
+    { row:18, callout:'2',  partNum:'3310102', desc:'Guardrail Section, Mid',           qty:'2',  uom:'EA',  notes:'',                    conf:0.97, issues:[],                    srcPage:38, inCatalog:false },
+    { row:19, callout:'3',  partNum:'',        desc:'Gate Hinge Assembly',              qty:'2',  uom:'EA',  notes:'',                    conf:0.76, issues:['no_partnum'],         srcPage:38, inCatalog:false },
+    { row:20, callout:'4',  partNum:'3310215', desc:'Floor Plate Weldment',             qty:'1',  uom:'EA',  notes:'',                    conf:0.91, issues:[],                    srcPage:38, inCatalog:false },
+    // Electrical — page 46
+    { row:21, callout:'1',  partNum:'1100156', desc:'Control Board — ACLE',             qty:'1',  uom:'EA',  notes:'',                    conf:0.99, issues:[],                    srcPage:46, inCatalog:true  },
+    { row:22, callout:'2',  partNum:'1100201', desc:'Joystick Controller Assembly',     qty:'1',  uom:'EA',  notes:'',                    conf:0.96, issues:[],                    srcPage:46, inCatalog:false },
+    { row:23, callout:'3',  partNum:'',        desc:'Emergency Stop Switch',            qty:'2',  uom:'EA',  notes:'',                    conf:0.81, issues:['no_partnum'],         srcPage:46, inCatalog:false },
+    { row:24, callout:'4',  partNum:'1100344', desc:'Battery Charger, 24V 25A',         qty:'1',  uom:'EA',  notes:'',                    conf:0.94, issues:[],                    srcPage:46, inCatalog:false },
+  ];
+
+  function renderExtractor() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Parts Extractor';
+    const contentEl = document.getElementById('sp-content');
+
+    contentEl.innerHTML = `
+<style>
+.ex-shell { display:flex; flex:1; min-height:0; overflow:hidden; }
+.ex-sidebar { width:260px; min-width:260px; background:#FFFFFF; border-right:0.5px solid #E8E4DF; display:flex; flex-direction:column; overflow:hidden; }
+.ex-sb-hdr { padding:14px 16px; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.ex-sb-title { font-size:13px; font-weight:700; color:#111318; }
+.ex-job-list { flex:1; overflow-y:auto; padding:8px 0; }
+.ex-job-item { padding:10px 16px; cursor:pointer; border-left:2px solid transparent; transition:background .12s; }
+.ex-job-item:hover { background:#FAFAF8; }
+.ex-job-item.active { background:#D6E4F7; border-left-color:#1C3969; }
+.ex-job-name { font-size:12px; font-weight:600; color:#111318; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ex-job-item.active .ex-job-name { color:#1C3969; }
+.ex-job-meta { font-size:10px; color:#9CA3AF; }
+.ex-job-status { display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:700; border-radius:4px; padding:1px 6px; margin-top:3px; }
+.ex-main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.ex-topbar { padding:10px 20px; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.ex-tab { padding:5px 14px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:0.5px solid transparent; color:#5A5F6E; white-space:nowrap; }
+.ex-tab.active { background:#111318; color:#FFFFFF; }
+.ex-tab.disabled { opacity:0.4; cursor:default; }
+.ex-tab:hover:not(.active):not(.disabled) { background:#F5F2EE; }
+.ex-body { flex:1; overflow-y:auto; padding:18px 20px 32px; }
+/* Queue view */
+.ex-queue-row { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:10px; padding:14px 18px; margin-bottom:10px; display:flex; align-items:center; gap:16px; }
+.ex-q-icon { width:40px; height:40px; background:#FEE2E2; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+.ex-q-body { flex:1; min-width:0; }
+.ex-q-name { font-size:13px; font-weight:600; color:#111318; margin-bottom:3px; }
+.ex-q-meta { font-size:11px; color:#9CA3AF; }
+.ex-q-progress { margin-top:7px; }
+.ex-q-prog-bar { height:5px; background:#F0ECE8; border-radius:3px; overflow:hidden; margin-top:4px; }
+.ex-q-prog-fill { height:100%; border-radius:3px; }
+/* Classification view */
+.ex-class-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; }
+.ex-page-card { border:2px solid #E8E4DF; border-radius:10px; overflow:hidden; cursor:pointer; transition:border-color .15s; }
+.ex-page-card:hover { border-color:#9CA3AF; }
+.ex-page-card.type-diagram { border-color:#3B82F6; }
+.ex-page-card.type-bom     { border-color:#10B981; }
+.ex-page-card.type-ignore  { border-color:#E2DDD8; opacity:.6; }
+.ex-page-thumb { background:#F5F2EE; height:100px; display:flex; align-items:center; justify-content:center; font-size:36px; }
+.ex-page-footer { padding:8px 10px; background:#FFFFFF; border-top:0.5px solid #F0ECE8; }
+.ex-page-num { font-size:10px; color:#9CA3AF; margin-bottom:3px; }
+.ex-page-label { font-size:11px; font-weight:600; color:#111318; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ex-page-type-btns { display:flex; gap:3px; flex-wrap:wrap; }
+.ex-ptype-btn { font-size:9px; font-weight:700; padding:2px 6px; border-radius:4px; cursor:pointer; border:0.5px solid transparent; }
+.ex-ptype-btn.diagram { background:#DBEAFE; color:#1D4ED8; }
+.ex-ptype-btn.bom     { background:#DBEAFE; color:#1C3969; }
+.ex-ptype-btn.other   { background:#F5F2EE; color:#5A5F6E; }
+.ex-ptype-btn.ignore  { background:#FEE2E2; color:#B91C1C; }
+.ex-ptype-btn.selected { opacity:1; box-shadow:0 0 0 1.5px currentColor; }
+.ex-ptype-btn:not(.selected) { opacity:.5; }
+.ex-conf-dot { width:6px; height:6px; border-radius:50%; display:inline-block; margin-right:3px; }
+/* BoM view */
+.ex-bom-table { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
+.ex-bom-head { display:grid; grid-template-columns:36px 110px 1fr 60px 60px 80px 100px 32px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
+.ex-bom-th { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.7px; text-transform:uppercase; padding:9px 6px; }
+.ex-bom-row { display:grid; grid-template-columns:36px 110px 1fr 60px 60px 80px 100px 32px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; }
+.ex-bom-row:last-child { border-bottom:none; }
+.ex-bom-row:hover { background:#FAFAF9; }
+.ex-bom-row.has-issue { background:#FFFBF2; }
+.ex-bom-td { padding:10px 6px; font-size:12px; color:#3A3D4A; }
+.ex-bom-input { width:100%; height:28px; border:0.5px solid #E2DDD8; border-radius:5px; padding:0 7px; font-size:12px; font-family:inherit; color:#111318; outline:none; background:#FAFAF9; }
+.ex-bom-input:focus { border-color:#1C3969; background:#FFFFFF; }
+.ex-issue-tag { display:inline-flex; align-items:center; gap:3px; font-size:9px; font-weight:700; padding:1px 5px; border-radius:4px; }
+.ex-conf-bar { height:4px; background:#F0ECE8; border-radius:2px; margin-top:3px; overflow:hidden; }
+.ex-conf-fill { height:100%; border-radius:2px; }
+</style>
+<div class="ex-shell">
+  <div class="ex-sidebar">
+    <div class="ex-sb-hdr">
+      <div class="ex-sb-title">Processing queue</div>
+      <button class="sp-btn sp-btn-primary" style="height:28px;padding:0 10px;font-size:11px;" onclick="exUploadNew()"><i class="ti ti-plus"></i> New</button>
+    </div>
+    <div class="ex-job-list">
+      ${_exJobs.map(j => {
+        const S = { classified:{label:'Ready',bg:'#D6E4F7',color:'#1C3969'}, extracting:{label:'Extracting',bg:'#FFFBEB',color:'#B45309'}, classifying:{label:'Classifying',bg:'#EEEDFE',color:'#534AB7'}, queued:{label:'Queued',bg:'#F5F2EE',color:'#5A5F6E'} };
+        const s = S[j.status] || S.queued;
+        return `<div class="ex-job-item ${_exActiveJobId===j.id?'active':''}" onclick="exSelectJob('${j.id}')">
+          <div class="ex-job-name" title="${j.name}">${j.name}</div>
+          <div class="ex-job-meta">${j.pages} pages · ${j.uploadedAt}</div>
+          <div class="ex-job-status" style="background:${s.bg};color:${s.color};">${s.label}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+  <div class="ex-main">
+    <div class="ex-topbar">
+      <div class="ex-tab ${_exView==='queue'?'active':''}" onclick="exSetView('queue')">Overview</div>
+      <div class="ex-tab ${_exView==='classify'?'active':''} ${_exJobs.find(j=>j.id===_exActiveJobId)?.status==='queued'?'disabled':''}" onclick="exSetView('classify')">Page classification</div>
+      <div class="ex-tab ${_exView==='bom'?'active':''} ${['queued','classifying'].includes(_exJobs.find(j=>j.id===_exActiveJobId)?.status||'')?'disabled':''}" onclick="exSetView('bom')">BoM extraction</div>
+      <div style="margin-left:auto;display:flex;gap:6px;">
+        <button class="sp-btn sp-btn-ghost" style="height:28px;padding:0 10px;font-size:11px;" onclick="exReview()"><i class="ti ti-eye" style="font-size:12px;"></i> Review</button>
+        <button class="sp-btn sp-btn-primary" style="height:28px;padding:0 10px;font-size:11px;" onclick="exCommit()"><i class="ti ti-database-import" style="font-size:12px;"></i> Commit to catalog</button>
+      </div>
+    </div>
+    <div class="ex-body" id="ex-body"></div>
+  </div>
+</div>`;
+
+    window.exSelectJob = function(id) {
+      _exActiveJobId = id;
+      const job = _exJobs.find(j => j.id === id);
+      if (job) {
+        if (_exView === 'bom'      && ['queued','classifying'].includes(job.status)) _exView = 'queue';
+        if (_exView === 'classify' && job.status === 'queued') _exView = 'queue';
+      }
+      renderExtractor();
+    };
+    window.exSetView = function(v) {
+      const job = _exJobs.find(j => j.id === _exActiveJobId);
+      if (!job) return;
+      if (v === 'classify' && job.status === 'queued') return;
+      if (v === 'bom' && ['queued','classifying'].includes(job.status)) return;
+      _exView = v;
+      renderExtractor();
+    };
+    window.exGoClassify = function(id) { _exActiveJobId = id; _exView = 'classify'; renderExtractor(); };
+    window.exGoBom      = function(id) { if (id) _exActiveJobId = id; _exView = 'bom'; renderExtractor(); };
+    window.exSetBomFilter = function(v)  { _exBomFilter = v;        exRenderBom(document.getElementById('ex-body')); };
+    window.exSetBomPage   = function(pg) { _exBomPage = String(pg); exRenderBom(document.getElementById('ex-body')); };
+    window.exUploadNew = function() {
+      Modal.show({ title:'Add document to extractor', body:`
+<div style="display:flex;flex-direction:column;gap:12px;">
+  <div class="modal-form-field"><label class="modal-form-label">File name / identifier</label><input id="ex-f-name" class="modal-form-input" placeholder="e.g. SJIII-3219-Parts-Rev5.pdf"/></div>
+  <div class="modal-form-field"><label class="modal-form-label">Estimated pages</label><input id="ex-f-pages" class="modal-form-input" type="number" min="1" placeholder="e.g. 120"/></div>
+</div>`, actions:[
+        { label:'Add to queue', style:'primary', onClick:()=>{
+          const name = document.getElementById('ex-f-name').value.trim() || 'document.pdf';
+          const pages = parseInt(document.getElementById('ex-f-pages').value) || 100;
+          const id = 'ex' + Date.now();
+          _exJobs.unshift({ id, name, pages, status:'queued', pagesClassified:0, bomPages:null, partsFound:null, steps:{ upload:1, ocr:0, classify:0, extract:0 }, uploadedAt:new Date().toISOString().slice(0,16).replace('T',' ') });
+          _exActiveJobId = id; _exView = 'queue';
+          Modal.close(); renderExtractor();
+        }},
+        { label:'Cancel', onClick:()=>Modal.close() },
+      ]});
+    };
+    window.exReview = function() {
+      Modal.show({ title:'Review summary', body:`<p style="font-size:13px;color:#5A5F6E;">In production, this would show a full diff of parts to be added or updated before committing. Demo only.</p>`, actions:[{label:'Close',onClick:()=>Modal.close()}] });
+    };
+    window.exCommit = function() {
+      Modal.show({ title:'Commit to catalog', body:`<p style="font-size:13px;color:#5A5F6E;">This would push the extracted parts records into the live parts catalog for fleet mechanics to find. Demo only.</p>`, actions:[
+        { label:'Commit', style:'primary', onClick:()=>Modal.close() },
+        { label:'Cancel', onClick:()=>Modal.close() },
+      ]});
+    };
+
+    exRenderBody();
+  }
+
+  function exRenderBody() {
+    const body = document.getElementById('ex-body');
+    if (!body) return;
+    if (_exView === 'queue')    exRenderQueue(body);
+    if (_exView === 'classify') exRenderClassify(body);
+    if (_exView === 'bom')      exRenderBom(body);
+  }
+
+  function exRenderQueue(body) {
+    const S = {
+      classified: { label:'Ready',        bg:'#D6E4F7', color:'#1C3969' },
+      extracting: { label:'Extracting…',  bg:'#FFFBEB', color:'#B45309' },
+      classifying:{ label:'Classifying…', bg:'#EEEDFE', color:'#534AB7' },
+      queued:     { label:'Queued',        bg:'#F5F2EE', color:'#5A5F6E' },
+    };
+    const STEP_DEFS = [
+      { key:'upload',   label:'Upload',   icon:'ti-cloud-upload' },
+      { key:'ocr',      label:'OCR',      icon:'ti-scan' },
+      { key:'classify', label:'Classify', icon:'ti-layout-grid' },
+      { key:'extract',  label:'Extract',  icon:'ti-table' },
+    ];
+    body.innerHTML = `
+<div style="font-size:14px;font-weight:700;color:#111318;margin-bottom:14px;">Processing queue</div>
+${_exJobs.map(j => {
+  const s = S[j.status] || S.queued;
+  const steps = j.steps || {};
+  const stepsHtml = STEP_DEFS.map((sd, si) => {
+    const pct = steps[sd.key] || 0;
+    const done = pct >= 1;
+    const active = !done && pct > 0;
+    const dotColor = done ? '#1C3969' : active ? '#B45309' : '#E2DDD8';
+    const lineColor = done ? '#1C3969' : '#E2DDD8';
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;min-width:52px;">
+      <div style="width:28px;height:28px;border-radius:50%;background:${done?'#1C3969':active?'#FFFBEB':'#F5F2EE'};border:2px solid ${dotColor};display:flex;align-items:center;justify-content:center;">
+        <i class="ti ${sd.icon}" style="font-size:13px;color:${done?'#0A1628':active?'#B45309':'#C8C3BC'};"></i>
+      </div>
+      ${active ? `<div style="height:3px;width:28px;background:#F0ECE8;border-radius:2px;overflow:hidden;"><div style="height:100%;width:${Math.round(pct*100)}%;background:#B45309;"></div></div>` : ''}
+      <div style="font-size:9px;font-weight:${done||active?'600':'400'};color:${done?'#1C3969':active?'#B45309':'#B0AAA3'};">${sd.label}</div>
+    </div>
+    ${si < STEP_DEFS.length-1 ? `<div style="flex:1;height:2px;background:${done?'#1C3969':'#E2DDD8'};margin-top:13px;border-radius:1px;"></div>` : ''}`;
+  }).join('');
+  return `<div class="ex-queue-row" style="${_exActiveJobId===j.id?'border-color:#1C3969;background:#FAFFF8;':''}">
+    <div class="ex-q-icon"><i class="ti ti-file-type-pdf" style="color:#B91C1C;font-size:22px;"></i></div>
+    <div class="ex-q-body">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <div class="ex-q-name">${j.name}</div>
+        <span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:4px;background:${s.bg};color:${s.color};">${s.label}</span>
+      </div>
+      <div class="ex-q-meta">${j.pages} pages · Uploaded ${j.uploadedAt}</div>
+      <div style="display:flex;align-items:center;gap:0;margin-top:12px;">${stepsHtml}</div>
+      <div style="display:flex;gap:14px;margin-top:10px;font-size:11px;color:#7A7F8E;">
+        ${j.pagesClassified ? `<span><i class="ti ti-layout-grid" style="font-size:12px;margin-right:3px;"></i>${j.pagesClassified} pages classified</span>` : ''}
+        ${j.bomPages   != null ? `<span><i class="ti ti-table" style="font-size:12px;margin-right:3px;"></i>${j.bomPages} BoM pages</span>` : ''}
+        ${j.partsFound != null ? `<span><i class="ti ti-components" style="font-size:12px;margin-right:3px;"></i>${j.partsFound} parts found</span>` : ''}
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0;">
+      ${j.status !== 'queued' ? `<button class="sp-btn sp-btn-ghost" style="height:28px;font-size:11px;" onclick="exGoClassify('${j.id}')">Classify</button>` : ''}
+      ${j.status === 'classified' ? `<button class="sp-btn sp-btn-primary" style="height:28px;font-size:11px;" onclick="exGoBom('${j.id}')">View BoM</button>` : ''}
+    </div>
+  </div>`;
+}).join('')}`;
+  }
+
+  function exRenderClassify(body) {
+    const job = _exJobs.find(j => j.id === _exActiveJobId);
+    if (!job) return;
+
+    const isClassifying = job.status === 'classifying';
+    const classifyPct = job.steps ? job.steps.classify : 1;
+    // How many of our sample pages are "done" for this job
+    const donePagesCount = isClassifying ? Math.floor(EX_SAMPLE_PAGES.length * classifyPct) : EX_SAMPLE_PAGES.length;
+
+    // Apply mutable overrides; mark pages past the done threshold as pending
+    let pages = EX_SAMPLE_PAGES.map((p, i) => ({
+      ...p,
+      type: i < donePagesCount ? (_exPageTypes[i] || p.type) : 'pending',
+      _idx: i,
+      _pending: i >= donePagesCount,
+    }));
+
+    const donePages = pages.filter(p => !p._pending);
+    const typeCounts = { diagram:0, bom:0, text:0, cover:0, toc:0, ignore:0 };
+    donePages.forEach(p => { if (typeCounts[p.type] !== undefined) typeCounts[p.type]++; else typeCounts.text++; });
+
+    // Group by section (include all pages so pending ones show under their section)
+    const sections = [];
+    const sectionOrder = [];
+    pages.forEach(p => {
+      if (!sectionOrder.includes(p.section)) { sectionOrder.push(p.section); sections.push({ name: p.section, pages: [] }); }
+      sections.find(s => s.name === p.section).pages.push(p);
+    });
+
+    const legendTypes = [
+      { t:'cover',   label:'Cover',   bg:'#D6E4F7', color:'#1C3969' },
+      { t:'toc',     label:'TOC',     bg:'#F0ECE8', color:'#5A5F6E' },
+      { t:'diagram', label:'Diagram', bg:'#DBEAFE', color:'#1D4ED8' },
+      { t:'bom',     label:'BoM',     bg:'#DBEAFE', color:'#1C3969' },
+      { t:'text',    label:'Text',    bg:'#F5F2EE', color:'#5A5F6E' },
+      { t:'ignore',  label:'Ignore',  bg:'#FEE2E2', color:'#B91C1C' },
+    ];
+
+    const canProceed = !isClassifying;
+
+    body.innerHTML = `
+${isClassifying ? `
+<div style="background:#EEEDFE;border:0.5px solid #C4C0F5;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+  <i class="ti ti-loader-2" style="font-size:20px;color:#534AB7;animation:spin 1s linear infinite;flex-shrink:0;"></i>
+  <div style="flex:1;">
+    <div style="font-size:13px;font-weight:600;color:#3730A3;">Classification in progress</div>
+    <div style="font-size:11px;color:#534AB7;margin-top:2px;">${job.pagesClassified} of ${job.pages} pages classified (${Math.round(classifyPct*100)}%) — results update live</div>
+    <div style="height:4px;background:#C4C0F5;border-radius:2px;margin-top:6px;overflow:hidden;"><div style="height:100%;width:${Math.round(classifyPct*100)}%;background:#534AB7;"></div></div>
+  </div>
+</div>` : ''}
+<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:12px;">
+  <div>
+    <div style="font-size:14px;font-weight:700;color:#111318;">Page classification — ${job.name}</div>
+    <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">${isClassifying ? `${donePagesCount} of ${pages.length} sample pages classified so far` : `${pages.length} pages classified — review and correct before extraction`}</div>
+    <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
+      <span style="font-size:11px;color:#1D4ED8;font-weight:600;"><i class="ti ti-stack" style="font-size:12px;margin-right:3px;"></i>${typeCounts.diagram} diagrams</span>
+      <span style="font-size:11px;color:#1C3969;font-weight:600;"><i class="ti ti-table" style="font-size:12px;margin-right:3px;"></i>${typeCounts.bom} BoMs</span>
+      <span style="font-size:11px;color:#5A5F6E;font-weight:600;"><i class="ti ti-file-text" style="font-size:12px;margin-right:3px;"></i>${typeCounts.text + typeCounts.cover + typeCounts.toc} other</span>
+      <span style="font-size:11px;color:#B91C1C;font-weight:600;"><i class="ti ti-eye-off" style="font-size:12px;margin-right:3px;"></i>${typeCounts.ignore} ignored</span>
+    </div>
+  </div>
+  <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+    <button class="sp-btn sp-btn-ghost" style="height:28px;font-size:11px;" onclick="exAutoClassify()"><i class="ti ti-sparkles" style="font-size:12px;"></i> Re-classify</button>
+    <button class="sp-btn sp-btn-primary" style="height:28px;font-size:11px;${!canProceed?'opacity:0.4;cursor:not-allowed;':''}" onclick="${canProceed?'exSetView(\'bom\')':'void 0'}">
+      <i class="ti ti-table" style="font-size:12px;"></i> ${isClassifying ? 'Classification running…' : 'Proceed to BoM'}
+    </button>
+  </div>
+</div>
+<div style="display:flex;gap:6px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+  <span style="font-size:11px;color:#9CA3AF;margin-right:2px;">Legend:</span>
+  ${legendTypes.map(l => `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:${l.bg};color:${l.color};">${l.label}</span>`).join('')}
+  ${isClassifying ? `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;background:#F3F4F6;color:#9CA3AF;">Pending</span>` : ''}
+</div>
+<div id="ex-class-grid">
+${sections.map(sec => `
+<div style="margin-bottom:20px;">
+  <div style="font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#9CA3AF;margin-bottom:10px;padding-bottom:6px;border-bottom:0.5px solid #F0ECE8;">${sec.name}</div>
+  <div class="ex-class-grid">
+    ${sec.pages.map(p => {
+      if (p._pending) {
+        return `<div class="ex-page-card" style="border-color:#E5E7EB;opacity:.5;cursor:default;">
+          <div class="ex-page-thumb" style="background:#F9FAFB;height:110px;padding:4px;overflow:hidden;">${exThumbSVG('ignore')}</div>
+          <div class="ex-page-footer">
+            <div class="ex-page-num" style="margin:0 0 3px;">Pg ${p.num}</div>
+            <div class="ex-page-label" style="color:#9CA3AF;">Pending…</div>
+            <div style="font-size:9px;color:#C8C3BC;margin-top:4px;display:flex;align-items:center;gap:3px;"><i class="ti ti-loader-2" style="font-size:10px;"></i> Classifying</div>
+          </div>
+        </div>`;
+      }
+      const curType = p.type;
+      const typeColors = { cover:'#1C3969', toc:'#5A5F6E', diagram:'#1D4ED8', bom:'#1C3969', text:'#5A5F6E', ignore:'#B91C1C' };
+      const typeBgs   = { cover:'#D6E4F7', toc:'#F0ECE8', diagram:'#DBEAFE', bom:'#DBEAFE', text:'#F5F2EE', ignore:'#FEE2E2' };
+      const borderCol = { diagram:'#3B82F6', bom:'#10B981', ignore:'#E2DDD8', cover:'#10B981', toc:'#C8C3BC', text:'#E2DDD8' };
+      const confColor = p.conf > 0.9 ? '#10B981' : p.conf > 0.75 ? '#F59E0B' : '#EF4444';
+      return `<div class="ex-page-card" style="border-color:${borderCol[curType]||'#E2DDD8'};${curType==='ignore'?'opacity:.55;':''}" id="ex-pc-${p._idx}">
+        <div class="ex-page-thumb" style="background:transparent;height:110px;padding:4px;overflow:hidden;">${exThumbSVG(curType)}</div>
+        <div class="ex-page-footer">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+            <div class="ex-page-num" style="margin:0;">Pg ${p.num}</div>
+            <span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;background:${typeBgs[curType]||'#F5F2EE'};color:${typeColors[curType]||'#5A5F6E'};">${curType.toUpperCase()}</span>
+          </div>
+          <div class="ex-page-label" title="${p.label}">${p.label}</div>
+          <div style="display:flex;align-items:center;gap:3px;margin-bottom:5px;">
+            <span class="ex-conf-dot" style="background:${confColor};"></span>
+            <span style="font-size:9px;color:#9CA3AF;">AI ${Math.round(p.conf*100)}%</span>
+          </div>
+          <div class="ex-page-type-btns">
+            ${['diagram','bom','text','ignore'].map(t =>
+              `<span class="ex-ptype-btn ${t} ${curType===t?'selected':''}" onclick="exSetPageType(${p._idx},'${t}')">${t==='diagram'?'Diag':t==='ignore'?'Skip':t.charAt(0).toUpperCase()+t.slice(1)}</span>`
+            ).join('')}
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+</div>`).join('')}
+</div>`;
+
+    window.exSetPageType = function(idx, type) {
+      _exPageTypes[idx] = type;
+      exRenderClassify(body);
+    };
+    window.exAutoClassify = function() {
+      _exPageTypes = {};
+      const grid = document.getElementById('ex-class-grid');
+      if (grid) { grid.style.opacity = '0.4'; setTimeout(() => { exRenderClassify(body); }, 700); }
+    };
+  }
+
+  function exRenderBom(body) {
+    const job = _exJobs.find(j => j.id === _exActiveJobId);
+    if (!job) return;
+
+    const isExtracting = job.status === 'extracting';
+    const extractPct = job.steps ? job.steps.extract : 1;
+    // Slice rows proportionally for in-progress jobs
+    const availableRows = isExtracting
+      ? EX_SAMPLE_BOM.slice(0, Math.floor(EX_SAMPLE_BOM.length * extractPct))
+      : EX_SAMPLE_BOM;
+
+    // Source pages for filter pill
+    const srcPages = [...new Set(availableRows.map(r => r.srcPage))].sort((a,b) => a-b);
+
+    // Build filtered view from available rows (job-scoped)
+    let rows = availableRows.filter(r => {
+      if (_exBomFilter === 'issues' && !r.issues.length) return false;
+      if (_exBomFilter === 'clean'  &&  r.issues.length) return false;
+      if (_exBomPage !== 'all' && String(r.srcPage) !== String(_exBomPage)) return false;
+      return true;
+    });
+
+    // Group by source page
+    const grouped = {};
+    rows.forEach(r => { if (!grouped[r.srcPage]) grouped[r.srcPage] = []; grouped[r.srcPage].push(r); });
+    const groupKeys = Object.keys(grouped).map(Number).sort((a,b) => a-b);
+
+    // Page label lookup
+    const pageLabel = {};
+    EX_SAMPLE_PAGES.forEach(p => { pageLabel[p.num] = p.label; });
+
+    const cleanCount = availableRows.filter(r=>!r.issues.length).length;
+    const issueCount = availableRows.filter(r=>r.issues.length).length;
+    const avgConf = availableRows.length ? Math.round(availableRows.reduce((a,r)=>a+r.conf,0)/availableRows.length*100) : 0;
+    const catalogCount = availableRows.filter(r=>r.inCatalog).length;
+    const bomPageCount = [...new Set(availableRows.map(r=>r.srcPage))].length;
+
+    body.innerHTML = `
+${isExtracting ? `
+<div style="background:#FFFBEB;border:0.5px solid #FCD34D;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+  <i class="ti ti-loader-2" style="font-size:20px;color:#B45309;animation:spin 1s linear infinite;flex-shrink:0;"></i>
+  <div style="flex:1;">
+    <div style="font-size:13px;font-weight:600;color:#92400E;">Extraction in progress</div>
+    <div style="font-size:11px;color:#B45309;margin-top:2px;">${availableRows.length} of ${EX_SAMPLE_BOM.length} rows extracted so far (${Math.round(extractPct*100)}%) — results update as pages finish</div>
+    <div style="height:4px;background:#FDE68A;border-radius:2px;margin-top:6px;overflow:hidden;"><div style="height:100%;width:${Math.round(extractPct*100)}%;background:#B45309;"></div></div>
+  </div>
+</div>` : ''}
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:12px;">
+  <div>
+    <div style="font-size:14px;font-weight:700;color:#111318;">BoM extraction — ${job.name}</div>
+    <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">${availableRows.length} rows · ${bomPageCount} source pages · <span style="color:#B45309;font-weight:600;">${issueCount} need review</span></div>
+  </div>
+  <div style="display:flex;gap:6px;">
+    <button class="sp-btn sp-btn-ghost" style="height:28px;font-size:11px;" onclick="exExportBom()"><i class="ti ti-download" style="font-size:12px;"></i> Export CSV</button>
+    <button class="sp-btn sp-btn-primary" style="height:28px;font-size:11px;" onclick="exCommit()"><i class="ti ti-database-import" style="font-size:12px;"></i> Commit to catalog</button>
+  </div>
+</div>
+<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+  <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:8px;padding:10px 16px;text-align:center;min-width:80px;">
+    <div style="font-size:20px;font-weight:700;color:#111318;">${availableRows.length}${isExtracting?`<span style="font-size:11px;color:#B45309;">/${EX_SAMPLE_BOM.length}</span>`:''}</div>
+    <div style="font-size:10px;color:#9CA3AF;margin-top:2px;">Rows</div>
+  </div>
+  <div style="background:#F0FDF4;border:0.5px solid #86EFAC;border-radius:8px;padding:10px 16px;text-align:center;min-width:80px;">
+    <div style="font-size:20px;font-weight:700;color:#1C3969;">${cleanCount}</div>
+    <div style="font-size:10px;color:#059669;margin-top:2px;">Clean</div>
+  </div>
+  <div style="background:#FFFBF2;border:0.5px solid #F5C97A;border-radius:8px;padding:10px 16px;text-align:center;min-width:80px;">
+    <div style="font-size:20px;font-weight:700;color:#B45309;">${issueCount}</div>
+    <div style="font-size:10px;color:#B45309;margin-top:2px;">Review</div>
+  </div>
+  <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:8px;padding:10px 16px;text-align:center;min-width:80px;">
+    <div style="font-size:20px;font-weight:700;color:#111318;">${avgConf}%</div>
+    <div style="font-size:10px;color:#9CA3AF;margin-top:2px;">Avg conf</div>
+  </div>
+  <div style="background:#EFF6FF;border:0.5px solid #BFDBFE;border-radius:8px;padding:10px 16px;text-align:center;min-width:80px;">
+    <div style="font-size:20px;font-weight:700;color:#1D4ED8;">${catalogCount}</div>
+    <div style="font-size:10px;color:#3B82F6;margin-top:2px;">In catalog</div>
+  </div>
+</div>
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+  <div style="display:flex;gap:4px;">
+    ${[['all','All'],['clean','Clean only'],['issues','Issues only']].map(([v,l]) =>
+      `<button onclick="exSetBomFilter('${v}')" style="height:27px;padding:0 11px;border-radius:20px;font-size:11px;font-weight:500;font-family:inherit;cursor:pointer;border:1px solid ${_exBomFilter===v?'#111318':'#E2DDD8'};background:${_exBomFilter===v?'#111318':'#FFFFFF'};color:${_exBomFilter===v?'#FFFFFF':'#5A5F6E'};">${l}</button>`
+    ).join('')}
+  </div>
+  <div style="width:1px;height:20px;background:#E2DDD8;"></div>
+  <div style="font-size:11px;color:#9CA3AF;">Source page:</div>
+  <div style="display:flex;gap:4px;flex-wrap:wrap;">
+    <button onclick="exSetBomPage('all')" style="height:27px;padding:0 10px;border-radius:20px;font-size:11px;font-family:inherit;cursor:pointer;border:1px solid ${_exBomPage==='all'?'#111318':'#E2DDD8'};background:${_exBomPage==='all'?'#111318':'#FFFFFF'};color:${_exBomPage==='all'?'#FFFFFF':'#5A5F6E'};">All</button>
+    ${srcPages.map(pg =>
+      `<button onclick="exSetBomPage('${pg}')" style="height:27px;padding:0 10px;border-radius:20px;font-size:11px;font-family:inherit;cursor:pointer;border:1px solid ${String(_exBomPage)===String(pg)?'#111318':'#E2DDD8'};background:${String(_exBomPage)===String(pg)?'#111318':'#FFFFFF'};color:${String(_exBomPage)===String(pg)?'#FFFFFF':'#5A5F6E'};">Pg ${pg}</button>`
+    ).join('')}
+  </div>
+  <div style="margin-left:auto;display:flex;gap:6px;">
+    <button class="sp-btn sp-btn-ghost" style="height:27px;font-size:11px;" onclick="exBulkAccept()"><i class="ti ti-checks" style="font-size:12px;"></i> Accept all clean</button>
+    <button class="sp-btn sp-btn-ghost" style="height:27px;font-size:11px;" onclick="exBulkSkip()"><i class="ti ti-ban" style="font-size:12px;"></i> Skip all issues</button>
+  </div>
+</div>
+${groupKeys.length === 0 ? `<div style="padding:40px;text-align:center;color:#9CA3AF;font-size:13px;">No rows match the current filter.</div>` :
+groupKeys.map(pg => {
+  const pgRows = grouped[pg];
+  const pgLabel = pageLabel[pg] ? ` — ${pageLabel[pg]}` : '';
+  return `
+<div style="margin-bottom:20px;">
+  <div style="font-size:11px;font-weight:700;color:#5A5F6E;letter-spacing:.8px;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+    <span style="background:#F0FDF4;border:0.5px solid #86EFAC;border-radius:5px;padding:2px 9px;font-size:10px;color:#1C3969;">Pg ${pg}</span>
+    <span style="text-transform:uppercase;letter-spacing:1px;">${pgLabel.slice(3)}</span>
+    <span style="font-size:10px;font-weight:400;color:#9CA3AF;">${pgRows.length} rows</span>
+  </div>
+  <div class="ex-bom-table" style="margin-bottom:0;">
+    <div class="ex-bom-head" style="grid-template-columns:28px 32px 110px 1fr 50px 52px 76px 90px 32px;">
+      <div class="ex-bom-th">#</div>
+      <div class="ex-bom-th">⌖</div>
+      <div class="ex-bom-th">Part #</div>
+      <div class="ex-bom-th">Description</div>
+      <div class="ex-bom-th">Qty</div>
+      <div class="ex-bom-th">UOM</div>
+      <div class="ex-bom-th">Conf.</div>
+      <div class="ex-bom-th">Status</div>
+      <div class="ex-bom-th"></div>
+    </div>
+    ${pgRows.map((r,i) => {
+      const confColor = r.conf >= 0.95 ? '#10B981' : r.conf >= 0.8 ? '#F59E0B' : '#EF4444';
+      const hasIssue = r.issues.length > 0;
+      return `<div class="ex-bom-row ${hasIssue?'has-issue':''}" style="grid-template-columns:28px 32px 110px 1fr 50px 52px 76px 90px 32px;" id="ex-bom-r${r.row}">
+        <div class="ex-bom-td" style="color:#9CA3AF;font-size:11px;">${r.row}</div>
+        <div class="ex-bom-td" style="font-size:11px;font-weight:700;color:#3B82F6;font-family:monospace;">${r.callout}</div>
+        <div class="ex-bom-td"><input class="ex-bom-input" value="${r.partNum}" placeholder="—" style="font-family:monospace;font-size:11px;font-weight:700;${!r.partNum?'border-color:#FCA5A5;background:#FFF5F5;':''}"/></div>
+        <div class="ex-bom-td"><input class="ex-bom-input" value="${r.desc}" style="width:100%;"/></div>
+        <div class="ex-bom-td"><input class="ex-bom-input" value="${r.qty}" style="width:40px;text-align:center;"/></div>
+        <div class="ex-bom-td" style="font-size:11px;color:#7A7F8E;">${r.uom}</div>
+        <div class="ex-bom-td">
+          <div style="font-size:11px;font-weight:700;color:${confColor};">${Math.round(r.conf*100)}%</div>
+          <div class="ex-conf-bar"><div class="ex-conf-fill" style="width:${Math.round(r.conf*100)}%;background:${confColor};"></div></div>
+        </div>
+        <div class="ex-bom-td" style="display:flex;flex-wrap:wrap;gap:2px;align-items:center;">
+          ${r.inCatalog ? `<span class="ex-issue-tag" style="background:#EFF6FF;color:#1D4ED8;" title="Part already in catalog"><i class="ti ti-check" style="font-size:9px;"></i> Catalog</span>` : ''}
+          ${r.issues.includes('no_partnum') ? `<span class="ex-issue-tag" style="background:#FEE2E2;color:#B91C1C;">No P/N</span>` : ''}
+          ${r.issues.includes('low_conf')   ? `<span class="ex-issue-tag" style="background:#FFFBEB;color:#B45309;">Low conf</span>` : ''}
+          ${!hasIssue && !r.inCatalog ? `<span style="font-size:10px;color:#10B981;font-weight:600;">✓ OK</span>` : ''}
+        </div>
+        <div class="ex-bom-td" style="justify-content:center;">
+          <button class="sp-btn sp-btn-ghost" style="height:24px;padding:0 7px;font-size:10px;" onclick="exIgnoreRow('${r.row}')"><i class="ti ti-x"></i></button>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+</div>`;
+}).join('')}`;
+
+    window.exIgnoreRow = function(rowId) {
+      const el = document.getElementById('ex-bom-r' + rowId);
+      if (el) { el.style.opacity = '0.3'; el.style.pointerEvents = 'none'; }
+    };
+    window.exBulkAccept = function() {
+      document.querySelectorAll('.ex-bom-row:not(.has-issue)').forEach(el => {
+        el.style.background = '#F0FDF4';
+      });
+    };
+    window.exBulkSkip = function() {
+      document.querySelectorAll('.ex-bom-row.has-issue').forEach(el => {
+        el.style.opacity = '0.3'; el.style.pointerEvents = 'none';
+      });
+    };
+    window.exExportBom = function() {
+      const lines = ['row,callout,srcPage,partNum,description,qty,uom,confidence,inCatalog,issues',
+        ...EX_SAMPLE_BOM.map(r => `${r.row},${r.callout},${r.srcPage},${r.partNum},"${r.desc}",${r.qty},${r.uom},${Math.round(r.conf*100)}%,${r.inCatalog},"${r.issues.join(';')}"`)];
+      const a = document.createElement('a');
+      a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(lines.join('\n'));
+      a.download = 'bom-extraction.csv'; a.click();
+    };
+  }
+
+  function setTab(tab) {
+    _activeTab = tab;
+    el.querySelectorAll('.sb-item[data-sp-tab]').forEach(item => {
+      item.classList.toggle('active', item.dataset.spTab === tab);
+    });
+
+    const contentEl = document.getElementById('sp-content');
+    const fullHeight = ['manuals', 'news', 'analytics', 'doc-upload', 'extractor', 'pricing'].includes(tab);
+    const scrollPad  = ['content'].includes(tab);
+    if (fullHeight) {
+      contentEl.style.cssText = 'flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0;';
+    } else if (scrollPad) {
+      contentEl.style.cssText = 'flex:1;overflow-y:auto;padding:0;';
+    } else {
+      contentEl.style.cssText = 'flex:1;overflow-y:auto;padding:28px;';
+    }
+
+    if (tab === 'home')       renderHome();
+    if (tab === 'fleets')     renderFleets();
+    if (tab === 'requests')   renderRequests();
+    if (tab === 'content')    renderContent();
+    if (tab === 'manuals')    renderManuals();
+    if (tab === 'news')       renderNews();
+    if (tab === 'analytics')  renderAnalytics();
+    if (tab === 'doc-upload') renderDocUpload();
+    if (tab === 'pricing')    renderPricing();
+    if (tab === 'extractor')  renderExtractor();
+  }
+
+  el.querySelectorAll('.sb-item[data-sp-tab]').forEach(item => {
+    item.addEventListener('click', () => setTab(item.dataset.spTab));
   });
 
-  setTab('fleets');
+  setTab('home');
 }
