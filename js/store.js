@@ -908,6 +908,13 @@ const Store = (() => {
     },
   };
 
+  // Fleet-level feature enabled/disabled (gates role settings entirely)
+  const _fleetFeatures = {};
+  MANAGED_FEATURES.forEach(f => { _fleetFeatures[f.id] = true; }); // all on by default
+
+  function getFleetFeature(featureId) { return _fleetFeatures[featureId] !== false; }
+  function setFleetFeature(featureId, enabled) { _fleetFeatures[featureId] = enabled; }
+
   // Per-user feature overrides: { userId: { featureId: true|false } }
   // null means "follow role default"
   const _userFeatureOverrides = {};
@@ -1239,7 +1246,8 @@ const Store = (() => {
     getUsers, authenticate, setCurrentUser, getCurrentUser, logout,
     getLocations, getCurrentLocation, setCurrentLocation,
     getOrgConfig, getOrderTerms,
-    getManagedUsers, getManagedFeatures, getRoleFeatures, setRoleFeature,
+    getManagedUsers, getManagedFeatures, getFleetFeature, setFleetFeature,
+    getRoleFeatures, setRoleFeature,
     getUserFeatureOverrides, setUserFeatureOverride, getEffectiveFeatures,
     addManagedUser, updateManagedUser,
     getSupplierFleets, getPriceRequests, addPriceRequest, respondToPriceRequest, addPriceRequestComment,
