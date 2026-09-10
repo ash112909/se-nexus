@@ -396,33 +396,60 @@ function render_fleet_admin(el) {
 </div>`;
   }
 
+  const FEAT_PERMISSION_OPTIONS = [
+    { value: 'on',       label: 'Enabled' },
+    { value: 'off',      label: 'Disabled' },
+    { value: 'readonly', label: 'View only' },
+  ];
+
   function _renderRoleFeatures(features) {
+    const roles = ['mechanic','supervisor'];
+    const users = Store.getManagedUsers();
     return `
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-  ${['mechanic','supervisor'].map(role => {
-    const rf = Store.getRoleFeatures(role);
-    const rc = ROLE_COLORS[role];
-    return `<div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-        <span class="fa-pill" style="background:${rc.bg};color:${rc.color};font-size:12px;">${ROLE_LABELS[role]}</span>
-        <span style="font-size:12px;color:#9CA3AF;">${Store.getManagedUsers().filter(u=>u.role===role).length} users</span>
-      </div>
-      <div class="fa-table">
-        ${features.map(f => `
-          <div class="fa-feat-row">
-            <div class="fa-feat-info">
-              <div class="fa-feat-label"><i class="ti ${f.icon}" style="font-size:13px;color:#9CA3AF;"></i>${f.label}</div>
-              <div class="fa-feat-desc">${f.description}</div>
+<div style="overflow-x:auto;">
+  <table style="width:100%;border-collapse:collapse;min-width:560px;">
+    <thead>
+      <tr>
+        <th style="text-align:left;padding:10px 16px;font-size:12px;font-weight:600;color:#6B7280;border-bottom:1px solid #E5E7EB;width:45%;">Feature</th>
+        ${roles.map(role => {
+          const rc = ROLE_COLORS[role];
+          return `<th style="text-align:center;padding:10px 16px;border-bottom:1px solid #E5E7EB;">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <span class="fa-pill" style="background:${rc.bg};color:${rc.color};font-size:11px;">${ROLE_LABELS[role]}</span>
+              <span style="font-size:11px;color:#9CA3AF;font-weight:400;">${users.filter(u=>u.role===role).length} users</span>
             </div>
-            <label class="fa-toggle">
-              <input type="checkbox" ${rf[f.id]?'checked':''} onchange="faSetRoleFeature('${role}','${f.id}',this.checked)"/>
-              <div class="fa-toggle-track"></div>
-              <div class="fa-toggle-thumb"></div>
-            </label>
-          </div>`).join('')}
-      </div>
-    </div>`;
-  }).join('')}
+          </th>`;
+        }).join('')}
+      </tr>
+    </thead>
+    <tbody>
+      ${features.map((f, i) => {
+        return `<tr style="background:${i%2===0?'transparent':'#F9FAFB'};">
+          <td style="padding:12px 16px;border-bottom:1px solid #F3F4F6;">
+            <div style="display:flex;align-items:flex-start;gap:9px;">
+              <i class="ti ${f.icon}" style="font-size:14px;color:#9CA3AF;margin-top:2px;flex-shrink:0;"></i>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:#111318;">${f.label}</div>
+                <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">${f.description}</div>
+              </div>
+            </div>
+          </td>
+          ${roles.map(role => {
+            const rf = Store.getRoleFeatures(role);
+            const current = rf[f.id] ? 'on' : 'off';
+            return `<td style="text-align:center;padding:10px 16px;border-bottom:1px solid #F3F4F6;">
+              <select onchange="faSetRoleFeatureLevel('${role}','${f.id}',this.value)"
+                style="font-size:12px;padding:5px 8px;border:1px solid #D1D5DB;border-radius:6px;background:#fff;color:#111318;cursor:pointer;appearance:auto;min-width:100px;">
+                ${FEAT_PERMISSION_OPTIONS.map(o =>
+                  `<option value="${o.value}" ${current===o.value?'selected':''}>${o.label}</option>`
+                ).join('')}
+              </select>
+            </td>`;
+          }).join('')}
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table>
 </div>
 <div style="margin-top:16px;padding:12px 16px;background:#F5F2EE;border-radius:8px;font-size:12px;color:#7A7F8E;">
   Role defaults apply to all users of that role. Individual user overrides take precedence — manage those in <button style="background:none;border:none;color:#1A6DB5;cursor:pointer;font-size:12px;text-decoration:underline;padding:0;" onclick="faFeatView('users')">Per-user overrides</button> or by opening a user on the Users tab.
@@ -538,7 +565,12 @@ function render_fleet_admin(el) {
 
   window.faSetRoleFeature = function(role, featureId, enabled) {
     Store.setRoleFeature(role, featureId, enabled);
-    // Don't full re-render — toggles are live
+  };
+
+  window.faSetRoleFeatureLevel = function(role, featureId, level) {
+    // 'on' and 'readonly' both count as enabled at the Store level;
+    // 'off' disables. Extend Store when per-level granularity is supported.
+    Store.setRoleFeature(role, featureId, level !== 'off');
   };
 
   window.faSetUserOverride = function(userId, featureId, enabled) {
