@@ -33,14 +33,14 @@ const GlobalSearch = (() => {
     const ql = q.toLowerCase();
     const out = [];
 
-    // Parts
+    // Parts — no price or availability; view those in part cards
     const parts = Store.getParts(q, '');
     parts.slice(0, 6).forEach(p => out.push({
       section: 'Parts',
       icon: 'ti-package',
       label: p.description,
-      sub: p.partNum + ' · ' + p.vendor + ' · $' + p.price.toFixed(2),
-      badge: p.inStock ? { text: 'In stock', color: '#639922' } : { text: 'B/O', color: '#BA7517' },
+      sub: p.partNum + (p.vendor ? ' · ' + p.vendor : '') + (p.category ? ' · ' + p.category : ''),
+      badge: null,
       action: () => { Router.navigate('parts-search'); },
     }));
 
@@ -140,7 +140,7 @@ const GlobalSearch = (() => {
       if (vaEl) vaEl.style.display = 'none';
       return;
     }
-    if (vaEl) { vaEl.style.display = 'inline'; vaEl.textContent = `View all ${_results.length}+ results →`; }
+    if (vaEl) vaEl.style.display = 'none';
 
     // Group by section
     const sections = {};
@@ -288,9 +288,7 @@ const GlobalSearch = (() => {
       else if (e.key === 'ArrowUp') { e.preventDefault(); moveSelection(-1); }
       else if (e.key === 'Enter') {
         e.preventDefault();
-        if (_query.trim() && _results.length === 0) {
-          close(); Router.navigate('search-results', { query: _query });
-        } else if (_query.trim() && _selIdx === 0 && !_results[0]) {
+        if (_query.trim() && (!_results.length || (_selIdx === 0 && !_results[0]))) {
           close(); Router.navigate('search-results', { query: _query });
         } else {
           pick(_selIdx);

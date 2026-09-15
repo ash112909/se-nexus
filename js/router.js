@@ -24,9 +24,16 @@ const Router = (() => {
   };
 
   let _context = {};
+  let _prev = null;
+
+  function back() {
+    if (_prev && _prev !== current) navigate(_prev);
+    else navigate('home');
+  }
 
   function navigate(view, ctx) {
     _context = ctx || {};
+    if (current && current !== view) _prev = current;
     if (current) {
       document.getElementById(views[current])?.classList.remove('active');
     }
@@ -80,5 +87,5 @@ const Router = (() => {
     else { navigate('dashboard'); }
   };
 
-  return { navigate, get context() { return _context; }, get currentView() { return current; } };
+  return { navigate, back, get context() { return _context; }, get currentView() { return current; } };
 })();
