@@ -114,14 +114,17 @@ function render_search_results(el) {
     }
 
     if (cat === 'Fleet') {
-      // Fleet asset search — placeholder until asset inventory is built
-      out.push({
+      (Store.getFleetAssets ? Store.getFleetAssets(q) : []).forEach(a => out.push({
         icon: 'ti-tractor',
-        label: 'Fleet asset search coming soon',
-        sub: 'Asset inventory management is not yet available',
-        badge: null,
-        action: () => {},
-      });
+        label: a.equipNum + ' · ' + a.make + ' ' + a.model,
+        sub: a.serial + ' · ' + a.location + ' · ' + a.status + ' · ' + a.year,
+        badge: a.status === 'Active'
+          ? { text: 'Active',     color: '#3B6D11', bg: '#EAF3DE' }
+          : a.status === 'Retired'
+          ? { text: 'Retired',    color: '#6B7280', bg: '#F3F4F6' }
+          : { text: a.status,     color: '#1C3969', bg: '#D6E4F7' },
+        action: () => Router.navigate('fleet-assets', { assetId: a.id }),
+      }));
     }
 
     return out;

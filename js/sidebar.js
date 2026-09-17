@@ -125,6 +125,8 @@ function buildSidebar(activeItem, opts) {
       <div class="sb-section-label">Parts</div>
       <div class="sb-item ${activeItem==='parts'?'active':''}" onclick="sendPrompt('Open Parts Search scoped to WO #100094, Skyjack SJIII 3219 — diagram view, hydraulic lift cylinder')"><i class="ti ti-search"></i><span class="sb-lbl"> Search parts</span></div>
       ${_can('recommended') ? `<div class="sb-item ${activeItem==='recommended'?'active':''}" onclick="sendPrompt('Open recommended parts')"><i class="ti ti-star"></i><span class="sb-lbl"> Recommended</span></div>` : ''}
+      <div class="sb-section-label">Fleet</div>
+      <div class="sb-item ${activeItem==='fleet-assets'?'active':''}" onclick="Router.navigate('fleet-assets')"><i class="ti ti-tractor"></i><span class="sb-lbl"> Fleet Assets</span></div>
       <div class="sb-section-label">Knowledge</div>
       ${_can('manuals') ? `<div class="sb-item ${activeItem==='manuals'?'active':''}" onclick="sendPrompt('Open manuals and docs')"><i class="ti ti-book"></i><span class="sb-lbl"> Manuals &amp; docs</span></div>` : ''}
       ${_can('diagnostics') ? `<div class="sb-item ${activeItem==='diagnostics'?'active':''}" onclick="sendPrompt('Open diagnostic assistant')"><i class="ti ti-tool"></i><span class="sb-lbl"> Diagnostics</span></div>` : ''}

@@ -20,6 +20,7 @@ const Router = (() => {
     'supplier': 'view-supplier',
     'supplier-portal': 'view-supplier-portal',
     'fleet-admin': 'view-fleet-admin',
+    'fleet-assets': 'view-fleet-assets',
     'search-results': 'view-search-results',
   };
 

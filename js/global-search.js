@@ -9,9 +9,10 @@ const GlobalSearch = (() => {
   let _results = [];
 
   const CATEGORIES = [
-    { key: 'Parts',   label: 'Parts',   icon: 'ti-package', needsSupplier: true },
-    { key: 'Orders',  label: 'Orders',  icon: 'ti-receipt',  needsSupplier: false },
-    { key: 'Manuals', label: 'Manuals', icon: 'ti-book',     needsSupplier: true },
+    { key: 'Parts',   label: 'Parts',         icon: 'ti-package', needsSupplier: true },
+    { key: 'Orders',  label: 'Orders',         icon: 'ti-receipt',  needsSupplier: false },
+    { key: 'Manuals', label: 'Manuals',        icon: 'ti-book',     needsSupplier: true },
+    { key: 'Fleet',   label: 'Fleet Assets',  icon: 'ti-tractor',  needsSupplier: false },
   ];
 
   // Mirrors the catalog suppliers in parts-search.js
@@ -79,6 +80,16 @@ const GlobalSearch = (() => {
       }));
     }
 
+    if (cat === 'Fleet') {
+      (Store.getFleetAssets ? Store.getFleetAssets(q) : []).slice(0, 8).forEach(a => out.push({
+        icon: 'ti-tractor',
+        label: a.equipNum + ' · ' + a.make + ' ' + a.model,
+        sub: a.serial + ' · ' + a.location + ' · ' + a.status,
+        badge: null,
+        action: () => Router.navigate('fleet-assets', { assetId: a.id }),
+      }));
+    }
+
     return out;
   }
 
@@ -88,9 +99,10 @@ const GlobalSearch = (() => {
     const q = _query;
     const cat = _category;
     close();
-    if (cat === 'Parts')   { Router.navigate('parts-search'); }
+    if (cat === 'Parts')        { Router.navigate('parts-search'); }
     else if (cat === 'Orders')  { Router.navigate('order-history'); }
     else if (cat === 'Manuals') { Router.navigate('manuals'); }
+    else if (cat === 'Fleet')   { Router.navigate('fleet-assets'); }
     else { Router.navigate('search-results', { query: q, category: cat }); }
   }
 

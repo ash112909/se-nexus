@@ -1253,8 +1253,117 @@ const Store = (() => {
     getSupplierFleets, getPriceRequests, addPriceRequest, respondToPriceRequest, addPriceRequestComment,
     getNotifications, markNotificationRead, markAllNotificationsRead, getUnreadCount,
     getCmsArticles, getCmsArticle, saveCmsArticle, deleteCmsArticle, getActiveBanners, dismissBanner,
+    getFleetAssets,
     reset,
   };
+
+  // ── Fleet Assets ──────────────────────────────────────────────────────────
+  const FLEET_ASSETS = [
+    {
+      id: 'FL-094', companyCode: 'MCR', equipNum: 'FL-094',
+      type: 'Aerial Work Platform', category: 'Scissor Lift', class: 'Electric',
+      location: 'Austin Branch', make: 'Skyjack', model: 'SJIII 3219',
+      serial: 'SJ3219-00847', status: 'Active', year: 2019,
+      acquisitionDate: 'Mar 15, 2019', retiredDate: null,
+      warrantyEnd: 'Sep 14, 2027', hours: 1842, mileage: null,
+      description: '19 ft electric scissor lift — indoor/outdoor rated. Dual-fuel capable.',
+      image: null,
+      manualMachines: ['Skyjack SJIII 3219'],
+    },
+    {
+      id: 'FL-017', companyCode: 'MCR', equipNum: 'FL-017',
+      type: 'Excavator', category: 'Tracked Excavator', class: 'Diesel',
+      location: 'San Marcos Branch', make: 'Caterpillar', model: '320 Excavator',
+      serial: 'CAT320-01044', status: 'Active', year: 2018,
+      acquisitionDate: 'Aug 3, 2018', retiredDate: null,
+      warrantyEnd: null, hours: 4217, mileage: null,
+      description: '20-ton hydraulic excavator. 47" bucket standard configuration.',
+      image: null,
+      manualMachines: ['Cat 320 Excavator'],
+    },
+    {
+      id: 'FL-031', companyCode: 'MCR', equipNum: 'FL-031',
+      type: 'Forklift', category: 'Counterbalance Forklift', class: 'LPG',
+      location: 'Austin Branch', make: 'Toyota', model: '8FGU25',
+      serial: 'TOY8FGU-00391', status: 'Active', year: 2020,
+      acquisitionDate: 'Jan 22, 2020', retiredDate: null,
+      warrantyEnd: 'Dec 3, 2026', hours: 2103, mileage: null,
+      description: '5,000 lb capacity LPG counterbalance forklift. 189" max lift height.',
+      image: null,
+      manualMachines: ['Toyota 8FGU25'],
+    },
+    {
+      id: 'FL-008', companyCode: 'MCR', equipNum: 'FL-008',
+      type: 'Compact Track Loader', category: 'Skid Steer / CTL', class: 'Diesel',
+      location: 'Kyle Branch', make: 'Bobcat', model: 'S650',
+      serial: 'BOB-S650-00814', status: 'Active', year: 2016,
+      acquisitionDate: 'May 10, 2016', retiredDate: null,
+      warrantyEnd: null, hours: 5840, mileage: null,
+      description: 'Radial-lift compact track loader. Aux hydraulics, cab w/ heat & A/C.',
+      image: null,
+      manualMachines: ['Bobcat S650'],
+    },
+    {
+      id: 'FL-055', companyCode: 'MCR', equipNum: 'FL-055',
+      type: 'Aerial Work Platform', category: 'Boom Lift', class: 'Diesel',
+      location: 'San Marcos Branch', make: 'JLG', model: '400S',
+      serial: 'JLG400S-02213', status: 'Active', year: 2021,
+      acquisitionDate: 'Jun 30, 2021', retiredDate: null,
+      warrantyEnd: 'Jun 30, 2024', hours: 988, mileage: null,
+      description: '40 ft straight boom lift — 4WD diesel, rough-terrain rated.',
+      image: null,
+      manualMachines: [],
+    },
+    {
+      id: 'FL-072', companyCode: 'MCR', equipNum: 'FL-072',
+      type: 'Aerial Work Platform', category: 'Scissor Lift', class: 'Electric',
+      location: 'Austin Branch', make: 'Genie', model: 'GS-2632',
+      serial: 'GEN-GS2632-00771', status: 'Active', year: 2022,
+      acquisitionDate: 'Feb 14, 2022', retiredDate: null,
+      warrantyEnd: 'Feb 14, 2025', hours: 630, mileage: null,
+      description: '26 ft electric narrow scissor lift — fits through standard doorways.',
+      image: null,
+      manualMachines: [],
+    },
+    {
+      id: 'FL-003', companyCode: 'MCR', equipNum: 'FL-003',
+      type: 'Forklift', category: 'Counterbalance Forklift', class: 'Electric',
+      location: 'Kyle Branch', make: 'Toyota', model: '8FBU25',
+      serial: 'TOY8FBU-00184', status: 'Retired', year: 2011,
+      acquisitionDate: 'Apr 5, 2011', retiredDate: 'Jan 31, 2024',
+      warrantyEnd: null, hours: 12480, mileage: null,
+      description: '5,000 lb electric counterbalance forklift. Retired — battery end of life.',
+      image: null,
+      manualMachines: ['Toyota 8FGU25'],
+    },
+    {
+      id: 'FL-041', companyCode: 'MCR', equipNum: 'FL-041',
+      type: 'Compact Track Loader', category: 'Skid Steer / CTL', class: 'Diesel',
+      location: 'Austin Branch', make: 'Bobcat', model: 'S770',
+      serial: 'BOB-S770-01102', status: 'In Service', year: 2023,
+      acquisitionDate: 'Sep 1, 2023', retiredDate: null,
+      warrantyEnd: 'Sep 1, 2026', hours: 312, mileage: null,
+      description: 'Large-frame radial-lift CTL. High-flow aux hydraulics. Dealer loaner pending parts.',
+      image: null,
+      manualMachines: ['Bobcat S770'],
+    },
+  ];
+
+  function getFleetAssets(query) {
+    if (!query) return FLEET_ASSETS;
+    const ql = query.toLowerCase();
+    return FLEET_ASSETS.filter(a =>
+      a.equipNum.toLowerCase().includes(ql) ||
+      a.make.toLowerCase().includes(ql) ||
+      a.model.toLowerCase().includes(ql) ||
+      a.serial.toLowerCase().includes(ql) ||
+      a.location.toLowerCase().includes(ql) ||
+      a.type.toLowerCase().includes(ql) ||
+      a.category.toLowerCase().includes(ql) ||
+      a.status.toLowerCase().includes(ql) ||
+      String(a.year).includes(ql)
+    );
+  }
 })();
 
 window.Store = Store;
