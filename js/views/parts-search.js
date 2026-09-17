@@ -2407,7 +2407,7 @@ function render_parts_search(el) {
   function renderBreadcrumb() {
     const el2 = document.getElementById('ps-breadcrumb');
     if (!el2) return;
-    const crumbs = [{ label:'All parts', action:"psNavTo(null,null,null,null)" }];
+    const crumbs = [{ label:'Suppliers', action:"psNavTo(null,null,null,null)" }];
     if (_nav.supplierId) { const s=CATALOG.find(x=>x.id===_nav.supplierId); if(s) crumbs.push({label:s.name, action:`psNavTo('${s.id}',null,null,null)`}); }
     if (_nav.modelId) { const e=findModelEntry(_nav.modelId); if(e) crumbs.push({label:e.model.name, action:`psNavTo('${e.supplier.id}','${e.model.id}',null,null)`}); }
     if (_nav.compName) crumbs.push({label:_nav.compName, action:`psNavTo('${_nav.supplierId}','${_nav.modelId}','${esc(_nav.compName)}',null)`});
@@ -2432,7 +2432,7 @@ function render_parts_search(el) {
     const _visiblePartCount = _impersonating
       ? [...new Set(_visibleCatalog.flatMap(s=>s.models.flatMap(m=>m.components.flatMap(c=>c.subs.flatMap(sub=>sub.partIds)))))].length
       : ALL_PARTS.length;
-    let h = `<div class="tree-root-node ${isRoot?'active':''}" onclick="psNavTo(null,null,null,null)"><i class="ti ti-package" style="font-size:13px;"></i> All parts <span class="tree-count">${_visiblePartCount}</span></div>`;
+    let h = `<div class="tree-root-node ${isRoot?'active':''}" onclick="psNavTo(null,null,null,null)"><i class="ti ti-building-store" style="font-size:13px;"></i> Suppliers <span class="tree-count">${CATALOG.length}</span></div>`;
     for (const s of _visibleCatalog) {
       const sExp = _expanded.has(s.id);
       const sActive = _nav.supplierId===s.id && !_nav.modelId;
@@ -2497,7 +2497,7 @@ function render_parts_search(el) {
 
   function renderRoot() {
     document.getElementById('ps-center').innerHTML = `<div class="center-body">
-      <div class="center-hdr"><div class="center-title">Parts catalog</div><div class="center-sub">${ALL_PARTS.length} parts across ${CATALOG.length} suppliers</div></div>
+      <div class="center-hdr"><div class="center-title">Parts catalog</div><div class="center-sub">Select a supplier to browse parts</div></div>
       <div class="supplier-grid">${CATALOG.map(s=>{
         const ids=[...new Set(s.models.flatMap(m=>m.components.flatMap(c=>c.subs.flatMap(sub=>sub.partIds))))];
         return `<div class="supplier-card" onclick="psNavTo('${s.id}',null,null,null)">
@@ -2507,8 +2507,6 @@ function render_parts_search(el) {
           <div class="sc-models">${s.models.map(m=>m.name).join(', ')}</div>
         </div>`;
       }).join('')}</div>
-      <div class="sec-label">All parts</div>
-      ${partsTable(ALL_PARTS)}
     </div>`;
   }
 

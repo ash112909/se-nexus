@@ -7,12 +7,10 @@ function render_search_results(el) {
   let _submitted = !!(ctx.query && ctx.category); // auto-run if both passed in
 
   const CATEGORIES = [
-    { key: 'Parts',             label: 'Parts',              icon: 'ti-package',         color: '#534AB7', bg: '#EEEDFE' },
-    { key: 'Orders',            label: 'Orders',             icon: 'ti-receipt',          color: '#1C3969', bg: '#D6E4F7' },
-    { key: 'Manuals',           label: 'Manuals',            icon: 'ti-book',             color: '#185FA5', bg: '#E6F1FB' },
-    { key: 'News & Bulletins',  label: 'News & Bulletins',   icon: 'ti-news',             color: '#B91C1C', bg: '#FEE2E2' },
-    { key: 'Knowledge Base',    label: 'Knowledge Base',     icon: 'ti-help-circle',      color: '#6B7280', bg: '#F3F4F6' },
-    { key: 'Fleet',             label: 'Fleet Assets',       icon: 'ti-tractor',          color: '#065F46', bg: '#D1FAE5' },
+    { key: 'Parts',   label: 'Parts',   icon: 'ti-package', color: '#534AB7', bg: '#EEEDFE' },
+    { key: 'Orders',  label: 'Orders',  icon: 'ti-receipt',  color: '#1C3969', bg: '#D6E4F7' },
+    { key: 'Manuals', label: 'Manuals', icon: 'ti-book',     color: '#185FA5', bg: '#E6F1FB' },
+    { key: 'Fleet',   label: 'Fleet Assets', icon: 'ti-tractor', color: '#065F46', bg: '#D1FAE5' },
   ];
 
   const NEWS_ITEMS = [
