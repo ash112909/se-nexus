@@ -107,7 +107,7 @@ function render_fleet_assets(el) {
 .fa-wo-row { display:flex; align-items:center; gap:9px; padding:10px 16px; border-bottom:0.5px solid #F0ECE8; cursor:pointer; transition:background .1s; }
 .fa-wo-row:last-child { border-bottom:none; }
 .fa-wo-row:hover { background:#F9F8F6; }
-.fa-empty-detail { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; gap:10px; color:#9CA3AF; padding:40px; }
+.fa-empty-detail { display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; min-height:300px; text-align:center; gap:10px; color:#9CA3AF; padding:40px; }
 .fa-no-content { padding:18px 16px; font-size:12px; color:#9CA3AF; text-align:center; }
 @media (max-width:700px) {
   .fa-list-panel { width:100%; min-width:0; }
@@ -148,7 +148,7 @@ function render_fleet_assets(el) {
         <div class="fa-list-scroll" id="fa-asset-list"></div>
       </div>
       <div class="fa-detail-panel" id="fa-detail-panel">
-        <div id="fa-detail-content" style="display:flex;flex-direction:column;height:100%;"></div>
+        <div id="fa-detail-content" style="display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;"></div>
       </div>
     </div>
   </div>
