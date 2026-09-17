@@ -1253,11 +1253,12 @@ const Store = (() => {
     getSupplierFleets, getPriceRequests, addPriceRequest, respondToPriceRequest, addPriceRequestComment,
     getNotifications, markNotificationRead, markAllNotificationsRead, getUnreadCount,
     getCmsArticles, getCmsArticle, saveCmsArticle, deleteCmsArticle, getActiveBanners, dismissBanner,
-    getFleetAssets,
     reset,
   };
+})();
 
-  // ── Fleet Assets ──────────────────────────────────────────────────────────
+// ── Fleet Assets (appended to Store after IIFE) ───────────────────────────
+(function() {
   const FLEET_ASSETS = [
     {
       id: 'FL-094', companyCode: 'MCR', equipNum: 'FL-094',
@@ -1426,7 +1427,7 @@ const Store = (() => {
     },
   ];
 
-  function getFleetAssets(query) {
+  Store.getFleetAssets = function(query) {
     if (!query) return FLEET_ASSETS;
     const ql = query.toLowerCase();
     return FLEET_ASSETS.filter(a =>
@@ -1440,7 +1441,7 @@ const Store = (() => {
       a.status.toLowerCase().includes(ql) ||
       String(a.year).includes(ql)
     );
-  }
+  };
 })();
 
 window.Store = Store;
