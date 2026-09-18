@@ -459,6 +459,26 @@ function render_home(el) {
 .home-left   {}
 .home-right  {}
 
+/* ── News drawer ──────────────────────────────────────── */
+.home-news-drawer { display:none; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; padding:0; overflow:hidden; }
+.home-news-drawer.open { display:block; }
+.hnd-header { display:flex; align-items:center; gap:10px; padding:14px 28px 10px; border-bottom:0.5px solid #F0ECE8; }
+.hnd-title  { font-size:13px; font-weight:700; color:#111318; flex:1; }
+.hnd-close  { width:28px; height:28px; border:none; background:#F5F2EE; border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px; color:#5A5F6E; }
+.hnd-close:hover { background:#ECEAE7; }
+.hnd-items  { max-height:360px; overflow-y:auto; padding:8px 28px 14px; display:flex; flex-direction:column; gap:6px; }
+
+/* ── WO mini-table ────────────────────────────────────── */
+.wo-mini-wrap { background:#FFF; border:0.5px solid #E8E4DF; border-radius:10px; overflow:hidden; margin-bottom:16px; }
+.wo-mini-row  { display:flex; align-items:center; gap:10px; padding:9px 14px; border-bottom:0.5px solid #F0ECE8; cursor:pointer; transition:background .1s; }
+.wo-mini-row:last-child { border-bottom:none; }
+.wo-mini-row:hover { background:#F9F8F6; }
+.wo-mini-pri  { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.wo-mini-id   { font-size:11px; font-weight:700; color:#1C3969; white-space:nowrap; flex-shrink:0; min-width:70px; }
+.wo-mini-issue { font-size:12px; color:#111318; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.wo-mini-asset { font-size:11px; color:#9CA3AF; flex-shrink:0; max-width:130px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.wo-mini-pill  { font-size:10px; font-weight:700; border-radius:10px; padding:2px 8px; flex-shrink:0; }
+
 /* ── Section label ────────────────────────────────────── */
 .h-lbl { font-size:11px; font-weight:700; color:#3A3D4A; letter-spacing:.1px; display:flex; align-items:center; gap:5px; margin-bottom:10px; }
 .h-lbl-action { margin-left:auto; font-size:11px; font-weight:400; color:#ABA6A0; cursor:pointer; display:flex; align-items:center; gap:3px; }
@@ -517,30 +537,69 @@ function render_home(el) {
         <div class="hw-greet">Welcome back, <strong>${_firstName}</strong>.</div>
         <div class="hw-loc"><i class="ti ti-map-pin" style="font-size:10px;"></i>${locName}</div>
       </div>
-      <div class="hw-stats">
-        <div class="hw-stat">
-          <div class="hw-stat-val">${activeWOs.length}</div>
-          <div class="hw-stat-lbl">Active WOs</div>
-        </div>
-        <div class="hw-stat">
-          <div class="hw-stat-val">3</div>
-          <div class="hw-stat-lbl">Branches</div>
-        </div>
-        <div class="hw-stat">
-          <div class="hw-stat-val">${ALL_SUPPLIERS.length}</div>
-          <div class="hw-stat-lbl">Suppliers</div>
+      <button class="hw-cta" onclick="homeToggleNews()" id="hw-news-btn" style="position:relative;">
+        <i class="ti ti-bell" style="font-size:14px;"></i> View News
+        <span id="hw-news-badge" style="position:absolute;top:-6px;right:-6px;background:#DC2626;color:#FFF;font-size:9px;font-weight:800;border-radius:99px;padding:1px 5px;min-width:16px;text-align:center;line-height:16px;height:16px;display:flex;align-items:center;justify-content:center;">${getNewsItems().length}</span>
+      </button>
+    </div>
+
+    <!-- News drawer (hidden by default) -->
+    <div class="home-news-drawer" id="home-news-drawer">
+      <div class="hnd-header">
+        <i class="ti ti-news" style="font-size:14px;color:#1C3969;"></i>
+        <div class="hnd-title">Fleet News &amp; Updates</div>
+        <button class="hnd-close" onclick="homeToggleNews()"><i class="ti ti-x"></i></button>
+      </div>
+      <div class="hnd-items">
+        ${getNewsItems().map(n => {
+          const m = TYPE_META[n.type]||TYPE_META.notice;
+          return `<div class="hn-card" onclick="newsOpenArticle('${n.id}')">
+            <div class="hn-icon" style="background:${m.bg};color:${m.color};"><i class="ti ${m.icon}"></i></div>
+            <div style="flex:1;min-width:0;">
+              <div class="hn-type" style="color:${m.color};">${m.label}</div>
+              <div class="hn-title">${n.title}</div>
+              <div class="hn-sub">${n.summary}</div>
+            </div>
+            <div class="hn-date">${n.dateLabel||n.date||''}</div>
+          </div>`;
+        }).join('')}
+        <div style="padding-top:4px;">
+          <button onclick="Router.navigate('news')" style="background:none;border:none;font-size:12px;color:#1C3969;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">View all updates <i class="ti ti-arrow-right" style="font-size:11px;"></i></button>
         </div>
       </div>
-      <button class="hw-cta" onclick="sendPrompt('Go back to dashboard')">
-        <i class="ti ti-layout-dashboard" style="font-size:14px;"></i> Dashboard
-      </button>
     </div>
 
     <div class="home-body">
       <div class="home-grid">
 
-        <!-- Left: carousel + news -->
+        <!-- Left: work orders + carousel -->
         <div class="home-left">
+
+          <!-- Active work orders -->
+          <div class="h-lbl">
+            <i class="ti ti-clipboard-list" style="color:#1C3969;"></i> Active work orders
+            <span style="margin-left:4px;font-size:10px;font-weight:700;background:#D6E4F7;color:#1C3969;border-radius:999px;padding:1px 7px;">${activeWOs.length}</span>
+            <span class="h-lbl-action" onclick="Router.navigate('wo-list')">View all <i class="ti ti-arrow-right" style="font-size:10px;"></i></span>
+          </div>
+          ${activeWOs.length === 0
+            ? `<div style="background:#FFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:20px;text-align:center;font-size:12px;color:#9CA3AF;margin-bottom:16px;">No active work orders.</div>`
+            : `<div class="wo-mini-wrap">
+              ${activeWOs.slice(0, 6).map(wo => {
+                const priColor = wo.priority === 'high' || wo.priority === 'urgent'
+                  ? '#DC2626' : wo.priority === 'medium' ? '#D97706' : '#9CA3AF';
+                const statusColor = wo.status === 'active' ? '#3B6D11' : '#1C3969';
+                const statusBg    = wo.status === 'active' ? '#EAF3DE' : '#D6E4F7';
+                return `<div class="wo-mini-row" onclick="Router.navigate('wo-detail',{woId:${wo.id}})">
+                  <div class="wo-mini-pri" style="background:${priColor};"></div>
+                  <div class="wo-mini-id">WO #${wo.id}</div>
+                  <div class="wo-mini-issue">${wo.issue || wo.machine || '—'}</div>
+                  <div class="wo-mini-asset">${wo.asset || ''}</div>
+                  <span class="wo-mini-pill" style="background:${statusBg};color:${statusColor};">${wo.status}</span>
+                </div>`;
+              }).join('')}
+            </div>`
+          }
+
           <div class="h-lbl"><i class="ti ti-speakerphone" style="color:#1C3969;"></i> Fleet highlights</div>
           <div class="home-car-wrap">
             ${SLIDES.map((s, i) => `<div class="home-slide${i===0?' active':''}" style="background:${s.bg};" id="hslide-${i}">${s.html}</div>`).join('')}
@@ -553,22 +612,6 @@ function render_home(el) {
             </div>
           </div>
 
-          <div class="h-lbl" style="margin-top:20px;">
-            <i class="ti ti-news" style="color:#ABA6A0;"></i> Fleet news &amp; updates
-            <span class="h-lbl-action" onclick="sendPrompt('Open news and updates')">View all <i class="ti ti-arrow-right" style="font-size:10px;"></i></span>
-          </div>
-          ${getNewsItems().map(n => {
-            const m = TYPE_META[n.type]||TYPE_META.notice;
-            return `<div class="hn-card" onclick="newsOpenArticle('${n.id}')">
-              <div class="hn-icon" style="background:${m.bg};color:${m.color};"><i class="ti ${m.icon}"></i></div>
-              <div style="flex:1;min-width:0;">
-                <div class="hn-type" style="color:${m.color};">${m.label}</div>
-                <div class="hn-title">${n.title}</div>
-                <div class="hn-sub">${n.summary}</div>
-              </div>
-              <div class="hn-date">${n.dateLabel||n.date||''}</div>
-            </div>`;
-          }).join('')}
         </div>
 
         <!-- Right: supplier network list -->
@@ -625,5 +668,10 @@ function render_home(el) {
     document.querySelectorAll('#hs-list .hs-row').forEach(row => {
       row.style.display = (!q2 || row.dataset.name.includes(q2)) ? '' : 'none';
     });
+  };
+
+  window.homeToggleNews = function() {
+    const drawer = document.getElementById('home-news-drawer');
+    if (drawer) drawer.classList.toggle('open');
   };
 }
