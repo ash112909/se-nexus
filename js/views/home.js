@@ -469,15 +469,19 @@ function render_home(el) {
 .hnd-items  { max-height:360px; overflow-y:auto; padding:8px 28px 14px; display:flex; flex-direction:column; gap:6px; }
 
 /* ── WO mini-table ────────────────────────────────────── */
-.wo-mini-wrap { background:#FFF; border:0.5px solid #E8E4DF; border-radius:10px; overflow:hidden; margin-bottom:16px; }
-.wo-mini-row  { display:flex; align-items:center; gap:10px; padding:9px 14px; border-bottom:0.5px solid #F0ECE8; cursor:pointer; transition:background .1s; }
+.wo-mini-wrap  { background:#FFF; border:0.5px solid #E8E4DF; border-radius:10px; overflow:hidden; margin-bottom:16px; }
+.wo-mini-head  { display:grid; grid-template-columns:6px 74px 1fr 110px 110px 88px 90px; gap:10px; align-items:center; padding:6px 14px; background:#F9F8F6; border-bottom:0.5px solid #E8E4DF; }
+.wo-mini-hcell { font-size:10px; font-weight:700; color:#9CA3AF; letter-spacing:.4px; text-transform:uppercase; white-space:nowrap; }
+.wo-mini-row   { display:grid; grid-template-columns:6px 74px 1fr 110px 110px 88px 90px; gap:10px; align-items:center; padding:9px 14px; border-bottom:0.5px solid #F0ECE8; cursor:pointer; transition:background .1s; }
 .wo-mini-row:last-child { border-bottom:none; }
 .wo-mini-row:hover { background:#F9F8F6; }
-.wo-mini-pri  { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-.wo-mini-id   { font-size:11px; font-weight:700; color:#1C3969; white-space:nowrap; flex-shrink:0; min-width:70px; }
-.wo-mini-issue { font-size:12px; color:#111318; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.wo-mini-asset { font-size:11px; color:#9CA3AF; flex-shrink:0; max-width:130px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.wo-mini-pill  { font-size:10px; font-weight:700; border-radius:10px; padding:2px 8px; flex-shrink:0; }
+.wo-mini-pri   { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.wo-mini-id    { font-size:11px; font-weight:700; color:#1C3969; white-space:nowrap; }
+.wo-mini-issue { font-size:12px; color:#111318; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.wo-mini-asset { font-size:11px; color:#5A5F6E; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.wo-mini-assign{ font-size:11px; color:#5A5F6E; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.wo-mini-due   { font-size:11px; color:#9CA3AF; white-space:nowrap; }
+.wo-mini-pill  { font-size:10px; font-weight:700; border-radius:10px; padding:2px 8px; white-space:nowrap; text-align:center; }
 
 /* ── Section label ────────────────────────────────────── */
 .h-lbl { font-size:11px; font-weight:700; color:#3A3D4A; letter-spacing:.1px; display:flex; align-items:center; gap:5px; margin-bottom:10px; }
@@ -537,7 +541,7 @@ function render_home(el) {
         <div class="hw-greet">Welcome back, <strong>${_firstName}</strong>.</div>
         <div class="hw-loc"><i class="ti ti-map-pin" style="font-size:10px;"></i>${locName}</div>
       </div>
-      <button class="hw-cta" onclick="homeToggleNews()" id="hw-news-btn" style="position:relative;">
+      <button class="hw-cta" onclick="homeToggleNews()" id="hw-news-btn" style="position:relative;margin-left:auto;">
         <i class="ti ti-bell" style="font-size:14px;"></i> View News
         <span id="hw-news-badge" style="position:absolute;top:-6px;right:-6px;background:#DC2626;color:#FFF;font-size:9px;font-weight:800;border-radius:99px;padding:1px 5px;min-width:16px;text-align:center;line-height:16px;height:16px;display:flex;align-items:center;justify-content:center;">${getNewsItems().length}</span>
       </button>
@@ -584,17 +588,35 @@ function render_home(el) {
           ${activeWOs.length === 0
             ? `<div style="background:#FFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:20px;text-align:center;font-size:12px;color:#9CA3AF;margin-bottom:16px;">No active work orders.</div>`
             : `<div class="wo-mini-wrap">
-              ${activeWOs.slice(0, 6).map(wo => {
-                const priColor = wo.priority === 'high' || wo.priority === 'urgent'
-                  ? '#DC2626' : wo.priority === 'medium' ? '#D97706' : '#9CA3AF';
+              <div class="wo-mini-head">
+                <div></div>
+                <div class="wo-mini-hcell">WO #</div>
+                <div class="wo-mini-hcell">Issue</div>
+                <div class="wo-mini-hcell">Asset</div>
+                <div class="wo-mini-hcell">Assignee</div>
+                <div class="wo-mini-hcell">Due</div>
+                <div class="wo-mini-hcell">Status</div>
+              </div>
+              ${activeWOs.slice(0, 8).map(wo => {
+                const priColor = wo.priority === 'urgent' ? '#991B1B'
+                  : wo.priority === 'high' ? '#DC2626'
+                  : wo.priority === 'medium' ? '#D97706' : '#9CA3AF';
+                const priLabel = wo.priority === 'urgent' ? 'Urgent'
+                  : wo.priority === 'high' ? 'High'
+                  : wo.priority === 'medium' ? 'Med' : 'Low';
                 const statusColor = wo.status === 'active' ? '#3B6D11' : '#1C3969';
                 const statusBg    = wo.status === 'active' ? '#EAF3DE' : '#D6E4F7';
+                const statusLabel = wo.status === 'active' ? 'Active' : wo.status === 'pending' ? 'Pending' : wo.status;
+                const machine = wo.machine || (wo.make && wo.model ? wo.make + ' ' + wo.model : '—');
+                const assetLabel = [wo.asset, machine].filter(Boolean).join(' · ');
                 return `<div class="wo-mini-row" onclick="Router.navigate('wo-detail',{woId:${wo.id}})">
-                  <div class="wo-mini-pri" style="background:${priColor};"></div>
+                  <div class="wo-mini-pri" title="${priLabel}" style="background:${priColor};"></div>
                   <div class="wo-mini-id">WO #${wo.id}</div>
                   <div class="wo-mini-issue">${wo.issue || wo.machine || '—'}</div>
-                  <div class="wo-mini-asset">${wo.asset || ''}</div>
-                  <span class="wo-mini-pill" style="background:${statusBg};color:${statusColor};">${wo.status}</span>
+                  <div class="wo-mini-asset">${assetLabel}</div>
+                  <div class="wo-mini-assign">${wo.assignee || '—'}</div>
+                  <div class="wo-mini-due">${wo.dueDate || '—'}</div>
+                  <span class="wo-mini-pill" style="background:${statusBg};color:${statusColor};">${statusLabel}</span>
                 </div>`;
               }).join('')}
             </div>`
