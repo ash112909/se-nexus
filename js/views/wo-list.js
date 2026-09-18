@@ -2,10 +2,25 @@ function render_wo_list(el) {
   const _user = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
   const _isSupervisor = _user && _user.role === 'supervisor';
   const CURRENT_USER = _user ? _user.shortName : 'James W.';
-  let _currentFilter = 'all';
+
+  // ── top-level tab: 'orders' | 'history' ──────────────────────────
+  let _mainTab = 'orders';
+
+  // ── Orders tab state ─────────────────────────────────────────────
+  let _statusFilter = 'all';
+  let _supplierFilter = 'all';
+  let _dateFilter = 'all';
   let _searchQuery = '';
 
-  // Equipment lookup for auto-populate in new WO form
+  // ── History tab state ─────────────────────────────────────────────
+  let _histTab = 'submitted';
+  let _histSearch = '';
+  let _histSupplier = 'all';
+  let _histStatus = 'all';
+  let _histDate = 'all';
+  let _histSelectedId = null;
+
+  // ── Equipment lookup ──────────────────────────────────────────────
   const EQUIPMENT_DB = {
     'FL-094': { make: 'Skyjack',     model: 'SJIII 3219',        serial: 'SJ3219-00847'    },
     'FL-017': { make: 'Caterpillar', model: '320 Excavator',     serial: 'CAT320-01044'    },
@@ -17,16 +32,14 @@ function render_wo_list(el) {
     'KY-007': { make: 'Caterpillar', model: '308 Mini Excavator',serial: 'CAT308-00512'    },
   };
 
-  // WO types = equipment repair / PM; general order types = stock / other
-  // isWorkOrder(wo) determines whether a record carries a WO designation
-  function isWorkOrder(wo) { return wo.woType === 'equipment' || wo.woType === 'pm'; }
-
   const TYPE_META = {
     equipment: { label: 'Repair',  color: '#185FA5', bg: '#E6F1FB' },
     pm:        { label: 'PM',      color: '#1C3969', bg: '#E1F5EE' },
     stock:     { label: 'Stock',   color: '#534AB7', bg: '#EEEDFE' },
     other:     { label: 'General', color: '#6B7280', bg: '#F3F4F6' },
   };
+
+  function isWorkOrder(wo) { return wo.woType === 'equipment' || wo.woType === 'pm'; }
 
   function machineIcon(machine, woType) {
     if (woType === 'stock') return 'ti-package';
@@ -61,22 +74,72 @@ function render_wo_list(el) {
   function dueDateCell(dueDate, status) {
     if (!dueDate) return '<span style="color:#C0BAB3;font-size:12px;">—</span>';
     if (status === 'closed') return `<span style="color:#9CA3AF;font-size:12px;">${dueDate}</span>`;
-    // Check if overdue (simple string compare against today Jul 6 2026)
     const due = new Date(dueDate);
-    const today = new Date('2026-07-06');
+    const today = new Date('2026-09-18');
     if (due < today) return `<span style="font-size:12px;color:#A32D2D;font-weight:600;">${dueDate}</span>`;
     return `<span style="font-size:12px;color:#3A3D4A;">${dueDate}</span>`;
   }
 
-  // Grid cols: supervisor gets an extra Assignee column
+  // Grid cols: supervisor gets an Assignee column
   const _cols = _isSupervisor
     ? '100px 80px 1fr 130px 110px 110px 80px 50px'
     : '100px 80px 1fr 110px 110px 80px 50px';
 
-  function renderRows(wos) {
+  // ── Orders tab: supplier list derived from WOs ────────────────────
+  function getSupplierOptions() {
+    const wos = Store.getWorkOrders('all', null);
+    const makes = [...new Set(wos.map(w => w.make).filter(Boolean))].sort();
+    return makes;
+  }
+
+  function dateMatchesFilter(dateStr, filter) {
+    if (!filter || filter === 'all') return true;
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    const now = new Date('2026-09-18');
+    if (filter === 'week') {
+      const wk = new Date(now); wk.setDate(now.getDate() - 7);
+      return d >= wk;
+    }
+    if (filter === 'month') {
+      const mo = new Date(now); mo.setDate(now.getDate() - 30);
+      return d >= mo;
+    }
+    if (filter === 'quarter') {
+      const qt = new Date(now); qt.setDate(now.getDate() - 90);
+      return d >= qt;
+    }
+    return true;
+  }
+
+  function getFilteredWOs() {
+    let wos = Store.getWorkOrders(_statusFilter === 'all' ? 'all' : _statusFilter,
+      _isSupervisor ? null : CURRENT_USER);
+
+    if (_supplierFilter !== 'all') {
+      wos = wos.filter(w => (w.make || '') === _supplierFilter);
+    }
+    if (_dateFilter !== 'all') {
+      wos = wos.filter(w => dateMatchesFilter(w.opened || w.dueDate, _dateFilter));
+    }
+    if (_searchQuery.trim()) {
+      const q = _searchQuery.toLowerCase();
+      wos = wos.filter(wo =>
+        (wo.machine || '').toLowerCase().includes(q) ||
+        (wo.issue || '').toLowerCase().includes(q) ||
+        String(wo.id).includes(q) ||
+        (wo.externalId || '').toLowerCase().includes(q) ||
+        (wo.asset || '').toLowerCase().includes(q) ||
+        (wo.assignee || '').toLowerCase().includes(q)
+      );
+    }
+    return wos;
+  }
+
+  function renderOrderRows(wos) {
     if (!wos.length) return '<div class="wol-empty">No orders found.</div>';
     return wos.map(wo => `
-      <div class="wol-row" style="grid-template-columns:${_cols};" onclick="sendPrompt('Show me the order detail view for Order #${wo.id}')">
+      <div class="wol-row" style="grid-template-columns:${_cols};" onclick="Router.navigate('wo-detail',{woId:${wo.id}})">
         <div class="wol-td">
           <span class="wol-wo-id">#${wo.id}</span>
           ${wo.externalId ? `<div style="font-size:10px;color:#9CA3AF;margin-top:2px;">${wo.externalId}</div>` : ''}
@@ -100,68 +163,186 @@ function render_wo_list(el) {
       </div>`).join('');
   }
 
-  function getMyWOs(statusFilter) {
-    // Mechanics only see their own WOs; supervisors see all
-    return Store.getWorkOrders(statusFilter || 'all', _isSupervisor ? null : CURRENT_USER);
+  function reRenderOrderTable() {
+    const tbody = document.getElementById('wol-tbody');
+    if (tbody) tbody.innerHTML = renderOrderRows(getFilteredWOs());
+    const countEl = document.getElementById('wol-result-count');
+    if (countEl) countEl.textContent = getFilteredWOs().length + ' orders';
   }
 
-  function getFilteredWOs() {
-    let wos = getMyWOs(_currentFilter === 'all' ? 'all' : _currentFilter);
-    if (_searchQuery.trim()) {
-      const q = _searchQuery.toLowerCase();
-      wos = wos.filter(wo =>
-        (wo.machine || '').toLowerCase().includes(q) ||
-        (wo.issue || '').toLowerCase().includes(q) ||
-        String(wo.id).includes(q) ||
-        (wo.externalId || '').toLowerCase().includes(q) ||
-        (wo.asset || '').toLowerCase().includes(q) ||
-        (wo.assignee || '').toLowerCase().includes(q)
+  // ── History tab helpers ───────────────────────────────────────────
+  function histStatusPillClass(status) {
+    const map = { saved:'pill-saved', submitted:'pill-submitted', delivered:'pill-delivered', backordered:'pill-backordered', review:'pill-review', in_transit:'pill-submitted' };
+    return map[status] || 'pill-saved';
+  }
+  function histStatusLabel(status) {
+    const map = { saved:'Saved', submitted:'Submitted', delivered:'Delivered', backordered:'Backordered', review:'In review', in_transit:'In transit' };
+    return map[status] || status;
+  }
+
+  function getHistOrders() {
+    let orders = Store.getOrders(_histTab === 'all' ? 'all' : _histTab);
+    if (_histSearch.trim()) {
+      const q = _histSearch.toLowerCase();
+      orders = orders.filter(o =>
+        (o.name || '').toLowerCase().includes(q) ||
+        (o.vendor || '').toLowerCase().includes(q) ||
+        (o.poNum || '').toLowerCase().includes(q) ||
+        (o.wo || '').toLowerCase().includes(q)
       );
     }
-    return wos;
+    if (_histSupplier !== 'all') {
+      orders = orders.filter(o => (o.vendor || '') === _histSupplier);
+    }
+    if (_histStatus !== 'all') {
+      orders = orders.filter(o => (o.status || '') === _histStatus);
+    }
+    if (_histDate !== 'all') {
+      orders = orders.filter(o => dateMatchesFilter(o.date, _histDate));
+    }
+    return orders;
   }
 
-  function reRenderTable() {
-    const tbody = document.getElementById('wol-tbody');
-    if (tbody) tbody.innerHTML = renderRows(getFilteredWOs());
-    updateSummary();
+  function getHistVendors() {
+    const all = Store.getOrders('all');
+    return [...new Set(all.map(o => o.vendor).filter(Boolean))].sort();
   }
 
-  function updateSummary() {
-    const myAll    = getMyWOs('all');
-    const myActive = myAll.filter(w => w.status === 'active');
-    const myHigh   = myAll.filter(w => w.priority === 'high' && w.status !== 'closed');
-    const withActiveOrders = myAll.filter(w =>
-      (w.submittedOrders || []).some(o => ['submitted','in_transit','backordered'].includes(o.status))
-    );
-    const arrivingToday = myAll.filter(w =>
-      (w.submittedOrders || []).some(o => o.status === 'in_transit')
-    );
+  function renderHistRows() {
+    const orders = getHistOrders();
+    const tbody = document.getElementById('hist-tbody');
+    if (!tbody) return;
+    const countEl = document.getElementById('hist-result-count');
+    if (countEl) countEl.textContent = orders.length + ' orders';
 
-    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-    set('wol-sum-active',   myActive.length);
-    set('wol-sum-active-2', myActive.length);
-    set('wol-sum-parts',    withActiveOrders.length);
-    set('wol-sum-high',     myHigh.length);
-    set('wol-sum-arriving', arrivingToday.length);
+    if (!orders.length) {
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#9CA3AF;font-size:13px;">No orders found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = orders.map(o => `
+      <tr data-id="${o.id}" class="${o.id === _histSelectedId ? 'selected-row' : ''}" onclick="wolHistOpenDetail('${o.id}')">
+        <td><strong style="color:#111318;">${o.vendor}</strong></td>
+        <td style="font-size:11px;color:#9CA3AF;">${o.vendorId || '—'}</td>
+        <td>${o.date}</td>
+        <td style="font-size:12px;color:#5A5F6E;">${o.user}</td>
+        <td>${o.name}</td>
+        <td style="font-size:12px;color:#5A5F6E;">${o.wo}${o.asset && o.asset !== o.wo ? ' · ' + o.asset : ''}</td>
+        <td style="font-weight:600;color:#111318;">$${(+o.amount).toFixed(2)}</td>
+        <td><span class="status-pill ${histStatusPillClass(o.status)}">${histStatusLabel(o.status)}</span></td>
+        <td style="font-size:11px;color:#9CA3AF;">${o.poNum || '—'}</td>
+      </tr>`).join('');
   }
+
+  function renderHistDetail(orderId) {
+    const panel = document.getElementById('hist-detail-panel');
+    if (!panel) return;
+    if (!orderId) { panel.style.display = 'none'; return; }
+    const o = Store.getOrders('all').find(x => x.id === orderId);
+    if (!o) { panel.style.display = 'none'; return; }
+
+    panel.style.display = 'block';
+    panel.innerHTML = `
+      <div class="oh-detail-header">
+        <i class="ti ti-truck-delivery" style="font-size:16px;color:#1C3969;"></i>
+        <div class="oh-detail-title">${o.poNum ? o.poNum + ' · ' : ''}${o.vendor} · ${o.name}</div>
+        <span class="status-pill ${histStatusPillClass(o.status)}" style="margin-right:8px;">${histStatusLabel(o.status)}</span>
+        <button class="oh-detail-close" onclick="wolHistCloseDetail()"><i class="ti ti-x"></i></button>
+      </div>
+      <div class="oh-detail-grid">
+        <div class="oh-detail-section">
+          <div class="oh-detail-section-title">Order info</div>
+          <div class="oh-detail-row"><span class="oh-detail-label">Order name</span><span class="oh-detail-val">${o.name}</span></div>
+          <div class="oh-detail-row"><span class="oh-detail-label">PO #</span><span class="oh-detail-val">${o.poNum || '—'}</span></div>
+          <div class="oh-detail-row"><span class="oh-detail-label">Date</span><span class="oh-detail-val">${o.date}</span></div>
+          <div class="oh-detail-row"><span class="oh-detail-label">Ordered by</span><span class="oh-detail-val">${o.user}</span></div>
+          <div class="oh-detail-row"><span class="oh-detail-label">Total</span><span class="oh-detail-val" style="color:#111318;font-weight:700;">$${(+o.amount).toFixed(2)}</span></div>
+        </div>
+        <div class="oh-detail-section">
+          <div class="oh-detail-section-title">Ship to / Bill to</div>
+          <div class="oh-detail-row"><span class="oh-detail-label">Ship to</span><span class="oh-detail-val">Mid-County Rental, Austin</span></div>
+          <div class="oh-detail-row"><span class="oh-detail-label">Address</span><span class="oh-detail-val">1402 S Lamar Blvd, Austin TX</span></div>
+          <div class="oh-detail-row"><span class="oh-detail-label">Attn</span><span class="oh-detail-val">${o.user} · Shop</span></div>
+          <div class="oh-detail-row"><span class="oh-detail-label">Bill to</span><span class="oh-detail-val">Mid-County Rental Corp</span></div>
+        </div>
+        <div class="oh-detail-section">
+          <div class="oh-detail-section-title">Order</div>
+          <div class="oh-detail-row"><span class="oh-detail-label">WO</span><span class="oh-detail-val">${o.wo}</span></div>
+          <div class="oh-detail-row"><span class="oh-detail-label">Asset</span><span class="oh-detail-val">${o.asset}</span></div>
+          <div class="oh-detail-row"><span class="oh-detail-label">Vendor</span><span class="oh-detail-val">${o.vendor}</span></div>
+          <div class="oh-detail-row"><span class="oh-detail-label">Vendor ID</span><span class="oh-detail-val">${o.vendorId || '—'}</span></div>
+        </div>
+      </div>
+      ${(o.items && o.items.length) ? `
+      <div class="oh-items-section">
+        <div class="oh-items-title"><i class="ti ti-package" style="font-size:14px;color:#9CA3AF;"></i> Line items <span style="font-size:11px;font-weight:600;background:#F0ECE8;color:#5A5F6E;border-radius:999px;padding:1px 8px;margin-left:4px;">${o.items.length}</span></div>
+        <table class="oh-items-table">
+          <thead><tr><th>Part #</th><th>Description</th><th>Vendor</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Unit</th><th style="text-align:right;">Total</th></tr></thead>
+          <tbody>
+            ${o.items.map(it => `
+            <tr>
+              <td style="font-family:monospace;font-size:11px;color:#5A5F6E;">${it.partNum || '—'}</td>
+              <td>${it.description || it.name || '—'}${it.oemOnly ? ' <span style="font-size:10px;font-weight:600;background:#F5F2EE;color:#5A5F6E;border-radius:4px;padding:1px 5px;">OEM</span>' : ''}</td>
+              <td style="color:#7A7F8E;">${it.vendor || '—'}</td>
+              <td style="text-align:center;">×${it.qty || 1}</td>
+              <td style="text-align:right;">$${(+it.price).toFixed(2)}</td>
+              <td style="text-align:right;font-weight:600;color:#111318;">$${(it.price * (it.qty || 1)).toFixed(2)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+        <div class="oh-items-total">Total <strong>$${(+o.amount).toFixed(2)}</strong></div>
+      </div>` : ''}
+      <div class="oh-comments">
+        <div class="oh-comments-label">Comments</div>
+        <input class="oh-comment-input" type="text" placeholder="Add a comment…" readonly/>
+      </div>`;
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function updateHistTabBadges() {
+    const counts = { submitted: Store.getOrders('submitted').length, review: Store.getOrders('review').length, local: Store.getOrders('local').length };
+    Object.entries(counts).forEach(([tab, count]) => {
+      const badge = document.querySelector(`.hist-tab[data-htab="${tab}"] .hist-tab-badge`);
+      if (badge) badge.textContent = count;
+    });
+  }
+
+  // ── Build vendor/supplier filter options (orders tab) ─────────────
+  const supplierOpts = getSupplierOptions();
+  const histVendors  = getHistVendors();
 
   el.innerHTML = `
 <style>
+/* ── Shared shell / topbar ─────────────────────── */
 .topbar-search { flex: 1; max-width: 380px; height: 32px; background: #0E1F3D; border: 1px solid #0E1F3D; border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 0 10px; color: #5C6070; font-size: 13px; cursor: text; }
-.wol-content { flex: 1; padding: 28px 28px 40px; overflow-y: auto; }
-.wol-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-.wol-title { font-size: 18px; font-weight: 700; color: #111318; letter-spacing: -0.3px; }
-.wol-subtitle { font-size: 13px; color: #7A7F8E; margin-top: 2px; }
-.wol-filters { display: flex; align-items: center; gap: 8px; }
-.wol-filter-pill { display: flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid #E2DDD8; background: #FFFFFF; color: #5A5F6E; transition: all 0.12s; user-select: none; }
+
+/* ── Main tab bar ─────────────────────────────── */
+.wol-main-tabs { display: flex; align-items: center; gap: 0; background: #FFFFFF; border-bottom: 1px solid #E8E4DF; padding: 0 28px; }
+.wol-mtab { padding: 13px 16px; font-size: 13px; font-weight: 500; color: #7A7F8E; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+.wol-mtab:hover { color: #3A3D4A; }
+.wol-mtab.active { color: #111318; font-weight: 600; border-bottom-color: #1C3969; }
+.wol-mtab-badge { font-size: 10px; font-weight: 700; border-radius: 999px; padding: 1px 7px; background: #F0ECE8; color: #5A5F6E; }
+.wol-mtab-new { margin-left: auto; }
+
+/* ── Filter bar ───────────────────────────────── */
+.wol-filter-bar { background: #FAFAF8; border-bottom: 0.5px solid #E8E4DF; padding: 10px 28px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.wol-filter-pills { display: flex; gap: 4px; }
+.wol-filter-pill { padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid #E2DDD8; background: #FFFFFF; color: #5A5F6E; user-select: none; white-space: nowrap; }
 .wol-filter-pill.active { background: #152B52; color: #FFFFFF; border-color: #152B52; }
 .wol-filter-pill:hover:not(.active) { border-color: #C8C3BC; }
-.wol-search { height: 34px; background: #FFFFFF; border: 1px solid #E2DDD8; border-radius: 8px; padding: 0 12px; font-size: 13px; font-family: inherit; color: #111318; outline: none; width: 200px; }
+.wol-filter-divider { width: 1px; height: 24px; background: #E2DDD8; flex-shrink: 0; }
+.wol-select { height: 34px; background: #FFFFFF; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 12px; font-family: inherit; color: #3A3D4A; outline: none; cursor: pointer; }
+.wol-search-wrap { position: relative; }
+.wol-search-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: #B0AAA3; font-size: 13px; pointer-events: none; }
+.wol-search { height: 34px; background: #FFFFFF; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px 0 30px; font-size: 12px; font-family: inherit; color: #111318; outline: none; width: 190px; }
 .wol-search:focus { border-color: #1C3969; }
+.wol-result-count { margin-left: auto; font-size: 12px; color: #B0AAA3; white-space: nowrap; }
 .wol-new-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: #1C3969; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: #FFFFFF; cursor: pointer; font-family: inherit; }
 .wol-new-btn:hover { background: #152B52; }
-.wol-table { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; overflow: hidden; }
+
+/* ── Orders table ─────────────────────────────── */
+.wol-content { flex: 1; overflow-y: auto; }
+.wol-table-wrap { padding: 0 28px 40px; }
+.wol-table { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; overflow: hidden; margin-top: 20px; }
 .wol-thead { display: grid; gap: 0; border-bottom: 1px solid #F0ECE8; padding: 0 18px; background: #FAFAF9; }
 .wol-th { font-size: 11px; font-weight: 600; color: #9CA3AF; letter-spacing: 0.8px; text-transform: uppercase; padding: 10px 8px; }
 .wol-row { display: grid; gap: 0; padding: 0 18px; border-bottom: 0.5px solid #F5F2EE; cursor: pointer; transition: background 0.1s; align-items: center; }
@@ -184,11 +365,48 @@ function render_wo_list(el) {
 .wol-priority-low  { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; color: #3B6D11; }
 .wol-arrow { color: #C0BAB3; font-size: 14px; }
 .wol-empty { padding: 48px 24px; text-align: center; color: #9CA3AF; font-size: 13px; }
-.wol-summary-bar { display: flex; gap: 12px; margin-bottom: 20px; }
-.wol-summary-card { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 10px; padding: 14px 18px; flex: 1; }
-.wol-summary-val { font-size: 22px; font-weight: 700; color: #111318; letter-spacing: -0.5px; }
-.wol-summary-label { font-size: 12px; color: #9CA3AF; margin-top: 2px; }
-/* modal form */
+
+/* ── History tab ──────────────────────────────── */
+.hist-tabs { display: flex; align-items: center; gap: 2px; padding: 0 28px; background: #FFFFFF; border-bottom: 1px solid #E8E4DF; }
+.hist-tab { padding: 11px 14px; font-size: 13px; font-weight: 500; color: #7A7F8E; cursor: pointer; border-bottom: 2px solid transparent; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.hist-tab:hover { color: #3A3D4A; }
+.hist-tab.active { color: #111318; font-weight: 600; border-bottom-color: #1C3969; }
+.hist-tab-badge { font-size: 10px; font-weight: 700; border-radius: 999px; padding: 1px 7px; background: #F0ECE8; color: #5A5F6E; }
+.hist-table-wrap { flex: 1; overflow-y: auto; min-height: 0; }
+.oh-table { width: 100%; border-collapse: collapse; }
+.oh-table th { background: #FAFAF8; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: #9CA3AF; padding: 9px 14px; text-align: left; border-bottom: 1px solid #E8E4DF; white-space: nowrap; position: sticky; top: 0; z-index: 1; }
+.oh-table td { padding: 10px 14px; border-bottom: 0.5px solid #F0ECE8; font-size: 13px; color: #3A3D4A; vertical-align: middle; }
+.oh-table tr:hover td { background: #FAFAF8; cursor: pointer; }
+.oh-table tr.selected-row td { background: #D6E4F7; }
+.status-pill { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
+.pill-saved { background: #F0ECE8; color: #5A5F6E; }
+.pill-submitted { background: #DBEAFE; color: #1D4ED8; }
+.pill-delivered { background: #DBEAFE; color: #1C3969; }
+.pill-backordered { background: #FEF3C7; color: #92400E; }
+.pill-review { background: #EDE9FE; color: #5B21B6; }
+.hist-detail-panel { background: #FFFFFF; border-top: 1px solid #E8E4DF; flex-shrink: 0; max-height: 55vh; overflow-y: auto; }
+.oh-detail-header { display: flex; align-items: center; gap: 12px; padding: 14px 24px; border-bottom: 0.5px solid #E8E4DF; position: sticky; top: 0; background: #FFFFFF; z-index: 2; }
+.oh-detail-title { font-size: 15px; font-weight: 700; color: #111318; flex: 1; }
+.oh-detail-close { width: 28px; height: 28px; background: #F5F2EE; border: none; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; color: #5A5F6E; }
+.oh-detail-close:hover { background: #E8E4DF; }
+.oh-detail-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; border-bottom: 0.5px solid #E8E4DF; }
+.oh-detail-section { padding: 14px 24px; border-right: 0.5px solid #E8E4DF; }
+.oh-detail-section:last-child { border-right: none; }
+.oh-detail-section-title { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: #9CA3AF; margin-bottom: 10px; }
+.oh-detail-row { display: flex; justify-content: space-between; padding: 3px 0; }
+.oh-detail-label { font-size: 12px; color: #9CA3AF; }
+.oh-detail-val { font-size: 12px; font-weight: 500; color: #111318; text-align: right; }
+.oh-items-section { border-top: 0.5px solid #E8E4DF; }
+.oh-items-title { display: flex; align-items: center; gap: 6px; padding: 12px 24px 8px; font-size: 12px; font-weight: 600; color: #5A5F6E; text-transform: uppercase; letter-spacing: 0.8px; }
+.oh-items-table { width: 100%; border-collapse: collapse; }
+.oh-items-table th { font-size: 10px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: #9CA3AF; padding: 6px 24px; text-align: left; background: #FAFAF8; border-top: 0.5px solid #F0ECE8; border-bottom: 0.5px solid #F0ECE8; }
+.oh-items-table td { padding: 8px 24px; font-size: 12px; color: #3A3D4A; border-bottom: 0.5px solid #F5F2EE; vertical-align: middle; }
+.oh-items-table tr:last-child td { border-bottom: none; }
+.oh-items-total { padding: 10px 24px; font-size: 12px; color: #7A7F8E; text-align: right; border-top: 0.5px solid #F0ECE8; }
+.oh-comments { padding: 14px 24px; border-top: 0.5px solid #E8E4DF; }
+.oh-comments-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: #9CA3AF; margin-bottom: 8px; }
+.oh-comment-input { width: 100%; height: 36px; background: #F5F2EE; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 12px; font-size: 13px; font-family: inherit; color: #111318; outline: none; }
+/* modal */
 .modal-form-field { margin-bottom: 14px; }
 .modal-form-label { font-size: 12px; font-weight: 600; color: #5A5F6E; margin-bottom: 5px; display: block; }
 .modal-form-label .lbl-opt { font-weight: 400; color: #9CA3AF; }
@@ -204,82 +422,216 @@ function render_wo_list(el) {
 <h2 class="sr-only">Orders</h2>
 <div class="shell">
   ${buildSidebar('wo')}
-  <div class="main">
+  <div class="main" style="display:flex;flex-direction:column;min-height:0;overflow:hidden;">
     <div class="topbar">
+      <div style="font-size:13px;color:#5C6070;font-weight:500;">Orders</div>
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
       ${buildTopbarRight()}
     </div>
-    <div class="wol-content">
-      <div class="wol-header">
-        <div>
-          <div class="wol-title">${_isSupervisor ? 'All Orders' : 'My Orders'}</div>
-          <div class="wol-subtitle">${(Store.getCurrentLocation()||{name:'—'}).name} · <span id="wol-sum-active">0</span> active</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <input class="wol-search" type="text" placeholder="Search orders, machine…" id="wol-search-input"/>
-          <div class="wol-filters" id="wol-filters">
-            <div class="wol-filter-pill active" data-filter="all">All</div>
-            <div class="wol-filter-pill" data-filter="active">Active</div>
-            <div class="wol-filter-pill" data-filter="pending">Pending</div>
-            <div class="wol-filter-pill" data-filter="closed">Closed</div>
-          </div>
-          <button class="wol-new-btn" id="wol-new-btn"><i class="ti ti-plus" style="font-size:14px;"></i> New Order</button>
-        </div>
-      </div>
 
-      <div class="wol-summary-bar">
-        <div class="wol-summary-card">
-          <div class="wol-summary-val" id="wol-sum-active-2">0</div>
-          <div class="wol-summary-label">Active orders</div>
-        </div>
-        <div class="wol-summary-card">
-          <div class="wol-summary-val" style="color:#1C3969;" id="wol-sum-parts">0</div>
-          <div class="wol-summary-label">Parts on order</div>
-        </div>
-        <div class="wol-summary-card">
-          <div class="wol-summary-val" style="color:#A32D2D;" id="wol-sum-high">0</div>
-          <div class="wol-summary-label">High priority</div>
-        </div>
-        <div class="wol-summary-card">
-          <div class="wol-summary-val" style="color:#1C3969;" id="wol-sum-arriving">0</div>
-          <div class="wol-summary-label">Parts arriving today</div>
-        </div>
+    <!-- Main tab bar -->
+    <div class="wol-main-tabs">
+      <div class="wol-mtab active" id="mtab-orders" onclick="wolSwitchMain('orders')">
+        <i class="ti ti-clipboard-list" style="font-size:14px;"></i> Orders
+        <span class="wol-mtab-badge" id="mtab-orders-badge">${Store.getWorkOrders('all', _isSupervisor ? null : CURRENT_USER).length}</span>
       </div>
-
-      <div class="wol-table">
-        <div class="wol-thead" style="grid-template-columns:${_cols};">
-          <div class="wol-th">Order #</div>
-          <div class="wol-th">Type</div>
-          <div class="wol-th">Machine / Issue</div>
-          ${_isSupervisor ? '<div class="wol-th">Assignee</div>' : ''}
-          <div class="wol-th">Due Date</div>
-          <div class="wol-th">Status</div>
-          <div class="wol-th">Priority</div>
-          <div class="wol-th"></div>
-        </div>
-        <div id="wol-tbody"></div>
+      <div class="wol-mtab" id="mtab-history" onclick="wolSwitchMain('history')">
+        <i class="ti ti-history" style="font-size:14px;"></i> History
+        <span class="wol-mtab-badge" id="mtab-history-badge">${Store.getOrders('all').length}</span>
+      </div>
+      <div class="wol-mtab-new">
+        <button class="wol-new-btn" id="wol-new-btn"><i class="ti ti-plus" style="font-size:14px;"></i> New Order</button>
       </div>
     </div>
+
+    <!-- ══ ORDERS panel ══════════════════════════════════════════════ -->
+    <div id="wol-orders-panel" style="display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
+      <!-- Filter bar -->
+      <div class="wol-filter-bar">
+        <div class="wol-filter-pills" id="wol-status-pills">
+          <div class="wol-filter-pill active" data-filter="all">All</div>
+          <div class="wol-filter-pill" data-filter="active">Active</div>
+          <div class="wol-filter-pill" data-filter="pending">Pending</div>
+          <div class="wol-filter-pill" data-filter="closed">Closed</div>
+        </div>
+        <div class="wol-filter-divider"></div>
+        <select class="wol-select" id="wol-supplier-select">
+          <option value="all">All suppliers</option>
+          ${supplierOpts.map(s => `<option value="${s}">${s}</option>`).join('')}
+        </select>
+        <select class="wol-select" id="wol-date-select">
+          <option value="all">Any date</option>
+          <option value="week">Last 7 days</option>
+          <option value="month">Last 30 days</option>
+          <option value="quarter">Last 90 days</option>
+        </select>
+        <div class="wol-search-wrap">
+          <i class="ti ti-search wol-search-icon"></i>
+          <input class="wol-search" type="text" placeholder="Search…" id="wol-search-input"/>
+        </div>
+        <span class="wol-result-count" id="wol-result-count"></span>
+      </div>
+
+      <!-- Table -->
+      <div class="wol-content">
+        <div class="wol-table-wrap">
+          <div class="wol-table">
+            <div class="wol-thead" style="grid-template-columns:${_cols};">
+              <div class="wol-th">Order #</div>
+              <div class="wol-th">Type</div>
+              <div class="wol-th">Machine / Issue</div>
+              ${_isSupervisor ? '<div class="wol-th">Assignee</div>' : ''}
+              <div class="wol-th">Due Date</div>
+              <div class="wol-th">Status</div>
+              <div class="wol-th">Priority</div>
+              <div class="wol-th"></div>
+            </div>
+            <div id="wol-tbody"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ HISTORY panel ═════════════════════════════════════════════ -->
+    <div id="wol-history-panel" style="display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
+      <!-- History sub-tabs -->
+      <div class="hist-tabs" id="hist-tabs">
+        <div class="hist-tab active" data-htab="submitted">Submitted <span class="hist-tab-badge">0</span></div>
+        <div class="hist-tab" data-htab="review">In review <span class="hist-tab-badge">0</span></div>
+        <div class="hist-tab" data-htab="local">Local <span class="hist-tab-badge">0</span></div>
+      </div>
+
+      <!-- History filter bar -->
+      <div class="wol-filter-bar">
+        <div class="wol-search-wrap">
+          <i class="ti ti-search wol-search-icon"></i>
+          <input class="wol-search" id="hist-search-input" type="text" placeholder="Search orders…" style="width:200px;"/>
+        </div>
+        <select class="wol-select" id="hist-vendor-select">
+          <option value="all">All vendors</option>
+          ${histVendors.map(v => `<option value="${v}">${v}</option>`).join('')}
+        </select>
+        <select class="wol-select" id="hist-status-select">
+          <option value="all">Any status</option>
+          <option value="submitted">Submitted</option>
+          <option value="in_transit">In transit</option>
+          <option value="delivered">Delivered</option>
+          <option value="backordered">Backordered</option>
+          <option value="review">In review</option>
+          <option value="saved">Saved</option>
+        </select>
+        <select class="wol-select" id="hist-date-select">
+          <option value="all">Any date</option>
+          <option value="week">Last 7 days</option>
+          <option value="month">Last 30 days</option>
+          <option value="quarter">Last 90 days</option>
+        </select>
+        <span class="wol-result-count" id="hist-result-count"></span>
+      </div>
+
+      <!-- History table -->
+      <div class="hist-table-wrap">
+        <table class="oh-table">
+          <thead>
+            <tr>
+              <th>Vendor</th><th>Vendor ID</th><th>Date</th><th>User</th><th>Order name</th><th>WO / Equipment</th><th>Amount</th><th>Status</th><th>PO #</th>
+            </tr>
+          </thead>
+          <tbody id="hist-tbody"></tbody>
+        </table>
+      </div>
+
+      <div id="hist-detail-panel" style="display:none;" class="hist-detail-panel"></div>
+
+      <div style="padding:10px 24px;background:#FFFFFF;border-top:0.5px solid #E8E4DF;display:flex;align-items:center;font-size:12px;color:#7A7F8E;">
+        <span>Order history — read only</span>
+      </div>
+    </div>
+
   </div>
 </div>`;
 
-  reRenderTable();
-  updateSummary();
+  // ── Wire up Orders tab ────────────────────────────────────────────
+  reRenderOrderTable();
 
-  document.getElementById('wol-filters').querySelectorAll('.wol-filter-pill').forEach(pill => {
+  document.getElementById('wol-status-pills').querySelectorAll('.wol-filter-pill').forEach(pill => {
     pill.addEventListener('click', function() {
-      document.querySelectorAll('#wol-filters .wol-filter-pill').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('#wol-status-pills .wol-filter-pill').forEach(p => p.classList.remove('active'));
       this.classList.add('active');
-      _currentFilter = this.dataset.filter;
-      reRenderTable();
+      _statusFilter = this.dataset.filter;
+      reRenderOrderTable();
     });
+  });
+
+  document.getElementById('wol-supplier-select').addEventListener('change', function() {
+    _supplierFilter = this.value;
+    reRenderOrderTable();
+  });
+
+  document.getElementById('wol-date-select').addEventListener('change', function() {
+    _dateFilter = this.value;
+    reRenderOrderTable();
   });
 
   document.getElementById('wol-search-input').addEventListener('input', function() {
     _searchQuery = this.value;
-    reRenderTable();
+    reRenderOrderTable();
   });
 
+  // ── Wire up History tab ───────────────────────────────────────────
+  updateHistTabBadges();
+  renderHistRows();
+
+  document.getElementById('hist-tabs').querySelectorAll('.hist-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('#hist-tabs .hist-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      _histTab = this.dataset.htab;
+      _histSelectedId = null;
+      renderHistDetail(null);
+      renderHistRows();
+    });
+  });
+
+  document.getElementById('hist-search-input').addEventListener('input', function() {
+    _histSearch = this.value; renderHistRows();
+  });
+  document.getElementById('hist-vendor-select').addEventListener('change', function() {
+    _histSupplier = this.value; renderHistRows();
+  });
+  document.getElementById('hist-status-select').addEventListener('change', function() {
+    _histStatus = this.value; renderHistRows();
+  });
+  document.getElementById('hist-date-select').addEventListener('change', function() {
+    _histDate = this.value; renderHistRows();
+  });
+
+  window.wolHistOpenDetail = function(orderId) {
+    _histSelectedId = orderId;
+    document.querySelectorAll('#hist-tbody tr').forEach(r => {
+      r.classList.toggle('selected-row', r.dataset.id === orderId);
+    });
+    renderHistDetail(orderId);
+  };
+
+  window.wolHistCloseDetail = function() {
+    _histSelectedId = null;
+    document.querySelectorAll('#hist-tbody tr').forEach(r => r.classList.remove('selected-row'));
+    renderHistDetail(null);
+  };
+
+  // ── Main tab switch ───────────────────────────────────────────────
+  window.wolSwitchMain = function(tab) {
+    _mainTab = tab;
+    document.getElementById('mtab-orders').classList.toggle('active', tab === 'orders');
+    document.getElementById('mtab-history').classList.toggle('active', tab === 'history');
+    const op = document.getElementById('wol-orders-panel');
+    const hp = document.getElementById('wol-history-panel');
+    if (op) { op.style.display = tab === 'orders' ? 'flex' : 'none'; }
+    if (hp) { hp.style.display = tab === 'history' ? 'flex' : 'none'; }
+  };
+
+  // ── New Order modal ───────────────────────────────────────────────
   const ASSIGNEES = ['James W.','Marcus T.','Lena R.','Darius K.','Priya N.'];
 
   function openWoForm() {
@@ -366,18 +718,16 @@ function render_wo_list(el) {
               show('nwo-due-err',   !dueRaw); if (!dueRaw) valid = false;
             }
             if (!valid) return;
-
             const make    = document.getElementById('nwo-make')?.value.trim() || '';
             const model   = document.getElementById('nwo-model')?.value.trim() || '';
             const serial  = document.getElementById('nwo-serial')?.value.trim() || '';
             const machine = (make && model) ? `${make} ${model}` : asset || '';
             const extId   = document.getElementById('nwo-extid').value.trim();
             const dueDate = dueRaw ? new Date(dueRaw).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
-
             Store.addWorkOrder({ woType, asset, make, model, serial, machine, issue, dueDate,
               externalId: extId, priority: document.getElementById('nwo-priority').value,
               assignee: document.getElementById('nwo-assignee').value });
-            Modal.close(); reRenderTable(); updateSummary();
+            Modal.close(); reRenderOrderTable();
           }
         }
       ]
@@ -392,14 +742,12 @@ function render_wo_list(el) {
         const dueLbl   = document.getElementById('nwo-due-lbl');
         if (assetLbl) assetLbl.innerHTML = isWoType
           ? 'Equipment # * <span class="lbl-opt">(auto-populates make, model, serial)</span>'
-          : 'Equipment # <span class="lbl-opt">(optional — auto-populates make, model, serial)</span>';
+          : 'Equipment # <span class="lbl-opt">(optional)</span>';
         if (issueLbl) issueLbl.textContent = isWoType ? 'Fault / Issue *' : 'Fault / Issue / Description';
         if (dueLbl)   dueLbl.textContent   = isWoType ? 'Due Date *' : 'Due Date';
       }
-
       const typeSelect = document.getElementById('nwo-type');
       if (typeSelect) typeSelect.addEventListener('change', updateRequiredLabels);
-
       const assetInput = document.getElementById('nwo-asset');
       if (!assetInput) return;
       assetInput.addEventListener('blur', function() {
@@ -409,113 +757,7 @@ function render_wo_list(el) {
         document.getElementById('nwo-model').value  = eq.model;
         document.getElementById('nwo-serial').value = eq.serial;
         const banner = document.getElementById('nwo-autofill-msg');
-        banner.textContent = `Auto-filled from fleet: ${eq.make} ${eq.model} · ${eq.serial}`;
-        banner.style.display = 'block';
-      });
-    }, 50);
-  }
-
-  function openOrderForm() {
-    const formHtml = `
-      <div class="modal-form-field">
-        <label class="modal-form-label">Order Type *</label>
-        <select class="modal-form-select" id="nord-type">
-          <option value="stock">Stock / Parts Request</option>
-          <option value="other">General Order</option>
-        </select>
-      </div>
-      <div class="modal-form-field">
-        <label class="modal-form-label">Description *</label>
-        <input class="modal-form-input" id="nord-issue" type="text" placeholder="Describe what's needed"/>
-        <div class="modal-field-error" id="nord-issue-err">Required</div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div class="modal-form-field" style="grid-column:1/-1;">
-          <label class="modal-form-label">Equipment # <span class="lbl-opt">(optional — auto-populates make, model, serial)</span></label>
-          <input class="modal-form-input" id="nord-asset" type="text" placeholder="e.g. FL-094"/>
-          <div class="nwo-autofill-banner" id="nord-autofill-msg"></div>
-        </div>
-        <div class="modal-form-field">
-          <label class="modal-form-label">Make <span class="lbl-opt">(optional)</span></label>
-          <input class="modal-form-input" id="nord-make" type="text" placeholder="e.g. Skyjack"/>
-        </div>
-        <div class="modal-form-field">
-          <label class="modal-form-label">Model <span class="lbl-opt">(optional)</span></label>
-          <input class="modal-form-input" id="nord-model" type="text" placeholder="e.g. SJIII 3219"/>
-        </div>
-        <div class="modal-form-field" style="grid-column:1/-1;">
-          <label class="modal-form-label">Serial # <span class="lbl-opt">(optional)</span></label>
-          <input class="modal-form-input" id="nord-serial" type="text" placeholder="e.g. SJ3219-00847"/>
-        </div>
-        <div class="modal-form-field">
-          <label class="modal-form-label">Priority</label>
-          <select class="modal-form-select" id="nord-priority">
-            <option value="high">High</option>
-            <option value="medium" selected>Medium</option>
-            <option value="low">Low</option>
-          </select>
-        </div>
-        <div class="modal-form-field">
-          <label class="modal-form-label">Due Date <span class="lbl-opt">(optional)</span></label>
-          <input class="modal-form-input" id="nord-due" type="date"/>
-        </div>
-        <div class="modal-form-field">
-          <label class="modal-form-label">Assignee</label>
-          <select class="modal-form-select" id="nord-assignee">
-            ${ASSIGNEES.map(n => `<option${n === CURRENT_USER ? ' selected' : ''}>${n}</option>`).join('')}
-          </select>
-        </div>
-        <div class="modal-form-field">
-          <label class="modal-form-label">Reference ID <span class="lbl-opt">(optional)</span></label>
-          <input class="modal-form-input" id="nord-extid" type="text" placeholder="e.g. PO or ERP ref"/>
-        </div>
-      </div>`;
-
-    Modal.show({
-      title: 'New Order',
-      body: formHtml,
-      actions: [
-        { label: 'Back', onClick: () => openTypePicker() },
-        {
-          label: 'Create Order', primary: true, onClick: () => {
-            const issue = document.getElementById('nord-issue').value.trim();
-            const show  = (id, v) => { const e = document.getElementById(id); if (e) e.style.display = v ? 'block' : 'none'; };
-            show('nord-issue-err', !issue); if (!issue) return;
-
-            const dueRaw  = document.getElementById('nord-due').value;
-            const extId   = document.getElementById('nord-extid').value.trim();
-            const asset   = document.getElementById('nord-asset').value.trim();
-            const make    = document.getElementById('nord-make').value.trim();
-            const model   = document.getElementById('nord-model').value.trim();
-            const serial  = document.getElementById('nord-serial').value.trim();
-            const machine = (make && model) ? `${make} ${model}` : asset || '';
-            const nextId  = Store.getWorkOrders('all').reduce((m, w) => Math.max(m, w.id), 100000) + 1;
-            const dueDate = dueRaw
-              ? new Date(dueRaw).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-              : '';
-
-            Store.addWorkOrder({ woType: document.getElementById('nord-type').value,
-              issue, dueDate, externalId: extId || `SE-${nextId}`,
-              priority: document.getElementById('nord-priority').value,
-              assignee: document.getElementById('nord-assignee').value,
-              machine, asset, make, model, serial });
-            Modal.close(); reRenderTable(); updateSummary();
-          }
-        }
-      ]
-    });
-
-    setTimeout(() => {
-      const assetInput = document.getElementById('nord-asset');
-      if (!assetInput) return;
-      assetInput.addEventListener('blur', function() {
-        const eq = EQUIPMENT_DB[this.value.trim().toUpperCase()] || EQUIPMENT_DB[this.value.trim()];
-        if (!eq) return;
-        document.getElementById('nord-make').value   = eq.make;
-        document.getElementById('nord-model').value  = eq.model;
-        document.getElementById('nord-serial').value = eq.serial;
-        const banner = document.getElementById('nord-autofill-msg');
-        banner.textContent = `Auto-filled from fleet: ${eq.make} ${eq.model} · ${eq.serial}`;
+        banner.textContent = `Auto-filled: ${eq.make} ${eq.model} · ${eq.serial}`;
         banner.style.display = 'block';
       });
     }, 50);
@@ -529,27 +771,27 @@ function render_wo_list(el) {
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <button class="wol-type-pick-card" id="pick-wo">
             <i class="ti ti-clipboard-list" style="font-size:22px;color:#185FA5;margin-bottom:8px;"></i>
-            <div style="font-size:13px;font-weight:700;color:#111318;">Order</div>
-            <div style="font-size:11px;color:#7A7F8E;margin-top:3px;">Equipment repair or scheduled PM linked to a WO ID</div>
+            <div style="font-size:13px;font-weight:700;color:#111318;">Work Order</div>
+            <div style="font-size:11px;color:#7A7F8E;margin-top:3px;">Equipment repair or scheduled PM</div>
           </button>
           <button class="wol-type-pick-card" id="pick-ord">
             <i class="ti ti-shopping-cart" style="font-size:22px;color:#534AB7;margin-bottom:8px;"></i>
-            <div style="font-size:13px;font-weight:700;color:#111318;">Order</div>
-            <div style="font-size:11px;color:#7A7F8E;margin-top:3px;">Stock request, parts order, or general purchase</div>
+            <div style="font-size:13px;font-weight:700;color:#111318;">Parts Order</div>
+            <div style="font-size:11px;color:#7A7F8E;margin-top:3px;">Stock request or general purchase</div>
           </button>
         </div>`,
       actions: [{ label: 'Cancel', onClick: () => Modal.close() }]
     });
     setTimeout(() => {
       document.getElementById('pick-wo')?.addEventListener('click', () => openWoForm());
-      document.getElementById('pick-ord')?.addEventListener('click', () => openOrderForm());
+      document.getElementById('pick-ord')?.addEventListener('click', () => openWoForm());
     }, 50);
   }
 
   document.getElementById('wol-new-btn').addEventListener('click', () => openTypePicker());
 }
 
-// ── Global: open the WO creation form from anywhere (e.g. diagnostics cart) ──
+// ── Global: open the WO creation form from anywhere ───────────────────────────
 (function() {
   const EQUIPMENT_DB_GLOBAL = {
     'FL-094': { make: 'Skyjack',     model: 'SJIII 3219',        serial: 'SJ3219-00847'    },
@@ -652,13 +894,11 @@ function render_wo_list(el) {
             show('nwo-issue-err', !issue); if (!issue) valid = false;
             show('nwo-due-err',   !dueRaw); if (!dueRaw) valid = false;
             if (!valid) return;
-
             const make    = document.getElementById('nwo-make')?.value.trim() || '';
             const model   = document.getElementById('nwo-model')?.value.trim() || '';
             const serial  = document.getElementById('nwo-serial')?.value.trim() || '';
             const machine = (make && model) ? `${make} ${model}` : asset || '';
             const dueDate = new Date(dueRaw).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-
             const newWO = Store.addWorkOrder({
               woType: document.getElementById('nwo-type').value,
               asset, make, model, serial, machine, issue, dueDate,
@@ -666,11 +906,9 @@ function render_wo_list(el) {
               priority: document.getElementById('nwo-priority').value,
               assignee: document.getElementById('nwo-assignee').value,
             });
-
             if (prefill.cart && prefill.cart.length) {
               Store.addPartsToWorkOrder(newWO.id, prefill.cart);
             }
-
             Modal.close();
             if (typeof prefill.onCreated === 'function') prefill.onCreated(newWO);
             else {
@@ -679,11 +917,11 @@ function render_wo_list(el) {
                 body: `<div style="text-align:center;padding:12px 0;">
                   <div style="font-size:32px;margin-bottom:8px;color:#1C3969;">✓</div>
                   <div style="font-size:14px;font-weight:600;color:#111318;margin-bottom:4px;">Work Order #${newWO.id} created</div>
-                  <div style="font-size:13px;color:#7A7F8E;">${machine} · ${document.getElementById('nwo-priority') ? '' : 'Medium'} priority</div>
+                  <div style="font-size:13px;color:#7A7F8E;">${machine}</div>
                 </div>`,
                 actions: [
                   { label: 'Close', onClick: () => Modal.close() },
-                  { label: 'View orders', primary: true, onClick: () => { Modal.close(); if (typeof sendPrompt === 'function') sendPrompt('Open orders list'); } }
+                  { label: 'View orders', primary: true, onClick: () => { Modal.close(); Router.navigate('wo-list'); } }
                 ]
               });
             }
