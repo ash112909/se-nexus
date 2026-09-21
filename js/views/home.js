@@ -4,7 +4,10 @@ function render_home(el) {
   const _firstName = _user ? _user.displayName.split(' ')[0] : 'there';
   const loc = Store.getCurrentLocation();
   const locName = loc ? loc.name : (_isSupervisor ? 'All locations' : 'Mid-County Rental');
-  const activeWOs = Store.getWorkOrders('active', _isSupervisor ? null : (_user ? _user.shortName : null));
+  const _allWOs = Store.getWorkOrders('all', _isSupervisor ? null : (_user ? _user.shortName : null))
+    .filter(w => !w.archived)
+    .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  const activeWOs = _allWOs.slice(0, 5);
 
   const ALL_SUPPLIERS = [
     { id:'abatement',   name:'Abatement Technologies'  }, { id:'abc-weld',    name:'ABC Welding Supply'       },
@@ -581,12 +584,11 @@ function render_home(el) {
 
           <!-- Active work orders -->
           <div class="h-lbl">
-            <i class="ti ti-clipboard-list" style="color:#1C3969;"></i> Active work orders
-            <span style="margin-left:4px;font-size:10px;font-weight:700;background:#D6E4F7;color:#1C3969;border-radius:999px;padding:1px 7px;">${activeWOs.length}</span>
+            <i class="ti ti-clipboard-list" style="color:#1C3969;"></i> 5 most recently updated work orders
             <span class="h-lbl-action" onclick="Router.navigate('wo-list')">View all <i class="ti ti-arrow-right" style="font-size:10px;"></i></span>
           </div>
           ${activeWOs.length === 0
-            ? `<div style="background:#FFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:20px;text-align:center;font-size:12px;color:#9CA3AF;margin-bottom:16px;">No active work orders.</div>`
+            ? `<div style="background:#FFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:20px;text-align:center;font-size:12px;color:#9CA3AF;margin-bottom:16px;">No work orders found.</div>`
             : `<div class="wo-mini-wrap">
               <div class="wo-mini-head">
                 <div></div>
@@ -597,7 +599,7 @@ function render_home(el) {
                 <div class="wo-mini-hcell">Due</div>
                 <div class="wo-mini-hcell">Status</div>
               </div>
-              ${activeWOs.slice(0, 8).map(wo => {
+              ${activeWOs.map(wo => {
                 const priColor = wo.priority === 'urgent' ? '#991B1B'
                   : wo.priority === 'high' ? '#DC2626'
                   : wo.priority === 'medium' ? '#D97706' : '#9CA3AF';

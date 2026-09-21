@@ -505,7 +505,7 @@ const Store = (() => {
   function updateWorkOrder(id, changes) {
     const wo = getWorkOrder(id);
     if (!wo) return null;
-    Object.assign(wo, changes);
+    Object.assign(wo, changes, { updatedAt: Date.now() });
     save(_data);
     return wo;
   }
@@ -517,12 +517,17 @@ const Store = (() => {
     const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
     const note = { text, author: 'James W.', time };
     wo.notes.push(note);
+    wo.updatedAt = Date.now();
     save(_data);
     return note;
   }
 
   function closeWorkOrder(id) {
-    return updateWorkOrder(id, { status: 'closed' });
+    return updateWorkOrder(id, { status: 'closed', closedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) });
+  }
+
+  function archiveWorkOrder(id) {
+    return updateWorkOrder(id, { archived: true });
   }
 
   // --- WO Cart ---
@@ -1234,7 +1239,7 @@ const Store = (() => {
   }
 
   return {
-    getWorkOrders, getWorkOrder, addWorkOrder, addPartsToWorkOrder, updateWorkOrder, addWoNote, closeWorkOrder,
+    getWorkOrders, getWorkOrder, addWorkOrder, addPartsToWorkOrder, updateWorkOrder, addWoNote, closeWorkOrder, archiveWorkOrder,
     getOrders, addOrder, updateOrder,
     getCart, addToCart, removeFromCart, updateCartQty, clearCart, submitCart,
     getWoCart, addToWoCart, removeFromWoCart, updateWoCartQty, submitWoCart,

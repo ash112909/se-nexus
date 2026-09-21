@@ -11,7 +11,7 @@ function render_wo_detail(el) {
   <div class="main">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
-        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('Open orders list')">Orders</a>
+        <a style="color:#5C6070;cursor:pointer;" onclick="Router.navigate('wo-list')">Orders</a>
         <span>/</span><span style="color:#FFFFFF;">WO not found</span>
       </div>
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
@@ -25,8 +25,11 @@ function render_wo_detail(el) {
     return;
   }
 
+  const isArchived = !!wo.archived;
+
   function statusBadge() {
     const s = wo.status;
+    if (isArchived) return '<span class="pill pill-closed" style="background:#E5E7EB;color:#6B7280;">Archived</span>';
     if (s === 'active') return '<span class="pill pill-open">Open</span>';
     if (s === 'pending') return '<span class="pill pill-pending">Pending</span>';
     if (s === 'closed') return '<span class="pill pill-closed">Closed</span>';
@@ -311,6 +314,10 @@ function render_wo_detail(el) {
 .btn-ghost:hover { background: #F5F2EE; }
 .btn-danger { background: none; border: 0.5px solid #F5C5C5; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 500; color: #A32D2D; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
 .btn-danger:hover { background: #FCEBEB; }
+.btn-archive { background: #FFFBF0; border: 0.5px solid #D97706; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; color: #92400E; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+.btn-archive:hover { background: #FEF3C7; }
+.wod-readonly-banner { display:flex; align-items:center; gap:8px; background:#F3F4F6; border-bottom:0.5px solid #E5E7EB; padding:10px 28px; font-size:12px; color:#6B7280; font-weight:500; }
+.wod-readonly-banner i { font-size:14px; }
 .wo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
 .wo-card-section { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; padding: 16px; }
 .wo-section-label { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #9CA3AF; margin-bottom: 12px; }
@@ -426,13 +433,14 @@ function render_wo_detail(el) {
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
         <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('dashboard')">Dashboard</a>
         <span style="color:#3C4052;">/</span>
-        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('Open orders list')">Orders</a>
+        <a style="color:#5C6070;cursor:pointer;" onclick="Router.navigate('wo-list')">Orders</a>
         <span style="color:#3C4052;">/</span>
         <span style="color:#FFFFFF;font-weight:500;">WO #${wo.id}</span>
       </div>
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
       ${buildTopbarRight()}
     </div>
+    ${isArchived ? `<div class="wod-readonly-banner"><i class="ti ti-lock"></i> This order has been archived and is read-only.</div>` : ''}
     <div class="wo-detail-content">
       <div class="wo-detail-header">
         <div>
@@ -443,16 +451,17 @@ function render_wo_detail(el) {
           </div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-          <div style="display:flex;align-items:center;gap:6px;">
+          ${isArchived ? '' : `<div style="display:flex;align-items:center;gap:6px;">
             <label style="font-size:12px;color:#9CA3AF;">Status:</label>
             <select class="status-select" id="wod-status-select">
               <option value="active" ${wo.status === 'active' ? 'selected' : ''}>Active</option>
               <option value="pending" ${wo.status === 'pending' ? 'selected' : ''}>Pending</option>
               <option value="closed" ${wo.status === 'closed' ? 'selected' : ''}>Closed</option>
             </select>
-          </div>
-          <button class="btn-ghost" onclick="sendPrompt('Open orders list')"><i class="ti ti-arrow-left" style="font-size:14px;"></i> Back</button>
-          ${wo.status !== 'closed' ? `<button class="btn-danger" id="wod-close-btn"><i class="ti ti-x" style="font-size:14px;"></i> Close WO</button>` : ''}
+          </div>`}
+          ${wo.status === 'closed' && !isArchived ? `<button class="btn-archive" id="wod-archive-btn" title="Move to archive"><i class="ti ti-archive" style="font-size:14px;"></i> Archive this order?</button>` : ''}
+          <button class="btn-ghost" onclick="Router.navigate('wo-list')"><i class="ti ti-arrow-left" style="font-size:14px;"></i> Back</button>
+          ${wo.status !== 'closed' && !isArchived ? `<button class="btn-danger" id="wod-close-btn"><i class="ti ti-x" style="font-size:14px;"></i> Close WO</button>` : ''}
         </div>
       </div>
 
@@ -469,22 +478,28 @@ function render_wo_detail(el) {
           <div class="wo-field"><div class="wo-field-label">Reported issue</div><div class="wo-field-value">${wo.issue}</div></div>
           <div class="wo-field">
             <div class="wo-field-label">Priority</div>
-            <select class="field-select" id="wod-priority-select">
+            ${isArchived
+              ? `<div class="wo-field-value">${wo.priority || 'Low'}</div>`
+              : `<select class="field-select" id="wod-priority-select">
               <option value="high" ${wo.priority === 'high' ? 'selected' : ''}>High</option>
               <option value="medium" ${wo.priority === 'medium' ? 'selected' : ''}>Medium</option>
               <option value="low" ${(wo.priority === 'low' || !wo.priority) ? 'selected' : ''}>Low</option>
-            </select>
+            </select>`}
           </div>
           <div class="wo-field">
             <div class="wo-field-label">Due Date</div>
-            <input class="field-date" type="date" id="wod-due-date" value="${wo.dueDate || ''}"/>
+            ${isArchived
+              ? `<div class="wo-field-value">${wo.dueDate || '—'}</div>`
+              : `<input class="field-date" type="date" id="wod-due-date" value="${wo.dueDate || ''}"/>`}
           </div>
           <div class="wo-field">
             <div class="wo-field-label">Assignee</div>
-            <select class="field-select" id="wod-assignee-select">
+            ${isArchived
+              ? `<div class="wo-field-value">${wo.assignee || '—'}</div>`
+              : `<select class="field-select" id="wod-assignee-select">
               ${['James W.','Marcus T.','Lena R.','Darius K.','Priya N.'].map(n => `<option value="${n}" ${wo.assignee === n ? 'selected' : ''}>${n}</option>`).join('')}
               <option value="Priya S." ${wo.assignee === 'Priya S.' ? 'selected' : ''}>Priya S.</option>
-            </select>
+            </select>`}
           </div>
         </div>
       </div>
@@ -504,9 +519,9 @@ function render_wo_detail(el) {
                 <button id="cart-grp-${v}" class="cart-grp-chip${_cartGroupBy===v?' cart-grp-chip-active':''}" onclick="wodSetGroupBy('${v}')">${l}</button>
               `).join('')}
             </div>
-            <button class="add-parts-btn" onclick="sendPrompt('Open Parts Search scoped to WO #${wo.id}')">
+            ${isArchived ? '' : `<button class="add-parts-btn" onclick="sendPrompt('Open Parts Search scoped to WO #${wo.id}')">
               <i class="ti ti-plus" style="font-size:12px;"></i> Add parts
-            </button>
+            </button>`}
           </div>
         </div>
         <div id="wod-cart-body"></div>
@@ -530,8 +545,8 @@ function render_wo_detail(el) {
         <div class="wo-section-label">Notes &amp; timeline</div>
         <div id="wod-notes-list">${renderNotes()}</div>
         <div class="note-input-row">
-          <input class="note-input" type="text" id="wod-note-input" placeholder="Add a note…"/>
-          <button class="note-add-btn" id="wod-add-note-btn">Add note</button>
+          ${isArchived ? '' : `<input class="note-input" type="text" id="wod-note-input" placeholder="Add a note…"/>
+          <button class="note-add-btn" id="wod-add-note-btn">Add note</button>`}
         </div>
       </div>
     </div>
@@ -592,7 +607,18 @@ function render_wo_detail(el) {
     closeBtn.addEventListener('click', function() {
       Modal.confirm('Close Work Order #' + wo.id + '? This cannot be undone.', () => {
         Store.closeWorkOrder(wo.id);
-        sendPrompt('Open orders list');
+        Router.navigate('wo-list');
+      });
+    });
+  }
+
+  // Archive WO
+  const archiveBtn = document.getElementById('wod-archive-btn');
+  if (archiveBtn) {
+    archiveBtn.addEventListener('click', function() {
+      Modal.confirm('Archive Work Order #' + wo.id + '? It will become read-only and move to the Archive tab.', () => {
+        Store.archiveWorkOrder(wo.id);
+        Router.navigate('wo-detail', { woId: wo.id });
       });
     });
   }

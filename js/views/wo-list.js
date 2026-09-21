@@ -3,7 +3,7 @@ function render_wo_list(el) {
   const _isSupervisor = _user && _user.role === 'supervisor';
   const CURRENT_USER = _user ? _user.shortName : 'James W.';
 
-  // ── top-level tab: 'orders' | 'history' ──────────────────────────
+  // ── top-level tab: 'orders' | 'archive' ──────────────────────────
   let _mainTab = 'orders';
 
   // ── Orders tab state ─────────────────────────────────────────────
@@ -11,14 +11,12 @@ function render_wo_list(el) {
   let _supplierFilter = 'all';
   let _dateFilter = 'all';
   let _searchQuery = '';
+  let _sortField = null;
+  let _sortDir = 'asc';
 
-  // ── History tab state ─────────────────────────────────────────────
-  let _histTab = 'submitted';
-  let _histSearch = '';
-  let _histSupplier = 'all';
-  let _histStatus = 'all';
-  let _histDate = 'all';
-  let _histSelectedId = null;
+  // ── Archive tab state ─────────────────────────────────────────────
+  let _archSearch = '';
+  let _archSelectedId = null;
 
   // ── Equipment lookup ──────────────────────────────────────────────
   const EQUIPMENT_DB = {
@@ -116,6 +114,8 @@ function render_wo_list(el) {
     let wos = Store.getWorkOrders(_statusFilter === 'all' ? 'all' : _statusFilter,
       _isSupervisor ? null : CURRENT_USER);
 
+    wos = wos.filter(w => !w.archived);
+
     if (_supplierFilter !== 'all') {
       wos = wos.filter(w => (w.make || '') === _supplierFilter);
     }
@@ -133,6 +133,17 @@ function render_wo_list(el) {
         (wo.assignee || '').toLowerCase().includes(q)
       );
     }
+
+    if (_sortField) {
+      wos = [...wos].sort((a, b) => {
+        let av = a[_sortField] || '';
+        let bv = b[_sortField] || '';
+        if (_sortField === 'id') { av = +av; bv = +bv; }
+        const cmp = av < bv ? -1 : av > bv ? 1 : 0;
+        return _sortDir === 'asc' ? cmp : -cmp;
+      });
+    }
+
     return wos;
   }
 
@@ -170,145 +181,8 @@ function render_wo_list(el) {
     if (countEl) countEl.textContent = getFilteredWOs().length + ' orders';
   }
 
-  // ── History tab helpers ───────────────────────────────────────────
-  function histStatusPillClass(status) {
-    const map = { saved:'pill-saved', submitted:'pill-submitted', delivered:'pill-delivered', backordered:'pill-backordered', review:'pill-review', in_transit:'pill-submitted' };
-    return map[status] || 'pill-saved';
-  }
-  function histStatusLabel(status) {
-    const map = { saved:'Saved', submitted:'Submitted', delivered:'Delivered', backordered:'Backordered', review:'In review', in_transit:'In transit' };
-    return map[status] || status;
-  }
-
-  function getHistOrders() {
-    let orders = Store.getOrders(_histTab === 'all' ? 'all' : _histTab);
-    if (_histSearch.trim()) {
-      const q = _histSearch.toLowerCase();
-      orders = orders.filter(o =>
-        (o.name || '').toLowerCase().includes(q) ||
-        (o.vendor || '').toLowerCase().includes(q) ||
-        (o.poNum || '').toLowerCase().includes(q) ||
-        (o.wo || '').toLowerCase().includes(q)
-      );
-    }
-    if (_histSupplier !== 'all') {
-      orders = orders.filter(o => (o.vendor || '') === _histSupplier);
-    }
-    if (_histStatus !== 'all') {
-      orders = orders.filter(o => (o.status || '') === _histStatus);
-    }
-    if (_histDate !== 'all') {
-      orders = orders.filter(o => dateMatchesFilter(o.date, _histDate));
-    }
-    return orders;
-  }
-
-  function getHistVendors() {
-    const all = Store.getOrders('all');
-    return [...new Set(all.map(o => o.vendor).filter(Boolean))].sort();
-  }
-
-  function renderHistRows() {
-    const orders = getHistOrders();
-    const tbody = document.getElementById('hist-tbody');
-    if (!tbody) return;
-    const countEl = document.getElementById('hist-result-count');
-    if (countEl) countEl.textContent = orders.length + ' orders';
-
-    if (!orders.length) {
-      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:32px;color:#9CA3AF;font-size:13px;">No orders found.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = orders.map(o => `
-      <tr data-id="${o.id}" class="${o.id === _histSelectedId ? 'selected-row' : ''}" onclick="wolHistOpenDetail('${o.id}')">
-        <td><strong style="color:#111318;">${o.vendor}</strong></td>
-        <td style="font-size:11px;color:#9CA3AF;">${o.vendorId || '—'}</td>
-        <td>${o.date}</td>
-        <td style="font-size:12px;color:#5A5F6E;">${o.user}</td>
-        <td>${o.name}</td>
-        <td style="font-size:12px;color:#5A5F6E;">${o.wo}${o.asset && o.asset !== o.wo ? ' · ' + o.asset : ''}</td>
-        <td style="font-weight:600;color:#111318;">$${(+o.amount).toFixed(2)}</td>
-        <td><span class="status-pill ${histStatusPillClass(o.status)}">${histStatusLabel(o.status)}</span></td>
-        <td style="font-size:11px;color:#9CA3AF;">${o.poNum || '—'}</td>
-      </tr>`).join('');
-  }
-
-  function renderHistDetail(orderId) {
-    const panel = document.getElementById('hist-detail-panel');
-    if (!panel) return;
-    if (!orderId) { panel.style.display = 'none'; return; }
-    const o = Store.getOrders('all').find(x => x.id === orderId);
-    if (!o) { panel.style.display = 'none'; return; }
-
-    panel.style.display = 'block';
-    panel.innerHTML = `
-      <div class="oh-detail-header">
-        <i class="ti ti-truck-delivery" style="font-size:16px;color:#1C3969;"></i>
-        <div class="oh-detail-title">${o.poNum ? o.poNum + ' · ' : ''}${o.vendor} · ${o.name}</div>
-        <span class="status-pill ${histStatusPillClass(o.status)}" style="margin-right:8px;">${histStatusLabel(o.status)}</span>
-        <button class="oh-detail-close" onclick="wolHistCloseDetail()"><i class="ti ti-x"></i></button>
-      </div>
-      <div class="oh-detail-grid">
-        <div class="oh-detail-section">
-          <div class="oh-detail-section-title">Order info</div>
-          <div class="oh-detail-row"><span class="oh-detail-label">Order name</span><span class="oh-detail-val">${o.name}</span></div>
-          <div class="oh-detail-row"><span class="oh-detail-label">PO #</span><span class="oh-detail-val">${o.poNum || '—'}</span></div>
-          <div class="oh-detail-row"><span class="oh-detail-label">Date</span><span class="oh-detail-val">${o.date}</span></div>
-          <div class="oh-detail-row"><span class="oh-detail-label">Ordered by</span><span class="oh-detail-val">${o.user}</span></div>
-          <div class="oh-detail-row"><span class="oh-detail-label">Total</span><span class="oh-detail-val" style="color:#111318;font-weight:700;">$${(+o.amount).toFixed(2)}</span></div>
-        </div>
-        <div class="oh-detail-section">
-          <div class="oh-detail-section-title">Ship to / Bill to</div>
-          <div class="oh-detail-row"><span class="oh-detail-label">Ship to</span><span class="oh-detail-val">Mid-County Rental, Austin</span></div>
-          <div class="oh-detail-row"><span class="oh-detail-label">Address</span><span class="oh-detail-val">1402 S Lamar Blvd, Austin TX</span></div>
-          <div class="oh-detail-row"><span class="oh-detail-label">Attn</span><span class="oh-detail-val">${o.user} · Shop</span></div>
-          <div class="oh-detail-row"><span class="oh-detail-label">Bill to</span><span class="oh-detail-val">Mid-County Rental Corp</span></div>
-        </div>
-        <div class="oh-detail-section">
-          <div class="oh-detail-section-title">Order</div>
-          <div class="oh-detail-row"><span class="oh-detail-label">WO</span><span class="oh-detail-val">${o.wo}</span></div>
-          <div class="oh-detail-row"><span class="oh-detail-label">Asset</span><span class="oh-detail-val">${o.asset}</span></div>
-          <div class="oh-detail-row"><span class="oh-detail-label">Vendor</span><span class="oh-detail-val">${o.vendor}</span></div>
-          <div class="oh-detail-row"><span class="oh-detail-label">Vendor ID</span><span class="oh-detail-val">${o.vendorId || '—'}</span></div>
-        </div>
-      </div>
-      ${(o.items && o.items.length) ? `
-      <div class="oh-items-section">
-        <div class="oh-items-title"><i class="ti ti-package" style="font-size:14px;color:#9CA3AF;"></i> Line items <span style="font-size:11px;font-weight:600;background:#F0ECE8;color:#5A5F6E;border-radius:999px;padding:1px 8px;margin-left:4px;">${o.items.length}</span></div>
-        <table class="oh-items-table">
-          <thead><tr><th>Part #</th><th>Description</th><th>Vendor</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Unit</th><th style="text-align:right;">Total</th></tr></thead>
-          <tbody>
-            ${o.items.map(it => `
-            <tr>
-              <td style="font-family:monospace;font-size:11px;color:#5A5F6E;">${it.partNum || '—'}</td>
-              <td>${it.description || it.name || '—'}${it.oemOnly ? ' <span style="font-size:10px;font-weight:600;background:#F5F2EE;color:#5A5F6E;border-radius:4px;padding:1px 5px;">OEM</span>' : ''}</td>
-              <td style="color:#7A7F8E;">${it.vendor || '—'}</td>
-              <td style="text-align:center;">×${it.qty || 1}</td>
-              <td style="text-align:right;">$${(+it.price).toFixed(2)}</td>
-              <td style="text-align:right;font-weight:600;color:#111318;">$${(it.price * (it.qty || 1)).toFixed(2)}</td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-        <div class="oh-items-total">Total <strong>$${(+o.amount).toFixed(2)}</strong></div>
-      </div>` : ''}
-      <div class="oh-comments">
-        <div class="oh-comments-label">Comments</div>
-        <input class="oh-comment-input" type="text" placeholder="Add a comment…" readonly/>
-      </div>`;
-    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  function updateHistTabBadges() {
-    const counts = { submitted: Store.getOrders('submitted').length, review: Store.getOrders('review').length, local: Store.getOrders('local').length };
-    Object.entries(counts).forEach(([tab, count]) => {
-      const badge = document.querySelector(`.hist-tab[data-htab="${tab}"] .hist-tab-badge`);
-      if (badge) badge.textContent = count;
-    });
-  }
-
-  // ── Build vendor/supplier filter options (orders tab) ─────────────
+  // ── Build supplier filter options (orders tab) ────────────────────
   const supplierOpts = getSupplierOptions();
-  const histVendors  = getHistVendors();
 
   el.innerHTML = `
 <style>
@@ -345,6 +219,10 @@ function render_wo_list(el) {
 .wol-table { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; overflow: hidden; margin-top: 20px; }
 .wol-thead { display: grid; gap: 0; border-bottom: 1px solid #F0ECE8; padding: 0 18px; background: #FAFAF9; }
 .wol-th { font-size: 11px; font-weight: 600; color: #9CA3AF; letter-spacing: 0.8px; text-transform: uppercase; padding: 10px 8px; }
+.wol-th-sort { cursor: pointer; user-select: none; white-space: nowrap; }
+.wol-th-sort:hover { color: #5A5F6E; }
+.wol-th-sort.sorted { color: #111318; }
+.wol-sort-arrow { margin-left: 4px; font-size: 9px; }
 .wol-row { display: grid; gap: 0; padding: 0 18px; border-bottom: 0.5px solid #F5F2EE; cursor: pointer; transition: background 0.1s; align-items: center; }
 .wol-row:last-child { border-bottom: none; }
 .wol-row:hover { background: #FAFAF9; }
@@ -435,9 +313,9 @@ function render_wo_list(el) {
         <i class="ti ti-clipboard-list" style="font-size:14px;"></i> Orders
         <span class="wol-mtab-badge" id="mtab-orders-badge">${Store.getWorkOrders('all', _isSupervisor ? null : CURRENT_USER).length}</span>
       </div>
-      <div class="wol-mtab" id="mtab-history" onclick="wolSwitchMain('history')">
-        <i class="ti ti-history" style="font-size:14px;"></i> History
-        <span class="wol-mtab-badge" id="mtab-history-badge">${Store.getOrders('all').length}</span>
+      <div class="wol-mtab" id="mtab-archive" onclick="wolSwitchMain('archive')">
+        <i class="ti ti-archive" style="font-size:14px;"></i> Archive
+        <span class="wol-mtab-badge" id="mtab-archive-badge">${Store.getWorkOrders('all', null).filter(w => w.archived).length}</span>
       </div>
       <div class="wol-mtab-new">
         <button class="wol-new-btn" id="wol-new-btn"><i class="ti ti-plus" style="font-size:14px;"></i> New Order</button>
@@ -476,14 +354,14 @@ function render_wo_list(el) {
       <div class="wol-content">
         <div class="wol-table-wrap">
           <div class="wol-table">
-            <div class="wol-thead" style="grid-template-columns:${_cols};">
-              <div class="wol-th">Order #</div>
-              <div class="wol-th">Type</div>
-              <div class="wol-th">Machine / Issue</div>
-              ${_isSupervisor ? '<div class="wol-th">Assignee</div>' : ''}
-              <div class="wol-th">Due Date</div>
-              <div class="wol-th">Status</div>
-              <div class="wol-th">Priority</div>
+            <div class="wol-thead" style="grid-template-columns:${_cols};" id="wol-thead">
+              <div class="wol-th wol-th-sort" data-sort="id">Order #</div>
+              <div class="wol-th wol-th-sort" data-sort="woType">Type</div>
+              <div class="wol-th wol-th-sort" data-sort="machine">Machine / Issue</div>
+              ${_isSupervisor ? '<div class="wol-th wol-th-sort" data-sort="assignee">Assignee</div>' : ''}
+              <div class="wol-th wol-th-sort" data-sort="dueDate">Due Date</div>
+              <div class="wol-th wol-th-sort" data-sort="status">Status</div>
+              <div class="wol-th wol-th-sort" data-sort="priority">Priority</div>
               <div class="wol-th"></div>
             </div>
             <div id="wol-tbody"></div>
@@ -492,59 +370,31 @@ function render_wo_list(el) {
       </div>
     </div>
 
-    <!-- ══ HISTORY panel ═════════════════════════════════════════════ -->
-    <div id="wol-history-panel" style="display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
-      <!-- History sub-tabs -->
-      <div class="hist-tabs" id="hist-tabs">
-        <div class="hist-tab active" data-htab="submitted">Submitted <span class="hist-tab-badge">0</span></div>
-        <div class="hist-tab" data-htab="review">In review <span class="hist-tab-badge">0</span></div>
-        <div class="hist-tab" data-htab="local">Local <span class="hist-tab-badge">0</span></div>
-      </div>
-
-      <!-- History filter bar -->
+    <!-- ══ ARCHIVE panel ═════════════════════════════════════════════ -->
+    <div id="wol-archive-panel" style="display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
+      <!-- Archive filter bar -->
       <div class="wol-filter-bar">
         <div class="wol-search-wrap">
           <i class="ti ti-search wol-search-icon"></i>
-          <input class="wol-search" id="hist-search-input" type="text" placeholder="Search orders…" style="width:200px;"/>
+          <input class="wol-search" id="arch-search-input" type="text" placeholder="Search archived orders…" style="width:220px;"/>
         </div>
-        <select class="wol-select" id="hist-vendor-select">
-          <option value="all">All vendors</option>
-          ${histVendors.map(v => `<option value="${v}">${v}</option>`).join('')}
-        </select>
-        <select class="wol-select" id="hist-status-select">
-          <option value="all">Any status</option>
-          <option value="submitted">Submitted</option>
-          <option value="in_transit">In transit</option>
-          <option value="delivered">Delivered</option>
-          <option value="backordered">Backordered</option>
-          <option value="review">In review</option>
-          <option value="saved">Saved</option>
-        </select>
-        <select class="wol-select" id="hist-date-select">
-          <option value="all">Any date</option>
-          <option value="week">Last 7 days</option>
-          <option value="month">Last 30 days</option>
-          <option value="quarter">Last 90 days</option>
-        </select>
-        <span class="wol-result-count" id="hist-result-count"></span>
+        <span class="wol-result-count" id="arch-result-count"></span>
       </div>
 
-      <!-- History table -->
+      <!-- Archive table -->
       <div class="hist-table-wrap">
         <table class="oh-table">
           <thead>
             <tr>
-              <th>Vendor</th><th>Vendor ID</th><th>Date</th><th>User</th><th>Order name</th><th>WO / Equipment</th><th>Amount</th><th>Status</th><th>PO #</th>
+              <th>WO #</th><th>Type</th><th>Machine / Issue</th><th>Assignee</th><th>Closed</th><th>Priority</th>
             </tr>
           </thead>
-          <tbody id="hist-tbody"></tbody>
+          <tbody id="arch-tbody"></tbody>
         </table>
       </div>
 
-      <div id="hist-detail-panel" style="display:none;" class="hist-detail-panel"></div>
-
       <div style="padding:10px 24px;background:#FFFFFF;border-top:0.5px solid #E8E4DF;display:flex;align-items:center;font-size:12px;color:#7A7F8E;">
-        <span>Order history — read only</span>
+        <i class="ti ti-lock" style="font-size:12px;margin-right:5px;"></i> Archived orders are read-only
       </div>
     </div>
 
@@ -578,57 +428,84 @@ function render_wo_list(el) {
     reRenderOrderTable();
   });
 
-  // ── Wire up History tab ───────────────────────────────────────────
-  updateHistTabBadges();
-  renderHistRows();
+  // ── Wire up Archive tab ───────────────────────────────────────────
+  function renderArchiveRows() {
+    const tbody = document.getElementById('arch-tbody');
+    if (!tbody) return;
+    let wos = Store.getWorkOrders('all', null).filter(w => w.archived);
+    if (_archSearch.trim()) {
+      const q = _archSearch.toLowerCase();
+      wos = wos.filter(w =>
+        String(w.id).includes(q) ||
+        (w.machine || '').toLowerCase().includes(q) ||
+        (w.issue || '').toLowerCase().includes(q) ||
+        (w.assignee || '').toLowerCase().includes(q)
+      );
+    }
+    const countEl = document.getElementById('arch-result-count');
+    if (countEl) countEl.textContent = wos.length + ' archived';
+    if (!wos.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:#9CA3AF;font-size:13px;">No archived orders.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = wos.map(wo => {
+      const t = TYPE_META[wo.woType] || TYPE_META.other;
+      return `<tr onclick="Router.navigate('wo-detail',{woId:${wo.id}})" style="cursor:pointer;">
+        <td><strong style="font-size:12px;font-family:monospace;color:#111318;">#${wo.id}</strong>${wo.externalId ? `<div style="font-size:10px;color:#9CA3AF;">${wo.externalId}</div>` : ''}</td>
+        <td><span class="wol-type-pill" style="background:${t.bg};color:${t.color};">${t.label}</span></td>
+        <td>
+          <div style="font-size:13px;font-weight:600;color:#111318;">${wo.machine || wo.asset || '—'}</div>
+          <div style="font-size:12px;color:#7A7F8E;">${wo.issue || ''}</div>
+        </td>
+        <td style="font-size:12px;color:#5A5F6E;">${wo.assignee || '—'}</td>
+        <td style="font-size:12px;color:#9CA3AF;">${wo.closedDate || wo.dueDate || '—'}</td>
+        <td>${priorityCell(wo.priority)}</td>
+      </tr>`;
+    }).join('');
+  }
 
-  document.getElementById('hist-tabs').querySelectorAll('.hist-tab').forEach(tab => {
-    tab.addEventListener('click', function() {
-      document.querySelectorAll('#hist-tabs .hist-tab').forEach(t => t.classList.remove('active'));
-      this.classList.add('active');
-      _histTab = this.dataset.htab;
-      _histSelectedId = null;
-      renderHistDetail(null);
-      renderHistRows();
+  renderArchiveRows();
+
+  document.getElementById('arch-search-input').addEventListener('input', function() {
+    _archSearch = this.value; renderArchiveRows();
+  });
+
+  // ── Sort column headers ───────────────────────────────────────────
+  function updateSortHeaders() {
+    document.querySelectorAll('#wol-thead .wol-th-sort').forEach(th => {
+      const f = th.dataset.sort;
+      th.classList.toggle('sorted', f === _sortField);
+      const arrow = th.querySelector('.wol-sort-arrow');
+      if (arrow) arrow.remove();
+      if (f === _sortField) {
+        th.insertAdjacentHTML('beforeend', `<span class="wol-sort-arrow">${_sortDir === 'asc' ? '▲' : '▼'}</span>`);
+      }
+    });
+  }
+
+  document.getElementById('wol-thead').querySelectorAll('.wol-th-sort').forEach(th => {
+    th.addEventListener('click', function() {
+      const f = this.dataset.sort;
+      if (_sortField === f) {
+        _sortDir = _sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        _sortField = f;
+        _sortDir = 'asc';
+      }
+      updateSortHeaders();
+      reRenderOrderTable();
     });
   });
-
-  document.getElementById('hist-search-input').addEventListener('input', function() {
-    _histSearch = this.value; renderHistRows();
-  });
-  document.getElementById('hist-vendor-select').addEventListener('change', function() {
-    _histSupplier = this.value; renderHistRows();
-  });
-  document.getElementById('hist-status-select').addEventListener('change', function() {
-    _histStatus = this.value; renderHistRows();
-  });
-  document.getElementById('hist-date-select').addEventListener('change', function() {
-    _histDate = this.value; renderHistRows();
-  });
-
-  window.wolHistOpenDetail = function(orderId) {
-    _histSelectedId = orderId;
-    document.querySelectorAll('#hist-tbody tr').forEach(r => {
-      r.classList.toggle('selected-row', r.dataset.id === orderId);
-    });
-    renderHistDetail(orderId);
-  };
-
-  window.wolHistCloseDetail = function() {
-    _histSelectedId = null;
-    document.querySelectorAll('#hist-tbody tr').forEach(r => r.classList.remove('selected-row'));
-    renderHistDetail(null);
-  };
 
   // ── Main tab switch ───────────────────────────────────────────────
   window.wolSwitchMain = function(tab) {
     _mainTab = tab;
     document.getElementById('mtab-orders').classList.toggle('active', tab === 'orders');
-    document.getElementById('mtab-history').classList.toggle('active', tab === 'history');
+    document.getElementById('mtab-archive').classList.toggle('active', tab === 'archive');
     const op = document.getElementById('wol-orders-panel');
-    const hp = document.getElementById('wol-history-panel');
+    const ap = document.getElementById('wol-archive-panel');
     if (op) { op.style.display = tab === 'orders' ? 'flex' : 'none'; }
-    if (hp) { hp.style.display = tab === 'history' ? 'flex' : 'none'; }
+    if (ap) { ap.style.display = tab === 'archive' ? 'flex' : 'none'; }
   };
 
   // ── New Order modal ───────────────────────────────────────────────
