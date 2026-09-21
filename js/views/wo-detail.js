@@ -316,6 +316,8 @@ function render_wo_detail(el) {
 .btn-danger:hover { background: #FCEBEB; }
 .btn-archive { background: #FFFBF0; border: 0.5px solid #D97706; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; color: #92400E; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
 .btn-archive:hover { background: #FEF3C7; }
+.btn-unarchive { background: #F3F4F6; border: 0.5px solid #D1D5DB; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; color: #374151; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+.btn-unarchive:hover { background: #E5E7EB; }
 .wod-readonly-banner { display:flex; align-items:center; gap:8px; background:#F3F4F6; border-bottom:0.5px solid #E5E7EB; padding:10px 28px; font-size:12px; color:#6B7280; font-weight:500; }
 .wod-readonly-banner i { font-size:14px; }
 .wo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
@@ -460,6 +462,7 @@ function render_wo_detail(el) {
             </select>
           </div>`}
           ${wo.status === 'closed' && !isArchived ? `<button class="btn-archive" id="wod-archive-btn" title="Move to archive"><i class="ti ti-archive" style="font-size:14px;"></i> Archive this order?</button>` : ''}
+          ${isArchived ? `<button class="btn-unarchive" id="wod-unarchive-btn"><i class="ti ti-archive-off" style="font-size:14px;"></i> Un-archive</button>` : ''}
           <button class="btn-ghost" onclick="Router.navigate('wo-list')"><i class="ti ti-arrow-left" style="font-size:14px;"></i> Back</button>
           ${wo.status !== 'closed' && !isArchived ? `<button class="btn-danger" id="wod-close-btn"><i class="ti ti-x" style="font-size:14px;"></i> Close WO</button>` : ''}
         </div>
@@ -608,6 +611,17 @@ function render_wo_detail(el) {
       Modal.confirm('Close Work Order #' + wo.id + '? This cannot be undone.', () => {
         Store.closeWorkOrder(wo.id);
         Router.navigate('wo-list');
+      });
+    });
+  }
+
+  // Un-archive WO
+  const unarchiveBtn = document.getElementById('wod-unarchive-btn');
+  if (unarchiveBtn) {
+    unarchiveBtn.addEventListener('click', function() {
+      Modal.confirm('Un-archive Work Order #' + wo.id + '? It will return to the Orders list as a closed order.', () => {
+        Store.updateWorkOrder(wo.id, { archived: false });
+        Router.navigate('wo-detail', { woId: wo.id });
       });
     });
   }
