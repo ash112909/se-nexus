@@ -452,7 +452,7 @@ function render_wo_detail(el) {
             </select>
           </div>
           <button class="btn-ghost" onclick="sendPrompt('Open orders list')"><i class="ti ti-arrow-left" style="font-size:14px;"></i> Back</button>
-          ${wo.status !== 'closed' ? `<button class="btn-danger" id="wod-close-btn"><i class="ti ti-x" style="font-size:14px;"></i> Close WO</button>` : ''}
+          ${wo.status !== 'closed' ? `<button class="btn-danger" id="wod-close-btn"><i class="ti ti-x" style="font-size:14px;"></i> Cancel WO</button>` : ''}
         </div>
       </div>
 
