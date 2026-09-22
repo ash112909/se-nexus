@@ -464,7 +464,7 @@ function render_wo_detail(el) {
           ${wo.status === 'closed' && !isArchived ? `<button class="btn-archive" id="wod-archive-btn" title="Move to archive"><i class="ti ti-archive" style="font-size:14px;"></i> Archive this order?</button>` : ''}
           ${isArchived ? `<button class="btn-unarchive" id="wod-unarchive-btn"><i class="ti ti-archive-off" style="font-size:14px;"></i> Un-archive</button>` : ''}
           <button class="btn-ghost" onclick="Router.navigate('wo-list')"><i class="ti ti-arrow-left" style="font-size:14px;"></i> Back</button>
-          ${wo.status !== 'closed' && !isArchived ? `<button class="btn-danger" id="wod-close-btn"><i class="ti ti-x" style="font-size:14px;"></i> Close WO</button>` : ''}
+          ${wo.status !== 'closed' && !isArchived ? `<button class="btn-danger" id="wod-close-btn"><i class="ti ti-x" style="font-size:14px;"></i> Cancel WO</button>` : ''}
         </div>
       </div>
 
