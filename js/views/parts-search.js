@@ -2911,7 +2911,7 @@ function render_parts_search(el) {
     const cart = getActiveCart();
     const item = cart.find(c=>c.id===partId);
     if (!item) return;
-    const newQty = Math.max(1, (item.qty||1) + delta);
+    const newQty = (item.qty||1) + delta;
     if (_woId) Store.updateWoCartQty(_woId, partId, newQty);
     else Store.updateCartQty(partId, newQty);
     renderDetail();

@@ -728,8 +728,9 @@ const Store = (() => {
   }
 
   function updateCartQty(partId, qty) {
+    if (qty <= 0) { removeFromCart(partId); return; }
     const item = _data.cart.find(c => c.id === partId);
-    if (item) { item.qty = Math.max(1, qty); save(_data); }
+    if (item) { item.qty = qty; save(_data); }
   }
 
   function clearCart() { _data.cart = []; save(_data); }

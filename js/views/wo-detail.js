@@ -216,27 +216,34 @@ function render_wo_detail(el) {
     let bodyHtml = '';
 
     if (_cartGroupBy === 'none') {
-      // Group related items (original + replacement) as visual units
+      // Build ordered list of "units": a unit is [original, replacement?] or just [standalone]
       const rendered = new Set();
-      const rows = [];
+      const units = [];
       cart.forEach(c => {
         if (rendered.has(c.id)) return;
-        if (c.replacesId && !rendered.has(c.replacesId)) return; // will be rendered with original
-        rows.push(itemRow(c));
+        if (c.replacesId) return; // rendered with its original
         rendered.add(c.id);
-        // If this item has a replacement, render it immediately after with a connector
         if (c.replacedBy) {
           const rep = cart.find(x => x.id === c.replacedBy);
-          if (rep) {
-            rows.push(`<tr class="cart-xref-connector-row"><td colspan="9" style="padding:0 10px 0 40px;border-bottom:none;"><div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#534AB7;padding:2px 0;"><div style="width:1px;height:16px;background:#C5C3F8;margin-left:6px;margin-right:10px;flex-shrink:0;"></div><i class="ti ti-arrows-exchange" style="font-size:11px;"></i> Replaced by</div></td></tr>`);
-            rows.push(itemRow(rep));
-            rendered.add(rep.id);
-          }
+          if (rep) { rendered.add(rep.id); units.push([c, rep]); return; }
         }
+        units.push([c]);
       });
-      // Render any remaining items not yet rendered (shouldn't happen but safety net)
-      cart.forEach(c => { if (!rendered.has(c.id)) rows.push(itemRow(c)); });
-      bodyHtml = `<tbody>${rows.join('')}</tbody>`;
+      cart.forEach(c => { if (!rendered.has(c.id)) units.push([c]); });
+
+      bodyHtml = units.map((unit, idx) => {
+        const isPair = unit.length === 2;
+        const sep = idx > 0 ? `<tr class="cart-unit-sep"><td colspan="9"></td></tr>` : '';
+        if (isPair) {
+          const [orig, rep] = unit;
+          return `${sep}<tbody class="cart-unit-pair">
+            ${itemRow(orig)}
+            <tr class="cart-xref-label-row"><td colspan="9"><div class="cart-xref-label"><i class="ti ti-arrows-exchange" style="font-size:10px;"></i> Cross-ref applied — replaced by</div></td></tr>
+            ${itemRow(rep)}
+          </tbody>`;
+        }
+        return `${sep}<tbody class="cart-unit-single">${itemRow(unit[0])}</tbody>`;
+      }).join('');
     } else {
       let groups;
       if (_cartGroupBy === 'vendor') {
@@ -359,6 +366,13 @@ function render_wo_detail(el) {
 .cart-grp-chip-active:hover { background: #2A2D3A; }
 .cart-group-hdr { font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; color: #9CA3AF; padding: 7px 12px; background: #FAFAF8; border-top: 1px solid #E8E4DF; display: flex; align-items: center; gap: 7px; }
 .cart-group-hdr:first-child { border-top: none; }
+/* Cross-ref pair grouping */
+.cart-unit-sep td { padding: 4px 0 0; border: none; }
+.cart-unit-pair { border-left: 3px solid #534AB7; }
+.cart-unit-pair .cart-row td:first-child { padding-left: 11px !important; }
+.cart-xref-label-row td { padding: 0; border-bottom: none; }
+.cart-xref-label { font-size: 10px; font-weight: 700; color: #534AB7; background: #F3F1FE; padding: 3px 14px; display: flex; align-items: center; gap: 5px; letter-spacing: .3px; }
+.cart-unit-single {  }
 .cart-section-title { font-size: 14px; font-weight: 600; color: #111318; display: flex; align-items: center; gap: 8px; }
 .cart-badge { background: #1C3969; color: #FFFFFF; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 1px 8px; }
 .add-parts-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #1C3969; background: #D6E4F7; border: none; border-radius: 7px; padding: 6px 12px; cursor: pointer; font-family: inherit; }
