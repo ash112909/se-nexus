@@ -2295,8 +2295,10 @@ function render_parts_search(el) {
 .dp-avail.g{color:#3B6D11;}.dp-avail.a{color:#1C3969;}
 .dp-path{padding:4px 14px 8px;font-size:10px;color:#9CA3AF;line-height:1.6;display:flex;align-items:flex-start;gap:4px;}
 .dp-actions{padding:12px 14px;border-top:0.5px solid #F0ECE8;margin-top:auto;}
-.dp-add{width:100%;background:#1C3969;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
+.dp-add{flex:1;background:#1C3969;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
 .dp-add:hover{background:#152B52;}
+.dp-wishlist{background:#FFF0F3;border:0.5px solid #F5C5C5;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;color:#A32D2D;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;}
+.dp-wishlist:hover{background:#FCEBEB;}
 .dp-incart{width:100%;background:#D6E4F7;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;color:#1C3969;cursor:default;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
 .dp-sec-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#9CA3AF;padding:10px 14px 4px;}
 .dp-manref{display:flex;align-items:center;gap:6px;padding:4px 14px;font-size:11px;}
@@ -2834,7 +2836,7 @@ function render_parts_search(el) {
       })()}
       <div class="dp-actions">${iC
         ?`<div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;display:flex;align-items:center;gap:6px;background:#D6E4F7;border-radius:8px;padding:8px 12px;"><i class="ti ti-check" style="color:#1C3969;font-size:13px;"></i><span style="font-size:13px;font-weight:600;color:#1C3969;flex:1;">In cart</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#1C3969;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',-1)">−</button><span style="font-size:14px;font-weight:700;color:#1C3969;min-width:20px;text-align:center;">${cartQty(p.id)}</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#1C3969;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',1)">+</button></div></div>`
-        :`<button class="dp-add" onclick="psAddPart('${p.id}')"><i class="ti ti-shopping-cart" style="font-size:13px;"></i> ${cartLabel}</button>`
+        :`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><button class="dp-add" onclick="psAddPart('${p.id}')"><i class="ti ti-shopping-cart" style="font-size:13px;"></i> ${cartLabel}</button><button class="dp-wishlist" onclick="addToWishList(fp('${p.id}'))"><i class="ti ti-heart" style="font-size:13px;"></i> Save to list</button></div>`
       }</div>`;
   }
 

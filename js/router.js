@@ -22,6 +22,7 @@ const Router = (() => {
     'fleet-admin': 'view-fleet-admin',
     'fleet-assets': 'view-fleet-assets',
     'search-results': 'view-search-results',
+    'wishlist': 'view-wishlist',
   };
 
   let _context = {};

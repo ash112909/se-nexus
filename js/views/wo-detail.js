@@ -18,7 +18,7 @@ function render_wo_detail(el) {
       ${buildTopbarRight()}
     </div>
     <div style="padding:40px;color:#9CA3AF;font-size:14px;">
-      <p>Work order not found. <a style="color:#1C3969;cursor:pointer;" onclick="sendPrompt('Open orders list')">Return to orders</a></p>
+      <p>Work order not found. <a style="color:#1C3969;cursor:pointer;" onclick="Router.navigate('wo-list')">Return to orders</a></p>
     </div>
   </div>
 </div>`;
@@ -83,7 +83,7 @@ function render_wo_detail(el) {
     if (!container) return;
 
     if (!cart.length) {
-      container.innerHTML = `<div style="padding:24px;text-align:center;color:#9CA3AF;font-size:13px;">No items in cart. <a style="color:#1C3969;cursor:pointer;" onclick="sendPrompt('Open Parts Search scoped to WO #${wo.id}')">Search parts to add</a></div>`;
+      container.innerHTML = `<div style="padding:24px;text-align:center;color:#9CA3AF;font-size:13px;">No items in cart. <a style="color:#1C3969;cursor:pointer;" onclick="Router.navigate('parts-search',{woId:'${wo.id}'})">Search parts to add</a></div>`;
       document.getElementById('wod-cart-total-row').style.display = 'none';
       return;
     }
@@ -216,7 +216,27 @@ function render_wo_detail(el) {
     let bodyHtml = '';
 
     if (_cartGroupBy === 'none') {
-      bodyHtml = `<tbody>${cart.map(itemRow).join('')}</tbody>`;
+      // Group related items (original + replacement) as visual units
+      const rendered = new Set();
+      const rows = [];
+      cart.forEach(c => {
+        if (rendered.has(c.id)) return;
+        if (c.replacesId && !rendered.has(c.replacesId)) return; // will be rendered with original
+        rows.push(itemRow(c));
+        rendered.add(c.id);
+        // If this item has a replacement, render it immediately after with a connector
+        if (c.replacedBy) {
+          const rep = cart.find(x => x.id === c.replacedBy);
+          if (rep) {
+            rows.push(`<tr class="cart-xref-connector-row"><td colspan="9" style="padding:0 10px 0 40px;border-bottom:none;"><div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#534AB7;padding:2px 0;"><div style="width:1px;height:16px;background:#C5C3F8;margin-left:6px;margin-right:10px;flex-shrink:0;"></div><i class="ti ti-arrows-exchange" style="font-size:11px;"></i> Replaced by</div></td></tr>`);
+            rows.push(itemRow(rep));
+            rendered.add(rep.id);
+          }
+        }
+      });
+      // Render any remaining items not yet rendered (shouldn't happen but safety net)
+      cart.forEach(c => { if (!rendered.has(c.id)) rows.push(itemRow(c)); });
+      bodyHtml = `<tbody>${rows.join('')}</tbody>`;
     } else {
       let groups;
       if (_cartGroupBy === 'vendor') {
@@ -433,7 +453,7 @@ function render_wo_detail(el) {
   <div class="main">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
-        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('dashboard')">Dashboard</a>
+        <a style="color:#5C6070;cursor:pointer;" onclick="Router.navigate('home')">Home</a>
         <span style="color:#3C4052;">/</span>
         <a style="color:#5C6070;cursor:pointer;" onclick="Router.navigate('wo-list')">Orders</a>
         <span style="color:#3C4052;">/</span>
@@ -522,7 +542,7 @@ function render_wo_detail(el) {
                 <button id="cart-grp-${v}" class="cart-grp-chip${_cartGroupBy===v?' cart-grp-chip-active':''}" onclick="wodSetGroupBy('${v}')">${l}</button>
               `).join('')}
             </div>
-            ${isArchived ? '' : `<button class="add-parts-btn" onclick="sendPrompt('Open Parts Search scoped to WO #${wo.id}')">
+            ${isArchived ? '' : `<button class="add-parts-btn" onclick="Router.navigate('parts-search',{woId:'${wo.id}'})">
               <i class="ti ti-plus" style="font-size:12px;"></i> Add parts
             </button>`}
           </div>
@@ -668,6 +688,17 @@ function render_wo_detail(el) {
     updateCartBadge();
   };
   window.wodRemoveItem = function(partId) {
+    const cart = Store.getWoCart(wo.id);
+    const item = cart.find(c => c.id === partId);
+    if (item && item.replacesId) {
+      // Removing a replacement — restore original so cross-ref can be re-applied
+      const original = cart.find(c => c.id === item.replacesId);
+      if (original) Store.updateWoCartItem(wo.id, item.replacesId, { replacedBy: null });
+    }
+    if (item && item.replacedBy) {
+      // Removing an original that has a replacement — remove the replacement too
+      Store.removeFromWoCart(wo.id, item.replacedBy);
+    }
     Store.removeFromWoCart(wo.id, partId);
     renderCart();
     updateCartBadge();
@@ -854,7 +885,6 @@ function render_wo_detail(el) {
       body,
       wide: true,
       actions: [
-        { label: 'Proceed to order anyway', onClick: () => { Modal.close(); _doNavigateToOrder(); } },
         { label: 'Continue →', primary: true, onClick: () => { Modal.close(); _doNavigateToOrder(); } },
       ],
     });

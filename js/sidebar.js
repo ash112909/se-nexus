@@ -117,6 +117,7 @@ function buildSidebar(activeItem, opts) {
       <div class="sb-section-label">${isSupervisor ? 'Operations' : 'My work'}</div>
       <div class="sb-item ${activeItem==='home'?'active':''}" onclick="Router.navigate('home')"><i class="ti ti-home"></i><span class="sb-lbl"> Home</span></div>
       <div class="sb-item ${activeItem==='wo'?'active':''}" onclick="Router.navigate('wo-list')"><i class="ti ti-clipboard-list"></i><span class="sb-lbl"> Orders <span class="sb-badge">2</span></span></div>
+      <div class="sb-item ${activeItem==='wishlist'?'active':''}" onclick="Router.navigate('wishlist')"><i class="ti ti-heart"></i><span class="sb-lbl"> Wish Lists</span></div>
       ${_can('approvals') ? `<div class="sb-item ${activeItem==='approvals'?'active':''}" onclick="sendPrompt('Open approvals')"><i class="ti ti-circle-check"></i><span class="sb-lbl"> Approvals</span></div>` : ''}
       ${_can('analytics') ? `<div class="sb-item ${activeItem==='analytics'?'active':''}" onclick="sendPrompt('Open analytics')"><i class="ti ti-chart-bar"></i><span class="sb-lbl"> Analytics</span></div>` : ''}
       ${_can('cms') ? `<div class="sb-item ${activeItem==='cms'?'active':''}" onclick="Router.navigate('cms')"><i class="ti ti-pencil"></i><span class="sb-lbl"> Content mgmt</span></div>` : ''}

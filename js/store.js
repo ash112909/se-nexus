@@ -558,8 +558,16 @@ const Store = (() => {
   function updateWoCartQty(woId, partId, qty) {
     const wo = getWorkOrder(woId);
     if (!wo || !wo.cart) return;
+    if (qty <= 0) { removeFromWoCart(woId, partId); return; }
     const item = wo.cart.find(c => c.id === partId);
-    if (item) { item.qty = Math.max(1, qty); save(_data); }
+    if (item) { item.qty = qty; save(_data); }
+  }
+
+  function updateWoCartItem(woId, partId, changes) {
+    const wo = getWorkOrder(woId);
+    if (!wo || !wo.cart) return;
+    const item = wo.cart.find(c => c.id === partId);
+    if (item) { Object.assign(item, changes); save(_data); }
   }
 
   function swapWoCartItem(woId, originalId, newPart) {
@@ -1232,6 +1240,50 @@ const Store = (() => {
   }
   function getUnreadCount() { return getNotifications(true).length; }
 
+  // --- Wish Lists ---
+  function getWishLists() {
+    if (!_data.wishLists) _data.wishLists = [];
+    return _data.wishLists;
+  }
+  function createWishList(name) {
+    if (!_data.wishLists) _data.wishLists = [];
+    const list = { id: 'wl-' + Date.now(), name: name || 'New List', items: [], createdAt: Date.now() };
+    _data.wishLists.push(list);
+    save(_data);
+    return list;
+  }
+  function renameWishList(listId, name) {
+    const list = (getWishLists()).find(l => l.id === listId);
+    if (list) { list.name = name; save(_data); }
+  }
+  function deleteWishList(listId) {
+    _data.wishLists = getWishLists().filter(l => l.id !== listId);
+    save(_data);
+  }
+  function addToWishList(listId, part) {
+    const list = getWishLists().find(l => l.id === listId);
+    if (!list) return;
+    if (!list.items.find(i => i.id === part.id)) {
+      list.items.push(Object.assign({}, part, { addedAt: Date.now() }));
+      save(_data);
+    }
+  }
+  function removeFromWishList(listId, partId) {
+    const list = getWishLists().find(l => l.id === listId);
+    if (list) { list.items = list.items.filter(i => i.id !== partId); save(_data); }
+  }
+  function moveWishListItem(fromListId, toListId, partId) {
+    const from = getWishLists().find(l => l.id === fromListId);
+    const to = getWishLists().find(l => l.id === toListId);
+    if (!from || !to) return;
+    const item = from.items.find(i => i.id === partId);
+    if (item) {
+      from.items = from.items.filter(i => i.id !== partId);
+      if (!to.items.find(i => i.id === partId)) to.items.push(item);
+      save(_data);
+    }
+  }
+
   // --- Reset ---
   function reset() {
     _data = JSON.parse(JSON.stringify(DEFAULTS));
@@ -1242,7 +1294,7 @@ const Store = (() => {
     getWorkOrders, getWorkOrder, addWorkOrder, addPartsToWorkOrder, updateWorkOrder, addWoNote, closeWorkOrder, archiveWorkOrder,
     getOrders, addOrder, updateOrder,
     getCart, addToCart, removeFromCart, updateCartQty, clearCart, submitCart,
-    getWoCart, addToWoCart, removeFromWoCart, updateWoCartQty, submitWoCart,
+    getWoCart, addToWoCart, removeFromWoCart, updateWoCartQty, updateWoCartItem, submitWoCart,
     swapWoCartItem, setWoCartItemSource, setWoCartItemSources, submitWoCartItems,
     addDiagnosticMessage, getDiagnosticHistory, clearDiagnosticHistory,
     createDiagSession, getDiagSessions, getActiveDiagSession, setActiveDiagSession,
@@ -1258,6 +1310,7 @@ const Store = (() => {
     getSupplierFleets, getPriceRequests, addPriceRequest, respondToPriceRequest, addPriceRequestComment,
     getNotifications, markNotificationRead, markAllNotificationsRead, getUnreadCount,
     getCmsArticles, getCmsArticle, saveCmsArticle, deleteCmsArticle, getActiveBanners, dismissBanner,
+    getWishLists, createWishList, renameWishList, deleteWishList, addToWishList, removeFromWishList, moveWishListItem,
     reset,
   };
 })();
