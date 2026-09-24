@@ -1,5 +1,5 @@
 const Store = (() => {
-  const LS_KEY = 'se-nexus-v8';
+  const LS_KEY = 'se-nexus-v9';
 
   const DEFAULT_PARTS = [
     // ── Skyjack — SJIII 3219 / shared ────────────────────────────────────────
