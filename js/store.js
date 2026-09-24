@@ -378,6 +378,21 @@ const Store = (() => {
           { id: 'p-skj-7', partNum: 'SKJ-105-5310', description: 'Hydraulic Gear Pump', vendor: 'Skyjack', price: 158.00, qty: 1, oemOnly: false },
         ]
       },
+      { id: 'ord-5c', poNum: null, vendor: 'W.W. Grainger', vendorId: 'GRG-001', date: 'Jun 19, 2026', user: 'D. Patel', name: 'Drive belt and tensioner — WO #100103', wo: 'WO #100103', asset: 'SL-022', amount: 143.00, status: 'review', tab: 'review', approvalType: 'cart_only', notes: [],
+        items: [
+          { id: 'p-dp-1', partNum: 'GRG-4VL37', description: 'V-Belt Drive A-Section 42"', vendor: 'Grainger', price: 18.50, qty: 2, oemOnly: false, inStock: true, uom: 'EA' },
+          { id: 'p-dp-2', partNum: 'GRG-3KCR8', description: 'Belt Tensioner Pulley Assembly', vendor: 'Grainger', price: 54.00, qty: 1, oemOnly: false, inStock: true, uom: 'EA', localInventory: [{ locationName: 'Austin Shop', qty: 3 }] },
+          { id: 'p-dp-3', partNum: 'GRG-2KXE9', description: 'Idler Arm Spring Clip', vendor: 'Grainger', price: 8.25, qty: 4, oemOnly: false, inStock: false, uom: 'EA' },
+        ]
+      },
+      { id: 'ord-5d', poNum: null, vendor: 'Napa Auto Parts', vendorId: 'NAPA-ATX', date: 'Jun 17, 2026', user: 'T. Nguyen', name: 'Filter kit — WO #100099', wo: 'WO #100099', asset: 'BL-041', amount: 97.75, status: 'review', tab: 'review', approvalType: 'cart_only', notes: [],
+        items: [
+          { id: 'p-tn-1', partNum: 'NAPA-1042', description: 'Oil Filter Heavy Duty', vendor: 'Napa', price: 11.25, qty: 2, oemOnly: false, inStock: true, uom: 'EA' },
+          { id: 'p-tn-2', partNum: 'NAPA-3387', description: 'Hydraulic Return Filter Element', vendor: 'Napa', price: 38.50, qty: 1, oemOnly: false, inStock: true, uom: 'EA' },
+          { id: 'p-tn-3', partNum: 'NAPA-7214', description: 'Fuel Filter Spin-On', vendor: 'Napa', price: 14.25, qty: 2, oemOnly: false, inStock: false, uom: 'EA',
+            crossRefs: [{ id: 'cr-tn-1', partNum: 'FLT-FF214', description: 'Aftermarket Fuel Filter (direct fit)', vendor: 'FleetFilter', price: 9.99, mandatory: false }] },
+        ]
+      },
       { id: 'ord-6', poNum: 'PO-7789', vendor: 'Parker', vendorId: 'PKR-WD', date: 'Jun 8, 2026', user: 'James W.', name: 'Aftermarket valve PAR-88821', wo: 'WO #100094', asset: 'FL-094', amount: 89.00, status: 'submitted', tab: 'submitted',
         items: [
           { id: 'p-pkr-3', partNum: 'PAR-88821', description: 'Relief Valve 3000 PSI', vendor: 'Parker', price: 89.00, qty: 1, oemOnly: false },

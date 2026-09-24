@@ -12,6 +12,8 @@ function render_approvals(el) {
   let _editItems = [];
   let _originalItems = [];
 
+  // ─── helpers ───────────────────────────────────────────────────────────────
+
   function statusPillClass(status) {
     const map = { saved: 'pill-saved', submitted: 'pill-submitted', delivered: 'pill-delivered', backordered: 'pill-backordered', review: 'pill-review' };
     return map[status] || 'pill-saved';
@@ -45,6 +47,12 @@ function render_approvals(el) {
     }
     return `<span class="ap-type-badge ap-type-limit"><i class="ti ti-alert-triangle" style="font-size:10px;"></i> Needs review</span>`;
   }
+
+  function calcTotal(items) {
+    return items.reduce((s, it) => s + (it.price || 0) * (it.qty || 1), 0);
+  }
+
+  // ─── table rows ────────────────────────────────────────────────────────────
 
   function renderRows() {
     const orders = getOrders();
@@ -89,111 +97,148 @@ function render_approvals(el) {
     if (badge) badge.textContent = count > 0 ? count + ' pending' : 'No items pending';
   }
 
-  function calcTotal(items) {
-    return items.reduce(function(s, it) { return s + (it.price || 0) * (it.qty || 1); }, 0);
+  // ─── cart rendering — mirrors wo-detail's renderCart exactly ───────────────
+
+  function itemStatus(c) {
+    if (c.replacedBy) return 'replaced';
+    if (c.replacesId) return c.inStock ? 'orderable' : 'needs_attention';
+    const hasMand = (c.crossRefs || []).some(r => r.mandatory);
+    if (!c.inStock && !(c.crossRefs || []).length) return 'unorderable';
+    if (hasMand) return 'blocked';
+    if (!c.inStock) return 'needs_attention';
+    if ((c.localInventory || []).length && !c.selectedSources && !c.selectedSource) return 'needs_attention';
+    return 'orderable';
   }
 
-  // --- item row for rich cart-style display ---
-  function itemStatusBadge(it) {
-    // Use item's availability field if present, else derive from localStock
-    const avail = it.availability || (it.localStock > 0 ? 'In stock' : it.localStock === 0 ? 'Out of stock' : null);
-    if (!avail) return '';
-    const green = avail === 'In stock' || avail === 'Available';
-    const color = green ? '#3B6D11' : '#92400E';
-    const bg = green ? '#EAF3DE' : '#FEF3C7';
-    return `<span style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:999px;background:${bg};color:${color};">${avail}</span>`;
+  function statusCell(c) {
+    const st = itemStatus(c);
+    if (st === 'replaced') return `<div class="ci-status" style="color:#C8C3BC;"><i class="ti ti-replace"></i></div>`;
+    if (st === 'blocked') return `<div class="ci-status ci-err"><i class="ti ti-lock"></i></div>`;
+    const tip = !c.inStock ? 'Backordered' : 'Ready to order';
+    if (st === 'orderable') return `<div class="ci-status ci-ok"><i class="ti ti-circle-check"></i></div>`;
+    if (st === 'needs_attention') return `<div class="ci-status ci-warn"><i class="ti ti-alert-triangle"></i></div>`;
+    return `<div class="ci-status ci-err"><i class="ti ti-circle-x"></i></div>`;
   }
 
-  function localStockBadge(it) {
-    if (it.localStock == null) return '';
-    if (it.localStock > 0) return `<span style="font-size:10px;padding:2px 6px;border-radius:999px;background:#EDE9FE;color:#5B21B6;">${it.localStock} local</span>`;
-    return '';
-  }
-
-  function sourcingChip(it) {
-    const src = it.source || it.sourcingLabel || null;
-    if (!src) return '';
-    return `<span style="font-size:10px;padding:2px 7px;border-radius:999px;background:#F0ECE8;color:#5A5F6E;border:0.5px solid #E2DDD8;">${src}</span>`;
-  }
-
-  function xrefBadge(it, idx) {
-    if (it.replacedBy) {
-      return `<span class="ap-xref-badge ap-xref-replaced" title="Replaced by another part">Superseded</span>`;
+  function xrefBadge(c) {
+    if (c.replacedBy || c.replacesId) return '';
+    const refs = c.crossRefs || [];
+    if (!refs.length) return '';
+    if (refs.some(r => r.mandatory)) {
+      return `<span class="ci-xref ci-xref-mand"><i class="ti ti-switch-horizontal" style="font-size:10px;"></i> Mandatory cross-ref</span>`;
     }
-    if (it.replacesId) {
-      return `<span class="ap-xref-badge ap-xref-replacement" onclick="apShowXrefModal(${idx})" title="Cross-reference applied — click to change">X-Ref <i class="ti ti-pencil" style="font-size:9px;"></i></span>`;
-    }
-    return `<button class="ap-xref-add-btn" onclick="apShowXrefModal(${idx})" title="Apply cross-reference"><i class="ti ti-arrows-right-left" style="font-size:11px;"></i></button>`;
+    return `<span class="ci-xref ci-xref-opt"><i class="ti ti-switch-horizontal" style="font-size:10px;"></i> ${refs.length} optional cross-ref${refs.length !== 1 ? 's' : ''}</span>`;
   }
 
-  function renderEditItemsTable() {
-    const tbody = document.getElementById('ap-items-tbody');
+  function localCell(c) {
+    if (c.replacedBy) return '<span class="ci-dash">—</span>';
+    const sources = c.selectedSources || (c.selectedSource ? [c.selectedSource] : []);
+    if (sources.length) {
+      const srcQty = sources.reduce((s, x) => s + (x.qty || 0), 0);
+      const label = sources.length === 1 ? sources[0].locationName : sources.length + ' locations';
+      return `<span class="ci-local ci-local-sel"><i class="ti ti-map-pin" style="font-size:10px;"></i> ${label}${srcQty ? ' (' + srcQty + ')' : ''}</span>`;
+    }
+    const inv = c.localInventory || [];
+    if (!inv.length) return '<span class="ci-dash">—</span>';
+    const total = inv.reduce((s, l) => s + l.qty, 0);
+    return `<span class="ci-local"><i class="ti ti-map-pin" style="font-size:10px;"></i> ${total} avail</span>`;
+  }
+
+  function itemRow(c, idx) {
+    const replaced = !!c.replacedBy;
+    const rowStyle = replaced ? 'opacity:0.45;' : '';
+    const descStyle = replaced ? 'text-decoration:line-through;color:#9CA3AF;' : '';
+    const partStyle = replaced ? 'text-decoration:line-through;color:#9CA3AF;' : '';
+    const replacesOrig = c.replacesId ? _editItems.find(x => x.id === c.replacesId) : null;
+    return `<tr class="cart-row" style="${rowStyle}">
+      <td class="col-st">${statusCell(c)}</td>
+      <td class="col-pn">
+        <div class="ci-partnum" style="${partStyle}">${c.partNum || '—'}</div>
+        <div class="ci-vendor-line">${c.vendor || '—'}${c.oemOnly ? ' <span class="oem-badge">OEM</span>' : ''}</div>
+      </td>
+      <td class="col-desc">
+        <div class="ci-desc-name" style="${descStyle}">${c.description || c.name || '—'}</div>
+        ${replacesOrig ? `<div style="font-size:10px;color:#7A7F8E;margin-top:2px;display:flex;align-items:center;gap:3px;"><i class="ti ti-arrows-exchange" style="font-size:10px;"></i> Replaces ${replacesOrig.partNum}</div>` : ''}
+        <div style="display:flex;align-items:center;gap:5px;margin-top:3px;">${xrefBadge(c)}</div>
+      </td>
+      <td class="col-uom"><span class="uom-badge">${c.uom || 'EA'}</span></td>
+      <td class="col-loc">${localCell(c)}</td>
+      <td class="col-qty">
+        ${replaced ? '<span style="color:#C8C3BC;font-size:12px;">—</span>' : `<div class="ci-qty-ctrl">
+          <button class="qty-btn" onclick="apQtyAdj(${idx},-1)">−</button>
+          <span class="qty-val">${c.qty || 1}</span>
+          <button class="qty-btn" onclick="apQtyAdj(${idx},1)">+</button>
+        </div>`}
+      </td>
+      <td class="col-unit" style="text-align:right;font-size:12px;color:#7A7F8E;">${replaced ? '—' : '$' + c.price.toFixed(2)}</td>
+      <td class="col-tot" style="text-align:right;font-size:13px;font-weight:700;color:${replaced ? '#C8C3BC' : '#111318'};">${replaced ? '—' : '$' + (c.price * (c.qty || 1)).toFixed(2)}</td>
+      <td class="col-rm">${replaced ? '' : `<button class="ci-remove" onclick="apRemoveItem(${idx})" title="Remove"><i class="ti ti-trash" style="font-size:13px;"></i></button>`}</td>
+    </tr>`;
+  }
+
+  function renderCartTable() {
+    const wrap = document.getElementById('ap-cart-wrap');
     const totalEl = document.getElementById('ap-items-total');
-    if (!tbody) return;
+    const badgeEl = document.getElementById('ap-items-badge');
+    if (!wrap) return;
+
     if (!_editItems.length) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:#9CA3AF;font-size:13px;">No line items.</td></tr>';
+      wrap.innerHTML = '<div style="padding:24px;text-align:center;color:#9CA3AF;font-size:13px;">No line items.</div>';
       if (totalEl) totalEl.textContent = '$0.00';
       return;
     }
 
-    // Group into units (cross-ref pairs)
-    const seen = new Set();
+    // Build units (cross-ref pairs stay together)
+    const rendered = new Set();
     const units = [];
-    _editItems.forEach((it, idx) => {
-      if (seen.has(idx)) return;
-      seen.add(idx);
-      if (it.replacedBy) {
-        const repIdx = _editItems.findIndex(x => x.id === it.replacedBy);
-        if (repIdx !== -1 && !seen.has(repIdx)) {
-          seen.add(repIdx);
-          units.push([{ it, idx }, { it: _editItems[repIdx], idx: repIdx }]);
+    _editItems.forEach((c, idx) => {
+      if (rendered.has(idx)) return;
+      if (c.replacesId) return;
+      rendered.add(idx);
+      if (c.replacedBy) {
+        const repIdx = _editItems.findIndex(x => x.id === c.replacedBy);
+        if (repIdx !== -1 && !rendered.has(repIdx)) {
+          rendered.add(repIdx);
+          units.push([{ c, idx }, { c: _editItems[repIdx], idx: repIdx }]);
           return;
         }
       }
-      units.push([{ it, idx }]);
+      units.push([{ c, idx }]);
     });
+    _editItems.forEach((c, idx) => { if (!rendered.has(idx)) units.push([{ c, idx }]); });
 
-    tbody.innerHTML = units.map((unit, ui) => {
-      const sep = ui > 0 ? `<tr class="ap-unit-sep"><td colspan="8"></td></tr>` : '';
+    const theadHtml = `<thead><tr>
+      <th class="col-st"></th>
+      <th class="col-pn">Part #</th>
+      <th class="col-desc">Description</th>
+      <th class="col-uom">UOM</th>
+      <th class="col-loc">Source / stock</th>
+      <th class="col-qty" style="text-align:center;">Qty</th>
+      <th class="col-unit" style="text-align:right;">Unit</th>
+      <th class="col-tot" style="text-align:right;">Total</th>
+      <th class="col-rm"></th>
+    </tr></thead>`;
+
+    const bodyHtml = units.map((unit, ui) => {
+      const sep = ui > 0 ? `<tr class="cart-unit-sep"><td colspan="9"></td></tr>` : '';
       if (unit.length === 2) {
         const [orig, rep] = unit;
-        return sep + `<tbody class="ap-unit-pair">
-          ${buildItemRow(orig.it, orig.idx, true)}
-          <tr class="ap-xref-label-row"><td colspan="8"><div class="ap-xref-connector"><i class="ti ti-arrows-right-left" style="font-size:10px;"></i> Replaced by cross-reference</div></td></tr>
-          ${buildItemRow(rep.it, rep.idx, false)}
+        return `${sep}<tbody class="cart-unit-pair">
+          ${itemRow(orig.c, orig.idx)}
+          <tr class="cart-xref-label-row"><td colspan="9"><div class="cart-xref-label"><i class="ti ti-arrows-exchange" style="font-size:10px;"></i> Cross-ref applied — replaced by</div></td></tr>
+          ${itemRow(rep.c, rep.idx)}
         </tbody>`;
       }
-      return sep + `<tbody class="ap-unit-single">${buildItemRow(unit[0].it, unit[0].idx, false)}</tbody>`;
+      return `${sep}<tbody class="cart-unit-single">${itemRow(unit[0].c, unit[0].idx)}</tbody>`;
     }).join('');
 
+    wrap.innerHTML = `<table class="wod-cart-table">${theadHtml}${bodyHtml}</table>`;
+
     if (totalEl) totalEl.textContent = '$' + calcTotal(_editItems).toFixed(2);
-    document.getElementById('ap-items-badge') && (document.getElementById('ap-items-badge').textContent = _editItems.length);
+    if (badgeEl) badgeEl.textContent = _editItems.length;
   }
 
-  function buildItemRow(it, idx, isSuperseded) {
-    const strikeStyle = isSuperseded ? 'text-decoration:line-through;opacity:0.55;' : '';
-    return `<tr>
-      <td style="font-family:monospace;font-size:11px;color:#5A5F6E;${strikeStyle}">${it.partNum || '—'}</td>
-      <td style="${strikeStyle}">
-        <div style="font-size:12px;color:#111318;font-weight:500;">${it.description || it.name || '—'}</div>
-        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px;">
-          ${itemStatusBadge(it)}${localStockBadge(it)}${sourcingChip(it)}
-          ${it.oemOnly ? '<span style="font-size:10px;font-weight:600;background:#F5F2EE;color:#5A5F6E;border-radius:4px;padding:1px 5px;">OEM</span>' : ''}
-        </div>
-      </td>
-      <td style="color:#7A7F8E;font-size:12px;${strikeStyle}">${it.vendor || '—'}</td>
-      <td style="text-align:center;">
-        ${isSuperseded ? `<span style="font-size:11px;color:#B0AAA3;">${it.qty || 1}</span>` : `<div class="ap-qty-wrap"><button class="ap-qty-btn" onclick="apQtyDec(${idx})">−</button><input class="ap-qty-input" type="number" min="1" value="${it.qty || 1}" oninput="apQtySet(${idx},this.value)"/><button class="ap-qty-btn" onclick="apQtyInc(${idx})">+</button></div>`}
-      </td>
-      <td style="text-align:center;">${xrefBadge(it, idx)}</td>
-      <td style="text-align:center;">
-        <button class="ap-source-btn" onclick="apShowSourceModal(${idx})" title="Change sourcing"><i class="ti ti-truck" style="font-size:11px;"></i></button>
-      </td>
-      <td style="text-align:right;font-size:12px;">$${(+it.price).toFixed(2)}</td>
-      <td style="text-align:right;font-size:12px;font-weight:600;color:#111318;">$${(it.price * (it.qty || 1)).toFixed(2)}</td>
-      <td style="text-align:center;"><button class="ap-remove-btn" onclick="apRemoveItem(${idx})" title="Remove"><i class="ti ti-trash" style="font-size:12px;"></i></button></td>
-    </tr>`;
-  }
+  // ─── detail panel ──────────────────────────────────────────────────────────
 
   function renderDetailPanel(orderId) {
     const panel = document.getElementById('ap-detail-panel');
@@ -211,13 +256,13 @@ function render_approvals(el) {
     let banner = '';
     if (isLimitExceeded && o.buyerLimit) {
       banner = `<div class="ap-type-banner ap-banner-limit">
-        <i class="ti ti-alert-triangle" style="font-size:14px;"></i>
+        <i class="ti ti-alert-triangle" style="font-size:14px;flex-shrink:0;margin-top:1px;"></i>
         <div><strong>${o.user}</strong> has a <strong>$${(+o.buyerLimit).toLocaleString()}</strong> buyer limit — this order totals <strong>$${(+o.amount).toFixed(2)}</strong>. Approve to override the limit and submit to vendor.</div>
       </div>`;
     } else if (isCartOnly) {
       banner = `<div class="ap-type-banner ap-banner-cart">
-        <i class="ti ti-shopping-cart" style="font-size:14px;"></i>
-        <div><strong>${o.user}</strong> is a cart-only user and cannot submit orders directly. Review and continue to the order screen to submit, or reject.</div>
+        <i class="ti ti-shopping-cart" style="font-size:14px;flex-shrink:0;margin-top:1px;"></i>
+        <div><strong>${o.user}</strong> is a cart-only user and cannot submit orders directly. Review the items below, then continue to the order screen to submit — or reject.</div>
       </div>`;
     }
 
@@ -256,18 +301,17 @@ function render_approvals(el) {
       </div>
       <div class="ap-items-section">
         <div class="ap-items-header">
-          <div style="display:flex;align-items:center;gap:6px;"><i class="ti ti-package" style="font-size:14px;color:#9CA3AF;"></i> <span>Line items</span> <span class="ap-items-badge" id="ap-items-badge">${_editItems.length}</span></div>
-          <div style="font-size:11px;color:#9CA3AF;">Modify qty, sourcing, or cross-references before approving — changes are tracked</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <i class="ti ti-package" style="font-size:14px;color:#9CA3AF;"></i>
+            <span>Line items</span>
+            <span class="ap-items-badge" id="ap-items-badge">${_editItems.length}</span>
+          </div>
+          <div style="font-size:11px;color:#9CA3AF;">Modify quantities or remove items before acting</div>
         </div>
-        <table class="ap-items-table">
-          <thead><tr><th>Part #</th><th>Description &amp; availability</th><th>Vendor</th><th style="text-align:center;">Qty</th><th style="text-align:center;">X-Ref</th><th style="text-align:center;">Source</th><th style="text-align:right;">Unit</th><th style="text-align:right;">Total</th><th></th></tr></thead>
-          <tbody id="ap-items-tbody"></tbody>
-        </table>
+        <div id="ap-cart-wrap"></div>
         <div class="ap-items-total-row">Order total <strong id="ap-items-total">$0.00</strong></div>
       </div>
-      <div class="ap-timeline-section" id="ap-timeline-section">
-        ${renderTimeline(o)}
-      </div>
+      ${renderTimeline(o)}
       <div class="ap-panel-actions">
         ${isCartOnly
           ? `<button class="ap-panel-approve" onclick="apContinue('${o.id}')"><i class="ti ti-arrow-right"></i> Continue to order screen</button>`
@@ -276,7 +320,7 @@ function render_approvals(el) {
         <button class="ap-panel-reject" onclick="apReject('${o.id}')"><i class="ti ti-x"></i> Reject</button>
         <span id="ap-edit-indicator" style="display:none;font-size:11px;color:#1C3969;margin-left:4px;"><i class="ti ti-pencil" style="font-size:11px;"></i> Edits will be saved and noted on approve/continue</span>
       </div>`;
-    renderEditItemsTable();
+    renderCartTable();
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
@@ -296,34 +340,25 @@ function render_approvals(el) {
     </div>`;
   }
 
+  // ─── edit helpers ──────────────────────────────────────────────────────────
+
+  function markEdited() {
+    const ind = document.getElementById('ap-edit-indicator');
+    if (ind) ind.style.display = 'inline-flex';
+  }
+
   function diffItems(original, edited) {
     const changes = [];
     const origMap = {};
     original.forEach(it => { origMap[it.id] = it; });
     const editMap = {};
     edited.forEach(it => { editMap[it.id] = it; });
-
-    // Removed items
-    original.forEach(it => {
-      if (!editMap[it.id]) changes.push(`Removed: ${it.partNum || it.description} (was qty ${it.qty || 1})`);
-    });
-    // Added items (from xref)
-    edited.forEach(it => {
-      if (!origMap[it.id]) changes.push(`Added: ${it.partNum || it.description} (qty ${it.qty || 1})`);
-    });
-    // Modified items
+    original.forEach(it => { if (!editMap[it.id]) changes.push(`Removed: ${it.partNum || it.description} (was qty ${it.qty || 1})`); });
+    edited.forEach(it => { if (!origMap[it.id]) changes.push(`Added: ${it.partNum || it.description} (qty ${it.qty || 1})`); });
     edited.forEach(it => {
       const orig = origMap[it.id];
       if (!orig) return;
-      if ((orig.qty || 1) !== (it.qty || 1)) {
-        changes.push(`${it.partNum || it.description}: qty ${orig.qty || 1} → ${it.qty || 1}`);
-      }
-      if ((orig.source || orig.sourcingLabel) !== (it.source || it.sourcingLabel) && (it.source || it.sourcingLabel)) {
-        changes.push(`${it.partNum || it.description}: sourcing → ${it.source || it.sourcingLabel}`);
-      }
-      if (orig.replacedBy !== it.replacedBy) {
-        changes.push(`${it.partNum || it.description}: cross-reference updated`);
-      }
+      if ((orig.qty || 1) !== (it.qty || 1)) changes.push(`${it.partNum || it.description}: qty ${orig.qty || 1} → ${it.qty || 1}`);
     });
     return changes;
   }
@@ -334,38 +369,22 @@ function render_approvals(el) {
     const approverName = _user.name || _user.email || 'Approver';
     const now = new Date();
     const timeStr = now.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-    const noteText = `Approver edits: ${changes.join('; ')}.`;
     const o = Store.getOrders('all').find(x => x.id === orderId);
     if (!o) return;
-    const notes = o.notes ? o.notes.slice() : [];
-    notes.push({ author: approverName, time: timeStr, text: noteText });
+    const notes = (o.notes || []).concat([{ author: approverName, time: timeStr, text: `Approver edits: ${changes.join('; ')}.` }]);
     Store.updateOrder(orderId, { notes });
   }
 
-  // --- global helpers for inline editing ---
+  // ─── global window callbacks ───────────────────────────────────────────────
 
-  function markEdited() {
-    const ind = document.getElementById('ap-edit-indicator');
-    if (ind) ind.style.display = 'inline-flex';
-  }
-
-  window.apQtyDec = function(idx) {
+  window.apQtyAdj = function(idx, delta) {
     if (!_editItems[idx]) return;
-    const newQty = (_editItems[idx].qty || 1) - 1;
+    const newQty = (_editItems[idx].qty || 1) + delta;
     if (newQty <= 0) { apRemoveItem(idx); return; }
     _editItems[idx].qty = newQty;
-    markEdited(); renderEditItemsTable();
+    markEdited(); renderCartTable();
   };
-  window.apQtyInc = function(idx) {
-    if (!_editItems[idx]) return;
-    _editItems[idx].qty = (_editItems[idx].qty || 1) + 1;
-    markEdited(); renderEditItemsTable();
-  };
-  window.apQtySet = function(idx, val) {
-    if (!_editItems[idx]) return;
-    const n = parseInt(val);
-    if (!isNaN(n) && n > 0) { _editItems[idx].qty = n; markEdited(); renderEditItemsTable(); }
-  };
+
   window.apRemoveItem = function(idx) {
     const it = _editItems[idx];
     if (it && it.replacedBy) {
@@ -377,72 +396,7 @@ function render_approvals(el) {
       if (origIdx !== -1) _editItems[origIdx].replacedBy = null;
     }
     _editItems.splice(idx, 1);
-    markEdited(); renderEditItemsTable();
-  };
-
-  window.apShowSourceModal = function(idx) {
-    const it = _editItems[idx];
-    if (!it) return;
-    const sources = ['Vendor (standard)', 'Local stock', 'Will-call', 'Drop-ship'];
-    const current = it.source || it.sourcingLabel || 'Vendor (standard)';
-    const body = `<div style="margin-bottom:8px;font-size:12px;color:#7A7F8E;">Select sourcing for <strong>${it.partNum || it.description}</strong></div>
-      <div style="display:flex;flex-direction:column;gap:6px;">
-        ${sources.map(s => `<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;padding:8px 10px;border-radius:7px;border:1px solid ${s === current ? '#1C3969' : '#E2DDD8'};background:${s === current ? '#EEF3FA' : '#FFF'};">
-          <input type="radio" name="ap-src" value="${s}" ${s === current ? 'checked' : ''} style="accent-color:#1C3969;"> ${s}
-        </label>`).join('')}
-      </div>`;
-    Modal.show({
-      title: 'Change sourcing',
-      body,
-      actions: [
-        { label: 'Cancel', onClick() { Modal.close(); } },
-        { label: 'Apply', primary: true, onClick() {
-          const sel = document.querySelector('input[name="ap-src"]:checked');
-          if (sel) { _editItems[idx].source = sel.value; markEdited(); renderEditItemsTable(); }
-          Modal.close();
-        }}
-      ]
-    });
-  };
-
-  window.apShowXrefModal = function(idx) {
-    const it = _editItems[idx];
-    if (!it) return;
-    const hasReplacement = !!it.replacedBy;
-    const body = `<div style="font-size:12px;color:#7A7F8E;margin-bottom:12px;">Cross-reference for <strong>${it.partNum || it.description}</strong></div>
-      ${hasReplacement ? `<div style="background:#FEF3C7;border-radius:8px;padding:10px 12px;font-size:12px;color:#92400E;margin-bottom:12px;">This item is currently superseded. Remove the replacement to edit.</div>` : ''}
-      <div style="margin-bottom:8px;">
-        <label style="font-size:12px;font-weight:600;color:#5A5F6E;display:block;margin-bottom:6px;">Replacement part number</label>
-        <input id="ap-xref-partnum" style="width:100%;height:32px;border:1px solid #E2DDD8;border-radius:7px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;" placeholder="Enter part #" value="" ${hasReplacement ? 'disabled' : ''}/>
-      </div>
-      <div>
-        <label style="font-size:12px;font-weight:600;color:#5A5F6E;display:block;margin-bottom:6px;">Description</label>
-        <input id="ap-xref-desc" style="width:100%;height:32px;border:1px solid #E2DDD8;border-radius:7px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;" placeholder="Replacement description" ${hasReplacement ? 'disabled' : ''}/>
-      </div>`;
-    const actions = hasReplacement
-      ? [
-          { label: 'Cancel', onClick() { Modal.close(); } },
-          { label: 'Remove replacement', primary: false, onClick() {
-            const repIdx = _editItems.findIndex(x => x.id === it.replacedBy);
-            if (repIdx !== -1) _editItems.splice(repIdx, 1);
-            _editItems[idx].replacedBy = null;
-            markEdited(); renderEditItemsTable(); Modal.close();
-          }}
-        ]
-      : [
-          { label: 'Cancel', onClick() { Modal.close(); } },
-          { label: 'Apply cross-ref', primary: true, onClick() {
-            const pn = document.getElementById('ap-xref-partnum').value.trim();
-            const desc = document.getElementById('ap-xref-desc').value.trim();
-            if (!pn) return;
-            const repId = 'ap-xref-' + Date.now();
-            const rep = { id: repId, partNum: pn, description: desc || pn, vendor: it.vendor, price: it.price, qty: it.qty || 1, replacesId: it.id };
-            _editItems[idx].replacedBy = repId;
-            _editItems.splice(idx + 1, 0, rep);
-            markEdited(); renderEditItemsTable(); Modal.close();
-          }}
-        ];
-    Modal.show({ title: 'Cross-reference', body, actions });
+    markEdited(); renderCartTable();
   };
 
   window.apApprove = function(orderId) {
@@ -503,7 +457,8 @@ function render_approvals(el) {
     }, 50);
   };
 
-  // --- render shell ---
+  // ─── shell ─────────────────────────────────────────────────────────────────
+
   el.innerHTML = `
 <style>
 .ap-page { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
@@ -530,7 +485,7 @@ function render_approvals(el) {
 .ap-type-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; border-radius: 999px; padding: 3px 8px; white-space: nowrap; }
 .ap-type-limit { background: #FEF3C7; color: #92400E; }
 .ap-type-cart { background: #EDE9FE; color: #5B21B6; }
-.ap-type-banner { display: flex; align-items: flex-start; gap: 10px; padding: 12px 24px; font-size: 12px; border-bottom: 0.5px solid #E8E4DF; }
+.ap-type-banner { display: flex; align-items: flex-start; gap: 10px; padding: 12px 24px; font-size: 12px; border-bottom: 0.5px solid #E8E4DF; line-height: 1.5; }
 .ap-banner-limit { background: #FFFBEB; color: #92400E; }
 .ap-banner-cart { background: #F5F3FF; color: #5B21B6; }
 .ap-actions { display: flex; align-items: center; gap: 6px; }
@@ -560,28 +515,7 @@ function render_approvals(el) {
 .ap-items-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px 8px; }
 .ap-items-header span { font-size: 12px; font-weight: 600; color: #5A5F6E; text-transform: uppercase; letter-spacing: 0.8px; }
 .ap-items-badge { font-size: 10px; font-weight: 700; border-radius: 999px; padding: 1px 8px; background: #F0ECE8; color: #5A5F6E; }
-.ap-items-table { width: 100%; border-collapse: collapse; }
-.ap-items-table th { font-size: 10px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: #9CA3AF; padding: 6px 12px; text-align: left; background: #FAFAF8; border-top: 0.5px solid #F0ECE8; border-bottom: 0.5px solid #F0ECE8; }
-.ap-items-table td { padding: 8px 12px; font-size: 12px; color: #3A3D4A; border-bottom: 0.5px solid #F5F2EE; vertical-align: middle; }
-.ap-unit-pair { border-left: 3px solid #534AB7; }
-.ap-unit-sep td { padding: 4px 0; background: transparent; border: none; }
-.ap-xref-label-row td { padding: 0; border-bottom: none; }
-.ap-xref-connector { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 600; color: #534AB7; padding: 4px 12px; background: #F0EEFE; }
-.ap-xref-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 600; border-radius: 4px; padding: 2px 6px; cursor: pointer; }
-.ap-xref-replaced { background: #FEF3C7; color: #92400E; }
-.ap-xref-replacement { background: #EDE9FE; color: #5B21B6; }
-.ap-xref-add-btn { background: none; border: 1px dashed #C8C3BE; border-radius: 4px; color: #B0AAA3; cursor: pointer; padding: 2px 5px; font-size: 11px; }
-.ap-xref-add-btn:hover { background: #F0EEFE; border-color: #534AB7; color: #534AB7; }
-.ap-source-btn { background: none; border: 1px solid #E2DDD8; border-radius: 4px; color: #9CA3AF; cursor: pointer; padding: 2px 6px; font-size: 11px; }
-.ap-source-btn:hover { background: #F5F2EE; color: #5A5F6E; }
 .ap-items-total-row { padding: 10px 24px; font-size: 12px; color: #7A7F8E; text-align: right; border-top: 0.5px solid #F0ECE8; }
-.ap-qty-wrap { display: inline-flex; align-items: center; gap: 4px; }
-.ap-qty-btn { width: 22px; height: 22px; background: #F0ECE8; border: none; border-radius: 4px; font-size: 14px; font-weight: 700; color: #5A5F6E; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
-.ap-qty-btn:hover { background: #E2DDD8; }
-.ap-qty-input { width: 40px; height: 22px; text-align: center; border: 1px solid #E2DDD8; border-radius: 4px; font-size: 12px; font-family: inherit; color: #111318; outline: none; }
-.ap-qty-input:focus { border-color: #1C3969; }
-.ap-remove-btn { background: none; border: none; color: #C0BAB4; cursor: pointer; border-radius: 4px; padding: 2px 4px; }
-.ap-remove-btn:hover { background: #FCEBEB; color: #A32D2D; }
 .ap-timeline { border-top: 0.5px solid #E8E4DF; padding: 14px 24px; }
 .ap-timeline-title { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: #9CA3AF; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
 .ap-timeline-entry { display: flex; gap: 10px; margin-bottom: 10px; }
