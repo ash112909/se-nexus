@@ -364,14 +364,14 @@ const Store = (() => {
           { id: 'p-skj-4', partNum: 'SKJ-105-5255', description: 'Gear Pump Seal Kit', vendor: 'Skyjack', price: 106.00, qty: 2, oemOnly: true },
         ]
       },
-      { id: 'ord-5', poNum: null, vendor: 'Grainger', vendorId: 'GRG-001', date: 'Jun 10, 2026', user: 'R. Singh', name: 'Safety equipment restock', wo: 'General', asset: 'Austin', amount: 330.75, status: 'review', tab: 'review',
+      { id: 'ord-5', poNum: null, vendor: 'Grainger', vendorId: 'GRG-001', date: 'Jun 10, 2026', user: 'R. Singh', name: 'Safety equipment restock', wo: 'General', asset: 'Austin', amount: 330.75, status: 'review', tab: 'review', approvalType: 'cart_only', notes: [],
         items: [
           { id: 'p-sft-1', partNum: 'GRG-6LM49', description: 'Safety Harness Class III', vendor: 'Grainger', price: 89.00, qty: 2, oemOnly: false },
           { id: 'p-sft-2', partNum: 'GRG-2TLP8', description: 'Fall Arrest Lanyard 6ft', vendor: 'Grainger', price: 44.25, qty: 3, oemOnly: false },
           { id: 'p-sft-3', partNum: 'GRG-8KRN2', description: 'Hard Hat Type II Class E', vendor: 'Grainger', price: 24.00, qty: 2, oemOnly: false },
         ]
       },
-      { id: 'ord-5b', poNum: null, vendor: 'Skyjack', vendorId: 'SKJ-DIST', date: 'Jun 11, 2026', user: 'M. Torres', name: 'Platform parts — WO #100081', wo: 'WO #100081', asset: 'FL-088', amount: 487.50, status: 'review', tab: 'review',
+      { id: 'ord-5b', poNum: null, vendor: 'Skyjack', vendorId: 'SKJ-DIST', date: 'Jun 11, 2026', user: 'M. Torres', name: 'Platform parts — WO #100081', wo: 'WO #100081', asset: 'FL-088', amount: 487.50, status: 'review', tab: 'review', approvalType: 'limit_exceeded', buyerLimit: 250, notes: [],
         items: [
           { id: 'p-skj-5', partNum: 'SKJ-158-0055', description: 'Platform Extension Slide Kit', vendor: 'Skyjack', price: 215.00, qty: 1, oemOnly: true },
           { id: 'p-skj-6', partNum: 'SKJ-702-0900', description: 'Cylinder Wiper Seal', vendor: 'Skyjack', price: 28.50, qty: 3, oemOnly: true },
