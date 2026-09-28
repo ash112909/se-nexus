@@ -145,9 +145,9 @@ function render_cms(el) {
   <div class="main cms-main">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
-        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('dashboard')">Dashboard</a>
+        <a style="color:#5C6070;cursor:pointer;" onclick="Router.navigate('news')">News &amp; updates</a>
         <span style="color:#3C4052;">/</span>
-        ${_cmsTab === 'edit' ? `<a style="color:#5C6070;cursor:pointer;" onclick="cmsGoList()">Content mgmt</a><span style="color:#3C4052;">/</span><span style="color:#FFFFFF;font-weight:500;">${_cmsEditId ? 'Edit article' : 'New article'}</span>` : _cmsTab === 'part-notes' ? `<a style="color:#5C6070;cursor:pointer;" onclick="cmsGoList()">Content mgmt</a><span style="color:#3C4052;">/</span><span style="color:#FFFFFF;font-weight:500;">Part notes</span>` : `<span style="color:#FFFFFF;font-weight:500;">Content mgmt</span>`}
+        ${_cmsTab === 'edit' ? `<a style="color:#5C6070;cursor:pointer;" onclick="cmsGoList()">Manage articles</a><span style="color:#3C4052;">/</span><span style="color:#FFFFFF;font-weight:500;">${_cmsEditId ? 'Edit article' : 'New article'}</span>` : `<span style="color:#FFFFFF;font-weight:500;">Manage articles</span>`}
       </div>
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
       ${buildTopbarRight()}
@@ -187,7 +187,7 @@ function cmsRenderList() {
         <div class="cms-hdr-sub">Manage fleet news, notices, and site-wide banners</div>
       </div>
       <div style="display:flex;gap:8px;">
-        <button class="cms-btn-ghost" onclick="cmsGoPartNotes()"><i class="ti ti-tag"></i> Part notes</button>
+        <button class="cms-btn-ghost" onclick="Router.navigate('news')"><i class="ti ti-arrow-left"></i> Back to News</button>
         <button class="cms-btn-primary" onclick="cmsNewArticle()"><i class="ti ti-plus"></i> New article</button>
       </div>
     </div>
@@ -367,38 +367,12 @@ function cmsRenderEditor() {
             </div>
           </div>
 
-          <!-- AI tools -->
-          <div class="cms-panel">
-            <div class="cms-panel-hdr"><i class="ti ti-sparkles" style="color:#1C3969;"></i> AI writing tools</div>
-            <div class="cms-panel-body" style="gap:8px;">
-              <button class="cms-ai-btn" onclick="cmsAiAction('rewrite')">
-                <div class="ai-icon"><i class="ti ti-wand"></i></div>
-                <div><div style="font-weight:600;">Rewrite &amp; improve</div><div style="font-size:10px;color:#9CA3AF;">Enhance clarity and professional tone</div></div>
-              </button>
-              <button class="cms-ai-btn" onclick="cmsAiAction('simplify')">
-                <div class="ai-icon"><i class="ti ti-list-check"></i></div>
-                <div><div style="font-weight:600;">Simplify</div><div style="font-size:10px;color:#9CA3AF;">Reduce to key action items</div></div>
-              </button>
-              <button class="cms-ai-btn" onclick="cmsAiAction('translate')">
-                <div class="ai-icon"><i class="ti ti-language"></i></div>
-                <div><div style="font-weight:600;">Translate</div><div style="font-size:10px;color:#9CA3AF;">Convert to selected language</div></div>
-              </button>
-              <div id="cms-ai-preview-area" style="display:none;">
-                <div class="cms-ai-preview" id="cms-ai-preview-text"></div>
-                <div style="display:flex;gap:6px;margin-top:8px;">
-                  <button class="cms-btn-primary" style="font-size:11px;padding:5px 11px;" onclick="cmsAiApply()"><i class="ti ti-check"></i> Apply</button>
-                  <button class="cms-btn-ghost" style="font-size:11px;padding:5px 11px;" onclick="cmsAiDismiss()">Discard</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
 
       <!-- Action bar -->
       <div class="cms-action-bar">
-        <button class="cms-btn-ghost" onclick="cmsGoList()"><i class="ti ti-arrow-left"></i> Back to list</button>
+        <button class="cms-btn-ghost" onclick="cmsGoList()"><i class="ti ti-arrow-left"></i> Back to articles</button>
         <div style="flex:1;"></div>
         <button class="cms-btn-ghost" onclick="cmsSaveDraft()"><i class="ti ti-device-floppy"></i> Save draft</button>
         <button class="cms-btn-ghost" onclick="cmsSchedule()"><i class="ti ti-calendar-event"></i> Schedule</button>
