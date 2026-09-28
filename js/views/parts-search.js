@@ -2931,6 +2931,7 @@ function render_parts_search(el) {
   };
   window.psSetMode = function(mode) {
     _searchMode=mode; _searchQuery=''; _woFilter=null;
+    if (mode !== 'wo') { _woId=null; _wo=null; renderWoRibbon(); }
     renderSearchBar();
     document.getElementById('ps-search-input')?.focus();
   };
@@ -2939,10 +2940,12 @@ function render_parts_search(el) {
   };
   window.psApplyWoFilter = function() {
     if (!_woFilter) return;
-    const wo=Store.getWorkOrder(parseInt(_woFilter));
+    const wo=Store.getWorkOrder(_woFilter)||Store.getWorkOrder(parseInt(_woFilter));
     if (!wo) return;
+    _woId = wo.id; _wo = wo;
     const eq=EQUIPMENT.find(e=>e.asset===wo.asset);
-    if (eq) { _nav={supplierId:eq.supplierId,modelId:eq.modelId,compName:null,subName:null}; _expanded.add(eq.supplierId); _expanded.add(eq.modelId); renderAll(); }
+    if (eq) { _nav={supplierId:eq.supplierId,modelId:eq.modelId,compName:null,subName:null}; _expanded.add(eq.supplierId); _expanded.add(eq.modelId); }
+    renderAll();
   };
   window.psApplySearch = function() {
     const q=_searchQuery.toLowerCase().trim(); if(!q) return;
