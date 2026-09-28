@@ -2,6 +2,7 @@ function render_manuals(el) {
   var _searchQuery = '';
   var _vendorFilter = (Router.context && Router.context.vendor) || null;
   var _machineFilter = new Set(); // empty = all
+  var _assetFilter = null; // fleet asset id
 
   var VENDORS = ['Skyjack', 'Caterpillar', 'Toyota', 'Bobcat'];
 
@@ -24,12 +25,26 @@ function render_manuals(el) {
   }
 
   function getFiltered() {
+    var machinesForAsset = null;
+    if (_assetFilter) {
+      var asset = Store.getFleetAssets('').find(function(a) { return a.id === _assetFilter; });
+      machinesForAsset = asset ? (asset.manualMachines || []) : [];
+    }
     return Store.getManuals(_searchQuery).filter(function(m) {
       if (_vendorFilter && m.vendor !== _vendorFilter) return false;
       if (_machineFilter.size > 0 && !_machineFilter.has(m.machine)) return false;
+      if (machinesForAsset !== null) {
+        var match = machinesForAsset.some(function(name) {
+          return m.machine.toLowerCase().includes(name.toLowerCase()) || name.toLowerCase().includes(m.machine.toLowerCase());
+        });
+        if (!match) return false;
+      }
       return true;
     });
   }
+
+  var TYPE_ORDER = ['Operator', 'Service', 'Parts', 'Safety', 'Other'];
+  var TYPE_LABELS = { 'Operator': "Operator's Manuals", 'Service': 'Service Manuals', 'Parts': 'Parts Catalogs', 'Safety': 'Safety Guides', 'Other': 'Other Documents' };
 
   function typeBackground(type) {
     if (type === 'Service') return 'background:#FCEBEB;color:#A32D2D;';
@@ -53,18 +68,37 @@ function render_manuals(el) {
       container.innerHTML = '<div style="padding:40px;text-align:center;color:#9CA3AF;font-size:13px;">No manuals found.</div>';
       return;
     }
-    container.innerHTML = manuals.map(function(m) {
-      return '<div class="doc-card" data-manual-id="' + m.id + '">'
-        + '<div class="doc-icon-wrap" style="' + typeBackground(m.type) + '"><i class="ti ' + typeIconClass(m.type) + '"></i></div>'
-        + '<div class="doc-body">'
-        + '<div class="doc-title">' + m.title + '</div>'
-        + '<div class="doc-meta"><span>' + m.machine + '</span><span class="doc-meta-sep">·</span><span>' + m.year + '</span><span class="doc-meta-sep">·</span><span>' + m.pages + ' pages</span><span class="doc-meta-sep">·</span><span>' + m.size + '</span></div>'
-        + '<div class="doc-tags"><span class="doc-tag tag-type">' + m.type + '</span></div>'
-        + '<div class="doc-actions">'
-        + '<button class="doc-btn doc-btn-primary" onclick="manViewManual(\'' + m.id + '\')"><i class="ti ti-eye" style="font-size:12px;"></i> View</button>'
-        + '<button class="doc-btn doc-btn-ghost" onclick="manDownloadManual(\'' + m.id + '\')"><i class="ti ti-download" style="font-size:12px;"></i> Download</button>'
-        + '</div></div></div>';
-    }).join('');
+
+    // Group by type
+    var grouped = {};
+    manuals.forEach(function(m) {
+      var t = m.type || 'Other';
+      var key = TYPE_ORDER.includes(t) ? t : 'Other';
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(m);
+    });
+
+    var html = '';
+    TYPE_ORDER.forEach(function(t) {
+      var group = grouped[t];
+      if (!group || !group.length) return;
+      html += '<div class="man-type-section">';
+      html += '<div class="man-section-label"><i class="ti ' + typeIconClass(t) + '" style="font-size:12px;"></i> ' + (TYPE_LABELS[t] || t) + ' <span style="background:#E8E4DF;color:#7A7F8E;border-radius:999px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:4px;">' + group.length + '</span></div>';
+      html += '<div class="docs-grid">';
+      group.forEach(function(m) {
+        html += '<div class="doc-card" data-manual-id="' + m.id + '">'
+          + '<div class="doc-icon-wrap" style="' + typeBackground(m.type) + '"><i class="ti ' + typeIconClass(m.type) + '"></i></div>'
+          + '<div class="doc-body">'
+          + '<div class="doc-title">' + m.title + '</div>'
+          + '<div class="doc-meta"><span>' + m.machine + '</span><span class="doc-meta-sep">·</span><span>' + m.year + '</span><span class="doc-meta-sep">·</span><span>' + m.pages + ' pages</span><span class="doc-meta-sep">·</span><span>' + m.size + '</span></div>'
+          + '<div class="doc-actions">'
+          + '<button class="doc-btn doc-btn-primary" onclick="manViewManual(\'' + m.id + '\')"><i class="ti ti-eye" style="font-size:12px;"></i> View</button>'
+          + '<button class="doc-btn doc-btn-ghost" onclick="manDownloadManual(\'' + m.id + '\')"><i class="ti ti-download" style="font-size:12px;"></i> Download</button>'
+          + '</div></div></div>';
+      });
+      html += '</div></div>';
+    });
+    container.innerHTML = html;
   }
 
   function renderVendorList() {
@@ -97,6 +131,7 @@ function render_manuals(el) {
         _machineFilter = new Set();
         renderVendorList();
         renderMachineChips();
+        renderAssetDropdown();
         renderGrid();
       });
     });
@@ -160,6 +195,36 @@ function render_manuals(el) {
     });
   }
 
+  function renderAssetDropdown() {
+    var wrap = document.getElementById('man-asset-wrap');
+    if (!wrap) return;
+    var assets = Store.getFleetAssets('');
+    // Filter to assets that have manualMachines relevant to current vendor filter
+    if (_vendorFilter) {
+      var vendorMachines = getMachinesForVendor(_vendorFilter).map(function(m) { return m.toLowerCase(); });
+      assets = assets.filter(function(a) {
+        return (a.manualMachines || []).some(function(mm) {
+          return vendorMachines.some(function(vm) { return vm.includes(mm.toLowerCase()) || mm.toLowerCase().includes(vm); });
+        });
+      });
+    }
+    if (!assets.length) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'flex';
+    var sel = wrap.querySelector('select');
+    var cur = sel ? sel.value : '';
+    wrap.innerHTML = '<label style="font-size:11px;font-weight:600;color:#9CA3AF;white-space:nowrap;display:flex;align-items:center;gap:5px;"><i class="ti ti-tractor" style="font-size:12px;"></i> Asset:</label>'
+      + '<select id="man-asset-sel" style="height:28px;border:0.5px solid #E2DDD8;border-radius:6px;padding:0 8px;font-size:12px;font-family:inherit;color:#111318;outline:none;background:#FFF;">'
+      + '<option value="">All assets</option>'
+      + assets.map(function(a) {
+          return '<option value="' + a.id + '"' + (_assetFilter === a.id ? ' selected' : '') + '>' + a.equipNum + ' — ' + a.make + ' ' + a.model + '</option>';
+        }).join('')
+      + '</select>';
+    document.getElementById('man-asset-sel').addEventListener('change', function() {
+      _assetFilter = this.value || null;
+      renderGrid();
+    });
+  }
+
   el.innerHTML = '<style>'
     + '.man-content-row{display:flex;flex:1;min-height:0;}'
     + '.man-vendor-panel{width:200px;min-width:200px;background:#FFFFFF;border-right:0.5px solid #E8E4DF;display:flex;flex-direction:column;padding:16px 0;overflow-y:auto;}'
@@ -179,13 +244,15 @@ function render_manuals(el) {
     + '.man-search-input{width:100%;height:40px;background:#F5F2EE;border:1.5px solid #E2DDD8;border-radius:10px;padding:0 14px 0 44px;font-size:14px;font-family:inherit;color:#111318;outline:none;box-sizing:border-box;}'
     + '.man-search-input:focus{border-color:#1C3969;background:#FFFFFF;}'
     + '.man-search-input::placeholder{color:#B0AAA3;}'
-    + '.man-machine-chip-row{display:flex;align-items:center;gap:6px;padding:10px 20px;background:#FAFAF8;border-bottom:0.5px solid #E8E4DF;flex-wrap:wrap;}'
+    + '.man-filter-row{display:flex;align-items:center;gap:10px;padding:8px 20px;background:#FAFAF8;border-bottom:0.5px solid #E8E4DF;flex-wrap:wrap;}'
+    + '.man-machine-chip-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}'
     + '.man-machine-chip{height:28px;padding:0 12px;border:1px solid #E2DDD8;border-radius:999px;background:#FFFFFF;font-size:12px;font-weight:500;color:#5A5F6E;cursor:pointer;font-family:inherit;white-space:nowrap;}'
     + '.man-machine-chip:hover{background:#F5F2EE;border-color:#C8C3BC;}'
     + '.man-machine-chip.active{background:#D6E4F7;border-color:#1C3969;color:#1C3969;font-weight:600;}'
     + '.man-content-body{flex:1;padding:20px;overflow-y:auto;}'
-    + '.man-section-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#9CA3AF;margin-bottom:12px;}'
-    + '.docs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:24px;}'
+    + '.man-type-section{margin-bottom:28px;}'
+    + '.man-section-label{font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:#9CA3AF;margin-bottom:10px;display:flex;align-items:center;gap:6px;}'
+    + '.docs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;}'
     + '.doc-card{background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:14px;display:flex;gap:12px;cursor:pointer;transition:border-color 0.12s;}'
     + '.doc-card:hover{border-color:#C8C3BC;}'
     + '.doc-icon-wrap{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}'
@@ -193,9 +260,6 @@ function render_manuals(el) {
     + '.doc-title{font-size:13px;font-weight:600;color:#111318;margin-bottom:3px;line-height:1.3;}'
     + '.doc-meta{font-size:11px;color:#9CA3AF;margin-bottom:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}'
     + '.doc-meta-sep{color:#D1CBC4;}'
-    + '.doc-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;}'
-    + '.doc-tag{font-size:10px;border-radius:4px;padding:2px 6px;font-weight:500;}'
-    + '.tag-type{background:#D6E4F7;color:#1C3969;}'
     + '.doc-actions{display:flex;align-items:center;gap:6px;}'
     + '.doc-btn{font-size:11px;font-weight:500;border-radius:6px;padding:4px 10px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;}'
     + '.doc-btn-primary{background:#1C3969;border:none;color:#FFFFFF;font-weight:600;}'
@@ -204,23 +268,24 @@ function render_manuals(el) {
     + '.doc-btn-ghost:hover{background:#F5F2EE;}'
     + '</style>'
     + '<h2 class="sr-only">Manuals and documentation</h2><div class="shell">' + buildSidebar('manuals') + '<div class="main">'
-    + '<div class="topbar"><div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;"><a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt(\'dashboard\')">Dashboard</a><span style="color:#3C4052;">/</span><span style="color:#FFFFFF;font-weight:500;">Manuals &amp; docs</span></div><div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>' + buildTopbarRight() + '</div>'
+    + '<div class="topbar"><div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;"><a style="color:#5C6070;cursor:pointer;" onclick="Router.navigate(\'home\')">Home</a><span style="color:#3C4052;">/</span><span style="color:#FFFFFF;font-weight:500;">Manuals &amp; docs</span></div><div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>' + buildTopbarRight() + '</div>'
     + '<div class="man-content-row">'
     + '<div class="man-vendor-panel"><div class="mvp-label">Supplier</div><div id="man-vendor-list"></div></div>'
     + '<div class="man-main-panel">'
     + '<div class="man-search-area"><div class="man-search-wrap"><i class="ti ti-search man-search-icon"></i><input class="man-search-input" id="man-search-input" type="text" placeholder="Search manuals, bulletins, specs…"/></div></div>'
+    + '<div class="man-filter-row">'
     + '<div class="man-machine-chip-row" id="man-machine-chips" style="display:none;"></div>'
-    + '<div class="man-content-body" id="man-content-body"><div class="man-section-label">Manuals &amp; documentation</div><div class="docs-grid" id="man-grid"></div></div>'
+    + '<div id="man-asset-wrap" style="display:none;align-items:center;gap:6px;margin-left:auto;"></div>'
+    + '</div>'
+    + '<div class="man-content-body" id="man-content-body"><div id="man-grid"></div></div>'
     + '</div></div></div></div>';
 
   renderVendorList();
   renderMachineChips();
+  renderAssetDropdown();
   renderGrid();
 
-  // If navigated here with a vendor filter pre-applied, show machine chips
-  if (_vendorFilter) {
-    renderMachineChips();
-  }
+  if (_vendorFilter) renderMachineChips();
 
   document.getElementById('man-search-input').addEventListener('input', function() {
     _searchQuery = this.value;
@@ -231,15 +296,16 @@ function render_manuals(el) {
   window.manClearVendor = function() {
     _vendorFilter = null;
     _machineFilter = new Set();
+    _assetFilter = null;
     renderVendorList();
     renderMachineChips();
+    renderAssetDropdown();
     renderGrid();
   };
 
   var _targetManualId = Router.context && Router.context.manualId;
   var _targetPdfPage  = Router.context && Router.context.pdfPage;
   var _targetHighlight = Router.context && Router.context.highlight;
-  // If arriving from diagnostics with sectionId, find the Skyjack operating manual
   if (!_targetManualId && _targetHighlight) {
     var _sjManual = Store.getManuals('').find(function(x) { return x.pdfFile; });
     if (_sjManual) _targetManualId = _sjManual.id;

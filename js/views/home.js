@@ -545,7 +545,7 @@ function render_home(el) {
         <div class="hw-loc"><i class="ti ti-map-pin" style="font-size:10px;"></i>${locName}</div>
       </div>
       <button class="hw-cta" onclick="homeToggleNews()" id="hw-news-btn" style="position:relative;margin-left:auto;">
-        <i class="ti ti-bell" style="font-size:14px;"></i> View News
+        <i class="ti ti-bell" style="font-size:14px;"></i> View Updates
         <span id="hw-news-badge" style="position:absolute;top:-6px;right:-6px;background:#DC2626;color:#FFF;font-size:9px;font-weight:800;border-radius:99px;padding:1px 5px;min-width:16px;text-align:center;line-height:16px;height:16px;display:flex;align-items:center;justify-content:center;">${getNewsItems().length}</span>
       </button>
     </div>

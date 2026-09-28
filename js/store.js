@@ -1261,12 +1261,16 @@ const Store = (() => {
     if (!_data.wishLists) _data.wishLists = [];
     return _data.wishLists;
   }
-  function createWishList(name) {
+  function createWishList(name, opts) {
     if (!_data.wishLists) _data.wishLists = [];
-    const list = { id: 'wl-' + Date.now(), name: name || 'New List', items: [], createdAt: Date.now() };
+    const list = { id: 'wl-' + Date.now(), name: name || 'New List', items: [], createdAt: Date.now(), public: !!(opts && opts.public), pinned: false, ownerId: (_data.currentUserId || null) };
     _data.wishLists.push(list);
     save(_data);
     return list;
+  }
+  function updateWishList(listId, changes) {
+    const list = getWishLists().find(l => l.id === listId);
+    if (list) { Object.assign(list, changes); save(_data); }
   }
   function renameWishList(listId, name) {
     const list = (getWishLists()).find(l => l.id === listId);
@@ -1326,7 +1330,7 @@ const Store = (() => {
     getSupplierFleets, getPriceRequests, addPriceRequest, respondToPriceRequest, addPriceRequestComment,
     getNotifications, markNotificationRead, markAllNotificationsRead, getUnreadCount,
     getCmsArticles, getCmsArticle, saveCmsArticle, deleteCmsArticle, getActiveBanners, dismissBanner,
-    getWishLists, createWishList, renameWishList, deleteWishList, addToWishList, removeFromWishList, moveWishListItem,
+    getWishLists, createWishList, updateWishList, renameWishList, deleteWishList, addToWishList, removeFromWishList, moveWishListItem,
     reset,
   };
 })();

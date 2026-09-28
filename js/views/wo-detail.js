@@ -83,7 +83,7 @@ function render_wo_detail(el) {
     if (!container) return;
 
     if (!cart.length) {
-      container.innerHTML = `<div style="padding:24px;text-align:center;color:#9CA3AF;font-size:13px;">No items in cart. <a style="color:#1C3969;cursor:pointer;" onclick="Router.navigate('parts-search',{woId:'${wo.id}'})">Search parts to add</a></div>`;
+      container.innerHTML = `<div style="padding:24px;text-align:center;color:#9CA3AF;font-size:13px;">No items in cart. <a style="color:#1C3969;cursor:pointer;" onclick="Router.navigate('parts-search',{woId:'${wo.id}',fromWo:true})">Search parts to add</a></div>`;
       document.getElementById('wod-cart-total-row').style.display = 'none';
       return;
     }
@@ -296,29 +296,148 @@ function render_wo_detail(el) {
       return;
     }
     const statusStyle = {
-      submitted: 'background:#E6F1FB;color:#185FA5;',
+      submitted:   'background:#E6F1FB;color:#185FA5;',
       backordered: 'background:#FEF3C7;color:#92400E;',
-      delivered: 'background:#E1F5EE;color:#1C3969;',
+      delivered:   'background:#E1F5EE;color:#1C3969;',
     };
-    container.innerHTML = orders.map(ord => `
-      <div class="ord-block">
-        <div class="ord-block-header">
-          <div>
-            <span class="ord-po">${ord.poNum}</span>
-            <span class="ord-date">${ord.date}</span>
+
+    function roStatusCell(c) {
+      const st = itemStatus(c);
+      if (st === 'replaced') return `<div class="ci-status" style="color:#C8C3BC;"><i class="ti ti-replace"></i></div>`;
+      if (!c.inStock) return `<div class="ci-status ci-warn"><i class="ti ti-alert-triangle"></i></div>`;
+      return `<div class="ci-status ci-ok"><i class="ti ti-circle-check"></i></div>`;
+    }
+
+    function roXrefBadge(c) {
+      if (c.replacedBy || c.replacesId) return '';
+      const refs = c.crossRefs || [];
+      if (!refs.length) return '';
+      if (refs.some(r => r.mandatory)) return `<span class="ci-xref ci-xref-mand" style="cursor:default;"><i class="ti ti-switch-horizontal" style="font-size:10px;"></i> Mandatory cross-ref</span>`;
+      return `<span class="ci-xref ci-xref-opt" style="cursor:default;"><i class="ti ti-switch-horizontal" style="font-size:10px;"></i> ${refs.length} optional cross-ref${refs.length !== 1 ? 's' : ''}</span>`;
+    }
+
+    function roLocalCell(c) {
+      if (c.replacedBy) return '<span class="ci-dash">—</span>';
+      const sources = c.selectedSources || (c.selectedSource ? [c.selectedSource] : []);
+      if (sources.length) {
+        const srcQty = sources.reduce((s, x) => s + (x.qty || 0), 0);
+        const label = sources.length === 1 ? sources[0].locationName : sources.length + ' locations';
+        return `<span class="ci-local ci-local-sel" style="cursor:default;"><i class="ti ti-map-pin" style="font-size:10px;"></i> ${label}${srcQty ? ' (' + srcQty + ')' : ''}</span>`;
+      }
+      const inv = c.localInventory || [];
+      if (!inv.length) return '<span class="ci-dash">—</span>';
+      const total = inv.reduce((s, l) => s + l.qty, 0);
+      return `<span class="ci-local" style="cursor:default;"><i class="ti ti-map-pin" style="font-size:10px;"></i> ${total} avail</span>`;
+    }
+
+    function roItemRow(c) {
+      const replaced = !!c.replacedBy;
+      const rowStyle = replaced ? 'opacity:0.45;' : '';
+      const descStyle = replaced ? 'text-decoration:line-through;color:#9CA3AF;' : '';
+      const partStyle = replaced ? 'text-decoration:line-through;color:#9CA3AF;' : '';
+      const replacesOrig = c.replacesId ? (c._origCart || []).find(x => x.id === c.replacesId) : null;
+      return `<tr class="cart-row" style="${rowStyle}">
+        <td class="col-st">${roStatusCell(c)}</td>
+        <td class="col-pn">
+          <div class="ci-partnum" style="${partStyle}">${c.partNum}</div>
+          <div class="ci-vendor-line">${c.vendor || ''}${c.oemOnly ? ' <span class="oem-badge">OEM</span>' : ''}</div>
+        </td>
+        <td class="col-desc">
+          <div class="ci-desc-name" style="${descStyle}">${c.description}</div>
+          ${replacesOrig ? `<div style="font-size:10px;color:#7A7F8E;margin-top:2px;display:flex;align-items:center;gap:3px;"><i class="ti ti-arrows-exchange" style="font-size:10px;"></i> Replaces ${replacesOrig.partNum}</div>` : ''}
+          <div style="display:flex;align-items:center;gap:5px;margin-top:3px;">${roXrefBadge(c)}</div>
+        </td>
+        <td class="col-uom"><span class="uom-badge">${c.uom || 'EA'}</span></td>
+        <td class="col-loc">${roLocalCell(c)}</td>
+        <td class="col-qty" style="text-align:center;font-size:13px;font-weight:600;color:#111318;">${replaced ? '—' : (c.qty || 1)}</td>
+        <td class="col-unit" style="text-align:right;font-size:12px;color:#7A7F8E;">${replaced ? '—' : '$' + c.price.toFixed(2)}</td>
+        <td class="col-tot" style="text-align:right;font-size:13px;font-weight:700;color:${replaced ? '#C8C3BC' : '#111318'};">${replaced ? '—' : '$' + (c.price * (c.qty || 1)).toFixed(2)}</td>
+      </tr>`;
+    }
+
+    function roCartTable(items) {
+      const rendered = new Set();
+      const units = [];
+      items.forEach(c => {
+        if (rendered.has(c.id)) return;
+        if (c.replacesId) return;
+        rendered.add(c.id);
+        if (c.replacedBy) {
+          const rep = items.find(x => x.id === c.replacedBy);
+          if (rep) { rendered.add(rep.id); units.push([c, rep]); return; }
+        }
+        units.push([c]);
+      });
+      items.forEach(c => { if (!rendered.has(c.id)) units.push([c]); });
+
+      const bodyHtml = units.map((unit, idx) => {
+        const sep = idx > 0 ? `<tr class="cart-unit-sep"><td colspan="8"></td></tr>` : '';
+        if (unit.length === 2) {
+          const [orig, rep] = unit;
+          return `${sep}<tbody class="cart-unit-pair">
+            ${roItemRow(orig)}
+            <tr class="cart-xref-label-row"><td colspan="8"><div class="cart-xref-label"><i class="ti ti-arrows-exchange" style="font-size:10px;"></i> Cross-ref applied — replaced by</div></td></tr>
+            ${roItemRow(rep)}
+          </tbody>`;
+        }
+        return `${sep}<tbody class="cart-unit-single">${roItemRow(unit[0])}</tbody>`;
+      }).join('');
+
+      return `<table class="wod-cart-table">
+        <thead><tr>
+          <th class="col-st"></th>
+          <th class="col-pn">Part #</th>
+          <th class="col-desc">Description</th>
+          <th class="col-uom">UOM</th>
+          <th class="col-loc">Source / stock</th>
+          <th class="col-qty" style="text-align:center;">Qty</th>
+          <th class="col-unit" style="text-align:right;">Unit</th>
+          <th class="col-tot" style="text-align:right;">Total</th>
+        </tr></thead>
+        ${bodyHtml}
+      </table>`;
+    }
+
+    container.innerHTML = `<style>
+      .ord-acc { border:0.5px solid #E8E4DF; border-radius:10px; overflow:hidden; margin-bottom:10px; background:#FFF; }
+      .ord-acc-hdr { display:flex; align-items:center; gap:10px; padding:11px 16px; cursor:pointer; user-select:none; }
+      .ord-acc-hdr:hover { background:#FAFAF8; }
+      .ord-acc-chevron { font-size:13px; color:#9CA3AF; transition:transform 0.15s; flex-shrink:0; }
+      .ord-acc-hdr.open .ord-acc-chevron { transform:rotate(90deg); }
+      .ord-acc-body { border-top:0.5px solid #E8E4DF; overflow:hidden; }
+      .ord-acc-foot { padding:8px 16px; border-top:0.5px solid #F0ECE8; display:flex; justify-content:flex-end; font-size:13px; color:#5A5F6E; background:#FAFAF8; }
+    </style>` + orders.map((ord, i) => {
+      const pill = statusStyle[ord.status] || 'background:#F0ECE8;color:#5A5F6E;';
+      const items = ord.items || [];
+      return `
+      <div class="ord-acc" id="ord-acc-${i}">
+        <div class="ord-acc-hdr open" onclick="wodToggleOrdAcc(${i})">
+          <i class="ti ti-chevron-right ord-acc-chevron"></i>
+          <div style="flex:1;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="font-size:13px;font-weight:700;color:#111318;">${ord.poNum}</span>
+            <span style="font-size:12px;color:#7A7F8E;">${ord.date}</span>
+            <span style="font-size:11px;font-weight:600;border-radius:999px;padding:3px 10px;${pill}">${ord.status.charAt(0).toUpperCase() + ord.status.slice(1)}</span>
           </div>
-          <span style="font-size:11px;font-weight:600;border-radius:999px;padding:3px 10px;${statusStyle[ord.status] || 'background:#F0ECE8;color:#5A5F6E;'}">${ord.status.charAt(0).toUpperCase() + ord.status.slice(1)}</span>
+          <span style="font-size:13px;font-weight:700;color:#111318;">$${ord.total.toFixed(2)}</span>
         </div>
-        ${ord.items.map(it => `
-          <div class="ord-item-row">
-            <span class="ord-item-name">${it.description}</span>
-            <span class="ord-item-num">${it.partNum}</span>
-            <span class="ord-item-qty">×${it.qty || 1}</span>
-            <span class="ord-item-price">$${(it.price * (it.qty || 1)).toFixed(2)}</span>
-          </div>`).join('')}
-        <div class="ord-block-footer">Total: <strong>$${ord.total.toFixed(2)}</strong></div>
-      </div>`).join('');
+        <div class="ord-acc-body" id="ord-acc-body-${i}">
+          ${roCartTable(items)}
+          <div class="ord-acc-foot">
+            ${items.filter(c => !c.replacedBy).length} item${items.filter(c => !c.replacedBy).length !== 1 ? 's' : ''} · <strong style="margin-left:4px;">$${ord.total.toFixed(2)}</strong>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
   }
+
+  window.wodToggleOrdAcc = function(i) {
+    const hdr = document.querySelector(`#ord-acc-${i} .ord-acc-hdr`);
+    const body = document.getElementById(`ord-acc-body-${i}`);
+    if (!hdr || !body) return;
+    const isOpen = hdr.classList.contains('open');
+    hdr.classList.toggle('open', !isOpen);
+    body.style.display = isOpen ? 'none' : '';
+  };
 
   el.innerHTML = `
 <style>
@@ -556,7 +675,7 @@ function render_wo_detail(el) {
                 <button id="cart-grp-${v}" class="cart-grp-chip${_cartGroupBy===v?' cart-grp-chip-active':''}" onclick="wodSetGroupBy('${v}')">${l}</button>
               `).join('')}
             </div>
-            ${isArchived ? '' : `<button class="add-parts-btn" onclick="Router.navigate('parts-search',{woId:'${wo.id}'})">
+            ${isArchived ? '' : `<button class="add-parts-btn" onclick="Router.navigate('parts-search',{woId:'${wo.id}',fromWo:true})">
               <i class="ti ti-plus" style="font-size:12px;"></i> Add parts
             </button>`}
           </div>
