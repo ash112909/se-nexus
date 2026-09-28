@@ -2452,7 +2452,7 @@ function render_parts_search(el) {
     const _visiblePartCount = _impersonating
       ? [...new Set(_visibleCatalog.flatMap(s=>s.models.flatMap(m=>m.components.flatMap(c=>c.subs.flatMap(sub=>sub.partIds)))))].length
       : ALL_PARTS.length;
-    let h = `<div class="tree-root-node ${isRoot?'active':''}" onclick="psNavTo(null,null,null,null)"><i class="ti ti-building-store" style="font-size:13px;"></i> Suppliers <span class="tree-count">${CATALOG.length}</span></div>`;
+    let h = `<div class="tree-root-node ${isRoot?'active':''}" onclick="psNavTo(null,null,null,null)"><i class="ti ti-building-store" style="font-size:13px;"></i> Suppliers</div>`;
     for (const s of _visibleCatalog) {
       const sExp = _expanded.has(s.id);
       const sActive = _nav.supplierId===s.id && !_nav.modelId;
@@ -2461,7 +2461,6 @@ function render_parts_search(el) {
         <span class="tree-toggle" onclick="event.stopPropagation();psToggle('${s.id}')">${sExp?'▾':'▸'}</span>
         <i class="ti ${s.icon}" style="font-size:12px;flex-shrink:0;"></i>
         <span onclick="psNavTo('${s.id}',null,null,null)" style="flex:1;">${s.name}</span>
-        <span class="tree-count">${sCount}</span>
       </div>`;
       if (sExp) for (const m of s.models) {
         const mExp = _expanded.has(m.id);
@@ -2471,21 +2470,19 @@ function render_parts_search(el) {
           <span class="tree-toggle" onclick="event.stopPropagation();psToggle('${m.id}')">${mExp?'▾':'▸'}</span>
           <i class="ti ti-tag" style="font-size:11px;flex-shrink:0;"></i>
           <span onclick="psNavTo('${s.id}','${m.id}',null,null)" style="flex:1;">${m.name}</span>
-          <span class="tree-count">${mCount}</span>
         </div>`;
         if (mExp) for (const c of m.components) {
           const cActive = _nav.modelId===m.id && _nav.compName===c.name && !_nav.subName;
           const cCount = [...new Set(c.subs.flatMap(sub=>sub.partIds))].length;
           h += `<div class="tree-node tree-c ${cActive?'active':''}" onclick="psNavTo('${s.id}','${m.id}','${esc(c.name)}',null)">
             <span class="tree-toggle"></span><i class="ti ${c.icon||'ti-settings'}" style="font-size:11px;flex-shrink:0;"></i>
-            <span style="flex:1;">${c.name}</span><span class="tree-count">${cCount}</span>
+            <span style="flex:1;">${c.name}</span>
           </div>`;
           for (const sub of c.subs) {
             const subActive = _nav.modelId===m.id && _nav.compName===c.name && _nav.subName===sub.name;
             h += `<div class="tree-node tree-sub ${subActive?'active':''}" onclick="psNavTo('${s.id}','${m.id}','${esc(c.name)}','${esc(sub.name)}')" title="${sub.name}">
               <span class="tree-toggle"></span><i class="ti ti-point" style="font-size:10px;flex-shrink:0;"></i>
               <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sub.name}</span>
-              <span class="tree-count">${sub.partIds.length}</span>
             </div>`;
           }
         }
@@ -2678,7 +2675,6 @@ function render_parts_search(el) {
             return `<div class="sub-section">
               <div class="sub-sec-hdr" onclick="psNavTo('${s.id}','${m.id}','${esc(comp.name)}','${esc(sub.name)}')">
                 <span class="sub-sec-name">${sub.name}</span>
-                <span class="sub-sec-count">${sp.length} part${sp.length!==1?'s':''}</span>
                 <i class="ti ti-chevron-right" style="color:#9CA3AF;font-size:11px;margin-left:auto;"></i>
               </div>
               ${partsTable(sp, true)}
@@ -2723,15 +2719,13 @@ function render_parts_search(el) {
   function partsTable(parts, compact) {
     if (!parts.length) return '<div style="padding:14px;color:#9CA3AF;font-size:12px;">No parts.</div>';
     return `<table class="parts-tbl">
-      <thead><tr><th>Part #</th><th>Description</th><th>Vendor</th><th>Avail.</th><th>Price</th><th></th></tr></thead>
+      <thead><tr><th>Part #</th><th>Description</th><th>Vendor</th><th></th></tr></thead>
       <tbody>${parts.map(p=>{
         const inC=isInCart(p.id), isSel=_sel===p.id;
         return `<tr class="prow ${isSel?'sel':''}" onclick="psSelect('${p.id}')">
           <td class="pnum">${p.partNum}</td>
           <td><div class="pdesc">${p.description}</div><div class="pbadges">${p.oemOnly?'<span class="badge-oem">OEM</span>':'<span class="badge-am">Aftermarket</span>'}${p.recommended?'<span class="badge-rec"><i class="ti ti-star" style="font-size:8px;"></i> Rec</span>':''}</div></td>
           <td style="color:#7A7F8E;font-size:11px;white-space:nowrap;">${p.vendor}</td>
-          <td><span class="avdot ${p.inStock?'g':'a'}"></span><span class="avlbl ${p.inStock?'g':'a'}">${p.inStock?'In stock':'B/O'}</span></td>
-          <td style="font-weight:700;color:#111318;white-space:nowrap;">$${p.price.toFixed(2)}</td>
           <td>${inC?inCartHtml(p.id,'sm'):`<button class="add-btn" onclick="event.stopPropagation();psAddPart('${p.id}')"><i class="ti ti-plus" style="font-size:10px;"></i> Add</button>`}</td>
         </tr>`;
       }).join('')}</tbody>
