@@ -2378,6 +2378,7 @@ function render_parts_search(el) {
     ${_impersonating ? `<div style="background:#FFF7ED;border-bottom:2px solid #1C3969;padding:9px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:500;color:#1C3969;flex-shrink:0;"><i class="ti ti-eye" style="font-size:13px;"></i> Viewing as <strong style="margin:0 3px;">${_impersonatingFleet || 'fleet'}</strong> — you are seeing this supplier page as this fleet would see it.<button onclick="Router.navigate('supplier-portal')" style="margin-left:auto;background:#152B52;color:#FFFFFF;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;">Exit impersonation</button></div>` : ''}
     <div id="ps-wo-ribbon"></div>
     <div class="ps-search-area">
+      <div class="search-mode-row" id="ps-mode-row"></div>
       <div class="search-input-row" id="ps-input-row"></div>
     </div>
     <div class="ps-breadcrumb" id="ps-breadcrumb"></div>
@@ -2399,14 +2400,27 @@ function render_parts_search(el) {
   ];
 
   function renderSearchBar() {
+    const modeRow = document.getElementById('ps-mode-row');
     const inputRow = document.getElementById('ps-input-row');
-    if (!inputRow) return;
-    inputRow.innerHTML = `<div class="search-input-wrap"><i class="ti ti-search search-icon-abs"></i><input class="ps-search-input" id="ps-search-input" type="text" placeholder="Search parts, components, vendors…" value="${_searchQuery}"/></div>${_searchQuery ? `<button onclick="psClearSearch()" style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:0 10px;height:36px;font-size:11px;color:#7A7F8E;cursor:pointer;font-family:inherit;">Clear</button>` : ''}`;
-    const inp = document.getElementById('ps-search-input');
-    if (inp) inp.addEventListener('input', function() {
-      _searchQuery = this.value;
-      renderCenter();
-    });
+    if (!modeRow || !inputRow) return;
+    modeRow.innerHTML = MODES.map(m =>
+      `<button class="smode-btn ${_searchMode === m.id ? 'active' : ''}" onclick="psSetMode('${m.id}')">${m.label}</button>`
+    ).join('');
+    if (_searchMode === 'wo') {
+      const wos = Store.getWorkOrders('active');
+      const opts = wos.map(w => `<option value="${w.id}" ${_woFilter == w.id ? 'selected' : ''}>${w.machine} — WO #${w.id} (${w.asset})</option>`).join('');
+      inputRow.innerHTML = `<select class="wo-mode-select" id="ps-wo-select"><option value="">Select a work order…</option>${opts}</select><button onclick="psApplyWoFilter()" style="background:#1C3969;border:none;border-radius:7px;padding:0 14px;height:36px;font-size:12px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;">Go</button>`;
+      document.getElementById('ps-wo-select').addEventListener('change', function() { _woFilter = this.value || null; });
+    } else {
+      const mode = MODES.find(m => m.id === _searchMode);
+      inputRow.innerHTML = `<div class="search-input-wrap"><i class="ti ti-search search-icon-abs"></i><input class="ps-search-input" id="ps-search-input" type="text" placeholder="${mode ? mode.ph : 'Search…'}" value="${_searchQuery}"/></div>${_searchQuery ? `<button onclick="psClearSearch()" style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:0 10px;height:36px;font-size:11px;color:#7A7F8E;cursor:pointer;font-family:inherit;">Clear</button>` : ''}`;
+      const inp = document.getElementById('ps-search-input');
+      if (inp) inp.addEventListener('input', function() {
+        _searchQuery = this.value;
+        if (_searchMode === 'keyword') { renderCenter(); }
+        else if (this.value.trim()) psApplySearch();
+      });
+    }
   }
 
   // ── Breadcrumb ────────────────────────────────────────────────────────────
