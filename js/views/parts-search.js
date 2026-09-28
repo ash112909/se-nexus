@@ -1,7 +1,7 @@
 function render_parts_search(el) {
   const _user = Store.getCurrentUser();
-  const _woId = Router.context && Router.context.woId;
-  const _wo = _woId ? Store.getWorkOrder(_woId) : null;
+  let _woId = (Router.context && Router.context.fromWo) ? Router.context.woId : null;
+  let _wo = _woId ? Store.getWorkOrder(_woId) : null;
   const _ctxSupplierId = Router.context && Router.context.supplierId;
   const _impersonating = Router.context && Router.context.impersonating;
   const _impersonatingFleet = Router.context && Router.context.impersonatingFleet;
@@ -2143,17 +2143,34 @@ function render_parts_search(el) {
     </div>`;
   }
   function doAddToCart(part) {
-    if (_woId) { Store.addToWoCart(_woId, part); renderDetail(); refreshRows(); }
-    else {
-      const wos = Store.getWorkOrders('active');
-      const opts = wos.map(w=>`<option value="${w.id}">${w.machine} — WO #${w.id}</option>`).join('');
-      Modal.show({ title:'Add to cart', body:`<p style="font-size:13px;color:#3A3D4A;margin-bottom:14px;"><strong>${part.description}</strong> · $${part.price.toFixed(2)}</p><label style="font-size:12px;font-weight:600;color:#5A5F6E;display:block;margin-bottom:6px;">Assign to Work Order</label><select id="ps-wo-picker" style="width:100%;height:36px;border:1px solid #E2DDD8;border-radius:7px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;"><option value="">No WO (general)</option>${opts}</select>`,
-        actions:[
-          {label:'Cancel', onClick:()=>Modal.close()},
-          {label:'Add to cart', primary:true, onClick:()=>{ const v=document.getElementById('ps-wo-picker').value; if(v) Store.addToWoCart(parseInt(v),part); else Store.addToCart(part); Modal.close(); renderDetail(); refreshRows(); }}
-        ]
-      });
-    }
+    if (_woId) { Store.addToWoCart(_woId, part); renderDetail(); refreshRows(); return; }
+    // No WO context — require selection of WO or wish list
+    const wos = Store.getWorkOrders('active');
+    const lists = Store.getWishLists();
+    const myId = (_user || {}).id || null;
+    const myLists = lists.filter(l => l.ownerId === myId || !l.ownerId);
+    const woOpts = wos.map(w=>`<option value="wo:${w.id}">${w.machine} — WO #${w.id}</option>`).join('');
+    const listOpts = myLists.map(l=>`<option value="wl:${l.id}">${l.name} (wish list)</option>`).join('');
+    Modal.show({ title:'Add to…', body:`
+      <p style="font-size:13px;color:#3A3D4A;margin-bottom:14px;"><strong>${part.description}</strong> · $${part.price.toFixed(2)}</p>
+      <label style="font-size:12px;font-weight:600;color:#5A5F6E;display:block;margin-bottom:6px;">Select destination</label>
+      <select id="ps-dest-picker" style="width:100%;height:36px;border:1px solid #E2DDD8;border-radius:7px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;">
+        <option value="">— Choose work order or wish list —</option>
+        ${woOpts ? `<optgroup label="Work Orders">${woOpts}</optgroup>` : ''}
+        ${listOpts ? `<optgroup label="Wish Lists">${listOpts}</optgroup>` : ''}
+      </select>
+      <div id="ps-dest-err" style="color:#A32D2D;font-size:11px;margin-top:6px;display:none;">Please select a destination.</div>`,
+      actions:[
+        {label:'Cancel', onClick:()=>Modal.close()},
+        {label:'Add', primary:true, onClick:()=>{
+          const v=document.getElementById('ps-dest-picker').value;
+          if (!v) { const e=document.getElementById('ps-dest-err'); if(e) e.style.display='block'; return; }
+          if (v.startsWith('wo:')) { const woId=parseInt(v.slice(3)); _woId=woId; _wo=Store.getWorkOrder(woId); Store.addToWoCart(woId, part); }
+          else if (v.startsWith('wl:')) { Store.addToWishList(v.slice(3), part); }
+          Modal.close(); renderDetail(); refreshRows();
+        }}
+      ]
+    });
   }
   function getWosForSupplier(supplierId) {
     const assets = EQUIPMENT.filter(e=>e.supplierId===supplierId).map(e=>e.asset);
@@ -2834,11 +2851,52 @@ function render_parts_search(el) {
             </div>`;
           }).join('');
       })()}
+      ${(() => {
+        const _psUser = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
+        const _psFeat = (_psUser && Store.getEffectiveFeatures) ? Store.getEffectiveFeatures(_psUser.id) : {};
+        const _psCms = 'cms' in _psFeat ? _psFeat.cms : _psUser?.role === 'supervisor';
+        if (!_psCms) return '';
+        return `<div class="dp-div"></div>
+          <div style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#9CA3AF;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;">
+            Fleet notes
+            <button id="ps-note-toggle" onclick="document.getElementById('ps-note-form').style.display=document.getElementById('ps-note-form').style.display==='none'?'':'none';document.getElementById('ps-note-toggle').textContent=document.getElementById('ps-note-form').style.display===''?'Cancel':'+ Add note'" style="background:none;border:none;font-size:10px;font-weight:600;color:#185FA5;cursor:pointer;font-family:inherit;padding:0;">+ Add note</button>
+          </div>
+          <div id="ps-note-form" style="display:none;margin-bottom:8px;">
+            <input id="ps-note-title" type="text" placeholder="Note title *" style="width:100%;height:30px;border:0.5px solid #E2DDD8;border-radius:6px;padding:0 8px;font-size:11px;font-family:inherit;color:#111318;outline:none;margin-bottom:5px;background:#FFFFFF;"/>
+            <textarea id="ps-note-body" placeholder="Note content *" style="width:100%;min-height:60px;border:0.5px solid #E2DDD8;border-radius:6px;padding:7px 8px;font-size:11px;font-family:inherit;color:#111318;outline:none;resize:none;margin-bottom:5px;background:#FFFFFF;"></textarea>
+            <button onclick="psSaveNote('${p.id}','${p.partNum.replace(/'/g,"\\'")}','${p.description.replace(/'/g,"\\'")}')" style="padding:5px 12px;background:#111318;color:#FFFFFF;border:none;border-radius:6px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;">Save note</button>
+          </div>`;
+      })()}
       <div class="dp-actions">${iC
         ?`<div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;display:flex;align-items:center;gap:6px;background:#D6E4F7;border-radius:8px;padding:8px 12px;"><i class="ti ti-check" style="color:#1C3969;font-size:13px;"></i><span style="font-size:13px;font-weight:600;color:#1C3969;flex:1;">In cart</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#1C3969;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',-1)">−</button><span style="font-size:14px;font-weight:700;color:#1C3969;min-width:20px;text-align:center;">${cartQty(p.id)}</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#1C3969;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',1)">+</button></div></div>`
         :`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><button class="dp-add" onclick="psAddPart('${p.id}')"><i class="ti ti-shopping-cart" style="font-size:13px;"></i> ${cartLabel}</button><button class="dp-wishlist" onclick="addToWishList(fp('${p.id}'))"><i class="ti ti-heart" style="font-size:13px;"></i> Save to list</button></div>`
       }</div>`;
   }
+
+  window.psSaveNote = function(partId, partNum, partDesc) {
+    const title = (document.getElementById('ps-note-title') || {}).value?.trim();
+    const body  = (document.getElementById('ps-note-body')  || {}).value?.trim();
+    if (!title || !body) { alert('Title and note content are required.'); return; }
+    const _u = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
+    Store.saveCmsArticle({
+      id: 'cms-fleet-note-' + Date.now(),
+      type: 'notice', subtype: 'fleet-part-note', status: 'published', postAs: 'news',
+      title, body,
+      poster: (_u || {}).shortName || '',
+      author: (_u || {}).displayName || '',
+      showOnPartPage: true, fleetNote: true,
+      targetPartNum: partId, targetPartDesc: partDesc,
+      date: new Date().toISOString().slice(0,7).replace('-','/'),
+      priority: 'low', locations: ['all'],
+    });
+    const form = document.getElementById('ps-note-form');
+    const btn = document.getElementById('ps-note-toggle');
+    if (form) form.style.display = 'none';
+    if (btn) btn.textContent = '+ Add note';
+    if (document.getElementById('ps-note-title')) document.getElementById('ps-note-title').value = '';
+    if (document.getElementById('ps-note-body'))  document.getElementById('ps-note-body').value  = '';
+    renderDetail();
+  };
 
   function refreshRows() {
     document.querySelectorAll('.prow').forEach(r=>{
@@ -2944,6 +3002,8 @@ function render_parts_search(el) {
 
   window.psNavFromWo = function(woId) {
     const wo = Store.getWorkOrder(woId); if(!wo) return;
+    _woId = wo.id;
+    _wo = wo;
     const eq = EQUIPMENT.find(e=>e.asset===wo.asset); if(!eq) return;
     _nav={supplierId:eq.supplierId,modelId:eq.modelId,compName:null,subName:null};
     _expanded.add(eq.supplierId); _expanded.add(eq.modelId);

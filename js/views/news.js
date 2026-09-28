@@ -241,6 +241,10 @@ window.newsReport = window.newsReport || function(id) { /* defined in render_new
 window.newsSave   = window.newsSave   || function(id) { /* defined in render_news */ };
 
 function render_news(el) {
+  const _newsUser = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
+  const _newsFeat = (_newsUser && Store.getEffectiveFeatures) ? Store.getEffectiveFeatures(_newsUser.id) : {};
+  const _canCms = 'cms' in _newsFeat ? _newsFeat.cms : _newsUser?.role === 'supervisor';
+
   let _search = '';
   let _filterType = 'all';
   let _filterPoster = (Router.context && Router.context.vendor) || 'all';
@@ -433,7 +437,7 @@ function render_news(el) {
   <div class="main">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
-        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('dashboard')">Dashboard</a>
+        <a style="color:#5C6070;cursor:pointer;" onclick="Router.navigate('home')">Home</a>
         <span style="color:#3C4052;">/</span>
         <span style="color:#FFFFFF;font-weight:500;">News &amp; updates</span>
       </div>
@@ -477,6 +481,7 @@ function render_news(el) {
           </div>
           <button class="news-sort-btn" onclick="newsToggleSort()" id="news-sort-btn"><i class="ti ti-arrow-down" id="news-sort-icon"></i> Newest first</button>
           <span class="news-count-label" id="news-count">25 articles</span>
+          ${_canCms ? `<button onclick="cmsGoList();Router.navigate('cms')" style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#FFFFFF;border:0.5px solid #E2DDD8;border-radius:8px;font-size:12px;font-weight:500;color:#5A5F6E;cursor:pointer;font-family:inherit;white-space:nowrap;"><i class="ti ti-list" style="font-size:12px;"></i> Manage articles</button><button onclick="cmsNewArticle();Router.navigate('cms')" style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#111318;border:none;border-radius:8px;font-size:12px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;white-space:nowrap;"><i class="ti ti-plus" style="font-size:12px;"></i> New article</button>` : ''}
         </div>
         <div class="news-body">
           <div id="news-grid"></div>

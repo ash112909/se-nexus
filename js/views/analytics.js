@@ -1,6 +1,8 @@
 // ── Analytics page state ───────────────────────────────────────────────────
 let _anPeriod = '30D';
 let _anLocs = null; // null = all; Set otherwise
+let _anView = 'dashboard'; // 'dashboard' | 'heatmap'
+let _anHeatmapKpi = 'parts_spend';
 
 function render_analytics(el) {
   const _user = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
@@ -129,6 +131,11 @@ function render_analytics(el) {
         ${['7D','30D','90D','12M'].map(p => `<div class="an-period-pill ${_anPeriod===p?'active':''}" onclick="anSetPeriod('${p}')">${p}</div>`).join('')}
       </div>
       <div class="an-filter-sep"></div>
+      <div class="an-period-pills">
+        <div class="an-period-pill ${_anView==='dashboard'?'active':''}" onclick="anSetView('dashboard')"><i class="ti ti-layout-dashboard" style="font-size:11px;"></i> Overview</div>
+        <div class="an-period-pill ${_anView==='heatmap'?'active':''}" onclick="anSetView('heatmap')"><i class="ti ti-map-pin" style="font-size:11px;"></i> Location map</div>
+      </div>
+      <div class="an-filter-sep"></div>
       <span class="an-filter-label">Locations</span>
       <div class="an-loc-pills">
         <div class="an-loc-pill ${_anLocs.size===locations.length?'active':''}" onclick="anToggleAllLocs()" style="${_anLocs.size===locations.length?'background:#111318;color:#FFFFFF;border-color:#111318;':''}">
@@ -199,6 +206,9 @@ function _syncLocPills() {
     }
   });
 }
+
+window.anSetView = function(v) { _anView = v; Router.navigate('analytics'); };
+window.anSetHeatmapKpi = function(k) { _anHeatmapKpi = k; anRenderContent(); };
 
 // ── Main content renderer ──────────────────────────────────────────────────
 function anRenderContent() {
@@ -319,16 +329,16 @@ function anRenderContent() {
   ].filter(p => p.qty > 0).sort((a, b) => b.qty - a.qty).slice(0, 7);
   const maxPartQty = Math.max(...TOP_PARTS.map(p => p.qty), 1);
 
-  // ── Category breakdown ────────────────────────────────────────────────────
-  const CAT_DATA = [
-    { name:'Hydraulic',   pct:0.32, color:'#185FA5' },
-    { name:'Drive',       pct:0.22, color:'#3B6D11' },
-    { name:'Seals',       pct:0.18, color:'#1C3969' },
-    { name:'Electrical',  pct:0.12, color:'#534AB7' },
-    { name:'Filtration',  pct:0.09, color:'#A32D2D' },
-    { name:'Structure',   pct:0.07, color:'#1C3969' },
+  // ── By-asset spending ──────────────────────────────────────────────────────
+  const ASSET_DATA = [
+    { id:'FL-031', name:'FL-031 — Toyota 8FGU25',    vendor:'Toyota',      color:'#3B6D11', pct:0.28 },
+    { id:'FL-017', name:'FL-017 — Cat 320',           vendor:'Caterpillar', color:'#185FA5', pct:0.22 },
+    { id:'FL-044', name:'FL-044 — Skyjack SJIII 3219',vendor:'Skyjack',    color:'#1C3969', pct:0.18 },
+    { id:'KY-001', name:'KY-001 — Bobcat S650',       vendor:'Bobcat',      color:'#534AB7', pct:0.15 },
+    { id:'FL-078', name:'FL-078 — Skyjack SJIII 4632',vendor:'Skyjack',    color:'#A32D2D', pct:0.10 },
+    { id:'Other',  name:'All other assets',            vendor:'',            color:'#9CA3AF', pct:0.07 },
   ].map(c => ({ ...c, amount: Math.round(totalSpend * c.pct) }));
-  const maxCat = Math.max(...CAT_DATA.map(c => c.amount), 1);
+  const maxAsset = Math.max(...ASSET_DATA.map(c => c.amount), 1);
 
   // ── WO type mix ───────────────────────────────────────────────────────────
   const WO_TYPES = [
@@ -388,6 +398,102 @@ function anRenderContent() {
       <div class="an-bar-lbl">${lbl}</div>
     </div>`;
   }).join('');
+
+  // ── Heatmap view ─────────────────────────────────────────────────────────
+  if (_anView === 'heatmap') {
+    const KPI_DEFS = [
+      { key:'parts_spend',       label:'Parts Spend',            icon:'ti-coins'         },
+      { key:'open_orders',       label:'Open Orders',            icon:'ti-clipboard-list' },
+      { key:'pending_approvals', label:'Pending Approvals',      icon:'ti-circle-check'  },
+      { key:'overnight_pct',     label:'Overnight Shipping %',   icon:'ti-truck-delivery' },
+    ];
+    const LOC_KPI = {};
+    locations.forEach((l, i) => {
+      const base = (LOC_BASE[l.id] || LOC_BASE.austin);
+      const spend12 = base[11];
+      LOC_KPI[l.id] = {
+        parts_spend:       spend12,
+        open_orders:       2 + i * 2 + (allWOs.filter(w => w.locationId === l.id && w.status === 'active').length || 0),
+        pending_approvals: 1 + i,
+        overnight_pct:     28 + i * 4,
+      };
+    });
+    const selectedKpi = KPI_DEFS.find(k => k.key === _anHeatmapKpi) || KPI_DEFS[0];
+    const kpiVals = locations.map(l => LOC_KPI[l.id][_anHeatmapKpi]);
+    const kpiMax = Math.max(...kpiVals, 1);
+    const LC = ['#1C3969','#185FA5','#3B6D11','#534AB7','#A32D2D'];
+    // TX city approximate SVG positions (viewBox 0 0 500 460)
+    const LOC_POS = { austin:[235,290], 'san-marcos':[225,315], kyle:[225,300], houston:[385,285], dallas:[310,150] };
+    const locDots = locations.map((l, i) => {
+      const pos = LOC_POS[l.id] || [200 + i * 60, 250];
+      const val = LOC_KPI[l.id][_anHeatmapKpi];
+      const pct = val / kpiMax;
+      const r = 10 + Math.round(pct * 18);
+      const glowR = r + 14 + Math.round(pct * 14);
+      const col = LC[i % LC.length];
+      const fmtVal = _anHeatmapKpi === 'parts_spend' ? '$' + val.toLocaleString()
+                   : _anHeatmapKpi === 'overnight_pct' ? val + '%'
+                   : val.toString();
+      return `
+        <circle cx="${pos[0]}" cy="${pos[1]}" r="${glowR}" fill="${col}" opacity="0.12"/>
+        <circle cx="${pos[0]}" cy="${pos[1]}" r="${r+5}" fill="${col}" opacity="0.22"/>
+        <circle cx="${pos[0]}" cy="${pos[1]}" r="${r}" fill="${col}" opacity="0.85"/>
+        <text x="${pos[0]}" y="${pos[1]+1}" text-anchor="middle" dominant-baseline="middle" fill="#FFFFFF" font-size="9" font-weight="700" font-family="Inter,sans-serif">${l.name.split(' ')[0]}</text>
+        <text x="${pos[0]}" y="${pos[1]+r+13}" text-anchor="middle" fill="${col}" font-size="10" font-weight="700" font-family="Inter,sans-serif">${fmtVal}</text>`;
+    }).join('');
+    body.innerHTML = `
+      <style>
+        .an-hm-kpi-bar { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+        .an-hm-kpi-btn { display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid #E0DBD5;color:#5A5F6E;background:#FFFFFF;font-family:inherit;transition:all .15s; }
+        .an-hm-kpi-btn.active { background:#111318;color:#FFFFFF;border-color:#111318; }
+        .an-hm-kpi-btn:hover:not(.active) { border-color:#9CA3AF;color:#111318; }
+        .an-hm-map { background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:16px;padding:20px;margin-bottom:18px; }
+        .an-hm-loc-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }
+        .an-hm-loc-card { background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:14px 16px; }
+        .an-hm-loc-val { font-size:22px;font-weight:700;color:#111318;letter-spacing:-0.5px; }
+        .an-hm-loc-name { font-size:11px;color:#9CA3AF;margin-top:2px; }
+        .an-hm-loc-bar { height:3px;border-radius:2px;margin-top:8px;background:#F5F2EE; }
+        .an-hm-loc-bar-fill { height:100%;border-radius:2px; }
+      </style>
+      <div class="an-hm-kpi-bar">
+        ${KPI_DEFS.map(k => `<button class="an-hm-kpi-btn ${k.key===_anHeatmapKpi?'active':''}" onclick="anSetHeatmapKpi('${k.key}')"><i class="ti ${k.icon}" style="font-size:12px;"></i> ${k.label}</button>`).join('')}
+      </div>
+      <div class="an-hm-map">
+        <div style="font-size:12px;font-weight:600;color:#111318;margin-bottom:14px;display:flex;align-items:center;gap:6px;"><i class="ti ti-map-pin" style="color:#9CA3AF;"></i> ${selectedKpi.label} by location</div>
+        <svg viewBox="0 0 500 420" style="width:100%;max-height:380px;">
+          <defs>
+            <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <!-- Texas outline (simplified) -->
+          <path d="M100,25 L275,25 L275,95 L330,95 L330,128 L420,128 L445,155 L465,195 L478,255 L470,315 L445,355 L400,385 L335,400 L255,408 L185,388 L145,350 L120,300 L90,255 L82,200 L88,150 L100,95 Z"
+            fill="#F5F2EE" stroke="#E0DBD5" stroke-width="1.5"/>
+          <g filter="url(#glow)">
+            ${locDots}
+          </g>
+        </svg>
+      </div>
+      <div class="an-hm-loc-cards">
+        ${locations.map((l, i) => {
+          const val = LOC_KPI[l.id][_anHeatmapKpi];
+          const pct = val / kpiMax;
+          const col = LC[i % LC.length];
+          const fmtVal = _anHeatmapKpi === 'parts_spend' ? '$' + val.toLocaleString()
+                       : _anHeatmapKpi === 'overnight_pct' ? val + '%'
+                       : val.toString();
+          const active = _anLocs.has(l.id);
+          return `<div class="an-hm-loc-card" style="${active?'border-color:'+col+';':''}" >
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+              <div style="width:8px;height:8px;border-radius:50%;background:${col};flex-shrink:0;"></div>
+              <span style="font-size:11px;font-weight:600;color:#5A5F6E;">${l.name}</span>
+            </div>
+            <div class="an-hm-loc-val">${fmtVal}</div>
+            <div class="an-hm-loc-name">${selectedKpi.label}</div>
+            <div class="an-hm-loc-bar"><div class="an-hm-loc-bar-fill" style="width:${Math.round(pct*100)}%;background:${col};"></div></div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    return;
+  }
 
   body.innerHTML = `
   <!-- KPI strip -->
@@ -554,15 +660,18 @@ function anRenderContent() {
 
     <div class="an-card">
       <div class="an-card-hdr">
-        <div class="an-card-title"><i class="ti ti-tags" style="font-size:13px;color:#9CA3AF;"></i> Spend by category</div>
+        <div class="an-card-title"><i class="ti ti-forklift" style="font-size:13px;color:#9CA3AF;"></i> Spend by asset</div>
         <span class="an-card-sub">${fmt(totalSpend)} total</span>
       </div>
       <div class="an-card-body">
-        ${CAT_DATA.map(c => `
+        ${ASSET_DATA.map(c => `
           <div class="an-cat-row">
             <div style="width:9px;height:9px;border-radius:2px;background:${c.color};flex-shrink:0;"></div>
-            <div class="an-cat-name">${c.name}</div>
-            ${bar(c.amount / maxCat, c.color)}
+            <div style="flex:1;min-width:0;">
+              <div class="an-cat-name" style="min-width:unset;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
+              ${c.vendor ? `<div style="font-size:9px;color:#B0AAA3;">${c.vendor}</div>` : ''}
+            </div>
+            ${bar(c.amount / maxAsset, c.color)}
             <div style="font-size:10px;color:#9CA3AF;min-width:28px;text-align:right;">${Math.round(c.pct*100)}%</div>
             <div class="an-cat-val">${fmt(c.amount)}</div>
           </div>`).join('')}
