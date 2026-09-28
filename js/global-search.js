@@ -157,11 +157,7 @@ const GlobalSearch = (() => {
 
     if (!_submitted || !_query || !_category) {
       list.innerHTML = `<div class="gs-empty">
-        <div style="font-size:12px;font-weight:600;color:#3A3D4A;margin-bottom:10px;">Jump to</div>
-        <div class="gs-nav-grid">${NAV_ITEMS.map((n,i) =>
-          `<div class="gs-nav-chip" onclick="GlobalSearch.pick(${i + 1000})"><i class="ti ${n.icon}"></i> ${n.label}</div>`
-        ).join('')}</div>
-        <div style="font-size:11px;color:#B0AAA3;margin-top:14px;text-align:center;">Select a category, enter a term, then click Search</div>
+        <div style="font-size:11px;color:#B0AAA3;text-align:center;">Select a category, enter a term, then click Search</div>
       </div>`;
       return;
     }
