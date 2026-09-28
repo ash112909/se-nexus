@@ -2102,6 +2102,7 @@ function render_parts_search(el) {
   // ── Helpers ───────────────────────────────────────────────────────────────
   const ALL_PARTS = Store.getParts('', '');
   function fp(id) { return ALL_PARTS.find(p => p.id === id); }
+  window._psGetPart = function(id) { return ALL_PARTS.find(p => p.id === id); };
   function findModelEntry(modelId) {
     for (const s of CATALOG) { const m = s.models.find(m => m.id === modelId); if (m) return {supplier:s,model:m}; }
     return null;
@@ -2869,7 +2870,7 @@ function render_parts_search(el) {
       })()}
       <div class="dp-actions">${iC
         ?`<div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;display:flex;align-items:center;gap:6px;background:#D6E4F7;border-radius:8px;padding:8px 12px;"><i class="ti ti-check" style="color:#1C3969;font-size:13px;"></i><span style="font-size:13px;font-weight:600;color:#1C3969;flex:1;">In cart</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#1C3969;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',-1)">−</button><span style="font-size:14px;font-weight:700;color:#1C3969;min-width:20px;text-align:center;">${cartQty(p.id)}</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#1C3969;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',1)">+</button></div></div>`
-        :`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><button class="dp-add" onclick="psAddPart('${p.id}')"><i class="ti ti-shopping-cart" style="font-size:13px;"></i> ${cartLabel}</button><button class="dp-wishlist" onclick="addToWishList(fp('${p.id}'))"><i class="ti ti-heart" style="font-size:13px;"></i> Save to list</button></div>`
+        :`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><button class="dp-add" onclick="psAddPart('${p.id}')"><i class="ti ti-shopping-cart" style="font-size:13px;"></i> ${cartLabel}</button><button class="dp-wishlist" onclick="addToWishList(_psGetPart('${p.id}'))"><i class="ti ti-heart" style="font-size:13px;"></i> Save to list</button></div>`
       }</div>`;
   }
 
