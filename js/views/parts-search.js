@@ -2585,7 +2585,7 @@ function render_parts_search(el) {
         <td>${wo.asset||'—'}</td>
         <td>${wo.description||'—'}</td>
         <td><span class="wo-status-badge active">Active</span></td>
-        <td><button onclick="event.stopPropagation();psNavFromWo(${wo.id})" style="background:#1C3969;border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;">Browse Parts</button></td>
+        <td><button onclick="event.stopPropagation();psNavFromWo('${wo.id}')" style="background:#1C3969;border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;">Browse Parts</button></td>
       </tr>`
     ).join('');
 
@@ -2999,9 +2999,11 @@ function render_parts_search(el) {
     const wo = Store.getWorkOrder(woId); if(!wo) return;
     _woId = wo.id;
     _wo = wo;
-    const eq = EQUIPMENT.find(e=>e.asset===wo.asset); if(!eq) return;
-    _nav={supplierId:eq.supplierId,modelId:eq.modelId,compName:null,subName:null};
-    _expanded.add(eq.supplierId); _expanded.add(eq.modelId);
+    const eq = EQUIPMENT.find(e=>e.asset===wo.asset);
+    if(eq) {
+      _nav={supplierId:eq.supplierId,modelId:eq.modelId,compName:null,subName:null};
+      _expanded.add(eq.supplierId); _expanded.add(eq.modelId);
+    }
     renderAll();
   };
 
