@@ -27,11 +27,18 @@ function render_analytics(el) {
 .an-period-pill.active { background:#111318; color:#FFFFFF; border-color:#111318; }
 .an-period-pill:hover:not(.active) { border-color:#9CA3AF; color:#111318; }
 .an-filter-sep { width:0.5px; height:20px; background:#E8E4DF; }
-.an-loc-pills { display:flex; gap:5px; flex-wrap:wrap; }
-.an-loc-pill { display:flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:0.5px solid #E0DBD5; color:#5A5F6E; background:#FFFFFF; transition:all 0.15s; white-space:nowrap; }
-.an-loc-pill.active { background:#D6E4F7; color:#1C3969; border-color:#F5C97A; }
-.an-loc-pill:hover:not(.active) { border-color:#9CA3AF; }
-.an-loc-dot { width:6px; height:6px; border-radius:50%; }
+.an-loc-dd-wrap { position:relative; }
+.an-loc-dd-btn { display:flex; align-items:center; gap:6px; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:0.5px solid #E0DBD5; color:#5A5F6E; background:#FFFFFF; white-space:nowrap; user-select:none; }
+.an-loc-dd-btn:hover { border-color:#9CA3AF; color:#111318; }
+.an-loc-dd-btn.open { border-color:#1C3969; color:#1C3969; background:#EAF1FB; }
+.an-loc-panel { position:absolute; top:calc(100% + 6px); left:0; min-width:220px; max-width:300px; background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:10px; box-shadow:0 4px 18px rgba(0,0,0,0.12); z-index:900; overflow:hidden; }
+.an-loc-panel-head { padding:8px 12px; border-bottom:0.5px solid #F0ECE8; display:flex; align-items:center; justify-content:space-between; }
+.an-loc-panel-head button { font-size:11px; font-weight:600; color:#1C3969; background:none; border:none; cursor:pointer; font-family:inherit; padding:0; }
+.an-loc-list { max-height:220px; overflow-y:auto; padding:4px 0; }
+.an-loc-item { display:flex; align-items:center; gap:8px; padding:6px 12px; cursor:pointer; font-size:12px; color:#3A3D4A; }
+.an-loc-item:hover { background:#F5F2EE; }
+.an-loc-item input[type=checkbox] { accent-color:#1C3969; width:13px; height:13px; flex-shrink:0; cursor:pointer; }
+.an-loc-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
 .an-content { flex:1; padding:20px 24px 40px; overflow-y:auto; }
 /* ── KPI strip ───── */
 .an-kpi-row { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:18px; }
@@ -136,19 +143,12 @@ function render_analytics(el) {
         <div class="an-period-pill ${_anView==='heatmap'?'active':''}" onclick="anSetView('heatmap')"><i class="ti ti-map-pin" style="font-size:11px;"></i> Location map</div>
       </div>
       <div class="an-filter-sep"></div>
-      <span class="an-filter-label">Locations</span>
-      <div class="an-loc-pills">
-        <div class="an-loc-pill ${_anLocs.size===locations.length?'active':''}" onclick="anToggleAllLocs()" style="${_anLocs.size===locations.length?'background:#111318;color:#FFFFFF;border-color:#111318;':''}">
-          <i class="ti ti-stack-2" style="font-size:11px;"></i> All
+      <div class="an-loc-dd-wrap" id="an-loc-dd-wrap">
+        <div class="an-loc-dd-btn" id="an-loc-dd-btn" onclick="anLocDdToggle()">
+          <i class="ti ti-map-2" style="font-size:12px;"></i>
+          <span id="an-loc-dd-label">${_anLocs.size===locations.length?'All locations':_anLocs.size+' location'+(_anLocs.size===1?'':'s')}</span>
+          <i class="ti ti-chevron-down" style="font-size:11px;" id="an-loc-dd-chevron"></i>
         </div>
-        ${locations.map((l, i) => {
-          const LC = ['#1C3969','#185FA5','#3B6D11','#534AB7','#A32D2D'];
-          const active = _anLocs.has(l.id);
-          return `<div class="an-loc-pill ${active?'active':''}" onclick="anToggleLoc('${l.id}')">
-            <div class="an-loc-dot" style="background:${LC[i%LC.length]};"></div>
-            ${l.name.split(' ')[0]}
-          </div>`;
-        }).join('')}
       </div>
     </div>
 
@@ -168,43 +168,72 @@ window.anSetPeriod = function(p) {
   anRenderContent();
 };
 
-window.anToggleAllLocs = function() {
+const LC = ['#1C3969','#185FA5','#3B6D11','#534AB7','#A32D2D'];
+
+window.anLocDdToggle = function() {
+  const wrap = document.getElementById('an-loc-dd-wrap');
+  const btn = document.getElementById('an-loc-dd-btn');
+  if (!wrap) return;
+  const existing = document.getElementById('an-loc-panel');
+  if (existing) { existing.remove(); btn.classList.remove('open'); return; }
+  btn.classList.add('open');
   const locs = Store.getLocations();
-  if (_anLocs.size === locs.length) {
-    _anLocs = new Set([locs[0].id]);
+  const allSel = _anLocs.size === locs.length;
+  const panel = document.createElement('div');
+  panel.id = 'an-loc-panel';
+  panel.className = 'an-loc-panel';
+  panel.innerHTML = `
+    <div class="an-loc-panel-head">
+      <span style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.7px;">Locations</span>
+      <button onclick="anLocSelectAll()">${allSel?'Deselect all':'Select all'}</button>
+    </div>
+    <div class="an-loc-list">
+      ${locs.map((l,i) => `
+        <label class="an-loc-item">
+          <input type="checkbox" ${_anLocs.has(l.id)?'checked':''} onchange="anLocCheck('${l.id}',this.checked)">
+          <div class="an-loc-dot" style="background:${LC[i%LC.length]};"></div>
+          ${l.name}
+        </label>`).join('')}
+    </div>`;
+  wrap.appendChild(panel);
+  setTimeout(() => document.addEventListener('click', _anLocOutside, {once:true, capture:true}), 0);
+};
+
+function _anLocOutside(e) {
+  const wrap = document.getElementById('an-loc-dd-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('an-loc-panel')?.remove();
+    document.getElementById('an-loc-dd-btn')?.classList.remove('open');
   } else {
-    _anLocs = new Set(locs.map(l => l.id));
+    document.addEventListener('click', _anLocOutside, {once:true, capture:true});
   }
-  _syncLocPills();
+}
+
+window.anLocCheck = function(id, checked) {
+  const locs = Store.getLocations();
+  if (!checked && _anLocs.size === 1) {
+    document.querySelector(`#an-loc-panel input[onchange*="'${id}'"]`).checked = true;
+    return;
+  }
+  if (checked) _anLocs.add(id); else _anLocs.delete(id);
+  _syncLocDd();
   anRenderContent();
 };
 
-window.anToggleLoc = function(id) {
-  if (_anLocs.has(id)) {
-    if (_anLocs.size === 1) return;
-    _anLocs.delete(id);
-  } else {
-    _anLocs.add(id);
-  }
-  _syncLocPills();
+window.anLocSelectAll = function() {
+  const locs = Store.getLocations();
+  const allSel = _anLocs.size === locs.length;
+  _anLocs = allSel ? new Set([locs[0].id]) : new Set(locs.map(l=>l.id));
+  document.getElementById('an-loc-panel')?.remove();
+  document.getElementById('an-loc-dd-btn')?.classList.remove('open');
+  _syncLocDd();
   anRenderContent();
 };
 
-function _syncLocPills() {
+function _syncLocDd() {
   const locs = Store.getLocations();
-  const LC = ['#1C3969','#185FA5','#3B6D11','#534AB7','#A32D2D'];
-  const allActive = _anLocs.size === locs.length;
-  document.querySelectorAll('.an-loc-pill').forEach((pill, i) => {
-    if (i === 0) {
-      pill.classList.toggle('active', allActive);
-      pill.style.cssText = allActive ? 'background:#111318;color:#FFFFFF;border-color:#111318;' : '';
-    } else {
-      const loc = locs[i - 1];
-      const active = loc && _anLocs.has(loc.id);
-      pill.classList.toggle('active', active);
-      pill.style.cssText = active ? `background:#D6E4F7;color:#1C3969;border-color:#F5C97A;` : '';
-    }
-  });
+  const lbl = document.getElementById('an-loc-dd-label');
+  if (lbl) lbl.textContent = _anLocs.size === locs.length ? 'All locations' : _anLocs.size + ' location' + (_anLocs.size===1?'':'s');
 }
 
 window.anSetView = function(v) { _anView = v; Router.navigate('analytics'); };
