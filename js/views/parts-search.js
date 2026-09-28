@@ -2873,7 +2873,7 @@ function render_parts_search(el) {
     const body  = (document.getElementById('ps-note-body')  || {}).value?.trim();
     if (!title || !body) { alert('Title and note content are required.'); return; }
     const _u = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
-    Store.saveCmsArticle({
+    const baseNote = {
       id: 'cms-fleet-note-' + Date.now(),
       type: 'notice', subtype: 'fleet-part-note', status: 'published', postAs: 'news',
       title, body,
@@ -2883,7 +2883,10 @@ function render_parts_search(el) {
       targetPartNum: partId, targetPartDesc: partDesc,
       date: new Date().toISOString().slice(0,7).replace('-','/'),
       priority: 'low', locations: ['all'],
-    });
+      supplierId: _ctxSupplierId || null,
+      impersonatingFleet: _impersonatingFleet || null,
+    };
+    Store.saveCmsArticle(baseNote);
     const form = document.getElementById('ps-note-form');
     const btn = document.getElementById('ps-note-toggle');
     if (form) form.style.display = 'none';
@@ -2891,6 +2894,48 @@ function render_parts_search(el) {
     if (document.getElementById('ps-note-title')) document.getElementById('ps-note-title').value = '';
     if (document.getElementById('ps-note-body'))  document.getElementById('ps-note-body').value  = '';
     renderDetail();
+    if (_impersonating) {
+      const cbId1 = 'pn-spread-locs', cbId2 = 'pn-spread-fleets';
+      Modal.show({
+        title: 'Propagate this note?',
+        body: `<div style="font-size:13px;color:#5A5F6E;margin-bottom:14px;">
+          <strong style="color:#111318;">${title}</strong> was saved for <em>${_impersonatingFleet || 'this fleet'}</em>.
+          Would you like to also apply it elsewhere?
+        </div>
+        <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#F5F2EE;border-radius:8px;cursor:pointer;margin-bottom:8px;">
+          <input type="checkbox" id="${cbId1}" style="margin-top:2px;accent-color:#1C3969;width:14px;height:14px;flex-shrink:0;">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#111318;">All locations</div>
+            <div style="font-size:11px;color:#7A7F8E;margin-top:2px;">Add this note to the same part across all of your fleet's locations.</div>
+          </div>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#F5F2EE;border-radius:8px;cursor:pointer;">
+          <input type="checkbox" id="${cbId2}" style="margin-top:2px;accent-color:#1C3969;width:14px;height:14px;flex-shrink:0;">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#111318;">All fleets</div>
+            <div style="font-size:11px;color:#7A7F8E;margin-top:2px;">Publish this note for all fleets that carry this part in their catalog.</div>
+          </div>
+        </label>`,
+        actions: [
+          { label: 'Apply', primary: true, onClick: function() {
+            const allLocs = document.getElementById(cbId1)?.checked;
+            const allFleets = document.getElementById(cbId2)?.checked;
+            if (allLocs || allFleets) {
+              Store.saveCmsArticle(Object.assign({}, baseNote, {
+                id: 'cms-fleet-note-' + (Date.now()+1),
+                locations: allLocs ? ['all'] : baseNote.locations,
+                impersonatingFleet: allFleets ? null : baseNote.impersonatingFleet,
+                allFleets: allFleets || false,
+                allLocations: allLocs || false,
+              }));
+            }
+            Modal.close();
+            renderDetail();
+          }},
+          { label: 'No thanks', onClick: function() { Modal.close(); } },
+        ],
+      });
+    }
   };
 
   function refreshRows() {
