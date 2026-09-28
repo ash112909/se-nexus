@@ -219,7 +219,7 @@ function render_order_history(el) {
   <div class="main">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
-        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('dashboard')">Dashboard</a>
+        <a style="color:#5C6070;cursor:pointer;" onclick="Router.navigate('home')">Home</a>
         <span style="color:#3C4052;">/</span>
         <span style="color:#FFFFFF;font-weight:500;">Order history</span>
       </div>

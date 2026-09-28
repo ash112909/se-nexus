@@ -838,7 +838,7 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
   <div class="main" style="display:flex;flex-direction:column;overflow:hidden;">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
-        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('dashboard')">Dashboard</a>
+        <a style="color:#5C6070;cursor:pointer;" onclick="Router.navigate('home')">Home</a>
         <span style="color:#3C4052;">/</span>
         <span style="color:#FFF;font-weight:500;">Diagnostic assistant</span>
       </div>

@@ -2367,7 +2367,7 @@ function render_parts_search(el) {
   <div class="main" style="display:flex;flex-direction:column;overflow:hidden;">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
-        <a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('dashboard')">Dashboard</a>
+        <a style="color:#5C6070;cursor:pointer;" onclick="Router.navigate('home')">Home</a>
         <span style="color:#3C4052;">/</span>
         ${_wo ? `<a style="color:#5C6070;cursor:pointer;" onclick="sendPrompt('Work Order detail WO #${_wo.id}')">WO #${_wo.id}</a><span style="color:#3C4052;">/</span>` : ''}
         <span style="color:#FFFFFF;font-weight:500;">Parts search</span>
