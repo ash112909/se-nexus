@@ -358,10 +358,10 @@ function anRenderContent() {
   // ── Smart insights ────────────────────────────────────────────────────────
   const INSIGHTS = [
     {
-      icon:'ti-trending-up', iconBg:'#D6E4F7', iconColor:'#1C3969',
-      title:'Hydraulic spend trending up 34%',
-      body:`Seal kits and cylinder assemblies account for 3 of your top 5 parts this period. Two active Cat 320 WOs are driving elevated hydraulic parts demand.`,
-      tag:'Watch', tagBg:'#FFF8EC', tagColor:'#1C3969',
+      icon:'ti-forklift', iconBg:'#D6E4F7', iconColor:'#1C3969',
+      title:'FL-031 & FL-017 driving 50% of parts spend',
+      body:`The Toyota 8FGU25 (FL-031) and Cat 320 (FL-017) together account for half of total parts spend this period. Both have open WOs with active parts orders.`,
+      tag:'Top assets', tagBg:'#EAF1FB', tagColor:'#1C3969',
     },
     {
       icon:'ti-alert-triangle', iconBg:'#FEF2F2', iconColor:'#A32D2D',
