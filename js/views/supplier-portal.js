@@ -247,6 +247,11 @@ function render_supplier_portal(el) {
   </div>
 </div>`;
 
+  // ── CMS navigation globals (defined early so news-feed buttons work) ─────────
+  window.spCmsGoList = function() { _spcView = 'list'; _spcEditId = null; _spPtSelectedPartId = null; _spNewsSubView = 'cms-list'; renderNews(); };
+  window.spCmsNewArticle = function() { _spcView = 'editor'; _spcEditId = null; _spPtSelectedPartId = null; _spNewsSubView = 'cms-editor'; renderNews(); };
+  window.spCmsEditArticle = function(id) { _spcView = 'editor'; _spcEditId = id; _spPtSelectedPartId = null; _spNewsSubView = 'cms-editor'; renderNews(); };
+
   // ── Helpers ──────────────────────────────────────────────────────────────────
 
   function spBar(pct, color) {
@@ -712,9 +717,6 @@ function render_supplier_portal(el) {
 </style>
 <div id="spc-body" style="padding:0 28px 28px;"></div>`;
 
-    window.spCmsGoList = function() { _spcView = 'list'; _spcEditId = null; _spPtSelectedPartId = null; _spNewsSubView = 'cms-list'; renderNews(); };
-    window.spCmsNewArticle = function() { _spcView = 'editor'; _spcEditId = null; _spPtSelectedPartId = null; _spNewsSubView = 'cms-editor'; renderNews(); };
-    window.spCmsEditArticle = function(id) { _spcView = 'editor'; _spcEditId = id; _spPtSelectedPartId = null; _spNewsSubView = 'cms-editor'; renderNews(); };
     window.spCmsSetFilter = function(f) { _spcFilter = f; renderSpcList(); };
 
     if (_spcView === 'editor') renderSpcEditor();
