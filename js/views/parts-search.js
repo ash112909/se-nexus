@@ -2726,7 +2726,7 @@ function render_parts_search(el) {
           <td class="pnum">${p.partNum}</td>
           <td><div class="pdesc">${p.description}</div><div class="pbadges">${p.oemOnly?'<span class="badge-oem">OEM</span>':'<span class="badge-am">Aftermarket</span>'}${p.recommended?'<span class="badge-rec"><i class="ti ti-star" style="font-size:8px;"></i> Rec</span>':''}</div></td>
           <td style="color:#7A7F8E;font-size:11px;white-space:nowrap;">${p.vendor}</td>
-          <td>${inC?inCartHtml(p.id,'sm'):`<button class="add-btn" onclick="event.stopPropagation();psAddPart('${p.id}')"><i class="ti ti-plus" style="font-size:10px;"></i> Add</button>`}</td>
+          <td>${_impersonating?'':(inC?inCartHtml(p.id,'sm'):`<button class="add-btn" onclick="event.stopPropagation();psAddPart('${p.id}')"><i class="ti ti-plus" style="font-size:10px;"></i> Add</button>`)}</td>
         </tr>`;
       }).join('')}</tbody>
     </table>`;
@@ -2757,7 +2757,7 @@ function render_parts_search(el) {
               <span class="legend-name">${p.description}</span>
               <span class="legend-num">${p.partNum}</span>
               <span class="legend-price">$${p.price.toFixed(2)}</span>
-              ${iC?inCartHtml(p.id,'sm'):`<button class="add-sm" onclick="event.stopPropagation();psAddPart('${p.id}')">Add</button>`}
+              ${_impersonating?'':(iC?inCartHtml(p.id,'sm'):`<button class="add-sm" onclick="event.stopPropagation();psAddPart('${p.id}')">Add</button>`)}
             </div>`;}).join('')
         : '<div style="padding:12px;font-size:12px;color:#9CA3AF;">Navigate to a sub-component to see parts on diagram.</div>'}
       </div>
@@ -2849,7 +2849,7 @@ function render_parts_search(el) {
       ${(() => {
         const _psUser = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
         const _psFeat = (_psUser && Store.getEffectiveFeatures) ? Store.getEffectiveFeatures(_psUser.id) : {};
-        const _psCms = 'cms' in _psFeat ? _psFeat.cms : _psUser?.role === 'supervisor';
+        const _psCms = _impersonating || ('cms' in _psFeat ? _psFeat.cms : _psUser?.role === 'supervisor');
         if (!_psCms) return '';
         return `<div class="dp-div"></div>
           <div style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#9CA3AF;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;">
@@ -2862,9 +2862,11 @@ function render_parts_search(el) {
             <button onclick="psSaveNote('${p.id}','${p.partNum.replace(/'/g,"\\'")}','${p.description.replace(/'/g,"\\'")}')" style="padding:5px 12px;background:#111318;color:#FFFFFF;border:none;border-radius:6px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;">Save note</button>
           </div>`;
       })()}
-      <div class="dp-actions">${iC
-        ?`<div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;display:flex;align-items:center;gap:6px;background:#D6E4F7;border-radius:8px;padding:8px 12px;"><i class="ti ti-check" style="color:#1C3969;font-size:13px;"></i><span style="font-size:13px;font-weight:600;color:#1C3969;flex:1;">In cart</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#1C3969;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',-1)">−</button><span style="font-size:14px;font-weight:700;color:#1C3969;min-width:20px;text-align:center;">${cartQty(p.id)}</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#1C3969;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',1)">+</button></div></div>`
-        :`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><button class="dp-add" onclick="psAddPart('${p.id}')"><i class="ti ti-shopping-cart" style="font-size:13px;"></i> ${cartLabel}</button><button class="dp-wishlist" onclick="addToWishList(_psGetPart('${p.id}'))"><i class="ti ti-heart" style="font-size:13px;"></i> Save to list</button></div>`
+      <div class="dp-actions">${_impersonating
+        ? `<div style="font-size:11px;color:#9CA3AF;font-style:italic;padding:4px 0;">Cart and list unavailable in view-as-fleet mode.</div>`
+        : iC
+          ?`<div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;display:flex;align-items:center;gap:6px;background:#D6E4F7;border-radius:8px;padding:8px 12px;"><i class="ti ti-check" style="color:#1C3969;font-size:13px;"></i><span style="font-size:13px;font-weight:600;color:#1C3969;flex:1;">In cart</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#1C3969;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',-1)">−</button><span style="font-size:14px;font-weight:700;color:#1C3969;min-width:20px;text-align:center;">${cartQty(p.id)}</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#1C3969;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',1)">+</button></div></div>`
+          :`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><button class="dp-add" onclick="psAddPart('${p.id}')"><i class="ti ti-shopping-cart" style="font-size:13px;"></i> ${cartLabel}</button><button class="dp-wishlist" onclick="addToWishList(_psGetPart('${p.id}'))"><i class="ti ti-heart" style="font-size:13px;"></i> Save to list</button></div>`
       }</div>`;
   }
 
@@ -2948,7 +2950,7 @@ function render_parts_search(el) {
       const actionCell=r.cells[5];
       if (!actionCell) return;
       const iC=isInCart(p.id);
-      actionCell.innerHTML=iC?inCartHtml(p.id,'sm'):`<button class="add-btn" onclick="event.stopPropagation();psAddPart('${p.id}')"><i class="ti ti-plus" style="font-size:10px;"></i> Add</button>`;
+      if (!_impersonating) actionCell.innerHTML=iC?inCartHtml(p.id,'sm'):`<button class="add-btn" onclick="event.stopPropagation();psAddPart('${p.id}')"><i class="ti ti-plus" style="font-size:10px;"></i> Add</button>`;
     });
   }
 
