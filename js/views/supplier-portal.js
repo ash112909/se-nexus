@@ -26,6 +26,7 @@ function render_supplier_portal(el) {
   let _spNewsShowSaved = false;
   let _spNewsSaved = new Set(JSON.parse(localStorage.getItem('se-news-saved') || '[]'));
   let _spNewsReported = new Set(JSON.parse(localStorage.getItem('se-news-reported') || '[]'));
+  let _spNewsSubView = 'feed'; // 'feed' | 'cms-list' | 'cms-editor'
 
   const PR_STATUS = {
     pending:    { label: 'Awaiting response', color: '#1C3969', bg: '#D6E4F7' },
@@ -299,7 +300,7 @@ function render_supplier_portal(el) {
       </div>` : ''}
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button class="sp-btn sp-btn-primary" onclick="document.querySelector('.sb-item[data-sp-tab=fleets]').click()"><i class="ti ti-building-warehouse" style="font-size:12px;"></i> View My Fleets</button>
-        <button class="sp-btn sp-btn-ghost" onclick="document.querySelector('.sb-item[data-sp-tab=content]').click()"><i class="ti ti-pencil" style="font-size:12px;"></i> My Content</button>
+        <button class="sp-btn sp-btn-ghost" onclick="document.querySelector('.sb-item[data-sp-tab=news]').click()"><i class="ti ti-news" style="font-size:12px;"></i> News &amp; Updates</button>
       </div>`;
   }
 
@@ -711,9 +712,9 @@ function render_supplier_portal(el) {
 </style>
 <div id="spc-body" style="padding:0 28px 28px;"></div>`;
 
-    window.spCmsGoList = function() { _spcView = 'list'; _spcEditId = null; _spPtSelectedPartId = null; renderContent(); };
-    window.spCmsNewArticle = function() { _spcView = 'editor'; _spcEditId = null; _spPtSelectedPartId = null; renderContent(); };
-    window.spCmsEditArticle = function(id) { _spcView = 'editor'; _spcEditId = id; _spPtSelectedPartId = null; renderContent(); };
+    window.spCmsGoList = function() { _spcView = 'list'; _spcEditId = null; _spPtSelectedPartId = null; _spNewsSubView = 'cms-list'; renderNews(); };
+    window.spCmsNewArticle = function() { _spcView = 'editor'; _spcEditId = null; _spPtSelectedPartId = null; _spNewsSubView = 'cms-editor'; renderNews(); };
+    window.spCmsEditArticle = function(id) { _spcView = 'editor'; _spcEditId = id; _spPtSelectedPartId = null; _spNewsSubView = 'cms-editor'; renderNews(); };
     window.spCmsSetFilter = function(f) { _spcFilter = f; renderSpcList(); };
 
     if (_spcView === 'editor') renderSpcEditor();
@@ -741,10 +742,13 @@ function render_supplier_portal(el) {
     body.innerHTML = `
       <div class="spc-list-hdr">
         <div>
-          <div class="spc-list-title">My Content</div>
-          <div class="spc-list-sub">Manage your published articles, bulletins, and part messages</div>
+          <div class="spc-list-title">Manage articles</div>
+          <div class="spc-list-sub">Create and manage your published articles, bulletins, and updates</div>
         </div>
-        <button class="spc-btn-primary" onclick="spCmsNewArticle()"><i class="ti ti-plus"></i> New article</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="spc-btn-ghost" onclick="_spNewsSubView='feed';renderNews()"><i class="ti ti-arrow-left"></i> Back to feed</button>
+          <button class="spc-btn-primary" onclick="spCmsNewArticle()"><i class="ti ti-plus"></i> New article</button>
+        </div>
       </div>
       <div class="spc-search-wrap">
         <i class="ti ti-search spc-search-icon"></i>
@@ -851,7 +855,7 @@ function render_supplier_portal(el) {
 
     body.innerHTML = `
       <div style="display:flex;align-items:center;gap:10px;padding:16px 0 14px;">
-        <button class="spc-btn-ghost" onclick="spCmsGoList()"><i class="ti ti-arrow-left"></i> My content</button>
+        <button class="spc-btn-ghost" onclick="spCmsGoList()"><i class="ti ti-arrow-left"></i> Back to articles</button>
         <div style="font-size:16px;font-weight:700;color:#111318;">${_spcEditId ? 'Edit article' : 'New article'}</div>
       </div>
       <div class="spc-editor-grid">
@@ -1171,19 +1175,19 @@ function render_supplier_portal(el) {
       const art = spcCollectForm('draft');
       if (!art) return;
       Store.saveCmsArticle(art);
-      _spcView = 'list'; _spcEditId = null; renderContent();
+      _spcView = 'list'; _spcEditId = null; _spNewsSubView = 'cms-list'; renderNews();
     };
     window.spcPublish = function() {
       const art = spcCollectForm('published');
       if (!art) return;
       Store.saveCmsArticle(art);
-      _spcView = 'list'; _spcEditId = null; renderContent();
+      _spcView = 'list'; _spcEditId = null; _spNewsSubView = 'cms-list'; renderNews();
     };
     window.spcSchedule = function() {
       const art = spcCollectForm('scheduled');
       if (!art) return;
       Store.saveCmsArticle(art);
-      _spcView = 'list'; _spcEditId = null; renderContent();
+      _spcView = 'list'; _spcEditId = null; _spNewsSubView = 'cms-list'; renderNews();
     };
   }
 
@@ -1338,6 +1342,9 @@ function render_supplier_portal(el) {
   function renderNews() {
     const titleEl = document.getElementById('sp-topbar-title');
     if (titleEl) titleEl.textContent = 'News & Updates';
+    if (_spNewsSubView === 'cms-list' || _spNewsSubView === 'cms-editor') {
+      renderContent(); return;
+    }
 
     // Supplier's own articles from NEWS_ARTICLES (where poster === supplierName)
     const supplierNewsArticles = (typeof NEWS_ARTICLES !== 'undefined' ? NEWS_ARTICLES : []).filter(n => n.poster === _supplierName);
@@ -1531,6 +1538,8 @@ function render_supplier_portal(el) {
               <i class="ti ti-arrow-${_spNewsSortDir==='desc'?'down':'up'}"></i> ${_spNewsSortDir==='desc'?'Newest':'Oldest'} first
             </button>
             <span class="news-count-label" id="sp-news-count">${ALL_SP_NEWS.length} articles</span>
+            <button onclick="spCmsGoList()" style="margin-left:auto;background:none;border:0.5px solid #E2DDD8;border-radius:7px;padding:0 11px;height:30px;font-size:12px;font-weight:600;color:#5A5F6E;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;white-space:nowrap;"><i class="ti ti-list" style="font-size:12px;"></i> Manage articles</button>
+            <button onclick="spCmsNewArticle()" style="background:#1C3969;border:none;border-radius:7px;padding:0 11px;height:30px;font-size:12px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;white-space:nowrap;"><i class="ti ti-plus" style="font-size:12px;"></i> New article</button>
           </div>
           <div class="news-body">
             <div id="sp-news-grid"></div>
@@ -2077,7 +2086,7 @@ function render_supplier_portal(el) {
         </div>`,
       actions: [
         { label: 'Cancel', onClick: () => Modal.close() },
-        { label: 'Open Catalog', primary: true, onClick: () => { Modal.close(); setTab('content'); } },
+        { label: 'Open Pricing Catalog', primary: true, onClick: () => { Modal.close(); setTab('pricing'); } },
       ]
     });
   };
@@ -3320,11 +3329,8 @@ groupKeys.map(pg => {
 
     const contentEl = document.getElementById('sp-content');
     const fullHeight = ['manuals', 'news', 'analytics', 'doc-upload', 'extractor', 'pricing'].includes(tab);
-    const scrollPad  = ['content'].includes(tab);
     if (fullHeight) {
       contentEl.style.cssText = 'flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0;';
-    } else if (scrollPad) {
-      contentEl.style.cssText = 'flex:1;overflow-y:auto;padding:0;';
     } else {
       contentEl.style.cssText = 'flex:1;overflow-y:auto;padding:28px;';
     }
@@ -3332,9 +3338,8 @@ groupKeys.map(pg => {
     if (tab === 'home')       renderHome();
     if (tab === 'fleets')     renderFleets();
     if (tab === 'requests')   renderRequests();
-    if (tab === 'content')    renderContent();
     if (tab === 'manuals')    renderManuals();
-    if (tab === 'news')       renderNews();
+    if (tab === 'news')       { _spNewsSubView = 'feed'; renderNews(); }
     if (tab === 'analytics')  renderAnalytics();
     if (tab === 'doc-upload') renderDocUpload();
     if (tab === 'pricing')    renderPricing();

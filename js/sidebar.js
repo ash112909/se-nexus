@@ -52,7 +52,6 @@ function buildSidebar(activeItem, opts) {
       <div class="sb-item ${activeItem==='sp-home'?'active':''}"     data-sp-tab="home"><i class="ti ti-home"></i><span class="sb-lbl"> Home</span></div>
       <div class="sb-item ${activeItem==='sp-fleets'?'active':''}"   data-sp-tab="fleets"><i class="ti ti-building-warehouse"></i><span class="sb-lbl"> My Fleets</span></div>
       <div class="sb-item ${activeItem==='sp-requests'?'active':''}" data-sp-tab="requests"><i class="ti ti-tag"></i><span class="sb-lbl"> Price Requests ${pending > 0 ? `<span class="sb-badge">${pending}</span>` : ''}</span></div>
-      <div class="sb-item ${activeItem==='sp-content'?'active':''}"  data-sp-tab="content"><i class="ti ti-pencil"></i><span class="sb-lbl"> Content</span></div>
       <div class="sb-section-label">Knowledge</div>
       <div class="sb-item ${activeItem==='sp-manuals'?'active':''}"  data-sp-tab="manuals"><i class="ti ti-book"></i><span class="sb-lbl"> Manuals &amp; Docs</span></div>
       <div class="sb-item ${activeItem==='sp-news'?'active':''}"     data-sp-tab="news"><i class="ti ti-news"></i><span class="sb-lbl"> News &amp; Updates</span></div>
