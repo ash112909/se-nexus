@@ -893,9 +893,9 @@ function render_supplier_portal(el) {
               <div class="spc-field">
                 <label class="spc-label">Where this content appears</label>
                 <div class="spc-check-list">
-                  <label class="spc-check-item"><input type="checkbox" id="spc-place-news" ${a.postAs!=='banner'||!a.showOnOrders&&!a.showOnPartPage?'checked':''}/> Fleet news feed</label>
                   <label class="spc-check-item"><input type="checkbox" id="spc-place-orders" ${a.showOnOrders?'checked':''}/> Order confirmation &amp; history pages</label>
                   <label class="spc-check-item"><input type="checkbox" id="spc-place-part" ${a.showOnPartPage?'checked':''}  onchange="spCmsTogglePartTree(this.checked)"/> Part page message</label>
+                  <label class="spc-check-item"><input type="checkbox" id="spc-place-news" ${a.postAs!=='banner'?'checked':''}/> Supplier news feed</label>
                 </div>
               </div>
               <div id="spc-part-tree-section" style="${a.showOnPartPage?'':'display:none;'}">
@@ -912,9 +912,9 @@ function render_supplier_portal(el) {
               <div class="spc-field">
                 <label class="spc-label">Post as</label>
                 <div style="display:flex;flex-direction:column;gap:5px;">
-                  <label class="spc-post-opt ${a.postAs==='news'||!a.postAs?'selected':''}" onclick="spcSelectPostAs('news')"><input type="radio" name="spc-post-as" value="news" ${a.postAs==='news'||!a.postAs?'checked':''}/><i class="ti ti-news" style="font-size:14px;color:#9CA3AF;"></i> News &amp; updates feed only</label>
-                  <label class="spc-post-opt ${a.postAs==='banner'?'selected':''}" onclick="spcSelectPostAs('banner')"><input type="radio" name="spc-post-as" value="banner" ${a.postAs==='banner'?'checked':''}/><i class="ti ti-speakerphone" style="font-size:14px;color:#9CA3AF;"></i> Site-wide banner only</label>
-                  <label class="spc-post-opt ${a.postAs==='both'?'selected':''}" onclick="spcSelectPostAs('both')"><input type="radio" name="spc-post-as" value="both" ${a.postAs==='both'?'checked':''}/><i class="ti ti-layout-board" style="font-size:14px;color:#9CA3AF;"></i> News feed + banner</label>
+                  <label class="spc-post-opt ${a.postAs==='banner'?'selected':''}" onclick="spcSelectPostAs('banner')"><input type="radio" name="spc-post-as" value="banner" ${a.postAs==='banner'?'checked':''}/><i class="ti ti-speakerphone" style="font-size:14px;color:#9CA3AF;"></i> Page banner (your supplier page only)</label>
+                  <label class="spc-post-opt ${a.postAs==='news'||!a.postAs?'selected':''}" onclick="spcSelectPostAs('news')"><input type="radio" name="spc-post-as" value="news" ${a.postAs==='news'||!a.postAs?'checked':''}/><i class="ti ti-news" style="font-size:14px;color:#9CA3AF;"></i> News feed</label>
+                  <label class="spc-post-opt ${a.postAs==='both'?'selected':''}" onclick="spcSelectPostAs('both')"><input type="radio" name="spc-post-as" value="both" ${a.postAs==='both'?'checked':''}/><i class="ti ti-layout-board" style="font-size:14px;color:#9CA3AF;"></i> News feed and banner</label>
                 </div>
               </div>
               <div id="spc-banner-opts" style="${a.postAs==='news'||!a.postAs?'display:none;':''}">
@@ -929,22 +929,6 @@ function render_supplier_portal(el) {
             </div>
           </div>
 
-          <!-- AI tools -->
-          <div class="spc-panel">
-            <div class="spc-panel-hdr"><i class="ti ti-sparkles" style="color:#1C3969;"></i> AI writing tools</div>
-            <div class="spc-panel-body" style="gap:8px;">
-              <button class="spc-ai-btn" onclick="spcAiAction('rewrite')"><div class="ai-icon"><i class="ti ti-wand"></i></div><div><div style="font-weight:600;">Rewrite &amp; improve</div><div style="font-size:10px;color:#9CA3AF;">Enhance clarity and professional tone</div></div></button>
-              <button class="spc-ai-btn" onclick="spcAiAction('simplify')"><div class="ai-icon"><i class="ti ti-list-check"></i></div><div><div style="font-weight:600;">Simplify</div><div style="font-size:10px;color:#9CA3AF;">Reduce to key action items</div></div></button>
-              <button class="spc-ai-btn" onclick="spcAiAction('translate')"><div class="ai-icon"><i class="ti ti-language"></i></div><div><div style="font-weight:600;">Translate</div><div style="font-size:10px;color:#9CA3AF;">Convert to selected language</div></div></button>
-              <div id="spc-ai-preview-area" style="display:none;">
-                <div class="spc-ai-preview" id="spc-ai-preview-text"></div>
-                <div style="display:flex;gap:6px;margin-top:8px;">
-                  <button class="spc-btn-primary" style="font-size:11px;padding:5px 11px;" onclick="spcAiApply()"><i class="ti ti-check"></i> Apply</button>
-                  <button class="spc-btn-ghost" style="font-size:11px;padding:5px 11px;" onclick="spcAiDismiss()">Discard</button>
-                </div>
-              </div>
-            </div>
-          </div>
 
           <div class="spc-action-bar">
             <button class="spc-btn-ghost" onclick="spCmsGoList()"><i class="ti ti-arrow-left"></i> Cancel</button>
