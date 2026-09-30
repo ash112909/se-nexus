@@ -2833,9 +2833,9 @@ function render_parts_search(el) {
       ${(() => {
         if (!Store.getCmsArticles) return '';
         const allMsgs = Store.getCmsArticles('published').filter(a => a.showOnPartPage && a.targetPartNum === p.id);
-        // Supplier impersonation: show only supplier notes (not fleet notes)
+        // Supplier impersonation: show only explicitly-tagged supplier notes
         const msgs = _impersonating
-          ? allMsgs.filter(a => !a.fleetNote)
+          ? allMsgs.filter(a => !!a.supplierNote)
           : allMsgs;
         if (!msgs.length) return '';
         const sectionLabel = _impersonating ? 'Supplier notes' : 'Supplier &amp; fleet notes';
@@ -3051,7 +3051,7 @@ function render_parts_search(el) {
 
     if (_impersonating && _ctxSupplierId && Store.getSupplierFleets) {
       // Supplier: multiselect of other fleets with nested location pickers
-      const allFleets = Store.getSupplierFleets(_ctxSupplierId).filter(f => f.fleetName !== _impersonatingFleet);
+      const allFleets = Store.getSupplierFleets(_ctxSupplierId);
       if (!allFleets.length) return;
       _pnState = {
         type: 'supplier',
