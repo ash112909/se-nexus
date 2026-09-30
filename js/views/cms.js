@@ -8,14 +8,15 @@ let _cmsPtExpandedCats = new Set();
 let _cmsPtExpandedVendors = new Set();
 
 const CMS_TYPES = {
-  bulletin: { label:'Service Bulletin', icon:'ti-alert-triangle', color:'#1C3969', bg:'#D6E4F7' },
-  fleet:    { label:'Fleet Update',     icon:'ti-building',       color:'#185FA5', bg:'#E6F1FB' },
-  safety:   { label:'Safety Alert',     icon:'ti-alert-octagon',  color:'#B91C1C', bg:'#FEE2E2' },
-  warranty: { label:'Warranty Notice',  icon:'ti-shield-check',   color:'#1C3969', bg:'#E1F5EE' },
-  supplier: { label:'Supplier News',    icon:'ti-news',           color:'#534AB7', bg:'#EEEDFE' },
-  training: { label:'Training',         icon:'ti-certificate',    color:'#5B21B6', bg:'#EDE9FE' },
-  pricing:  { label:'Pricing Update',   icon:'ti-tag',            color:'#6B7280', bg:'#F3F4F6' },
-  notice:   { label:'General Notice',   icon:'ti-info-circle',    color:'#374151', bg:'#F9FAFB' },
+  bulletin: { label:'Service Bulletin',    icon:'ti-alert-triangle', color:'#1C3969', bg:'#D6E4F7' },
+  fleet:    { label:'Fleet Update',        icon:'ti-building',       color:'#185FA5', bg:'#E6F1FB' },
+  safety:   { label:'Safety Alert',        icon:'ti-alert-octagon',  color:'#B91C1C', bg:'#FEE2E2' },
+  warranty: { label:'Warranty Notice',     icon:'ti-shield-check',   color:'#1C3969', bg:'#E1F5EE' },
+  supplier: { label:'Supplier News',       icon:'ti-news',           color:'#534AB7', bg:'#EEEDFE' },
+  training: { label:'Training',            icon:'ti-certificate',    color:'#5B21B6', bg:'#EDE9FE' },
+  pricing:  { label:'Pricing Update',      icon:'ti-tag',            color:'#6B7280', bg:'#F3F4F6' },
+  machine:  { label:'Machine Content',     icon:'ti-engine',         color:'#065F46', bg:'#D1FAE5' },
+  notice:   { label:'General Notice',      icon:'ti-info-circle',    color:'#374151', bg:'#F9FAFB' },
 };
 const CMS_SUBTYPES = {
   bulletin: ['Mandatory','Advisory','Recall'],
@@ -25,6 +26,7 @@ const CMS_SUBTYPES = {
   supplier: ['Pricing','Availability','Product Launch'],
   training: ['Required','Optional','Certification'],
   pricing:  ['Increase','Decrease','Promotional'],
+  machine:  ['Parts Guide','Service Tips','Spec Sheet','Usage Guide','Fleet Modification Note'],
   notice:   ['Policy','Reminder','Administrative'],
 };
 const CMS_PRIORITIES = [
