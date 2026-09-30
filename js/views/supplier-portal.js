@@ -306,6 +306,7 @@ function render_supplier_portal(el) {
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button class="sp-btn sp-btn-primary" onclick="document.querySelector('.sb-item[data-sp-tab=fleets]').click()"><i class="ti ti-building-warehouse" style="font-size:12px;"></i> View My Fleets</button>
         <button class="sp-btn sp-btn-ghost" onclick="document.querySelector('.sb-item[data-sp-tab=news]').click()"><i class="ti ti-news" style="font-size:12px;"></i> News &amp; Updates</button>
+        <button class="sp-btn sp-btn-ghost" onclick="spManagePartNotes()"><i class="ti ti-notes" style="font-size:12px;"></i> Manage Part Notes</button>
       </div>`;
   }
 
@@ -1945,6 +1946,29 @@ function render_supplier_portal(el) {
 
   window.spImpersonate = function(fleetId, fleetName) {
     Router.navigate('parts-search', { supplierId: _supplierId, impersonating: true, impersonatingFleet: fleetName });
+  };
+
+  window.spManagePartNotes = function() {
+    if (!Store.getCmsArticles) return;
+    const notes = Store.getCmsArticles('published').filter(a => a.showOnPartPage && a.supplierNote && a.supplierId === _supplierId);
+    function buildRow(a) {
+      return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:0.5px solid #F0ECE8;">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:11px;font-weight:600;color:#111318;margin-bottom:3px;">${a.title}</div>
+          <div style="font-size:11px;color:#7A7F8E;">${a.targetPartDesc || ''} ${a.targetPartNum ? '· '+a.targetPartNum : ''}</div>
+          ${a.date ? `<div style="font-size:10px;color:#B0AAA3;margin-top:2px;">${a.date}${a.impersonatingFleet ? ' · '+a.impersonatingFleet : ''}</div>` : ''}
+        </div>
+        <button onclick="Store.deleteCmsArticle('${a.id}');spManagePartNotes();" style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:4px 8px;font-size:11px;color:#D9534F;cursor:pointer;font-family:inherit;flex-shrink:0;">Remove</button>
+      </div>`;
+    }
+    const body = notes.length
+      ? `<div style="max-height:420px;overflow-y:auto;margin:-16px;">${notes.map(buildRow).join('')}</div>`
+      : '<div style="font-size:13px;color:#9CA3AF;text-align:center;padding:24px 0;">No supplier part notes added yet.</div>';
+    Modal.show({
+      title: 'Manage Part Notes',
+      body,
+      actions: [{ label: 'Close', onClick: function() { Modal.close(); } }],
+    });
   };
 
   // ── Price request global handlers ────────────────────────────────────────────

@@ -2403,9 +2403,12 @@ function render_parts_search(el) {
     const modeRow = document.getElementById('ps-mode-row');
     const inputRow = document.getElementById('ps-input-row');
     if (!modeRow || !inputRow) return;
+    const manageBtnHtml = !_impersonating
+      ? `<button class="smode-btn" onclick="psManageNotes()" style="margin-left:auto;color:#534AB7;border-color:#C8C3F2;"><i class="ti ti-notes" style="font-size:10px;"></i> Manage notes</button>`
+      : '';
     modeRow.innerHTML = MODES.map(m =>
       `<button class="smode-btn ${_searchMode === m.id ? 'active' : ''}" onclick="psSetMode('${m.id}')">${m.label}</button>`
-    ).join('');
+    ).join('') + manageBtnHtml;
     if (_searchMode === 'wo') {
       const wos = Store.getWorkOrders('active');
       const opts = wos.map(w => `<option value="${w.id}" ${_woFilter == w.id ? 'selected' : ''}>${w.machine} — WO #${w.id} (${w.asset})</option>`).join('');
@@ -2829,17 +2832,29 @@ function render_parts_search(el) {
       ${manRefs ? `<div class="dp-sec-label">Manual References</div>${manRefs}` : ''}
       ${(() => {
         if (!Store.getCmsArticles) return '';
-        const msgs = Store.getCmsArticles('published').filter(a => a.showOnPartPage && a.targetPartNum === p.id);
+        const allMsgs = Store.getCmsArticles('published').filter(a => a.showOnPartPage && a.targetPartNum === p.id);
+        // Supplier impersonation: show only supplier notes (not fleet notes)
+        const msgs = _impersonating
+          ? allMsgs.filter(a => !a.fleetNote)
+          : allMsgs;
         if (!msgs.length) return '';
-        return '<div class="dp-sec-label">Supplier &amp; fleet notes</div>'
+        const sectionLabel = _impersonating ? 'Supplier notes' : 'Supplier &amp; fleet notes';
+        return `<div class="dp-sec-label">${sectionLabel}</div>`
           + msgs.map(a => {
             const isFleet = !!a.fleetNote;
+            const isSupplierOwned = !!a.supplierNote;
             const col = isFleet ? '#3B6D11' : '#534AB7';
             const bg  = isFleet ? '#EAF3DE' : '#EEEDFE';
+            // Fleet users can delete fleet notes; impersonating supplier can delete their own supplier notes
+            const canDelete = (_impersonating && isSupplierOwned) || (!_impersonating && isFleet);
+            const deleteBtn = canDelete
+              ? `<button onclick="psDeleteNote('${a.id}')" style="margin-left:auto;background:none;border:none;padding:0 2px;cursor:pointer;color:#B0AAA3;font-size:11px;line-height:1;" title="Remove note"><i class="ti ti-x"></i></button>`
+              : '';
             return `<div style="background:${bg};border-radius:7px;padding:8px 10px;margin-bottom:6px;border-left:2px solid ${col};">
               <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
                 <span style="font-size:9px;font-weight:700;color:${col};text-transform:uppercase;letter-spacing:.5px;">${a.vendorName || (isFleet ? 'Fleet' : 'Supplier')}</span>
                 <span style="font-size:9px;color:#B0AAA3;">${a.date || ''}</span>
+                ${deleteBtn}
               </div>
               <div style="font-size:11px;font-weight:600;color:#111318;margin-bottom:2px;">${a.title}</div>
               <div style="font-size:11px;color:#5A5F6E;line-height:1.5;">${a.body ? a.body.slice(0,180)+(a.body.length>180?'…':'') : ''}</div>
@@ -2851,9 +2866,10 @@ function render_parts_search(el) {
         const _psFeat = (_psUser && Store.getEffectiveFeatures) ? Store.getEffectiveFeatures(_psUser.id) : {};
         const _psCms = _impersonating || ('cms' in _psFeat ? _psFeat.cms : _psUser?.role === 'supervisor');
         if (!_psCms) return '';
+        const noteLabel = _impersonating ? 'Supplier notes' : 'Fleet notes';
         return `<div class="dp-div"></div>
           <div style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#9CA3AF;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;">
-            Fleet notes
+            ${noteLabel}
             <button id="ps-note-toggle" onclick="document.getElementById('ps-note-form').style.display=document.getElementById('ps-note-form').style.display==='none'?'':'none';document.getElementById('ps-note-toggle').textContent=document.getElementById('ps-note-form').style.display===''?'Cancel':'+ Add note'" style="background:none;border:none;font-size:10px;font-weight:600;color:#185FA5;cursor:pointer;font-family:inherit;padding:0;">+ Add note</button>
           </div>
           <div id="ps-note-form" style="display:none;margin-bottom:8px;">
@@ -2877,11 +2893,13 @@ function render_parts_search(el) {
     const _u = (typeof Store !== 'undefined' && Store.getCurrentUser) ? Store.getCurrentUser() : null;
     const baseNote = {
       id: 'cms-fleet-note-' + Date.now(),
-      type: 'notice', subtype: 'fleet-part-note', status: 'published', postAs: 'news',
+      type: 'notice', subtype: _impersonating ? 'supplier-part-note' : 'fleet-part-note', status: 'published', postAs: 'news',
       title, body,
       poster: (_u || {}).shortName || '',
       author: (_u || {}).displayName || '',
-      showOnPartPage: true, fleetNote: true,
+      showOnPartPage: true,
+      fleetNote: !_impersonating,
+      supplierNote: !!_impersonating,
       targetPartNum: partId, targetPartDesc: partDesc,
       date: new Date().toISOString().slice(0,7).replace('-','/'),
       priority: 'low', locations: ['all'],
@@ -2953,6 +2971,54 @@ function render_parts_search(el) {
       if (!_impersonating) actionCell.innerHTML=iC?inCartHtml(p.id,'sm'):`<button class="add-btn" onclick="event.stopPropagation();psAddPart('${p.id}')"><i class="ti ti-plus" style="font-size:10px;"></i> Add</button>`;
     });
   }
+
+  window.psDeleteNote = function(noteId) {
+    if (!Store.deleteCmsArticle) return;
+    Store.deleteCmsArticle(noteId);
+    renderDetail();
+  };
+
+  window.psManageNotes = function() {
+    if (!Store.getCmsArticles) return;
+    const allNotes = Store.getCmsArticles('published').filter(a => a.showOnPartPage);
+    const fleetNotes = allNotes.filter(a => !!a.fleetNote);
+    const supplierNotes = allNotes.filter(a => !a.fleetNote);
+    function buildNoteRow(a, canDelete) {
+      const isFleet = !!a.fleetNote;
+      const col = isFleet ? '#3B6D11' : '#534AB7';
+      const bg  = isFleet ? '#EAF3DE' : '#EEEDFE';
+      const typeLabel = isFleet ? 'Fleet' : 'Supplier';
+      return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:0.5px solid #F0ECE8;">
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+            <span style="font-size:9px;font-weight:700;color:${col};text-transform:uppercase;letter-spacing:.5px;background:${bg};padding:2px 6px;border-radius:3px;">${typeLabel}</span>
+            <span style="font-size:11px;font-weight:600;color:#111318;">${a.title}</span>
+          </div>
+          <div style="font-size:11px;color:#7A7F8E;">${a.targetPartDesc || a.targetPartNum || ''} ${a.targetPartNum ? '· '+a.targetPartNum : ''}</div>
+          ${a.date ? `<div style="font-size:10px;color:#B0AAA3;margin-top:2px;">${a.date}${a.impersonatingFleet ? ' · '+a.impersonatingFleet : ''}</div>` : ''}
+        </div>
+        ${canDelete ? `<button onclick="psDeleteNote('${a.id}');psManageNotes();" style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:4px 8px;font-size:11px;color:#D9534F;cursor:pointer;font-family:inherit;flex-shrink:0;">Remove</button>` : ''}
+      </div>`;
+    }
+    let body = '';
+    if (!allNotes.length) {
+      body = '<div style="font-size:13px;color:#9CA3AF;text-align:center;padding:24px 0;">No part notes added yet.</div>';
+    } else {
+      if (fleetNotes.length) {
+        body += `<div style="font-size:10px;font-weight:700;color:#3B6D11;text-transform:uppercase;letter-spacing:.8px;padding:10px 12px 4px;">Fleet notes (${fleetNotes.length})</div>`;
+        body += fleetNotes.map(a => buildNoteRow(a, true)).join('');
+      }
+      if (supplierNotes.length) {
+        body += `<div style="font-size:10px;font-weight:700;color:#534AB7;text-transform:uppercase;letter-spacing:.8px;padding:10px 12px 4px;">Supplier notes (${supplierNotes.length})</div>`;
+        body += supplierNotes.map(a => buildNoteRow(a, false)).join('');
+      }
+    }
+    Modal.show({
+      title: 'Manage Part Notes',
+      body: `<div style="max-height:420px;overflow-y:auto;margin:-16px;">${body}</div>`,
+      actions: [{ label: 'Close', onClick: function() { Modal.close(); } }],
+    });
+  };
 
   // ── Global handlers ───────────────────────────────────────────────────────────
   window.psNavTo = function(sId, mId, cName, subName) {
