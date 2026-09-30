@@ -58,6 +58,23 @@ function render_order_review(el) {
   function subtotal() { return _items.reduce((s, c) => s + c.price * (c.qty || 1), 0); }
   function totalWeight() { return _items.reduce((s, c) => s + (c.weight || 0) * (c.qty || 1), 0); }
 
+  function renderOrderMessages(placement) {
+    if (!Store.getCmsArticles) return '';
+    const msgs = Store.getCmsArticles('published').filter(a => a.orderMsg && a.placement === placement);
+    if (!msgs.length) return '';
+    return msgs.map(a => {
+      const isSupplier = !!a.supplierNote;
+      const accentColor = isSupplier ? '#534AB7' : '#1C3969';
+      const bgColor = isSupplier ? '#EEEDFE' : '#EFF4FB';
+      const label = isSupplier ? (a.vendorName || 'Supplier') : 'Fleet message';
+      return `<div style="background:${bgColor};border-radius:9px;padding:11px 14px;margin-bottom:12px;border-left:3px solid ${accentColor};">
+        <div style="font-size:11px;font-weight:700;color:${accentColor};text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">${label}${a.date ? `<span style="font-weight:400;color:#9CA3AF;margin-left:8px;text-transform:none;">${a.date}</span>` : ''}</div>
+        <div style="font-size:13px;font-weight:600;color:#111318;margin-bottom:2px;">${a.title}</div>
+        ${a.body ? `<div style="font-size:12px;color:#5A5F6E;line-height:1.55;">${a.body}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
   function renderSupplierMessages() {
     if (!Store.getCmsArticles) return '';
     const vendors = [...new Set(_items.map(c => c.vendor).filter(Boolean))];
@@ -227,6 +244,8 @@ function render_order_review(el) {
         <div class="or-page-title">Review order — WO #${wo.id}</div>
         <div class="or-page-sub">${wo.machine} · ${wo.asset} · ${_items.length} item${_items.length!==1?'s':''}</div>
 
+        ${renderOrderMessages('cart-top')}
+
         <!-- Line items -->
         <div class="or-card">
           <div class="or-card-header">
@@ -239,6 +258,7 @@ function render_order_review(el) {
         </div>
 
         ${renderSupplierMessages()}
+        ${renderOrderMessages('order-form-top')}
 
         <!-- Ship To / Bill To -->
         <div class="or-card">
@@ -376,6 +396,8 @@ function render_order_review(el) {
             <textarea class="or-textarea" id="or-comments" placeholder="Special instructions, delivery notes, or comments for the vendor…">${_comments}</textarea>
           </div>
         </div>
+
+        ${renderOrderMessages('order-form-bottom')}
 
         <div style="height:80px;"></div>
       </div>
