@@ -31,8 +31,9 @@ function render_supplier_portal(el) {
   const PR_STATUS = {
     pending:    { label: 'Awaiting response', color: '#1C3969', bg: '#D6E4F7' },
     needs_info: { label: 'More info needed',  color: '#534AB7', bg: '#EEEDFE' },
-    quoted:     { label: 'Quoted',            color: '#1C3969', bg: '#E1F5EE' },
+    quoted:     { label: 'Quoted',            color: '#065F46', bg: '#D1FAE5' },
     rejected:   { label: 'Not available',     color: '#5A5F6E', bg: '#F0ECE8' },
+    superseded: { label: 'Superseded',        color: '#B45309', bg: '#FEF3C7' },
   };
 
   el.innerHTML = `
@@ -480,6 +481,7 @@ function render_supplier_portal(el) {
 .pr-table-row:hover { background:#FAFAF9; }
 .pr-table-row.pr-row-open { background:#F5F2EE; }
 .pr-table-td { padding:12px 14px; font-size:12px; color:#4B5268; display:flex; align-items:center; }
+.pr-group-header { display:flex; align-items:center; gap:8px; padding:8px 14px; background:#F9F8F7; border-bottom:1px solid #E8E4DF; border-top:2px solid #E8E4DF; }
 
 .pr-detail-panel { border:1px solid #E8E4DF; border-radius:10px; overflow:hidden; background:#fff; margin-top:0; animation:prSlideIn .18s ease; }
 @keyframes prSlideIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
@@ -548,6 +550,67 @@ function render_supplier_portal(el) {
 
   function _renderPrTable(reqs) {
     if (!reqs.length) return '<div style="padding:48px;text-align:center;color:#9CA3AF;font-size:13px;">No price requests match the current filters.</div>';
+
+    // Group by partNum
+    const groups = [];
+    const groupMap = {};
+    reqs.forEach(r => {
+      if (!groupMap[r.partNum]) {
+        groupMap[r.partNum] = [];
+        groups.push({ partNum: r.partNum, partDesc: r.partDesc, rows: groupMap[r.partNum] });
+      }
+      groupMap[r.partNum].push(r);
+    });
+
+    function renderRow(r, inGroup) {
+      const s = PR_STATUS[r.status] || PR_STATUS.pending;
+      const cCount = (r.comments || []).length;
+      const isOpen = _prDetailId === r.id;
+      const indent = inGroup ? 'padding-left:28px;' : '';
+      return `<div class="pr-table-row${isOpen?' pr-row-open':''}" style="${indent}" onclick="spPrToggleDetail('${r.id}')">
+        <div class="pr-table-td"><span style="font-size:11px;font-weight:600;font-family:monospace;color:${inGroup?'#9CA3AF':'#111318'};">${inGroup?'↳ same part':r.partNum}</span></div>
+        <div class="pr-table-td" style="flex-direction:column;align-items:flex-start;gap:2px;">
+          <span style="font-size:13px;color:#111318;font-weight:500;">${r.partDesc}</span>
+          ${r.notes ? `<span style="font-size:11px;color:#9CA3AF;">${r.notes}</span>` : ''}
+        </div>
+        <div class="pr-table-td" style="flex-direction:column;align-items:flex-start;gap:1px;">
+          <span>${r.fleetName}</span>
+          ${r.location ? `<span style="font-size:11px;color:#9CA3AF;">${r.location}</span>` : ''}
+        </div>
+        <div class="pr-table-td" style="flex-direction:column;align-items:flex-start;gap:1px;">
+          <span>${r.requestedBy}</span>
+          <span style="font-size:11px;color:#9CA3AF;">${r.requestedDate}</span>
+        </div>
+        <div class="pr-table-td">${r.qty}</div>
+        <div class="pr-table-td"><span class="sp-status-pill" style="background:${s.bg};color:${s.color};">${s.label}</span></div>
+        <div class="pr-table-td" style="justify-content:center;">
+          ${cCount ? `<span style="font-size:11px;color:#7A7F8E;display:flex;align-items:center;gap:3px;"><i class="ti ti-message" style="font-size:12px;"></i>${cCount}</span>` : ''}
+        </div>
+        <div class="pr-table-td" style="justify-content:flex-end;gap:6px;" onclick="event.stopPropagation()">
+          ${r.status === 'pending' || r.status === 'needs_info' ? `<button class="sp-btn sp-btn-primary" style="font-size:11px;padding:4px 10px;" onclick="spRespondToRequest('${r.id}')">Respond</button>` : ''}
+          <i class="ti ti-chevron-${_prDetailId===r.id?'up':'down'}" style="font-size:14px;color:#9CA3AF;cursor:pointer;" onclick="spPrToggleDetail('${r.id}')"></i>
+        </div>
+      </div>`;
+    }
+
+    const rows = groups.map(g => {
+      const multi = g.rows.length > 1;
+      let html = '';
+      if (multi) {
+        const pendingCount = g.rows.filter(r => r.status === 'pending' || r.status === 'needs_info').length;
+        html += `<div class="pr-group-header">
+          <i class="ti ti-stack-2" style="font-size:13px;color:#7A7F8E;"></i>
+          <span style="font-size:11px;font-weight:700;font-family:monospace;color:#111318;">${g.partNum}</span>
+          <span style="font-size:11px;color:#7A7F8E;">— ${g.partDesc}</span>
+          <span style="margin-left:auto;font-size:11px;background:#F0ECE8;color:#5A5F6E;border-radius:10px;padding:2px 8px;font-weight:600;">${g.rows.length} requests${pendingCount ? ` · ${pendingCount} pending` : ''}</span>
+        </div>`;
+        g.rows.forEach((r, i) => { html += renderRow(r, i > 0); });
+      } else {
+        html += renderRow(g.rows[0], false);
+      }
+      return html;
+    }).join('');
+
     return `
 <div class="pr-table">
   <div class="pr-table-head">
@@ -560,35 +623,7 @@ function render_supplier_portal(el) {
     <div class="pr-table-th" title="Comments"></div>
     <div class="pr-table-th"></div>
   </div>
-  ${reqs.map(r => {
-    const s = PR_STATUS[r.status] || PR_STATUS.pending;
-    const cCount = (r.comments || []).length;
-    const isOpen = _prDetailId === r.id;
-    return `<div class="pr-table-row${isOpen?' pr-row-open':''}" onclick="spPrToggleDetail('${r.id}')">
-      <div class="pr-table-td"><span style="font-size:11px;font-weight:600;font-family:monospace;color:#111318;">${r.partNum}</span></div>
-      <div class="pr-table-td" style="flex-direction:column;align-items:flex-start;gap:2px;">
-        <span style="font-size:13px;color:#111318;font-weight:500;">${r.partDesc}</span>
-        ${r.notes ? `<span style="font-size:11px;color:#9CA3AF;">${r.notes}</span>` : ''}
-      </div>
-      <div class="pr-table-td" style="flex-direction:column;align-items:flex-start;gap:1px;">
-        <span>${r.fleetName}</span>
-        ${r.location ? `<span style="font-size:11px;color:#9CA3AF;">${r.location}</span>` : ''}
-      </div>
-      <div class="pr-table-td" style="flex-direction:column;align-items:flex-start;gap:1px;">
-        <span>${r.requestedBy}</span>
-        <span style="font-size:11px;color:#9CA3AF;">${r.requestedDate}</span>
-      </div>
-      <div class="pr-table-td">${r.qty}</div>
-      <div class="pr-table-td"><span class="sp-status-pill" style="background:${s.bg};color:${s.color};">${s.label}</span></div>
-      <div class="pr-table-td" style="justify-content:center;">
-        ${cCount ? `<span style="font-size:11px;color:#7A7F8E;display:flex;align-items:center;gap:3px;"><i class="ti ti-message" style="font-size:12px;"></i>${cCount}</span>` : ''}
-      </div>
-      <div class="pr-table-td" style="justify-content:flex-end;gap:6px;" onclick="event.stopPropagation()">
-        ${r.status === 'pending' || r.status === 'needs_info' ? `<button class="sp-btn sp-btn-primary" style="font-size:11px;padding:4px 10px;" onclick="spRespondToRequest('${r.id}')">Add Price</button>` : ''}
-        <i class="ti ti-chevron-${_prDetailId===r.id?'up':'down'}" style="font-size:14px;color:#9CA3AF;cursor:pointer;" onclick="spPrToggleDetail('${r.id}')"></i>
-      </div>
-    </div>`;
-  }).join('')}
+  ${rows}
 </div>`;
   }
 
@@ -624,7 +659,8 @@ function render_supplier_portal(el) {
       ${r.status === 'pending' || r.status === 'needs_info'
         ? `<button class="sp-btn sp-btn-primary" style="font-size:12px;" onclick="spRespondToRequest('${r.id}')">Add Price</button>`
         : ''}
-      ${r.response && r.response.price ? `<div style="font-size:14px;font-weight:700;color:#1C3969;">$${parseFloat(r.response.price).toFixed(2)} / unit</div>` : ''}
+      ${r.response && r.response.price ? `<div style="font-size:14px;font-weight:700;color:#1C3969;">${r.response.currency||'USD'} ${parseFloat(r.response.price).toFixed(2)} / unit</div>` : ''}
+      ${r.response && r.response.supersededBy ? `<div style="font-size:12px;color:#B45309;display:flex;align-items:center;gap:4px;"><i class="ti ti-arrow-right" style="font-size:12px;"></i>Superseded by <strong>${r.response.supersededBy}</strong></div>` : ''}
     </div>
   </div>
   <div class="pr-detail-body">
@@ -670,8 +706,13 @@ function render_supplier_portal(el) {
       ${r.response && r.response.price ? `
         <div style="margin-top:16px;padding-top:14px;border-top:1px solid #F0ECE8;">
           <div style="font-size:11px;color:#9CA3AF;margin-bottom:2px;">Quoted price</div>
-          <div style="font-size:20px;font-weight:700;color:#1C3969;">$${parseFloat(r.response.price).toFixed(2)}</div>
+          <div style="font-size:20px;font-weight:700;color:#1C3969;">${r.response.currency||'USD'} ${parseFloat(r.response.price).toFixed(2)}</div>
           <div style="font-size:11px;color:#9CA3AF;">per unit</div>
+        </div>` : ''}
+      ${r.response && r.response.supersededBy ? `
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid #F0ECE8;">
+          <div style="font-size:11px;color:#9CA3AF;margin-bottom:4px;">Superseded by</div>
+          <div style="font-size:13px;font-weight:700;font-family:monospace;color:#B45309;">${r.response.supersededBy}</div>
         </div>` : ''}
     </div>
   </div>
@@ -2220,13 +2261,28 @@ function render_supplier_portal(el) {
           <select class="modal-form-select" id="sp-resp-type">
             <option value="quoted">Provide a price</option>
             <option value="needs_info">Request more information</option>
+            <option value="superseded">Part superseded by another part</option>
             <option value="rejected">Item not available</option>
           </select>
         </div>
         <div class="modal-form-field" id="sp-price-row">
-          <label class="modal-form-label">Unit price (USD)</label>
-          <input class="modal-form-input" id="sp-resp-price" type="number" min="0" step="0.01" placeholder="e.g. 149.00"/>
-          <div id="sp-resp-price-err" style="font-size:11px;color:#A32D2D;margin-top:3px;display:none;">Required when providing a price</div>
+          <label class="modal-form-label">Unit price <span style="font-weight:700;color:#A32D2D;">*</span></label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select class="modal-form-select" id="sp-resp-currency" style="width:90px;flex-shrink:0;">
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+              <option value="CAD">CAD</option>
+              <option value="AUD">AUD</option>
+            </select>
+            <input class="modal-form-input" id="sp-resp-price" type="number" min="0" step="0.01" placeholder="e.g. 149.00" style="flex:1;"/>
+          </div>
+          <div id="sp-resp-price-err" style="font-size:11px;color:#A32D2D;margin-top:3px;display:none;">A valid price is required</div>
+        </div>
+        <div class="modal-form-field" id="sp-superseded-row" style="display:none;">
+          <label class="modal-form-label">Superseding part number <span style="font-weight:700;color:#A32D2D;">*</span></label>
+          <input class="modal-form-input" id="sp-resp-superseded-by" type="text" placeholder="e.g. SKJ-HYD-1042"/>
+          <div id="sp-resp-superseded-err" style="font-size:11px;color:#A32D2D;margin-top:3px;display:none;">The superseding part number is required</div>
         </div>
         <div class="modal-form-field">
           <label class="modal-form-label" id="sp-msg-label">Message <span style="font-weight:400;color:#9CA3AF;">(optional)</span></label>
@@ -2236,52 +2292,91 @@ function render_supplier_portal(el) {
         { label: 'Cancel', onClick: () => Modal.close() },
         {
           label: 'Send Response', primary: true, onClick: () => {
-            const type    = document.getElementById('sp-resp-type').value;
-            const priceEl = document.getElementById('sp-resp-price');
-            const msg     = document.getElementById('sp-resp-msg').value.trim();
-            const price   = parseFloat(priceEl?.value);
+            const type         = document.getElementById('sp-resp-type').value;
+            const priceEl      = document.getElementById('sp-resp-price');
+            const currency     = document.getElementById('sp-resp-currency')?.value || 'USD';
+            const msg          = document.getElementById('sp-resp-msg').value.trim();
+            const price        = parseFloat(priceEl?.value);
+            const supersededBy = document.getElementById('sp-resp-superseded-by')?.value?.trim();
 
             if (type === 'quoted' && (!priceEl.value || isNaN(price) || price <= 0)) {
               document.getElementById('sp-resp-price-err').style.display = 'block';
               return;
             }
+            if (type === 'superseded' && !supersededBy) {
+              document.getElementById('sp-resp-superseded-err').style.display = 'block';
+              return;
+            }
             Store.respondToPriceRequest(reqId, {
               status: type,
               price: type === 'quoted' ? price : null,
+              currency: type === 'quoted' ? currency : null,
+              supersededBy: type === 'superseded' ? supersededBy : null,
               message: msg,
             });
-            // Also add the response as a comment so it appears in the thread
-            if (msg || type === 'quoted') {
-              const currentUser = Store.getCurrentUser();
+            const currentUser = Store.getCurrentUser();
+            let commentText = '';
+            if (type === 'quoted') commentText = `Quoted at ${currency} ${price.toFixed(2)}/unit.${msg ? ' ' + msg : ''}`;
+            else if (type === 'superseded') commentText = `This part has been superseded by ${supersededBy}.${msg ? ' ' + msg : ''}`;
+            else if (msg) commentText = msg;
+            if (commentText) {
               Store.addPriceRequestComment(reqId, {
                 author: currentUser?.name || currentUser?.username || 'You',
                 authorRole: 'supplier',
-                text: type === 'quoted'
-                  ? `Quoted at $${price.toFixed(2)}/unit.${msg ? ' ' + msg : ''}`
-                  : msg,
+                text: commentText,
               });
             }
             Modal.close();
             if (_prDetailId) _prDetailId = reqId;
             renderRequests();
+
+            // Post-resolution: check if this partNum is unpriced in other requests
+            if (type === 'quoted' || type === 'superseded') {
+              const allReqs = Store.getPriceRequests(_supplierId);
+              const otherPending = allReqs.filter(x => x.partNum === r.partNum && x.id !== reqId && (x.status === 'pending' || x.status === 'needs_info'));
+              if (otherPending.length) {
+                const fleetNames = [...new Set(otherPending.map(x => x.fleetName))].join(', ');
+                setTimeout(() => {
+                  Modal.show({
+                    title: 'Same part requested by other fleets',
+                    body: `
+                      <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;margin-bottom:4px;">
+                        <i class="ti ti-alert-triangle" style="font-size:18px;color:#B45309;flex-shrink:0;margin-top:1px;"></i>
+                        <div>
+                          <div style="font-size:13px;font-weight:600;color:#78350F;margin-bottom:4px;">Part ${r.partNum} is still unpriced for ${otherPending.length} other request${otherPending.length>1?'s':''}.</div>
+                          <div style="font-size:12px;color:#92400E;line-height:1.5;">The following fleet${otherPending.length>1?'s':''} have an open price request for this part: <strong>${fleetNames}</strong>. Consider resolving those now while you have the part in context.</div>
+                        </div>
+                      </div>`,
+                    actions: [
+                      { label: 'Dismiss', onClick: () => Modal.close() },
+                      { label: 'View open requests', primary: true, onClick: () => { Modal.close(); _prFilter.fleet = 'all'; renderRequests(); } },
+                    ]
+                  });
+                }, 200);
+              }
+            }
           }
         }
       ]
     });
 
     setTimeout(() => {
-      const typeEl = document.getElementById('sp-resp-type');
-      const priceRow = document.getElementById('sp-price-row');
-      const msgLabel = document.getElementById('sp-msg-label');
+      const typeEl       = document.getElementById('sp-resp-type');
+      const priceRow     = document.getElementById('sp-price-row');
+      const supersRow    = document.getElementById('sp-superseded-row');
+      const msgLabel     = document.getElementById('sp-msg-label');
       if (!typeEl) return;
 
       function syncFields() {
         const t = typeEl.value;
-        priceRow.style.display = t === 'quoted' ? 'block' : 'none';
+        priceRow.style.display      = t === 'quoted'     ? 'block' : 'none';
+        supersRow.style.display     = t === 'superseded' ? 'block' : 'none';
         if (t === 'needs_info') {
           msgLabel.innerHTML = 'Message to fleet <span style="font-weight:700;color:#A32D2D;">*</span>';
         } else if (t === 'rejected') {
           msgLabel.innerHTML = 'Reason <span style="font-weight:400;color:#9CA3AF;">(optional)</span>';
+        } else if (t === 'superseded') {
+          msgLabel.innerHTML = 'Additional notes <span style="font-weight:400;color:#9CA3AF;">(optional)</span>';
         } else {
           msgLabel.innerHTML = 'Message <span style="font-weight:400;color:#9CA3AF;">(optional)</span>';
         }
