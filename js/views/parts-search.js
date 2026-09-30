@@ -2886,6 +2886,134 @@ function render_parts_search(el) {
       }</div>`;
   }
 
+  // ── Propagation dialog state ─────────────────────────────────────────────────
+  let _pnState = null;
+
+  function _getFleetLocations(fleet) {
+    if (fleet.fleetId === 'mcr' && Store.getLocations) {
+      return Store.getLocations().map(l => ({ id: l.id, name: l.name }));
+    }
+    const count = typeof fleet.locations === 'number' ? Math.min(fleet.locations, 12) : 3;
+    return Array.from({ length: count }, (_, i) => ({ id: fleet.fleetId + '-loc-' + i, name: 'Location ' + (i + 1) }));
+  }
+
+  function _pnBuildSupplierBody() {
+    const allSelected = _pnState.fleets.every(f => f.selected);
+    return `<div id="pn-modal-body">
+      <div style="font-size:12px;color:#5A5F6E;margin-bottom:12px;">Choose which additional fleets and locations should receive this note. The current fleet already has it.</div>
+      <div style="border:0.5px solid #E2DDD8;border-radius:8px;overflow:hidden;max-height:360px;overflow-y:auto;">
+        <label style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#F5F2EE;border-bottom:0.5px solid #E2DDD8;cursor:pointer;position:sticky;top:0;z-index:1;">
+          <input type="checkbox" ${allSelected ? 'checked' : ''} onchange="pnToggleAllFleets(this.checked)" style="accent-color:#1C3969;width:14px;height:14px;flex-shrink:0;cursor:pointer;">
+          <span style="font-size:12px;font-weight:600;color:#111318;">Select all fleets</span>
+          <span style="font-size:11px;color:#9CA3AF;margin-left:auto;">${_pnState.fleets.length} fleet${_pnState.fleets.length !== 1 ? 's' : ''}</span>
+        </label>
+        ${_pnState.fleets.map(f => {
+          const isAllLocs = f.selLocs === 'all';
+          return `<div style="${f !== _pnState.fleets[_pnState.fleets.length-1] ? 'border-bottom:0.5px solid #F0ECE8;' : ''}">
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;">
+              <input type="checkbox" ${f.selected ? 'checked' : ''} onchange="pnToggleFleet('${f.fleetId}')" style="accent-color:#1C3969;width:14px;height:14px;flex-shrink:0;cursor:pointer;">
+              <span style="font-size:12px;font-weight:500;color:#111318;flex:1;">${f.fleetName}</span>
+              <span style="font-size:10px;color:#9CA3AF;">${f.locs.length} loc${f.locs.length !== 1 ? 's' : ''}</span>
+              <button onclick="pnExpandFleet('${f.fleetId}')" style="background:none;border:none;padding:2px 6px;cursor:pointer;color:#9CA3AF;font-size:10px;font-family:inherit;">${f.expanded ? '▲' : '▼'}</button>
+            </div>
+            ${f.expanded ? `<div style="background:#FAFAF9;padding:4px 12px 8px 36px;border-top:0.5px solid #F0ECE8;">
+              <label style="display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;border-bottom:0.5px solid #F0ECE8;margin-bottom:2px;">
+                <input type="checkbox" ${isAllLocs ? 'checked' : ''} onchange="pnToggleAllLocs('${f.fleetId}',this.checked)" style="accent-color:#1C3969;width:12px;height:12px;cursor:pointer;">
+                <span style="font-size:11px;font-weight:600;color:#111318;">All locations</span>
+              </label>
+              ${f.locs.map(l => {
+                const locSel = isAllLocs || (f.selLocs instanceof Set && f.selLocs.has(l.id));
+                return `<label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;">
+                  <input type="checkbox" ${locSel ? 'checked' : ''} onchange="pnToggleLoc('${f.fleetId}','${l.id}')" style="accent-color:#1C3969;width:12px;height:12px;cursor:pointer;">
+                  <span style="font-size:11px;color:#5A5F6E;">${l.name}</span>
+                </label>`;
+              }).join('')}
+            </div>` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
+
+  function _pnBuildFleetBody() {
+    const allSel = _pnState.selLocs === 'all';
+    return `<div id="pn-modal-body">
+      <div style="font-size:12px;color:#5A5F6E;margin-bottom:12px;">Choose which locations within your fleet should receive this note.</div>
+      <div style="border:0.5px solid #E2DDD8;border-radius:8px;overflow:hidden;">
+        <label style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#F5F2EE;border-bottom:0.5px solid #E2DDD8;cursor:pointer;">
+          <input type="checkbox" ${allSel ? 'checked' : ''} onchange="pnToggleAllFleetLocs(this.checked)" style="accent-color:#1C3969;width:14px;height:14px;flex-shrink:0;cursor:pointer;">
+          <span style="font-size:12px;font-weight:600;color:#111318;">All locations</span>
+          <span style="font-size:11px;color:#9CA3AF;margin-left:auto;">${_pnState.locs.length} location${_pnState.locs.length !== 1 ? 's' : ''}</span>
+        </label>
+        ${_pnState.locs.map((l, i) => {
+          const sel = allSel || (_pnState.selLocs instanceof Set && _pnState.selLocs.has(l.id));
+          const last = i === _pnState.locs.length - 1;
+          return `<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;${last ? '' : 'border-bottom:0.5px solid #F0ECE8;'}cursor:pointer;">
+            <input type="checkbox" ${sel ? 'checked' : ''} onchange="pnToggleFleetLoc('${l.id}')" style="accent-color:#1C3969;width:14px;height:14px;flex-shrink:0;cursor:pointer;">
+            <span style="font-size:12px;color:#111318;">${l.name}</span>
+          </label>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
+
+  function _pnRebuildModal() {
+    const outer = document.getElementById('pn-modal-body');
+    if (!outer || !_pnState) return;
+    outer.outerHTML = _pnState.type === 'supplier' ? _pnBuildSupplierBody() : _pnBuildFleetBody();
+  }
+
+  window.pnToggleAllFleets = function(checked) {
+    if (!_pnState) return;
+    _pnState.fleets.forEach(f => { f.selected = checked; });
+    _pnRebuildModal();
+  };
+  window.pnToggleFleet = function(fleetId) {
+    if (!_pnState) return;
+    const f = _pnState.fleets.find(x => x.fleetId === fleetId);
+    if (f) f.selected = !f.selected;
+    _pnRebuildModal();
+  };
+  window.pnExpandFleet = function(fleetId) {
+    if (!_pnState) return;
+    const f = _pnState.fleets.find(x => x.fleetId === fleetId);
+    if (f) f.expanded = !f.expanded;
+    _pnRebuildModal();
+  };
+  window.pnToggleAllLocs = function(fleetId, checked) {
+    if (!_pnState) return;
+    const f = _pnState.fleets.find(x => x.fleetId === fleetId);
+    if (f) f.selLocs = checked ? 'all' : new Set();
+    _pnRebuildModal();
+  };
+  window.pnToggleLoc = function(fleetId, locId) {
+    if (!_pnState) return;
+    const f = _pnState.fleets.find(x => x.fleetId === fleetId);
+    if (!f) return;
+    if (f.selLocs === 'all') {
+      f.selLocs = new Set(f.locs.map(l => l.id).filter(id => id !== locId));
+    } else {
+      if (f.selLocs.has(locId)) f.selLocs.delete(locId); else f.selLocs.add(locId);
+      if (f.selLocs.size === f.locs.length) f.selLocs = 'all';
+    }
+    _pnRebuildModal();
+  };
+  window.pnToggleAllFleetLocs = function(checked) {
+    if (!_pnState) return;
+    _pnState.selLocs = checked ? 'all' : new Set();
+    _pnRebuildModal();
+  };
+  window.pnToggleFleetLoc = function(locId) {
+    if (!_pnState) return;
+    if (_pnState.selLocs === 'all') {
+      _pnState.selLocs = new Set(_pnState.locs.map(l => l.id).filter(id => id !== locId));
+    } else {
+      if (_pnState.selLocs.has(locId)) _pnState.selLocs.delete(locId); else _pnState.selLocs.add(locId);
+      if (_pnState.selLocs.size === _pnState.locs.length) _pnState.selLocs = 'all';
+    }
+    _pnRebuildModal();
+  };
+
   window.psSaveNote = function(partId, partNum, partDesc) {
     const title = (document.getElementById('ps-note-title') || {}).value?.trim();
     const body  = (document.getElementById('ps-note-body')  || {}).value?.trim();
@@ -2914,45 +3042,75 @@ function render_parts_search(el) {
     if (document.getElementById('ps-note-title')) document.getElementById('ps-note-title').value = '';
     if (document.getElementById('ps-note-body'))  document.getElementById('ps-note-body').value  = '';
     renderDetail();
-    if (_impersonating) {
-      const cbId1 = 'pn-spread-locs', cbId2 = 'pn-spread-fleets';
+
+    // Propagation dialog — supplier sees fleet+location picker, fleet sees location picker
+    const _psUser2 = Store.getCurrentUser ? Store.getCurrentUser() : null;
+    const _psFeat2 = (_psUser2 && Store.getEffectiveFeatures) ? Store.getEffectiveFeatures(_psUser2.id) : {};
+    const hasCms = _impersonating || ('cms' in _psFeat2 ? _psFeat2.cms : _psUser2?.role === 'supervisor');
+    if (!hasCms) return;
+
+    if (_impersonating && _ctxSupplierId && Store.getSupplierFleets) {
+      // Supplier: multiselect of other fleets with nested location pickers
+      const allFleets = Store.getSupplierFleets(_ctxSupplierId).filter(f => f.fleetName !== _impersonatingFleet);
+      if (!allFleets.length) return;
+      _pnState = {
+        type: 'supplier',
+        baseNote,
+        fleets: allFleets.map(f => ({
+          ...f,
+          locs: _getFleetLocations(f),
+          selected: true,
+          expanded: false,
+          selLocs: 'all',
+        })),
+      };
       Modal.show({
-        title: 'Propagate this note?',
-        body: `<div style="font-size:13px;color:#5A5F6E;margin-bottom:14px;">
-          <strong style="color:#111318;">${title}</strong> was saved for <em>${_impersonatingFleet || 'this fleet'}</em>.
-          Would you like to also apply it elsewhere?
-        </div>
-        <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#F5F2EE;border-radius:8px;cursor:pointer;margin-bottom:8px;">
-          <input type="checkbox" id="${cbId1}" style="margin-top:2px;accent-color:#1C3969;width:14px;height:14px;flex-shrink:0;">
-          <div>
-            <div style="font-size:13px;font-weight:600;color:#111318;">All locations</div>
-            <div style="font-size:11px;color:#7A7F8E;margin-top:2px;">Add this note to the same part across all of your fleet's locations.</div>
-          </div>
-        </label>
-        <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#F5F2EE;border-radius:8px;cursor:pointer;">
-          <input type="checkbox" id="${cbId2}" style="margin-top:2px;accent-color:#1C3969;width:14px;height:14px;flex-shrink:0;">
-          <div>
-            <div style="font-size:13px;font-weight:600;color:#111318;">All fleets</div>
-            <div style="font-size:11px;color:#7A7F8E;margin-top:2px;">Publish this note for all fleets that carry this part in their catalog.</div>
-          </div>
-        </label>`,
+        title: 'Publish to other fleets?',
+        body: _pnBuildSupplierBody(),
         actions: [
-          { label: 'Apply', primary: true, onClick: function() {
-            const allLocs = document.getElementById(cbId1)?.checked;
-            const allFleets = document.getElementById(cbId2)?.checked;
-            if (allLocs || allFleets) {
-              Store.saveCmsArticle(Object.assign({}, baseNote, {
-                id: 'cms-fleet-note-' + (Date.now()+1),
-                locations: allLocs ? ['all'] : baseNote.locations,
-                impersonatingFleet: allFleets ? null : baseNote.impersonatingFleet,
-                allFleets: allFleets || false,
-                allLocations: allLocs || false,
-              }));
+          { label: 'Publish', primary: true, onClick: function() {
+            if (_pnState) {
+              _pnState.fleets.filter(f => f.selected).forEach(f => {
+                const locs = f.selLocs === 'all' ? ['all'] : Array.from(f.selLocs);
+                Store.saveCmsArticle(Object.assign({}, baseNote, {
+                  id: 'cms-fleet-note-' + f.fleetId + '-' + Date.now(),
+                  impersonatingFleet: f.fleetName,
+                  locations: locs,
+                  allFleets: false,
+                  allLocations: f.selLocs === 'all',
+                }));
+              });
             }
+            _pnState = null;
             Modal.close();
             renderDetail();
           }},
-          { label: 'No thanks', onClick: function() { Modal.close(); } },
+          { label: 'Skip', onClick: function() { _pnState = null; Modal.close(); } },
+        ],
+      });
+    } else if (!_impersonating && Store.getLocations) {
+      // Fleet user: multiselect of locations
+      const locs = Store.getLocations().map(l => ({ id: l.id, name: l.name }));
+      if (locs.length < 2) return;
+      _pnState = { type: 'fleet', baseNote, locs, selLocs: 'all' };
+      Modal.show({
+        title: 'Publish to locations?',
+        body: _pnBuildFleetBody(),
+        actions: [
+          { label: 'Publish', primary: true, onClick: function() {
+            if (_pnState) {
+              const locs = _pnState.selLocs === 'all' ? ['all'] : Array.from(_pnState.selLocs);
+              Store.saveCmsArticle(Object.assign({}, baseNote, {
+                id: 'cms-fleet-note-locs-' + Date.now(),
+                locations: locs,
+                allLocations: _pnState.selLocs === 'all',
+              }));
+            }
+            _pnState = null;
+            Modal.close();
+            renderDetail();
+          }},
+          { label: 'Skip', onClick: function() { _pnState = null; Modal.close(); } },
         ],
       });
     }
