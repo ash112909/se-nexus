@@ -3383,37 +3383,57 @@ groupKeys.map(pg => {
     const titleEl = document.getElementById('sp-topbar-title');
     if (titleEl) titleEl.textContent = 'Orders';
     const contentEl = document.getElementById('sp-content');
-    contentEl.style.cssText = 'flex:1;overflow-y:auto;padding:28px;';
+    contentEl.style.cssText = 'flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0;';
 
     const allOrders = _ordAllOrders();
     const fleets = [...new Set(allOrders.map(o => o.fleetName).filter(Boolean))].sort();
-    const filtered = _ordFiltered();
     const msgs = _ordMsgList();
 
     contentEl.innerHTML = `
 <style>
-.ord-msg-sub { display:inline-flex; gap:2px; background:#F5F2EE; border-radius:8px; padding:3px; margin-bottom:18px; }
-.ord-msg-sub-btn { padding:5px 12px; border:none; border-radius:6px; font-size:12px; font-weight:500; font-family:inherit; color:#7A7F8E; background:transparent; cursor:pointer; }
-.ord-msg-sub-btn.active { background:#FFFFFF; color:#111318; font-weight:600; box-shadow:0 1px 3px rgba(0,0,0,.08); }
-.sp-ord-table { border:1px solid #E8E4DF; border-radius:10px; overflow:hidden; background:#fff; }
-.sp-ord-th { display:grid; grid-template-columns:130px 1fr 120px 100px 90px 90px; background:#F9F8F7; border-bottom:1px solid #E8E4DF; }
-.sp-ord-tr { display:grid; grid-template-columns:130px 1fr 120px 100px 90px 90px; border-bottom:0.5px solid #F0ECE8; cursor:pointer; transition:background .12s; }
-.sp-ord-tr:last-child { border-bottom:none; }
-.sp-ord-tr:hover { background:#FAFAF9; }
-.sp-ord-td { padding:11px 14px; font-size:12px; color:#4B5268; display:flex; align-items:center; }
-.sp-ord-thd { padding:9px 14px; font-size:11px; font-weight:600; color:#9CA3AF; letter-spacing:.5px; text-transform:uppercase; }
+.sp-ord-tabs { display:flex; align-items:center; background:#FFFFFF; border-bottom:1px solid #E8E4DF; padding:0 28px; flex-shrink:0; }
+.sp-ord-tab { padding:13px 16px; font-size:13px; font-weight:500; color:#7A7F8E; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; display:flex; align-items:center; gap:6px; }
+.sp-ord-tab:hover { color:#3A3D4A; }
+.sp-ord-tab.active { color:#111318; font-weight:600; border-bottom-color:#1C3969; }
+.sp-ord-tab-badge { font-size:10px; font-weight:700; border-radius:999px; padding:1px 7px; background:#F0ECE8; color:#5A5F6E; }
+.sp-ord-tab-new { margin-left:auto; }
+.sp-ord-filter-bar { background:#FAFAF8; border-bottom:0.5px solid #E8E4DF; padding:10px 28px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; flex-shrink:0; }
+.sp-ord-pills { display:flex; gap:4px; }
+.sp-ord-pill { padding:5px 12px; border-radius:999px; font-size:12px; font-weight:500; cursor:pointer; border:1px solid #E2DDD8; background:#FFFFFF; color:#5A5F6E; user-select:none; white-space:nowrap; }
+.sp-ord-pill.active { background:#152B52; color:#FFFFFF; border-color:#152B52; }
+.sp-ord-pill:hover:not(.active) { border-color:#C8C3BC; }
+.sp-ord-divider { width:1px; height:24px; background:#E2DDD8; flex-shrink:0; }
+.sp-ord-select { height:34px; background:#FFFFFF; border:1px solid #E2DDD8; border-radius:7px; padding:0 10px; font-size:12px; font-family:inherit; color:#3A3D4A; outline:none; cursor:pointer; }
+.sp-ord-search-wrap { position:relative; }
+.sp-ord-search-icon { position:absolute; left:9px; top:50%; transform:translateY(-50%); color:#B0AAA3; font-size:13px; pointer-events:none; }
+.sp-ord-search { height:34px; background:#FFFFFF; border:1px solid #E2DDD8; border-radius:7px; padding:0 10px 0 30px; font-size:12px; font-family:inherit; color:#111318; outline:none; width:190px; }
+.sp-ord-search:focus { border-color:#1C3969; }
+.sp-ord-count { margin-left:auto; font-size:12px; color:#B0AAA3; white-space:nowrap; }
+.sp-ord-content { flex:1; overflow-y:auto; }
+.sp-ord-table-wrap { padding:20px 28px 40px; }
+.sp-ord-table { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
+.sp-ord-thead { display:grid; grid-template-columns:160px 1fr 110px 100px 110px 90px 32px; border-bottom:1px solid #F0ECE8; padding:0 18px; background:#FAFAF9; }
+.sp-ord-th { font-size:11px; font-weight:600; color:#9CA3AF; letter-spacing:.8px; text-transform:uppercase; padding:10px 8px; }
+.sp-ord-row { display:grid; grid-template-columns:160px 1fr 110px 100px 110px 90px 32px; padding:0 18px; border-bottom:0.5px solid #F5F2EE; cursor:pointer; transition:background .1s; align-items:center; }
+.sp-ord-row:hover { background:#FAFAF9; }
+.sp-ord-td { padding:12px 8px; font-size:13px; color:#3A3D4A; }
+.sp-ord-items { background:#FAFAF8; border-top:0.5px solid #E8E4DF; }
+.sp-ord-empty { padding:48px 24px; text-align:center; color:#9CA3AF; font-size:13px; }
+.sp-ord-msgs-wrap { padding:20px 28px 40px; }
 </style>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <div>
-          <div class="sp-page-title">Orders</div>
-          <div class="sp-page-sub">${allOrders.length} order${allOrders.length !== 1 ? 's' : ''} received from ${fleets.length} fleet${fleets.length !== 1 ? 's' : ''}</div>
+      <div class="sp-ord-tabs">
+        <div class="sp-ord-tab ${_ordMsgSubView==='orders'?'active':''}" onclick="spOrdSubView('orders')">
+          <i class="ti ti-clipboard-list" style="font-size:14px;"></i> Orders
+          <span class="sp-ord-tab-badge">${allOrders.length}</span>
+        </div>
+        <div class="sp-ord-tab ${_ordMsgSubView==='messages'?'active':''}" onclick="spOrdSubView('messages')">
+          <i class="ti ti-speakerphone" style="font-size:14px;"></i> Order Messages
+          ${msgs.length ? `<span class="sp-ord-tab-badge" style="background:#EEEDFE;color:#534AB7;">${msgs.length}</span>` : ''}
         </div>
       </div>
-      <div class="ord-msg-sub">
-        <button class="ord-msg-sub-btn ${_ordMsgSubView==='orders'?'active':''}" onclick="spOrdSubView('orders')"><i class="ti ti-truck-delivery" style="font-size:11px;"></i> Orders</button>
-        <button class="ord-msg-sub-btn ${_ordMsgSubView==='messages'?'active':''}" onclick="spOrdSubView('messages')"><i class="ti ti-speakerphone" style="font-size:11px;"></i> Order Messages ${msgs.length ? `<span style="background:#534AB7;color:#fff;font-size:9px;font-weight:700;border-radius:999px;padding:1px 6px;margin-left:4px;">${msgs.length}</span>` : ''}</button>
-      </div>
-      <div id="sp-ord-subview">${_ordMsgSubView === 'orders' ? _buildOrdTable(filtered, fleets) : _buildOrdMsgPanel(msgs)}</div>`;
+      <div id="sp-ord-subview" style="display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
+        ${_ordMsgSubView === 'orders' ? _buildOrdTable(allOrders, fleets) : _buildOrdMsgPanel(msgs)}
+      </div>`;
 
     window.spOrdSubView = function(view) {
       _ordMsgSubView = view;
@@ -3421,19 +3441,20 @@ groupKeys.map(pg => {
     };
     window.spOrdToggleRow = function(id) {
       _spOrdExpandedId = _spOrdExpandedId === id ? null : id;
-      document.getElementById('sp-ord-subview').innerHTML = _buildOrdTable(_ordFiltered(), fleets);
+      _reRenderOrdTable();
     };
     window.spOrdApplyFilter = function() {
-      _ordFilter.fleet  = document.getElementById('sp-ord-f-fleet')?.value || 'all';
-      _ordFilter.status = document.getElementById('sp-ord-f-status')?.value || 'all';
-      _ordFilter.dateFrom = document.getElementById('sp-ord-f-from')?.value || '';
-      _ordFilter.dateTo   = document.getElementById('sp-ord-f-to')?.value   || '';
+      _ordFilter.fleet   = document.getElementById('sp-ord-f-fleet')?.value || 'all';
+      _ordFilter.date    = document.getElementById('sp-ord-f-date')?.value  || 'all';
+      _ordFilter.search  = document.getElementById('sp-ord-search')?.value  || '';
       _spOrdExpandedId = null;
-      document.getElementById('sp-ord-subview').innerHTML = _buildOrdTable(_ordFiltered(), fleets);
+      _reRenderOrdTable();
     };
-    window.spOrdClearFilters = function() {
-      _ordFilter = { fleet: 'all', status: 'all', dateFrom: '', dateTo: '' };
-      renderOrders();
+    window.spOrdSetStatus = function(status) {
+      _ordFilter.status = status;
+      _spOrdExpandedId = null;
+      document.querySelectorAll('.sp-ord-pill').forEach(p => p.classList.toggle('active', p.dataset.status === status));
+      _reRenderOrdTable();
     };
     window.spOrdDeleteMsg = function(id) {
       if (Store.deleteCmsArticle) Store.deleteCmsArticle(id);
@@ -3443,8 +3464,7 @@ groupKeys.map(pg => {
       const title = document.getElementById('sp-ord-msg-title')?.value.trim();
       const body  = document.getElementById('sp-ord-msg-body')?.value.trim();
       const placement = document.getElementById('sp-ord-msg-placement')?.value || 'cart-top';
-      if (!title || !body) { alert('Title and message content are required.'); return; }
-      // Build fleet/location selections
+      if (!title || !body) { Modal.show({ title: 'Required fields', body: '<p style="padding:16px;font-size:13px;color:#5A5F6E;">Title and message content are required.</p>', actions: [{ label: 'OK', primary: true, onClick: () => Modal.close() }] }); return; }
       const selFleetEls = document.querySelectorAll('.sp-ord-fleet-cb:checked');
       const selFleets = selFleetEls.length ? Array.from(selFleetEls).map(cb => cb.value) : _fleets.map(f => f.fleetId);
       const allFleets = selFleets.length === _fleets.length;
@@ -3453,90 +3473,139 @@ groupKeys.map(pg => {
         id: 'sp-ord-msg-' + Date.now(),
         type: 'notice', subtype: 'supplier-order-message', status: 'published', postAs: 'orders',
         title, body, placement,
-        orderMsg: true,
-        supplierNote: true,
-        showOnOrders: true,
+        orderMsg: true, supplierNote: true, showOnOrders: true,
         supplierId: _supplierId,
-        vendorName: _user.displayName || '',
+        vendorName: _supplierName,
         poster: (_u || {}).shortName || '',
         author: (_u || {}).displayName || '',
         date: new Date().toISOString().slice(0,7).replace('-','/'),
-        targetFleets: selFleets,
-        allFleets,
-        locations: ['all'],
-        priority: 'low',
+        targetFleets: selFleets, allFleets,
+        locations: ['all'], priority: 'low',
       });
       renderOrders();
     };
   }
 
+  function _ordDateMatch(o, filter) {
+    if (!filter || filter === 'all') return true;
+    const raw = o.date || '';
+    const d = new Date(raw);
+    if (isNaN(d)) return true;
+    const now = new Date();
+    if (filter === 'week')    { const w = new Date(now); w.setDate(now.getDate()-7);  return d >= w; }
+    if (filter === 'month')   { const m = new Date(now); m.setDate(now.getDate()-30); return d >= m; }
+    if (filter === 'quarter') { const q = new Date(now); q.setDate(now.getDate()-90); return d >= q; }
+    return true;
+  }
+
+  function _ordGetFiltered(allOrders) {
+    let rows = allOrders;
+    if (_ordFilter.fleet !== 'all')   rows = rows.filter(r => (r.fleetName || '') === _ordFilter.fleet);
+    if (_ordFilter.status !== 'all')  rows = rows.filter(r => (r.status || '') === _ordFilter.status);
+    if (_ordFilter.date && _ordFilter.date !== 'all') rows = rows.filter(r => _ordDateMatch(r, _ordFilter.date));
+    if (_ordFilter.search) {
+      const q = _ordFilter.search.toLowerCase();
+      rows = rows.filter(r => (r.name||'').toLowerCase().includes(q) || (r.poNum||'').toLowerCase().includes(q) || (r.wo||'').toLowerCase().includes(q));
+    }
+    return rows;
+  }
+
+  function _reRenderOrdTable() {
+    const allOrders = _ordAllOrders();
+    const filtered = _ordGetFiltered(allOrders);
+    const tbody = document.getElementById('sp-ord-tbody');
+    if (tbody) tbody.innerHTML = _ordRows(filtered);
+    const countEl = document.getElementById('sp-ord-count');
+    if (countEl) countEl.textContent = filtered.length + ' orders';
+  }
+
   let _spOrdExpandedId = null;
 
-  function _buildOrdTable(rows, fleets) {
+  function _ordRows(rows) {
+    if (!rows.length) return '<div class="sp-ord-empty">No orders found.</div>';
+    return rows.map(o => {
+      const s = ORD_STATUS[o.status] || ORD_STATUS.submitted;
+      const isOpen = _spOrdExpandedId === o.id;
+      const items = o.items || [];
+      const itemsHtml = isOpen && items.length ? `<div class="sp-ord-items">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead><tr>
+            <th style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;padding:7px 14px;text-align:left;border-bottom:1px solid #E8E4DF;">Part #</th>
+            <th style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;padding:7px 14px;text-align:left;border-bottom:1px solid #E8E4DF;">Description</th>
+            <th style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;padding:7px 14px;text-align:center;border-bottom:1px solid #E8E4DF;width:50px;">UOM</th>
+            <th style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;padding:7px 14px;text-align:center;border-bottom:1px solid #E8E4DF;width:50px;">Qty</th>
+            <th style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;padding:7px 14px;text-align:right;border-bottom:1px solid #E8E4DF;width:70px;">Unit</th>
+            <th style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;padding:7px 14px;text-align:right;border-bottom:1px solid #E8E4DF;width:72px;">Total</th>
+          </tr></thead>
+          <tbody>${items.map((c, i) => `<tr style="${i < items.length-1 ? 'border-bottom:0.5px solid #F5F2EE;' : ''}">
+            <td style="padding:8px 14px;font-size:11px;font-weight:600;font-family:monospace;color:#3A3D4A;">${c.partNum||'—'}<div style="font-size:10px;font-weight:400;color:#9CA3AF;font-family:inherit;margin-top:1px;">${c.vendor||''}</div></td>
+            <td style="padding:8px 14px;font-size:12px;font-weight:500;color:#111318;">${c.description||'—'}</td>
+            <td style="padding:8px 14px;text-align:center;"><span style="font-size:10px;font-weight:700;background:#F0ECE8;color:#5A5F6E;border-radius:3px;padding:1px 5px;">${c.uom||'EA'}</span></td>
+            <td style="padding:8px 14px;text-align:center;font-size:13px;font-weight:600;color:#111318;">${c.qty||1}</td>
+            <td style="padding:8px 14px;text-align:right;font-size:12px;color:#7A7F8E;">$${(+(c.price||0)).toFixed(2)}</td>
+            <td style="padding:8px 14px;text-align:right;font-size:13px;font-weight:700;color:#111318;">$${((+(c.price||0))*(c.qty||1)).toFixed(2)}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+        <div style="display:flex;justify-content:flex-end;align-items:center;padding:8px 14px;border-top:0.5px solid #E8E4DF;background:#F9F8F7;">
+          <span style="font-size:12px;color:#7A7F8E;">${items.length} item${items.length!==1?'s':''}</span>
+          <span style="font-size:15px;font-weight:700;color:#111318;margin-left:16px;">$${(+(o.amount||o.total||0)).toFixed(2)}</span>
+        </div>
+      </div>` : '';
+      return `<div style="border-bottom:0.5px solid #F5F2EE;${isOpen?'background:#FAFAF9;':''}">
+        <div class="sp-ord-row" onclick="spOrdToggleRow('${o.id}')">
+          <div class="sp-ord-td" style="font-weight:600;color:#111318;">${o.fleetName||'—'}</div>
+          <div class="sp-ord-td"><div style="font-weight:500;color:#111318;">${o.name||'—'}</div><div style="font-size:11px;color:#9CA3AF;margin-top:2px;">${o.wo||''}${o.asset?' · '+o.asset:''}</div></div>
+          <div class="sp-ord-td" style="color:#7A7F8E;font-size:12px;">${o.date||'—'}</div>
+          <div class="sp-ord-td" style="font-weight:700;color:#111318;">$${(+(o.amount||o.total||0)).toFixed(2)}</div>
+          <div class="sp-ord-td"><span class="wol-pill" style="background:${s.bg};color:${s.color};">${s.label}</span></div>
+          <div class="sp-ord-td" style="font-size:11px;color:#9CA3AF;font-family:monospace;">${o.poNum||'—'}</div>
+          <div class="sp-ord-td" style="justify-content:center;padding-right:4px;"><i class="ti ti-chevron-${isOpen?'up':'down'}" style="font-size:13px;color:#C0BAB3;"></i></div>
+        </div>
+        ${itemsHtml}
+      </div>`;
+    }).join('');
+  }
+
+  function _buildOrdTable(allOrders, fleets) {
+    const filtered = _ordGetFiltered(allOrders);
     const fleetOpts = fleets.map(f => `<option value="${f}" ${_ordFilter.fleet===f?'selected':''}>${f}</option>`).join('');
-    const statusOpts = Object.entries(ORD_STATUS).map(([k,v]) => `<option value="${k}" ${_ordFilter.status===k?'selected':''}>${v.label}</option>`).join('');
-    return `<div class="pr-filter-bar" style="margin-bottom:14px;">
-      <select class="pr-filter-select" id="sp-ord-f-fleet" onchange="spOrdApplyFilter()">
+    return `<div class="sp-ord-filter-bar">
+      <div class="sp-ord-pills">
+        ${[['all','All'],['submitted','Submitted'],['delivered','Delivered'],['backordered','Backordered'],['review','In review']].map(([v,l]) =>
+          `<div class="sp-ord-pill${_ordFilter.status===v?' active':''}" data-status="${v}" onclick="spOrdSetStatus('${v}')">${l}</div>`
+        ).join('')}
+      </div>
+      <div class="sp-ord-divider"></div>
+      <select class="sp-ord-select" id="sp-ord-f-fleet" onchange="spOrdApplyFilter()">
         <option value="all">All fleets</option>${fleetOpts}
       </select>
-      <select class="pr-filter-select" id="sp-ord-f-status" onchange="spOrdApplyFilter()">
-        <option value="all">All statuses</option>${statusOpts}
+      <select class="sp-ord-select" id="sp-ord-f-date" onchange="spOrdApplyFilter()">
+        <option value="all">Any date</option>
+        <option value="week">Last 7 days</option>
+        <option value="month">Last 30 days</option>
+        <option value="quarter">Last 90 days</option>
       </select>
-      <span style="font-size:12px;color:#9CA3AF;white-space:nowrap;">From</span>
-      <input class="pr-filter-date" id="sp-ord-f-from" type="date" value="${_ordFilter.dateFrom}" onchange="spOrdApplyFilter()" />
-      <span style="font-size:12px;color:#9CA3AF;">to</span>
-      <input class="pr-filter-date" id="sp-ord-f-to" type="date" value="${_ordFilter.dateTo}" onchange="spOrdApplyFilter()" />
-      <button class="pr-clear-btn" onclick="spOrdClearFilters()">Clear</button>
-    </div>
-    <div class="sp-ord-table">
-      <div class="sp-ord-th">
-        <div class="sp-ord-thd">Fleet</div>
-        <div class="sp-ord-thd">Order</div>
-        <div class="sp-ord-thd">Date</div>
-        <div class="sp-ord-thd">Amount</div>
-        <div class="sp-ord-thd">Status</div>
-        <div class="sp-ord-thd">PO #</div>
+      <div class="sp-ord-search-wrap">
+        <i class="ti ti-search sp-ord-search-icon"></i>
+        <input class="sp-ord-search" type="text" id="sp-ord-search" placeholder="Search…" value="${_ordFilter.search||''}" oninput="spOrdApplyFilter()"/>
       </div>
-      ${rows.length ? rows.map(o => {
-        const s = ORD_STATUS[o.status] || ORD_STATUS.submitted;
-        const isOpen = _spOrdExpandedId === o.id;
-        const items = o.items || [];
-        const itemsHtml = isOpen && items.length ? `<div style="background:#FAFAF8;border-top:0.5px solid #E8E4DF;">
-          <table style="width:100%;border-collapse:collapse;">
-            <thead><tr>
-              <th style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;padding:7px 14px;text-align:left;border-bottom:1px solid #E8E4DF;">Part #</th>
-              <th style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;padding:7px 14px;text-align:left;border-bottom:1px solid #E8E4DF;">Description</th>
-              <th style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;padding:7px 14px;text-align:center;border-bottom:1px solid #E8E4DF;width:50px;">UOM</th>
-              <th style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;padding:7px 14px;text-align:center;border-bottom:1px solid #E8E4DF;width:50px;">Qty</th>
-              <th style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;padding:7px 14px;text-align:right;border-bottom:1px solid #E8E4DF;width:70px;">Unit</th>
-              <th style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;padding:7px 14px;text-align:right;border-bottom:1px solid #E8E4DF;width:72px;">Total</th>
-            </tr></thead>
-            <tbody>${items.map((c, i) => `<tr style="${i < items.length-1 ? 'border-bottom:0.5px solid #F5F2EE;' : ''}">
-              <td style="padding:8px 14px;font-size:11px;font-weight:600;font-family:monospace;color:#3A3D4A;">${c.partNum || '—'}<div style="font-size:10px;font-weight:400;color:#9CA3AF;font-family:inherit;margin-top:1px;">${c.vendor || ''}</div></td>
-              <td style="padding:8px 14px;font-size:12px;font-weight:500;color:#111318;">${c.description || '—'}</td>
-              <td style="padding:8px 14px;text-align:center;"><span style="font-size:10px;font-weight:700;background:#F0ECE8;color:#5A5F6E;border-radius:3px;padding:1px 5px;">${c.uom || 'EA'}</span></td>
-              <td style="padding:8px 14px;text-align:center;font-size:13px;font-weight:600;color:#111318;">${c.qty || 1}</td>
-              <td style="padding:8px 14px;text-align:right;font-size:12px;color:#7A7F8E;">$${(+(c.price||0)).toFixed(2)}</td>
-              <td style="padding:8px 14px;text-align:right;font-size:13px;font-weight:700;color:#111318;">$${((+(c.price||0)) * (c.qty || 1)).toFixed(2)}</td>
-            </tr>`).join('')}</tbody>
-          </table>
-          <div style="display:flex;justify-content:flex-end;align-items:center;padding:8px 14px;border-top:0.5px solid #E8E4DF;background:#F9F8F7;">
-            <span style="font-size:12px;color:#7A7F8E;">${items.length} item${items.length!==1?'s':''}</span>
-            <span style="font-size:15px;font-weight:700;color:#111318;margin-left:16px;">$${(+(o.amount||o.total||0)).toFixed(2)}</span>
+      <span class="sp-ord-count" id="sp-ord-count">${filtered.length} orders</span>
+    </div>
+    <div class="sp-ord-content">
+      <div class="sp-ord-table-wrap">
+        <div class="sp-ord-table">
+          <div class="sp-ord-thead">
+            <div class="sp-ord-th">Fleet</div>
+            <div class="sp-ord-th">Order</div>
+            <div class="sp-ord-th">Date</div>
+            <div class="sp-ord-th">Amount</div>
+            <div class="sp-ord-th">Status</div>
+            <div class="sp-ord-th">PO #</div>
+            <div class="sp-ord-th"></div>
           </div>
-        </div>` : '';
-        return `<div style="border-bottom:0.5px solid #F0ECE8;${isOpen?'background:#F5F2EE;':''}">
-          <div class="sp-ord-tr" style="border-bottom:none;" onclick="spOrdToggleRow('${o.id}')">
-            <div class="sp-ord-td" style="font-weight:600;color:#111318;">${o.fleetName || '—'}</div>
-            <div class="sp-ord-td"><div><div style="font-weight:500;color:#111318;">${o.name || '—'}</div><div style="font-size:10px;color:#9CA3AF;margin-top:1px;">${o.wo || ''}${o.asset ? ' · '+o.asset : ''}</div></div></div>
-            <div class="sp-ord-td" style="color:#7A7F8E;">${o.date || '—'}</div>
-            <div class="sp-ord-td" style="font-weight:600;color:#111318;">$${(+(o.amount||o.total||0)).toFixed(2)}</div>
-            <div class="sp-ord-td"><span class="sp-status-pill" style="background:${s.bg};color:${s.color};">${s.label}</span></div>
-            <div class="sp-ord-td" style="font-size:11px;color:#9CA3AF;justify-content:space-between;">${o.poNum || '—'}<i class="ti ti-chevron-${isOpen?'up':'down'}" style="font-size:12px;color:#C0BAB3;margin-left:8px;"></i></div>
-          </div>
-          ${itemsHtml}
-        </div>`;
-      }).join('') : `<div style="text-align:center;padding:32px;color:#9CA3AF;font-size:13px;">No orders found.</div>`}
+          <div id="sp-ord-tbody">${_ordRows(filtered)}</div>
+        </div>
+      </div>
     </div>`;
   }
 
