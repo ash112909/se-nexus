@@ -3541,22 +3541,17 @@ groupKeys.map(pg => {
   }
 
   function _buildOrdMsgPanel(msgs) {
-    const fleetCheckboxes = _fleets.map(f => `<label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;">
+    const fleetOpts = _fleets.map(f => `<label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;">
       <input type="checkbox" class="sp-ord-fleet-cb" value="${f.fleetId}" checked style="accent-color:#1C3969;width:12px;height:12px;">
       <span style="font-size:11px;color:#5A5F6E;">${f.fleetName}</span>
-      <span style="font-size:10px;color:#9CA3AF;margin-left:auto;">${f.locations} loc${f.locations!==1?'s':''}</span>
     </label>`).join('');
     const listHtml = msgs.length
       ? msgs.map(_spOrdMsgRow).join('')
-      : '<div style="font-size:13px;color:#9CA3AF;text-align:center;padding:20px 0;">No order messages published yet.</div>';
-    return `<div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;">
-      <div style="border:1px solid #E8E4DF;border-radius:10px;overflow:hidden;background:#fff;">
-        <div style="padding:10px 16px 4px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#534AB7;">Active messages (${msgs.length})</div>
-        ${listHtml}
-      </div>
-      <div style="border:1px solid #E8E4DF;border-radius:10px;overflow:hidden;background:#fff;">
-        <div style="padding:14px 16px;border-bottom:0.5px solid #F0ECE8;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#9CA3AF;">Add new message</div>
-        <div style="padding:14px 16px;display:grid;gap:7px;">
+      : '<div style="font-size:13px;color:#9CA3AF;text-align:center;padding:20px 0;">No order messages yet.</div>';
+    return `<div style="border:1px solid #E8E4DF;border-radius:10px;overflow:hidden;background:#fff;max-width:640px;">
+      <div style="padding:14px 16px;border-bottom:0.5px solid #F0ECE8;">
+        <div style="font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#9CA3AF;margin-bottom:10px;">Add new message</div>
+        <div style="display:grid;gap:7px;">
           <input id="sp-ord-msg-title" type="text" placeholder="Message title *" style="width:100%;height:32px;border:0.5px solid #E2DDD8;border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;background:#fff;"/>
           <textarea id="sp-ord-msg-body" placeholder="Message content *" style="width:100%;min-height:56px;border:0.5px solid #E2DDD8;border-radius:6px;padding:7px 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;resize:none;background:#fff;"></textarea>
           <select id="sp-ord-msg-placement" style="height:32px;border:0.5px solid #E2DDD8;border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;background:#fff;">
@@ -3569,10 +3564,14 @@ groupKeys.map(pg => {
               <input type="checkbox" id="sp-ord-all-fleets" checked onchange="document.querySelectorAll('.sp-ord-fleet-cb').forEach(cb=>cb.checked=this.checked)" style="accent-color:#1C3969;width:12px;height:12px;">
               <span style="font-size:11px;font-weight:600;color:#111318;">All fleets</span>
             </label>
-            <div style="padding:6px 10px;">${fleetCheckboxes}</div>
+            <div style="padding:6px 10px;">${fleetOpts}</div>
           </div>` : ''}
-          <button onclick="spOrdSaveMsg()" style="height:32px;background:#1C3969;border:none;border-radius:6px;font-size:12px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;">Publish message</button>
+          <button onclick="spOrdSaveMsg()" style="height:32px;background:#1C3969;border:none;border-radius:6px;font-size:12px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;">Add message</button>
         </div>
+      </div>
+      <div>
+        <div style="padding:10px 16px 4px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#534AB7;">Active messages (${msgs.length})</div>
+        ${listHtml}
       </div>
     </div>`;
   }
