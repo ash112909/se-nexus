@@ -3427,18 +3427,54 @@ groupKeys.map(pg => {
           <span class="sp-ord-tab-badge">${allOrders.length}</span>
         </div>
         <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
-          <button onclick="spOrdSubView('messages')" style="display:flex;align-items:center;gap:6px;height:32px;padding:0 14px;border-radius:7px;border:1px solid #E2DDD8;background:#FFFFFF;font-size:12px;font-weight:600;color:#3A3D4A;font-family:inherit;cursor:pointer;${_ordMsgSubView==='messages'?'background:#EEEDFE;border-color:#534AB7;color:#534AB7;':''}">
+          <button onclick="spOrdOpenMessages()" style="display:flex;align-items:center;gap:6px;height:32px;padding:0 14px;border-radius:7px;border:1px solid #C8C3F2;background:#FFFFFF;font-size:12px;font-weight:600;color:#534AB7;font-family:inherit;cursor:pointer;">
             <i class="ti ti-speakerphone" style="font-size:13px;"></i> Messages${msgs.length ? ` <span style="background:#534AB7;color:#fff;border-radius:999px;padding:1px 6px;font-size:10px;font-weight:700;">${msgs.length}</span>` : ''}
           </button>
         </div>
       </div>
       <div id="sp-ord-subview" style="display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
-        ${_ordMsgSubView === 'orders' ? _buildOrdTable(allOrders, fleets) : _buildOrdMsgPanel(msgs)}
+        ${_buildOrdTable(allOrders, fleets)}
       </div>`;
 
-    window.spOrdSubView = function(view) {
-      _ordMsgSubView = view;
-      renderOrders();
+    window.spOrdOpenMessages = function() {
+      const msgs = _ordMsgList();
+      const fleetOpts = _fleets.map(f => `<label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;">
+        <input type="checkbox" class="sp-ord-fleet-cb" value="${f.fleetId}" checked style="accent-color:#1C3969;width:12px;height:12px;">
+        <span style="font-size:11px;color:#5A5F6E;">${f.fleetName}</span>
+      </label>`).join('');
+      const listHtml = msgs.length
+        ? msgs.map(_spOrdMsgRow).join('')
+        : '<div style="font-size:13px;color:#9CA3AF;text-align:center;padding:20px 0;">No order messages yet.</div>';
+      Modal.show({
+        title: 'Order Messages',
+        body: `<div style="max-height:480px;overflow-y:auto;margin:-16px;">
+          <div style="padding:14px 16px;border-bottom:0.5px solid #F0ECE8;">
+            <div style="font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#9CA3AF;margin-bottom:10px;">Add new message</div>
+            <div style="display:grid;gap:7px;">
+              <input id="sp-ord-msg-title" type="text" placeholder="Message title *" style="width:100%;height:32px;border:0.5px solid #E2DDD8;border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;background:#fff;"/>
+              <textarea id="sp-ord-msg-body" placeholder="Message content *" style="width:100%;min-height:56px;border:0.5px solid #E2DDD8;border-radius:6px;padding:7px 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;resize:none;background:#fff;"></textarea>
+              <select id="sp-ord-msg-placement" style="height:32px;border:0.5px solid #E2DDD8;border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;background:#fff;">
+                <option value="cart-top">Top of cart</option>
+                <option value="order-form-top">Top of order form</option>
+                <option value="order-form-bottom">Bottom of order form</option>
+              </select>
+              ${_fleets.length > 1 ? `<div style="border:0.5px solid #E2DDD8;border-radius:8px;overflow:hidden;">
+                <label style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#F5F2EE;border-bottom:0.5px solid #E2DDD8;cursor:pointer;">
+                  <input type="checkbox" id="sp-ord-all-fleets" checked onchange="document.querySelectorAll('.sp-ord-fleet-cb').forEach(cb=>cb.checked=this.checked)" style="accent-color:#1C3969;width:12px;height:12px;">
+                  <span style="font-size:11px;font-weight:600;color:#111318;">All fleets</span>
+                </label>
+                <div style="padding:6px 10px;">${fleetOpts}</div>
+              </div>` : ''}
+              <button onclick="spOrdSaveMsg()" style="height:32px;background:#1C3969;border:none;border-radius:6px;font-size:12px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;">Add message</button>
+            </div>
+          </div>
+          <div>
+            <div style="padding:10px 16px 4px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#534AB7;">Active messages (${msgs.length})</div>
+            ${listHtml}
+          </div>
+        </div>`,
+        actions: [{ label: 'Done', onClick: function() { Modal.close(); } }],
+      });
     };
     window.spOrdToggleRow = function(id) {
       _spOrdExpandedId = _spOrdExpandedId === id ? null : id;
@@ -3459,7 +3495,8 @@ groupKeys.map(pg => {
     };
     window.spOrdDeleteMsg = function(id) {
       if (Store.deleteCmsArticle) Store.deleteCmsArticle(id);
-      renderOrders();
+      Modal.close();
+      window.spOrdOpenMessages();
     };
     window.spOrdSaveMsg = function() {
       const title = document.getElementById('sp-ord-msg-title')?.value.trim();
@@ -3483,7 +3520,8 @@ groupKeys.map(pg => {
         targetFleets: selFleets, allFleets,
         locations: ['all'], priority: 'low',
       });
-      renderOrders();
+      Modal.close();
+      window.spOrdOpenMessages();
     };
   }
 
