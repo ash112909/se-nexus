@@ -3,8 +3,11 @@ function render_parts_search(el) {
   let _woId = (Router.context && Router.context.fromWo) ? Router.context.woId : null;
   let _wo = _woId ? Store.getWorkOrder(_woId) : null;
   const _ctxSupplierId = Router.context && Router.context.supplierId;
-  const _impersonating = Router.context && Router.context.impersonating;
-  const _impersonatingFleet = Router.context && Router.context.impersonatingFleet;
+  const _impersonating          = Router.context && Router.context.impersonating;
+  const _impersonatingFleet     = Router.context && Router.context.impersonatingFleet;
+  const _impersonatingLocation  = Router.context && Router.context.impersonatingLocation;
+  const _impersonatingRole      = Router.context && Router.context.impersonatingRole;
+  const _impersonatingRoleLabel = Router.context && Router.context.impersonatingRoleLabel;
 
   const CATALOG = [
     { id:'SKJ', name:'Skyjack', icon:'ti-crane', models:[
@@ -2363,7 +2366,7 @@ function render_parts_search(el) {
 </style>
 <h2 class="sr-only">Parts search</h2>
 <div class="shell">
-  ${buildSidebar('parts', { impersonating: _impersonating, impersonatingFleet: _impersonatingFleet })}
+  ${buildSidebar('parts', { impersonating: _impersonating, impersonatingFleet: _impersonatingFleet, impersonatingLocation: _impersonatingLocation, impersonatingRoleLabel: _impersonatingRoleLabel })}
   <div class="main" style="display:flex;flex-direction:column;overflow:hidden;">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">

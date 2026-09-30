@@ -2083,8 +2083,64 @@ function render_supplier_portal(el) {
 
   // ── Impersonation ────────────────────────────────────────────────────────────
 
+  const IMPERSONATION_ROLES = [
+    { value: 'mechanic',    label: 'Mechanic / Technician' },
+    { value: 'purchasing',  label: 'Purchasing Manager' },
+    { value: 'branch_mgr', label: 'Branch Manager' },
+    { value: 'fleet_admin', label: 'Fleet Administrator' },
+  ];
+
   window.spImpersonate = function(fleetId, fleetName) {
-    Router.navigate('parts-search', { supplierId: _supplierId, impersonating: true, impersonatingFleet: fleetName });
+    const locationNames = Store.getFleetLocations(_supplierId, fleetId);
+    const locationOptions = locationNames.length
+      ? locationNames.map(n => `<option value="${n}">${n}</option>`).join('')
+      : `<option value="">— no locations configured —</option>`;
+
+    Modal.show({
+      title: 'View as Fleet',
+      body: `
+        <div style="background:#F5F2EE;border-radius:8px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:8px;background:#1C3969;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">${fleetName.split(' ').map(w=>w[0]).join('').slice(0,3)}</div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#111318;">${fleetName}</div>
+            <div style="font-size:11px;color:#7A7F8E;">Select a location and role to impersonate</div>
+          </div>
+        </div>
+        <div class="modal-form-field">
+          <label class="modal-form-label">Location <span style="font-weight:700;color:#A32D2D;">*</span></label>
+          <select class="modal-form-select" id="sp-imp-location">${locationOptions}</select>
+          <div id="sp-imp-loc-err" style="font-size:11px;color:#A32D2D;margin-top:3px;display:none;">Please select a location</div>
+        </div>
+        <div class="modal-form-field">
+          <label class="modal-form-label">Role <span style="font-weight:700;color:#A32D2D;">*</span></label>
+          <select class="modal-form-select" id="sp-imp-role">
+            ${IMPERSONATION_ROLES.map(r => `<option value="${r.value}">${r.label}</option>`).join('')}
+          </select>
+        </div>
+        <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:10px 12px;margin-top:4px;">
+          <div style="font-size:12px;color:#1E40AF;line-height:1.5;"><i class="ti ti-info-circle" style="font-size:13px;margin-right:4px;"></i>You'll see the parts catalog and pricing exactly as this fleet user would — no data is modified.</div>
+        </div>`,
+      actions: [
+        { label: 'Cancel', onClick: () => Modal.close() },
+        { label: 'Enter impersonation view', primary: true, onClick: () => {
+          const locationEl = document.getElementById('sp-imp-location');
+          const roleEl     = document.getElementById('sp-imp-role');
+          const location   = locationEl?.value;
+          const role       = roleEl?.value;
+          if (!location) { document.getElementById('sp-imp-loc-err').style.display = 'block'; return; }
+          Modal.close();
+          const roleLabel = IMPERSONATION_ROLES.find(r => r.value === role)?.label || role;
+          Router.navigate('parts-search', {
+            supplierId: _supplierId,
+            impersonating: true,
+            impersonatingFleet: fleetName,
+            impersonatingLocation: location,
+            impersonatingRole: role,
+            impersonatingRoleLabel: roleLabel,
+          });
+        }},
+      ]
+    });
   };
 
   window.spManagePartNotes = function() {

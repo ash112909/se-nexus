@@ -11,16 +11,23 @@ function buildSidebar(activeItem, opts) {
 
   // ── Impersonation-locked sidebar ──────────────────────────────────────────
   if (opts.impersonating) {
-    const fleetName = opts.impersonatingFleet || 'Fleet';
+    const fleetName    = opts.impersonatingFleet    || 'Fleet';
+    const impLocation  = opts.impersonatingLocation || null;
+    const impRoleLabel = opts.impersonatingRoleLabel || null;
     return `
   <div class="sb-wrap${wrapCls}">
   <div class="sidebar${pinCls}">
     <div class="sb-logo-area">
       <img src="smartequiplogo.png" class="sb-logo-img"/>
-      <div class="sb-logo-sub">${fleetName} · Impersonation view</div>
+      <div class="sb-logo-sub">${fleetName} · Impersonation</div>
+    </div>
+    <div style="background:#0E1F3D;border-radius:8px;margin:0 10px 8px;padding:10px 12px;">
+      <div style="font-size:10px;font-weight:600;color:#7B9FCC;letter-spacing:.6px;text-transform:uppercase;margin-bottom:6px;">Viewing as</div>
+      ${impRoleLabel ? `<div style="font-size:12px;font-weight:600;color:#E8F0FF;margin-bottom:3px;">${impRoleLabel}</div>` : ''}
+      ${impLocation  ? `<div style="font-size:11px;color:#7B9FCC;display:flex;align-items:center;gap:4px;"><i class="ti ti-map-pin" style="font-size:11px;"></i>${impLocation}</div>` : ''}
     </div>
     <div class="sb-nav">
-      <div class="sb-section-label">Viewing as fleet</div>
+      <div class="sb-section-label">Fleet view</div>
       <div class="sb-item active"><i class="ti ti-search"></i><span class="sb-lbl"> Search parts</span></div>
     </div>
     <div style="margin-top:auto;">
