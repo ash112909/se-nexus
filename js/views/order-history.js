@@ -241,6 +241,7 @@ function render_order_history(el) {
         </div>
         <select class="oh-select"><option>All vendors</option><option>Skyjack</option><option>Parker</option><option>Grainger</option></select>
         <button class="oh-btn-ghost oh-btn-ghost-ml"><i class="ti ti-download"></i> Export</button>
+        <button class="oh-btn-ghost" onclick="ohManageMessages()" style="color:#534AB7;border-color:#C8C3F2;"><i class="ti ti-speakerphone" style="font-size:12px;"></i> Manage messages</button>
       </div>
 
       <div class="oh-table-wrap">
@@ -298,6 +299,106 @@ function render_order_history(el) {
     document.querySelectorAll('#oh-tbody tr').forEach(r => r.classList.remove('selected-row'));
     const panel = document.getElementById('oh-detail-panel');
     if (panel) panel.style.display = 'none';
+  };
+
+  const OH_PLACEMENTS = [
+    { id: 'cart-top',         label: 'Top of cart' },
+    { id: 'order-form-top',   label: 'Top of order form' },
+    { id: 'order-form-bottom',label: 'Bottom of order form' },
+  ];
+
+  function _ohMsgList() {
+    if (!Store.getCmsArticles) return [];
+    return Store.getCmsArticles('published').filter(a => !!a.orderMsg);
+  }
+
+  function _ohBuildMsgRow(a) {
+    const pl = OH_PLACEMENTS.find(p => p.id === a.placement) || { label: a.placement || '—' };
+    return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:0.5px solid #F0ECE8;">
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+          <span style="font-size:9px;font-weight:700;color:#534AB7;text-transform:uppercase;letter-spacing:.5px;background:#EEEDFE;padding:2px 6px;border-radius:3px;">${pl.label}</span>
+          <span style="font-size:11px;font-weight:600;color:#111318;">${a.title}</span>
+        </div>
+        <div style="font-size:11px;color:#7A7F8E;">${a.body ? a.body.slice(0,120)+(a.body.length>120?'…':'') : ''}</div>
+        ${a.date ? `<div style="font-size:10px;color:#B0AAA3;margin-top:2px;">${a.date}</div>` : ''}
+      </div>
+      <button onclick="ohDeleteMsg('${a.id}')" style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:4px 8px;font-size:11px;color:#D9534F;cursor:pointer;font-family:inherit;flex-shrink:0;">Remove</button>
+    </div>`;
+  }
+
+  window.ohManageMessages = function() {
+    const msgs = _ohMsgList();
+    const locs = Store.getLocations ? Store.getLocations() : [];
+    const locOpts = locs.map((l, i) => `<label style="display:flex;align-items:center;gap:8px;padding:${i===locs.length-1?'':''}4px 0;cursor:pointer;">
+      <input type="checkbox" class="oh-loc-cb" value="${l.id}" checked style="accent-color:#1C3969;width:12px;height:12px;">
+      <span style="font-size:11px;color:#5A5F6E;">${l.name}</span>
+    </label>`).join('');
+
+    const listHtml = msgs.length
+      ? msgs.map(_ohBuildMsgRow).join('')
+      : '<div style="font-size:13px;color:#9CA3AF;text-align:center;padding:20px 0;">No order messages yet.</div>';
+
+    Modal.show({
+      title: 'Order Messages',
+      body: `<div style="max-height:480px;overflow-y:auto;margin:-16px;">
+        <div style="padding:14px 16px;border-bottom:0.5px solid #F0ECE8;">
+          <div style="font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#9CA3AF;margin-bottom:10px;">Add new message</div>
+          <div style="display:grid;gap:7px;">
+            <input id="oh-msg-title" type="text" placeholder="Message title *" style="width:100%;height:32px;border:0.5px solid #E2DDD8;border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;background:#fff;"/>
+            <textarea id="oh-msg-body" placeholder="Message content *" style="width:100%;min-height:56px;border:0.5px solid #E2DDD8;border-radius:6px;padding:7px 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;resize:none;background:#fff;"></textarea>
+            <select id="oh-msg-placement" style="height:32px;border:0.5px solid #E2DDD8;border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;background:#fff;">
+              ${OH_PLACEMENTS.map(p => `<option value="${p.id}">${p.label}</option>`).join('')}
+            </select>
+            ${locs.length > 1 ? `<div style="border:0.5px solid #E2DDD8;border-radius:8px;overflow:hidden;">
+              <label style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#F5F2EE;border-bottom:0.5px solid #E2DDD8;cursor:pointer;">
+                <input type="checkbox" id="oh-loc-all" checked onchange="document.querySelectorAll('.oh-loc-cb').forEach(cb=>cb.checked=this.checked)" style="accent-color:#1C3969;width:12px;height:12px;">
+                <span style="font-size:11px;font-weight:600;color:#111318;">All locations</span>
+              </label>
+              <div style="padding:6px 10px;">${locOpts}</div>
+            </div>` : ''}
+            <button onclick="ohSaveMsg()" style="height:32px;background:#1C3969;border:none;border-radius:6px;font-size:12px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;">Add message</button>
+          </div>
+        </div>
+        <div>
+          <div style="padding:10px 16px 4px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#534AB7;">Active messages (${msgs.length})</div>
+          ${listHtml}
+        </div>
+      </div>`,
+      actions: [{ label: 'Done', onClick: function() { Modal.close(); } }],
+    });
+  };
+
+  window.ohSaveMsg = function() {
+    const title = document.getElementById('oh-msg-title')?.value.trim();
+    const body  = document.getElementById('oh-msg-body')?.value.trim();
+    const placement = document.getElementById('oh-msg-placement')?.value || 'cart-top';
+    if (!title || !body) { alert('Title and message content are required.'); return; }
+    const locs = Store.getLocations ? Store.getLocations() : [];
+    const allChecked = document.getElementById('oh-loc-all')?.checked !== false;
+    const selLocs = allChecked ? ['all'] : Array.from(document.querySelectorAll('.oh-loc-cb:checked')).map(cb => cb.value);
+    const _u = Store.getCurrentUser ? Store.getCurrentUser() : null;
+    Store.saveCmsArticle({
+      id: 'oh-msg-' + Date.now(),
+      type: 'notice', subtype: 'order-message', status: 'published', postAs: 'orders',
+      title, body, placement,
+      orderMsg: true,
+      fleetNote: true,
+      showOnOrders: true,
+      poster: (_u || {}).shortName || '',
+      author: (_u || {}).displayName || '',
+      date: new Date().toISOString().slice(0,7).replace('-','/'),
+      locations: selLocs,
+      priority: 'low',
+    });
+    Modal.close();
+    ohManageMessages();
+  };
+
+  window.ohDeleteMsg = function(id) {
+    if (Store.deleteCmsArticle) Store.deleteCmsArticle(id);
+    Modal.close();
+    ohManageMessages();
   };
 
   // Trigger initial tab

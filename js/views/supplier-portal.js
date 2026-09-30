@@ -3331,6 +3331,216 @@ groupKeys.map(pg => {
     };
   }
 
+  // ── Orders view ──────────────────────────────────────────────────────────────
+  let _ordFilter = { fleet: 'all', status: 'all', dateFrom: '', dateTo: '' };
+  let _ordMsgSubView = 'orders'; // 'orders' | 'messages'
+
+  const ORD_STATUS = {
+    submitted:   { label: 'Submitted',   bg: '#DBEAFE', color: '#1D4ED8' },
+    delivered:   { label: 'Delivered',   bg: '#DBEAFE', color: '#1C3969' },
+    backordered: { label: 'Backordered', bg: '#FEF3C7', color: '#92400E' },
+    review:      { label: 'In review',   bg: '#EDE9FE', color: '#5B21B6' },
+    local:       { label: 'Draft',       bg: '#F0ECE8', color: '#5A5F6E' },
+  };
+
+  function _ordAllOrders() {
+    // Combine orders from Store with simulated supplier-visible orders from price requests
+    const base = Store.getOrders ? Store.getOrders('all') : [];
+    // Attach fleet name from supplier context (orders don't carry fleet name natively, use supplierId match)
+    return base.map(o => Object.assign({ fleetName: o.fleetName || 'Mid-County Rental', fleetId: o.fleetId || 'mcr' }, o));
+  }
+
+  function _ordFiltered() {
+    let rows = _ordAllOrders();
+    if (_ordFilter.fleet !== 'all') rows = rows.filter(r => (r.fleetName || '') === _ordFilter.fleet);
+    if (_ordFilter.status !== 'all') rows = rows.filter(r => (r.status || '') === _ordFilter.status);
+    return rows;
+  }
+
+  function _ordMsgList() {
+    if (!Store.getCmsArticles) return [];
+    return Store.getCmsArticles('published').filter(a => a.orderMsg && a.supplierId === _supplierId);
+  }
+
+  function _spOrdMsgRow(a) {
+    const placementLabels = { 'cart-top': 'Top of cart', 'order-form-top': 'Top of order form', 'order-form-bottom': 'Bottom of order form' };
+    const pl = placementLabels[a.placement] || a.placement || '—';
+    return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:0.5px solid #F0ECE8;">
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap;">
+          <span style="font-size:9px;font-weight:700;color:#534AB7;text-transform:uppercase;letter-spacing:.5px;background:#EEEDFE;padding:2px 6px;border-radius:3px;">${pl}</span>
+          <span style="font-size:11px;font-weight:600;color:#111318;">${a.title}</span>
+        </div>
+        <div style="font-size:11px;color:#7A7F8E;">${a.body ? a.body.slice(0,120)+(a.body.length>120?'…':'') : ''}</div>
+        <div style="font-size:10px;color:#B0AAA3;margin-top:3px;">${a.date || ''}${a.allFleets ? ' · All fleets' : (a.impersonatingFleet ? ' · '+a.impersonatingFleet : '')}</div>
+      </div>
+      <button onclick="spOrdDeleteMsg('${a.id}')" style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:4px 8px;font-size:11px;color:#D9534F;cursor:pointer;font-family:inherit;flex-shrink:0;">Remove</button>
+    </div>`;
+  }
+
+  function renderOrders() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Orders';
+    const contentEl = document.getElementById('sp-content');
+    contentEl.style.cssText = 'flex:1;overflow-y:auto;padding:28px;';
+
+    const allOrders = _ordAllOrders();
+    const fleets = [...new Set(allOrders.map(o => o.fleetName).filter(Boolean))].sort();
+    const filtered = _ordFiltered();
+    const msgs = _ordMsgList();
+
+    contentEl.innerHTML = `
+<style>
+.ord-msg-sub { display:inline-flex; gap:2px; background:#F5F2EE; border-radius:8px; padding:3px; margin-bottom:18px; }
+.ord-msg-sub-btn { padding:5px 12px; border:none; border-radius:6px; font-size:12px; font-weight:500; font-family:inherit; color:#7A7F8E; background:transparent; cursor:pointer; }
+.ord-msg-sub-btn.active { background:#FFFFFF; color:#111318; font-weight:600; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+.sp-ord-table { border:1px solid #E8E4DF; border-radius:10px; overflow:hidden; background:#fff; }
+.sp-ord-th { display:grid; grid-template-columns:130px 1fr 120px 100px 90px 90px; background:#F9F8F7; border-bottom:1px solid #E8E4DF; }
+.sp-ord-tr { display:grid; grid-template-columns:130px 1fr 120px 100px 90px 90px; border-bottom:0.5px solid #F0ECE8; cursor:pointer; transition:background .12s; }
+.sp-ord-tr:last-child { border-bottom:none; }
+.sp-ord-tr:hover { background:#FAFAF9; }
+.sp-ord-td { padding:11px 14px; font-size:12px; color:#4B5268; display:flex; align-items:center; }
+.sp-ord-thd { padding:9px 14px; font-size:11px; font-weight:600; color:#9CA3AF; letter-spacing:.5px; text-transform:uppercase; }
+</style>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div>
+          <div class="sp-page-title">Orders</div>
+          <div class="sp-page-sub">${allOrders.length} order${allOrders.length !== 1 ? 's' : ''} received from ${fleets.length} fleet${fleets.length !== 1 ? 's' : ''}</div>
+        </div>
+      </div>
+      <div class="ord-msg-sub">
+        <button class="ord-msg-sub-btn ${_ordMsgSubView==='orders'?'active':''}" onclick="spOrdSubView('orders')"><i class="ti ti-truck-delivery" style="font-size:11px;"></i> Orders</button>
+        <button class="ord-msg-sub-btn ${_ordMsgSubView==='messages'?'active':''}" onclick="spOrdSubView('messages')"><i class="ti ti-speakerphone" style="font-size:11px;"></i> Order Messages ${msgs.length ? `<span style="background:#534AB7;color:#fff;font-size:9px;font-weight:700;border-radius:999px;padding:1px 6px;margin-left:4px;">${msgs.length}</span>` : ''}</button>
+      </div>
+      <div id="sp-ord-subview">${_ordMsgSubView === 'orders' ? _buildOrdTable(filtered, fleets) : _buildOrdMsgPanel(msgs)}</div>`;
+
+    window.spOrdSubView = function(view) {
+      _ordMsgSubView = view;
+      renderOrders();
+    };
+    window.spOrdApplyFilter = function() {
+      _ordFilter.fleet  = document.getElementById('sp-ord-f-fleet')?.value || 'all';
+      _ordFilter.status = document.getElementById('sp-ord-f-status')?.value || 'all';
+      _ordFilter.dateFrom = document.getElementById('sp-ord-f-from')?.value || '';
+      _ordFilter.dateTo   = document.getElementById('sp-ord-f-to')?.value   || '';
+      document.getElementById('sp-ord-subview').innerHTML = _buildOrdTable(_ordFiltered(), fleets);
+    };
+    window.spOrdClearFilters = function() {
+      _ordFilter = { fleet: 'all', status: 'all', dateFrom: '', dateTo: '' };
+      renderOrders();
+    };
+    window.spOrdDeleteMsg = function(id) {
+      if (Store.deleteCmsArticle) Store.deleteCmsArticle(id);
+      renderOrders();
+    };
+    window.spOrdSaveMsg = function() {
+      const title = document.getElementById('sp-ord-msg-title')?.value.trim();
+      const body  = document.getElementById('sp-ord-msg-body')?.value.trim();
+      const placement = document.getElementById('sp-ord-msg-placement')?.value || 'cart-top';
+      if (!title || !body) { alert('Title and message content are required.'); return; }
+      // Build fleet/location selections
+      const selFleetEls = document.querySelectorAll('.sp-ord-fleet-cb:checked');
+      const selFleets = selFleetEls.length ? Array.from(selFleetEls).map(cb => cb.value) : _fleets.map(f => f.fleetId);
+      const allFleets = selFleets.length === _fleets.length;
+      const _u = Store.getCurrentUser ? Store.getCurrentUser() : null;
+      Store.saveCmsArticle({
+        id: 'sp-ord-msg-' + Date.now(),
+        type: 'notice', subtype: 'supplier-order-message', status: 'published', postAs: 'orders',
+        title, body, placement,
+        orderMsg: true,
+        supplierNote: true,
+        showOnOrders: true,
+        supplierId: _supplierId,
+        vendorName: _user.displayName || '',
+        poster: (_u || {}).shortName || '',
+        author: (_u || {}).displayName || '',
+        date: new Date().toISOString().slice(0,7).replace('-','/'),
+        targetFleets: selFleets,
+        allFleets,
+        locations: ['all'],
+        priority: 'low',
+      });
+      renderOrders();
+    };
+  }
+
+  function _buildOrdTable(rows, fleets) {
+    const fleetOpts = fleets.map(f => `<option value="${f}" ${_ordFilter.fleet===f?'selected':''}>${f}</option>`).join('');
+    const statusOpts = Object.entries(ORD_STATUS).map(([k,v]) => `<option value="${k}" ${_ordFilter.status===k?'selected':''}>${v.label}</option>`).join('');
+    return `<div class="pr-filter-bar" style="margin-bottom:14px;">
+      <select class="pr-filter-select" id="sp-ord-f-fleet" onchange="spOrdApplyFilter()">
+        <option value="all">All fleets</option>${fleetOpts}
+      </select>
+      <select class="pr-filter-select" id="sp-ord-f-status" onchange="spOrdApplyFilter()">
+        <option value="all">All statuses</option>${statusOpts}
+      </select>
+      <span style="font-size:12px;color:#9CA3AF;white-space:nowrap;">From</span>
+      <input class="pr-filter-date" id="sp-ord-f-from" type="date" value="${_ordFilter.dateFrom}" onchange="spOrdApplyFilter()" />
+      <span style="font-size:12px;color:#9CA3AF;">to</span>
+      <input class="pr-filter-date" id="sp-ord-f-to" type="date" value="${_ordFilter.dateTo}" onchange="spOrdApplyFilter()" />
+      <button class="pr-clear-btn" onclick="spOrdClearFilters()">Clear</button>
+    </div>
+    <div class="sp-ord-table">
+      <div class="sp-ord-th">
+        <div class="sp-ord-thd">Fleet</div>
+        <div class="sp-ord-thd">Order</div>
+        <div class="sp-ord-thd">Date</div>
+        <div class="sp-ord-thd">Amount</div>
+        <div class="sp-ord-thd">Status</div>
+        <div class="sp-ord-thd">PO #</div>
+      </div>
+      ${rows.length ? rows.map(o => {
+        const s = ORD_STATUS[o.status] || ORD_STATUS.submitted;
+        return `<div class="sp-ord-tr">
+          <div class="sp-ord-td" style="font-weight:600;color:#111318;">${o.fleetName || '—'}</div>
+          <div class="sp-ord-td"><div><div style="font-weight:500;color:#111318;">${o.name || '—'}</div><div style="font-size:10px;color:#9CA3AF;margin-top:1px;">${o.wo || ''}${o.asset ? ' · '+o.asset : ''}</div></div></div>
+          <div class="sp-ord-td" style="color:#7A7F8E;">${o.date || '—'}</div>
+          <div class="sp-ord-td" style="font-weight:600;color:#111318;">$${(+(o.amount||o.total||0)).toFixed(2)}</div>
+          <div class="sp-ord-td"><span class="sp-status-pill" style="background:${s.bg};color:${s.color};">${s.label}</span></div>
+          <div class="sp-ord-td" style="font-size:11px;color:#9CA3AF;">${o.poNum || '—'}</div>
+        </div>`;
+      }).join('') : `<div style="text-align:center;padding:32px;color:#9CA3AF;font-size:13px;">No orders found.</div>`}
+    </div>`;
+  }
+
+  function _buildOrdMsgPanel(msgs) {
+    const fleetCheckboxes = _fleets.map(f => `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;border-bottom:0.5px solid #F0ECE8;">
+      <input type="checkbox" class="sp-ord-fleet-cb" value="${f.fleetId}" checked style="accent-color:#1C3969;width:13px;height:13px;">
+      <span style="font-size:12px;color:#111318;">${f.fleetName}</span>
+      <span style="font-size:10px;color:#9CA3AF;margin-left:auto;">${f.locations} loc${f.locations!==1?'s':''}</span>
+    </label>`).join('');
+    const listHtml = msgs.length
+      ? msgs.map(_spOrdMsgRow).join('')
+      : '<div style="font-size:13px;color:#9CA3AF;text-align:center;padding:20px 0;">No order messages published yet.</div>';
+    return `<div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#111318;margin-bottom:12px;">Active order messages</div>
+        <div style="border:1px solid #E8E4DF;border-radius:10px;overflow:hidden;background:#fff;">${listHtml}</div>
+      </div>
+      <div style="border:1px solid #E8E4DF;border-radius:10px;overflow:hidden;background:#fff;">
+        <div style="padding:14px 16px;border-bottom:0.5px solid #F0ECE8;font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;">New message</div>
+        <div style="padding:14px 16px;display:flex;flex-direction:column;gap:8px;">
+          <input id="sp-ord-msg-title" type="text" placeholder="Message title *" style="width:100%;height:32px;border:0.5px solid #E2DDD8;border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;background:#fff;"/>
+          <textarea id="sp-ord-msg-body" placeholder="Message content *" style="width:100%;min-height:64px;border:0.5px solid #E2DDD8;border-radius:6px;padding:7px 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;resize:none;background:#fff;"></textarea>
+          <select id="sp-ord-msg-placement" style="height:32px;border:0.5px solid #E2DDD8;border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;background:#fff;">
+            <option value="cart-top">Top of cart</option>
+            <option value="order-form-top">Top of order form</option>
+            <option value="order-form-bottom">Bottom of order form</option>
+          </select>
+          <div style="font-size:11px;font-weight:600;color:#5A5F6E;margin-top:2px;">Publish to fleets</div>
+          <div style="border:0.5px solid #E2DDD8;border-radius:8px;overflow:hidden;">
+            <label style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#F5F2EE;border-bottom:0.5px solid #E2DDD8;cursor:pointer;">
+              <input type="checkbox" id="sp-ord-all-fleets" checked onchange="document.querySelectorAll('.sp-ord-fleet-cb').forEach(cb=>cb.checked=this.checked)" style="accent-color:#1C3969;width:13px;height:13px;">
+              <span style="font-size:12px;font-weight:600;color:#111318;">All fleets</span>
+            </label>
+            <div style="padding:4px 10px;">${fleetCheckboxes}</div>
+          </div>
+          <button onclick="spOrdSaveMsg()" style="height:34px;background:#1C3969;border:none;border-radius:7px;font-size:13px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;">Publish message</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
   function setTab(tab) {
     _activeTab = tab;
     el.querySelectorAll('.sb-item[data-sp-tab]').forEach(item => {
@@ -3348,6 +3558,7 @@ groupKeys.map(pg => {
     if (tab === 'home')       renderHome();
     if (tab === 'fleets')     renderFleets();
     if (tab === 'requests')   renderRequests();
+    if (tab === 'orders')     { _ordMsgSubView = 'orders'; renderOrders(); }
     if (tab === 'manuals')    renderManuals();
     if (tab === 'news')       { _spNewsSubView = 'feed'; renderNews(); }
     if (tab === 'analytics')  renderAnalytics();
