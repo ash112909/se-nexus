@@ -3426,9 +3426,10 @@ groupKeys.map(pg => {
           <i class="ti ti-clipboard-list" style="font-size:14px;"></i> Orders
           <span class="sp-ord-tab-badge">${allOrders.length}</span>
         </div>
-        <div class="sp-ord-tab ${_ordMsgSubView==='messages'?'active':''}" onclick="spOrdSubView('messages')">
-          <i class="ti ti-speakerphone" style="font-size:14px;"></i> Order Messages
-          ${msgs.length ? `<span class="sp-ord-tab-badge" style="background:#EEEDFE;color:#534AB7;">${msgs.length}</span>` : ''}
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+          <button onclick="spOrdSubView('messages')" style="display:flex;align-items:center;gap:6px;height:32px;padding:0 14px;border-radius:7px;border:1px solid #E2DDD8;background:#FFFFFF;font-size:12px;font-weight:600;color:#3A3D4A;font-family:inherit;cursor:pointer;${_ordMsgSubView==='messages'?'background:#EEEDFE;border-color:#534AB7;color:#534AB7;':''}">
+            <i class="ti ti-speakerphone" style="font-size:13px;"></i> Messages${msgs.length ? ` <span style="background:#534AB7;color:#fff;border-radius:999px;padding:1px 6px;font-size:10px;font-weight:700;">${msgs.length}</span>` : ''}
+          </button>
         </div>
       </div>
       <div id="sp-ord-subview" style="display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
