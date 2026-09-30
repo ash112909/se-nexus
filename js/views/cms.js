@@ -283,7 +283,7 @@ function cmsRenderEditor() {
                   <button onclick="cmsRemoveAttachment(${i})" style="background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:14px;">×</button>
                 </div>`).join('')}
               <div>
-                <input type="file" id="cms-file-input" style="display:none;" multiple onchange="cmsHandleFiles(this)"/>
+                <input type="file" id="cms-file-input" style="display:none;" multiple accept="image/*,.pdf,video/*,.mp4,.mov,.avi,.mkv,.webm,.m4v" onchange="cmsHandleFiles(this)"/>
                 <button class="cms-btn-ghost" onclick="document.getElementById('cms-file-input').click()"><i class="ti ti-upload"></i> Upload file</button>
                 <span style="font-size:11px;color:#9CA3AF;margin-left:8px;">PDF, DOCX, images</span>
               </div>
@@ -428,12 +428,22 @@ window.cmsSelectPostAs = function(val) {
 window.cmsHandleFiles = function(input) {
   const body = document.getElementById('cms-attachments-body');
   if (!body) return;
+  const allowed = /^(image\/|video\/|application\/pdf$)/;
+  const rejected = [];
   Array.from(input.files).forEach(f => {
+    if (!allowed.test(f.type)) { rejected.push(f.name); return; }
+    const isImg = f.type.startsWith('image/');
+    const isVid = f.type.startsWith('video/');
+    const icon = isImg ? 'ti-photo' : isVid ? 'ti-video' : 'ti-file-type-pdf';
     const row = document.createElement('div');
     row.className = 'cms-attach-row';
-    row.innerHTML = `<i class="ti ti-file-description" style="color:#9CA3AF;"></i><span class="cms-attach-name">${f.name}</span><button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:14px;">×</button>`;
+    row.innerHTML = `<i class="ti ${icon}" style="color:#9CA3AF;"></i><span class="cms-attach-name">${f.name}</span><button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:14px;">×</button>`;
     body.insertBefore(row, body.lastElementChild);
   });
+  if (rejected.length) {
+    Modal.show({ title: 'Unsupported file type', body: `<div style="padding:16px;font-size:13px;color:#5A5F6E;">Only images, PDFs, and videos are allowed. The following file${rejected.length!==1?'s were':' was'} not added:<ul style="margin:8px 0 0 16px;color:#A32D2D;">${rejected.map(n=>`<li>${n}</li>`).join('')}</ul></div>`, actions: [{ label: 'OK', primary: true, onClick: () => Modal.close() }] });
+  }
+  input.value = '';
 };
 
 window.cmsRemoveAttachment = function(i) {
