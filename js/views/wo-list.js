@@ -317,7 +317,8 @@ function render_wo_list(el) {
         <i class="ti ti-archive" style="font-size:14px;"></i> Archive
         <span class="wol-mtab-badge" id="mtab-archive-badge">${Store.getWorkOrders('all', null).filter(w => w.archived).length}</span>
       </div>
-      <div class="wol-mtab-new">
+      <div class="wol-mtab-new" style="display:flex;align-items:center;gap:8px;">
+        <button onclick="wolManageMessages()" style="display:flex;align-items:center;gap:6px;padding:7px 12px;background:none;border:1px solid #C8C3F2;border-radius:8px;font-size:12px;font-weight:600;color:#534AB7;cursor:pointer;font-family:inherit;"><i class="ti ti-speakerphone" style="font-size:12px;"></i> Messages</button>
         <button class="wol-new-btn" id="wol-new-btn"><i class="ti ti-plus" style="font-size:14px;"></i> New Order</button>
       </div>
     </div>
@@ -666,6 +667,101 @@ function render_wo_list(el) {
   }
 
   document.getElementById('wol-new-btn').addEventListener('click', () => openTypePicker());
+
+  const WOL_PLACEMENTS = [
+    { id: 'cart-top',          label: 'Top of cart' },
+    { id: 'order-form-top',    label: 'Top of order form' },
+    { id: 'order-form-bottom', label: 'Bottom of order form' },
+  ];
+
+  function _wolMsgList() {
+    if (!Store.getCmsArticles) return [];
+    return Store.getCmsArticles('published').filter(a => !!a.orderMsg && !!a.fleetNote);
+  }
+
+  function _wolMsgRow(a) {
+    const pl = WOL_PLACEMENTS.find(p => p.id === a.placement) || { label: a.placement || '—' };
+    return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:0.5px solid #F0ECE8;">
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap;">
+          <span style="font-size:9px;font-weight:700;color:#534AB7;text-transform:uppercase;letter-spacing:.5px;background:#EEEDFE;padding:2px 6px;border-radius:3px;">${pl.label}</span>
+          <span style="font-size:11px;font-weight:600;color:#111318;">${a.title}</span>
+        </div>
+        <div style="font-size:11px;color:#7A7F8E;">${a.body ? a.body.slice(0,120)+(a.body.length>120?'…':'') : ''}</div>
+        ${a.date ? `<div style="font-size:10px;color:#B0AAA3;margin-top:2px;">${a.date}</div>` : ''}
+      </div>
+      <button onclick="wolDeleteMsg('${a.id}')" style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:4px 8px;font-size:11px;color:#D9534F;cursor:pointer;font-family:inherit;flex-shrink:0;">Remove</button>
+    </div>`;
+  }
+
+  window.wolManageMessages = function() {
+    const msgs = _wolMsgList();
+    const locs = Store.getLocations ? Store.getLocations() : [];
+    const locOpts = locs.map((l, i) => `<label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;">
+      <input type="checkbox" class="wol-loc-cb" value="${l.id}" checked style="accent-color:#1C3969;width:12px;height:12px;">
+      <span style="font-size:11px;color:#5A5F6E;">${l.name}</span>
+    </label>`).join('');
+    const listHtml = msgs.length
+      ? msgs.map(_wolMsgRow).join('')
+      : '<div style="font-size:13px;color:#9CA3AF;text-align:center;padding:20px 0;">No order messages yet.</div>';
+    Modal.show({
+      title: 'Order Messages',
+      body: `<div style="max-height:480px;overflow-y:auto;margin:-16px;">
+        <div style="padding:14px 16px;border-bottom:0.5px solid #F0ECE8;">
+          <div style="font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#9CA3AF;margin-bottom:10px;">Add new message</div>
+          <div style="display:grid;gap:7px;">
+            <input id="wol-msg-title" type="text" placeholder="Message title *" style="width:100%;height:32px;border:0.5px solid #E2DDD8;border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;background:#fff;"/>
+            <textarea id="wol-msg-body" placeholder="Message content *" style="width:100%;min-height:56px;border:0.5px solid #E2DDD8;border-radius:6px;padding:7px 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;resize:none;background:#fff;"></textarea>
+            <select id="wol-msg-placement" style="height:32px;border:0.5px solid #E2DDD8;border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;background:#fff;">
+              ${WOL_PLACEMENTS.map(p => `<option value="${p.id}">${p.label}</option>`).join('')}
+            </select>
+            ${locs.length > 1 ? `<div style="border:0.5px solid #E2DDD8;border-radius:8px;overflow:hidden;">
+              <label style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#F5F2EE;border-bottom:0.5px solid #E2DDD8;cursor:pointer;">
+                <input type="checkbox" id="wol-loc-all" checked onchange="document.querySelectorAll('.wol-loc-cb').forEach(cb=>cb.checked=this.checked)" style="accent-color:#1C3969;width:12px;height:12px;">
+                <span style="font-size:11px;font-weight:600;color:#111318;">All locations</span>
+              </label>
+              <div style="padding:6px 10px;">${locOpts}</div>
+            </div>` : ''}
+            <button onclick="wolSaveMsg()" style="height:32px;background:#1C3969;border:none;border-radius:6px;font-size:12px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;">Add message</button>
+          </div>
+        </div>
+        <div>
+          <div style="padding:10px 16px 4px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#534AB7;">Active messages (${msgs.length})</div>
+          ${listHtml}
+        </div>
+      </div>`,
+      actions: [{ label: 'Done', onClick: function() { Modal.close(); } }],
+    });
+  };
+
+  window.wolSaveMsg = function() {
+    const title = document.getElementById('wol-msg-title')?.value.trim();
+    const body  = document.getElementById('wol-msg-body')?.value.trim();
+    const placement = document.getElementById('wol-msg-placement')?.value || 'cart-top';
+    if (!title || !body) { alert('Title and message content are required.'); return; }
+    const allChecked = document.getElementById('wol-loc-all')?.checked !== false;
+    const selLocs = allChecked ? ['all'] : Array.from(document.querySelectorAll('.wol-loc-cb:checked')).map(cb => cb.value);
+    const _u = Store.getCurrentUser ? Store.getCurrentUser() : null;
+    Store.saveCmsArticle({
+      id: 'wol-msg-' + Date.now(),
+      type: 'notice', subtype: 'order-message', status: 'published', postAs: 'orders',
+      title, body, placement,
+      orderMsg: true, fleetNote: true, showOnOrders: true,
+      poster: (_u || {}).shortName || '',
+      author: (_u || {}).displayName || '',
+      date: new Date().toISOString().slice(0,7).replace('-','/'),
+      locations: selLocs,
+      priority: 'low',
+    });
+    Modal.close();
+    wolManageMessages();
+  };
+
+  window.wolDeleteMsg = function(id) {
+    if (Store.deleteCmsArticle) Store.deleteCmsArticle(id);
+    Modal.close();
+    wolManageMessages();
+  };
 }
 
 // ── Global: open the WO creation form from anywhere ───────────────────────────
