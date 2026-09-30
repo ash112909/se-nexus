@@ -77,10 +77,28 @@ function render_wo_detail(el) {
     return 'orderable';
   }
 
+  function renderCartMessages() {
+    const el = document.getElementById('wod-cart-messages');
+    if (!el || !Store.getCmsArticles) return;
+    const msgs = Store.getCmsArticles('published').filter(a => a.orderMsg && a.placement === 'cart-top');
+    el.innerHTML = msgs.map(a => {
+      const isSupplier = !!a.supplierNote;
+      const accentColor = isSupplier ? '#534AB7' : '#1C3969';
+      const bgColor = isSupplier ? '#EEEDFE' : '#EFF4FB';
+      const label = isSupplier ? (a.vendorName || 'Supplier') : 'Fleet message';
+      return `<div style="background:${bgColor};border-radius:9px;padding:11px 14px;margin:10px 16px 0;border-left:3px solid ${accentColor};">
+        <div style="font-size:11px;font-weight:700;color:${accentColor};text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">${label}${a.date ? `<span style="font-weight:400;color:#9CA3AF;margin-left:8px;text-transform:none;">${a.date}</span>` : ''}</div>
+        <div style="font-size:13px;font-weight:600;color:#111318;margin-bottom:2px;">${a.title}</div>
+        ${a.body ? `<div style="font-size:12px;color:#5A5F6E;line-height:1.55;">${a.body}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
   function renderCart() {
     const cart = Store.getWoCart(wo.id);
     const container = document.getElementById('wod-cart-body');
     if (!container) return;
+    renderCartMessages();
 
     if (!cart.length) {
       container.innerHTML = `<div style="padding:24px;text-align:center;color:#9CA3AF;font-size:13px;">No items in cart. <a style="color:#1C3969;cursor:pointer;" onclick="Router.navigate('parts-search',{woId:'${wo.id}',fromWo:true})">Search parts to add</a></div>`;
@@ -680,6 +698,7 @@ function render_wo_detail(el) {
             </button>`}
           </div>
         </div>
+        <div id="wod-cart-messages"></div>
         <div id="wod-cart-body"></div>
         <div class="cart-total-row" id="wod-cart-total-row" style="display:none;"></div>
       </div>

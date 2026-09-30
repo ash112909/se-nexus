@@ -244,8 +244,6 @@ function render_order_review(el) {
         <div class="or-page-title">Review order — WO #${wo.id}</div>
         <div class="or-page-sub">${wo.machine} · ${wo.asset} · ${_items.length} item${_items.length!==1?'s':''}</div>
 
-        ${renderOrderMessages('cart-top')}
-
         <!-- Line items -->
         <div class="or-card">
           <div class="or-card-header">
