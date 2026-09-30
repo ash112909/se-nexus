@@ -3362,9 +3362,10 @@ groupKeys.map(pg => {
     return Store.getCmsArticles('published').filter(a => a.orderMsg && a.supplierId === _supplierId);
   }
 
+  const ORD_PLACEMENT_LABELS = { 'cart-top': 'Top of cart', 'order-form-top': 'Top of order form', 'order-form-bottom': 'Bottom of order form' };
+
   function _spOrdMsgRow(a) {
-    const placementLabels = { 'cart-top': 'Top of cart', 'order-form-top': 'Top of order form', 'order-form-bottom': 'Bottom of order form' };
-    const pl = placementLabels[a.placement] || a.placement || '—';
+    const pl = ORD_PLACEMENT_LABELS[a.placement] || a.placement || '—';
     return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:0.5px solid #F0ECE8;">
       <div style="flex:1;min-width:0;">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap;">
@@ -3372,7 +3373,7 @@ groupKeys.map(pg => {
           <span style="font-size:11px;font-weight:600;color:#111318;">${a.title}</span>
         </div>
         <div style="font-size:11px;color:#7A7F8E;">${a.body ? a.body.slice(0,120)+(a.body.length>120?'…':'') : ''}</div>
-        <div style="font-size:10px;color:#B0AAA3;margin-top:3px;">${a.date || ''}${a.allFleets ? ' · All fleets' : (a.impersonatingFleet ? ' · '+a.impersonatingFleet : '')}</div>
+        ${a.date ? `<div style="font-size:10px;color:#B0AAA3;margin-top:2px;">${a.date}${a.allFleets ? ' · All fleets' : (a.impersonatingFleet ? ' · '+a.impersonatingFleet : '')}</div>` : ''}
       </div>
       <button onclick="spOrdDeleteMsg('${a.id}')" style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:4px 8px;font-size:11px;color:#D9534F;cursor:pointer;font-family:inherit;flex-shrink:0;">Remove</button>
     </div>`;
@@ -3418,11 +3419,16 @@ groupKeys.map(pg => {
       _ordMsgSubView = view;
       renderOrders();
     };
+    window.spOrdToggleRow = function(id) {
+      _spOrdExpandedId = _spOrdExpandedId === id ? null : id;
+      document.getElementById('sp-ord-subview').innerHTML = _buildOrdTable(_ordFiltered(), fleets);
+    };
     window.spOrdApplyFilter = function() {
       _ordFilter.fleet  = document.getElementById('sp-ord-f-fleet')?.value || 'all';
       _ordFilter.status = document.getElementById('sp-ord-f-status')?.value || 'all';
       _ordFilter.dateFrom = document.getElementById('sp-ord-f-from')?.value || '';
       _ordFilter.dateTo   = document.getElementById('sp-ord-f-to')?.value   || '';
+      _spOrdExpandedId = null;
       document.getElementById('sp-ord-subview').innerHTML = _buildOrdTable(_ordFiltered(), fleets);
     };
     window.spOrdClearFilters = function() {
@@ -3464,6 +3470,8 @@ groupKeys.map(pg => {
     };
   }
 
+  let _spOrdExpandedId = null;
+
   function _buildOrdTable(rows, fleets) {
     const fleetOpts = fleets.map(f => `<option value="${f}" ${_ordFilter.fleet===f?'selected':''}>${f}</option>`).join('');
     const statusOpts = Object.entries(ORD_STATUS).map(([k,v]) => `<option value="${k}" ${_ordFilter.status===k?'selected':''}>${v.label}</option>`).join('');
@@ -3491,51 +3499,79 @@ groupKeys.map(pg => {
       </div>
       ${rows.length ? rows.map(o => {
         const s = ORD_STATUS[o.status] || ORD_STATUS.submitted;
-        return `<div class="sp-ord-tr">
-          <div class="sp-ord-td" style="font-weight:600;color:#111318;">${o.fleetName || '—'}</div>
-          <div class="sp-ord-td"><div><div style="font-weight:500;color:#111318;">${o.name || '—'}</div><div style="font-size:10px;color:#9CA3AF;margin-top:1px;">${o.wo || ''}${o.asset ? ' · '+o.asset : ''}</div></div></div>
-          <div class="sp-ord-td" style="color:#7A7F8E;">${o.date || '—'}</div>
-          <div class="sp-ord-td" style="font-weight:600;color:#111318;">$${(+(o.amount||o.total||0)).toFixed(2)}</div>
-          <div class="sp-ord-td"><span class="sp-status-pill" style="background:${s.bg};color:${s.color};">${s.label}</span></div>
-          <div class="sp-ord-td" style="font-size:11px;color:#9CA3AF;">${o.poNum || '—'}</div>
+        const isOpen = _spOrdExpandedId === o.id;
+        const items = o.items || [];
+        const itemsHtml = isOpen && items.length ? `<div style="background:#FAFAF8;border-top:0.5px solid #E8E4DF;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead><tr>
+              <th style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;padding:7px 14px;text-align:left;border-bottom:1px solid #E8E4DF;">Part #</th>
+              <th style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;padding:7px 14px;text-align:left;border-bottom:1px solid #E8E4DF;">Description</th>
+              <th style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;padding:7px 14px;text-align:center;border-bottom:1px solid #E8E4DF;width:50px;">UOM</th>
+              <th style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;padding:7px 14px;text-align:center;border-bottom:1px solid #E8E4DF;width:50px;">Qty</th>
+              <th style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;padding:7px 14px;text-align:right;border-bottom:1px solid #E8E4DF;width:70px;">Unit</th>
+              <th style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;padding:7px 14px;text-align:right;border-bottom:1px solid #E8E4DF;width:72px;">Total</th>
+            </tr></thead>
+            <tbody>${items.map((c, i) => `<tr style="${i < items.length-1 ? 'border-bottom:0.5px solid #F5F2EE;' : ''}">
+              <td style="padding:8px 14px;font-size:11px;font-weight:600;font-family:monospace;color:#3A3D4A;">${c.partNum || '—'}<div style="font-size:10px;font-weight:400;color:#9CA3AF;font-family:inherit;margin-top:1px;">${c.vendor || ''}</div></td>
+              <td style="padding:8px 14px;font-size:12px;font-weight:500;color:#111318;">${c.description || '—'}</td>
+              <td style="padding:8px 14px;text-align:center;"><span style="font-size:10px;font-weight:700;background:#F0ECE8;color:#5A5F6E;border-radius:3px;padding:1px 5px;">${c.uom || 'EA'}</span></td>
+              <td style="padding:8px 14px;text-align:center;font-size:13px;font-weight:600;color:#111318;">${c.qty || 1}</td>
+              <td style="padding:8px 14px;text-align:right;font-size:12px;color:#7A7F8E;">$${(+(c.price||0)).toFixed(2)}</td>
+              <td style="padding:8px 14px;text-align:right;font-size:13px;font-weight:700;color:#111318;">$${((+(c.price||0)) * (c.qty || 1)).toFixed(2)}</td>
+            </tr>`).join('')}</tbody>
+          </table>
+          <div style="display:flex;justify-content:flex-end;align-items:center;padding:8px 14px;border-top:0.5px solid #E8E4DF;background:#F9F8F7;">
+            <span style="font-size:12px;color:#7A7F8E;">${items.length} item${items.length!==1?'s':''}</span>
+            <span style="font-size:15px;font-weight:700;color:#111318;margin-left:16px;">$${(+(o.amount||o.total||0)).toFixed(2)}</span>
+          </div>
+        </div>` : '';
+        return `<div style="border-bottom:0.5px solid #F0ECE8;${isOpen?'background:#F5F2EE;':''}">
+          <div class="sp-ord-tr" style="border-bottom:none;" onclick="spOrdToggleRow('${o.id}')">
+            <div class="sp-ord-td" style="font-weight:600;color:#111318;">${o.fleetName || '—'}</div>
+            <div class="sp-ord-td"><div><div style="font-weight:500;color:#111318;">${o.name || '—'}</div><div style="font-size:10px;color:#9CA3AF;margin-top:1px;">${o.wo || ''}${o.asset ? ' · '+o.asset : ''}</div></div></div>
+            <div class="sp-ord-td" style="color:#7A7F8E;">${o.date || '—'}</div>
+            <div class="sp-ord-td" style="font-weight:600;color:#111318;">$${(+(o.amount||o.total||0)).toFixed(2)}</div>
+            <div class="sp-ord-td"><span class="sp-status-pill" style="background:${s.bg};color:${s.color};">${s.label}</span></div>
+            <div class="sp-ord-td" style="font-size:11px;color:#9CA3AF;justify-content:space-between;">${o.poNum || '—'}<i class="ti ti-chevron-${isOpen?'up':'down'}" style="font-size:12px;color:#C0BAB3;margin-left:8px;"></i></div>
+          </div>
+          ${itemsHtml}
         </div>`;
       }).join('') : `<div style="text-align:center;padding:32px;color:#9CA3AF;font-size:13px;">No orders found.</div>`}
     </div>`;
   }
 
   function _buildOrdMsgPanel(msgs) {
-    const fleetCheckboxes = _fleets.map(f => `<label style="display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;border-bottom:0.5px solid #F0ECE8;">
-      <input type="checkbox" class="sp-ord-fleet-cb" value="${f.fleetId}" checked style="accent-color:#1C3969;width:13px;height:13px;">
-      <span style="font-size:12px;color:#111318;">${f.fleetName}</span>
+    const fleetCheckboxes = _fleets.map(f => `<label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;">
+      <input type="checkbox" class="sp-ord-fleet-cb" value="${f.fleetId}" checked style="accent-color:#1C3969;width:12px;height:12px;">
+      <span style="font-size:11px;color:#5A5F6E;">${f.fleetName}</span>
       <span style="font-size:10px;color:#9CA3AF;margin-left:auto;">${f.locations} loc${f.locations!==1?'s':''}</span>
     </label>`).join('');
     const listHtml = msgs.length
       ? msgs.map(_spOrdMsgRow).join('')
       : '<div style="font-size:13px;color:#9CA3AF;text-align:center;padding:20px 0;">No order messages published yet.</div>';
     return `<div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;">
-      <div>
-        <div style="font-size:13px;font-weight:700;color:#111318;margin-bottom:12px;">Active order messages</div>
-        <div style="border:1px solid #E8E4DF;border-radius:10px;overflow:hidden;background:#fff;">${listHtml}</div>
+      <div style="border:1px solid #E8E4DF;border-radius:10px;overflow:hidden;background:#fff;">
+        <div style="padding:10px 16px 4px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#534AB7;">Active messages (${msgs.length})</div>
+        ${listHtml}
       </div>
       <div style="border:1px solid #E8E4DF;border-radius:10px;overflow:hidden;background:#fff;">
-        <div style="padding:14px 16px;border-bottom:0.5px solid #F0ECE8;font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#9CA3AF;">New message</div>
-        <div style="padding:14px 16px;display:flex;flex-direction:column;gap:8px;">
+        <div style="padding:14px 16px;border-bottom:0.5px solid #F0ECE8;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#9CA3AF;">Add new message</div>
+        <div style="padding:14px 16px;display:grid;gap:7px;">
           <input id="sp-ord-msg-title" type="text" placeholder="Message title *" style="width:100%;height:32px;border:0.5px solid #E2DDD8;border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;background:#fff;"/>
-          <textarea id="sp-ord-msg-body" placeholder="Message content *" style="width:100%;min-height:64px;border:0.5px solid #E2DDD8;border-radius:6px;padding:7px 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;resize:none;background:#fff;"></textarea>
+          <textarea id="sp-ord-msg-body" placeholder="Message content *" style="width:100%;min-height:56px;border:0.5px solid #E2DDD8;border-radius:6px;padding:7px 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;resize:none;background:#fff;"></textarea>
           <select id="sp-ord-msg-placement" style="height:32px;border:0.5px solid #E2DDD8;border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;background:#fff;">
             <option value="cart-top">Top of cart</option>
             <option value="order-form-top">Top of order form</option>
             <option value="order-form-bottom">Bottom of order form</option>
           </select>
-          <div style="font-size:11px;font-weight:600;color:#5A5F6E;margin-top:2px;">Publish to fleets</div>
-          <div style="border:0.5px solid #E2DDD8;border-radius:8px;overflow:hidden;">
+          ${_fleets.length > 1 ? `<div style="border:0.5px solid #E2DDD8;border-radius:8px;overflow:hidden;">
             <label style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#F5F2EE;border-bottom:0.5px solid #E2DDD8;cursor:pointer;">
-              <input type="checkbox" id="sp-ord-all-fleets" checked onchange="document.querySelectorAll('.sp-ord-fleet-cb').forEach(cb=>cb.checked=this.checked)" style="accent-color:#1C3969;width:13px;height:13px;">
-              <span style="font-size:12px;font-weight:600;color:#111318;">All fleets</span>
+              <input type="checkbox" id="sp-ord-all-fleets" checked onchange="document.querySelectorAll('.sp-ord-fleet-cb').forEach(cb=>cb.checked=this.checked)" style="accent-color:#1C3969;width:12px;height:12px;">
+              <span style="font-size:11px;font-weight:600;color:#111318;">All fleets</span>
             </label>
-            <div style="padding:4px 10px;">${fleetCheckboxes}</div>
-          </div>
-          <button onclick="spOrdSaveMsg()" style="height:34px;background:#1C3969;border:none;border-radius:7px;font-size:13px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;">Publish message</button>
+            <div style="padding:6px 10px;">${fleetCheckboxes}</div>
+          </div>` : ''}
+          <button onclick="spOrdSaveMsg()" style="height:32px;background:#1C3969;border:none;border-radius:6px;font-size:12px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;">Publish message</button>
         </div>
       </div>
     </div>`;
