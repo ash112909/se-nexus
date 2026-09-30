@@ -313,35 +313,133 @@ function render_supplier_portal(el) {
   function renderFleets() {
     const titleEl = document.getElementById('sp-topbar-title');
     if (titleEl) titleEl.textContent = 'My Fleets';
-    const openRequests = Store.getPriceRequests(_supplierId).filter(r => r.status === 'pending').length;
-    document.getElementById('sp-content').innerHTML = `
+
+    // Pending onboarding mock data — new fleets + new locations for existing fleets
+    const PENDING_ONBOARD = [
+      { type: 'fleet',    name: 'BlueLine Rental',      detail: 'New fleet · 18 locations pending',   since: '2 weeks ago',  logoText: 'BLR' },
+      { type: 'fleet',    name: 'HERC Rentals',          detail: 'New fleet · 6 locations pending',    since: '5 days ago',   logoText: 'HRC' },
+      { type: 'location', name: 'Mid-County Rental',     detail: '2 new locations — Kyle, TX and San Marcos, TX', since: '3 days ago',   logoText: 'MCR', fleetId: 'mcr' },
+      { type: 'location', name: 'United Rentals',        detail: '1 new location — Nashville, TN',     since: 'Today',        logoText: 'URI', fleetId: 'unitedrent' },
+    ];
+
+    // Per-fleet location lists (mock)
+    const FLEET_LOCATIONS = {
+      mcr:        ['Austin Branch', 'Round Rock Shop', 'Cedar Park Yard'],
+      boels:      ['Dallas Main', 'Fort Worth', 'Arlington', 'Plano', 'Irving', 'Garland', 'Frisco', 'McKinney', 'Denton', 'Lewisville', 'Carrollton', 'Grand Prairie'],
+      sunbelt:    ['Houston East', 'Houston West', 'Katy', 'Sugar Land', 'The Woodlands', 'Pearland'],
+      unitedrent: Array.from({length:22}, (_,i) => 'Location ' + (i+1)),
+      ahern:      ['Las Vegas Main', 'Henderson', 'North Las Vegas', 'Summerlin', 'Enterprise', 'Spring Valley', 'Sunrise', 'Pahrump', 'Mesquite'],
+      neff:       ['Miami HQ', 'Fort Lauderdale', 'West Palm Beach', 'Hialeah', 'Doral'],
+      maxim:      ['Pittsburgh HQ', 'Cleveland', 'Columbus', 'Cincinnati'],
+      'h&e':      ['Baton Rouge HQ', 'New Orleans', 'Shreveport', 'Lafayette', 'Lake Charles', 'Monroe', 'Metairie', 'Kenner', 'Marrero', 'Slidell', 'Gretna'],
+    };
+
+    const allReqs = Store.getPriceRequests(_supplierId);
+    const contentEl = document.getElementById('sp-content');
+    contentEl.innerHTML = `
+<style>
+.sp-fl-stat { background:#F5F2EE; border-radius:8px; padding:9px 12px; cursor:pointer; transition:background .12s; flex:1; min-width:0; }
+.sp-fl-stat:hover { background:#EDE9E4; }
+.sp-fl-stat-val { font-size:18px; font-weight:700; color:#1C3969; line-height:1; }
+.sp-fl-stat-lbl { font-size:10px; color:#9CA3AF; margin-top:3px; text-transform:uppercase; letter-spacing:.4px; }
+.sp-fl-stats-row { display:flex; gap:8px; }
+.sp-onboard-section { margin-top:32px; }
+.sp-onboard-title { font-size:13px; font-weight:700; color:#111318; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+.sp-onboard-badge { background:#FEF3C7; color:#92400E; border-radius:999px; font-size:10px; font-weight:700; padding:2px 8px; }
+.sp-onboard-list { display:flex; flex-direction:column; gap:8px; }
+.sp-onboard-row { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:10px; padding:12px 14px; display:flex; align-items:center; gap:12px; }
+.sp-onboard-logo { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; letter-spacing:.4px; flex-shrink:0; }
+.sp-onboard-logo.new-fleet { background:#152B52; color:#7EA8E0; }
+.sp-onboard-logo.new-loc { background:#EAF3DE; color:#3B6D11; }
+.sp-onboard-name { font-size:13px; font-weight:600; color:#111318; }
+.sp-onboard-detail { font-size:11px; color:#7A7F8E; margin-top:2px; }
+.sp-onboard-since { font-size:11px; color:#B0AAA3; margin-left:auto; white-space:nowrap; }
+.sp-onboard-type-pill { font-size:10px; font-weight:700; border-radius:4px; padding:2px 7px; margin-right:2px; }
+.sp-onboard-type-fleet { background:#EFF4FB; color:#1C3969; }
+.sp-onboard-type-loc { background:#EAF3DE; color:#3B6D11; }
+</style>
       <div class="sp-page-title">My Fleets</div>
-      <div class="sp-page-sub">${_fleets.length} fleet${_fleets.length !== 1 ? 's' : ''} onboarded · ${openRequests} open price request${openRequests !== 1 ? 's' : ''}</div>
+      <div class="sp-page-sub">${_fleets.length} fleet${_fleets.length !== 1 ? 's' : ''} onboarded</div>
       <div class="sp-fleet-grid">
-        ${_fleets.map(f => `
-          <div class="sp-fleet-card">
+        ${_fleets.map(f => {
+          const pendingOrders = f.activeOrders || 0;
+          const pendingReqs = allReqs.filter(r => r.fleetId === f.fleetId && r.status === 'pending').length;
+          const locList = FLEET_LOCATIONS[f.fleetId] || Array.from({length: f.locations}, (_,i) => f.fleetName + ' Location ' + (i+1));
+          return `<div class="sp-fleet-card">
             <div class="sp-fleet-card-header">
               <div class="sp-fleet-logo">${f.logoText}</div>
               <div>
                 <div class="sp-fleet-name">${f.fleetName}</div>
-                <div class="sp-fleet-city">${f.city} · ${f.locations} location${f.locations !== 1 ? 's' : ''}</div>
+                <div class="sp-fleet-city">${f.city}</div>
               </div>
             </div>
-            <div class="sp-fleet-stats">
-              <div class="sp-fleet-stat">
-                <div class="sp-fleet-stat-val">${f.activeOrders}</div>
-                <div class="sp-fleet-stat-lbl">Active orders</div>
+            <div class="sp-fl-stats-row">
+              <div class="sp-fl-stat" onclick="_spGoOrdersFleet('${f.fleetName}')" title="Go to orders filtered by this fleet">
+                <div class="sp-fl-stat-val">${pendingOrders}</div>
+                <div class="sp-fl-stat-lbl">Pending orders</div>
               </div>
-              <div class="sp-fleet-stat">
-                <div class="sp-fleet-stat-val">${Store.getPriceRequests(_supplierId).filter(r=>r.fleetId===f.fleetId&&r.status==='pending').length}</div>
-                <div class="sp-fleet-stat-lbl">Price requests</div>
+              <div class="sp-fl-stat" onclick="_spGoRequestsFleet('${f.fleetName}')" title="Go to price requests filtered by this fleet">
+                <div class="sp-fl-stat-val">${pendingReqs}</div>
+                <div class="sp-fl-stat-lbl">Price requests</div>
+              </div>
+              <div class="sp-fl-stat" onclick="_spShowLocations('${f.fleetId}')" title="View all locations">
+                <div class="sp-fl-stat-val">${f.locations}</div>
+                <div class="sp-fl-stat-lbl">Locations</div>
               </div>
             </div>
             <div class="sp-fleet-actions">
               <button class="sp-btn sp-btn-primary" onclick="spImpersonate('${f.fleetId}','${f.fleetName}')"><i class="ti ti-eye" style="font-size:12px;"></i> View as fleet</button>
             </div>
-          </div>`).join('')}
+          </div>`;
+        }).join('')}
+      </div>
+
+      <div class="sp-onboard-section">
+        <div class="sp-onboard-title">
+          <i class="ti ti-clock-bolt" style="font-size:15px;color:#D97706;"></i>
+          Pending onboarding
+          <span class="sp-onboard-badge">${PENDING_ONBOARD.length}</span>
+        </div>
+        <div class="sp-onboard-list">
+          ${PENDING_ONBOARD.map(p => `
+            <div class="sp-onboard-row">
+              <div class="sp-onboard-logo ${p.type === 'fleet' ? 'new-fleet' : 'new-loc'}">${p.logoText}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span class="sp-onboard-type-pill ${p.type === 'fleet' ? 'sp-onboard-type-fleet' : 'sp-onboard-type-loc'}">${p.type === 'fleet' ? 'New fleet' : 'New location'}</span>
+                  <span class="sp-onboard-name">${p.name}</span>
+                </div>
+                <div class="sp-onboard-detail">${p.detail}</div>
+              </div>
+              <div class="sp-onboard-since">${p.since}</div>
+            </div>`).join('')}
+        </div>
       </div>`;
+
+    window._spGoOrdersFleet = function(fleetName) {
+      _ordFilter.fleet = fleetName;
+      setTab('orders');
+    };
+    window._spGoRequestsFleet = function(fleetName) {
+      _prFilter.fleet = fleetName;
+      setTab('requests');
+    };
+    window._spShowLocations = function(fleetId) {
+      const f = _fleets.find(x => x.fleetId === fleetId);
+      if (!f) return;
+      const locs = FLEET_LOCATIONS[fleetId] || Array.from({length: f.locations}, (_,i) => f.fleetName + ' Location ' + (i+1));
+      Modal.show({
+        title: f.fleetName + ' — Locations',
+        body: `<div style="max-height:380px;overflow-y:auto;margin:-16px;">
+          <div style="padding:10px 16px 4px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#9CA3AF;">${locs.length} location${locs.length!==1?'s':''} onboarded</div>
+          ${locs.map((loc, i) => `<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;${i<locs.length-1?'border-bottom:0.5px solid #F5F2EE;':''}">
+            <div style="width:28px;height:28px;background:#EFF4FB;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#1C3969;flex-shrink:0;">${i+1}</div>
+            <span style="font-size:13px;color:#111318;">${loc}</span>
+          </div>`).join('')}
+        </div>`,
+        actions: [{ label: 'Close', primary: true, onClick: () => Modal.close() }],
+      });
+    };
   }
 
   // ── Price Requests state ─────────────────────────────────────────────────────
