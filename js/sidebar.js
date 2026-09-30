@@ -9,7 +9,7 @@ function buildSidebar(activeItem, opts) {
   const pinIcon = pinned ? 'ti-pin-filled' : 'ti-pin';
   const pinLabel = pinned ? 'Pinned' : 'Pin sidebar';
 
-  // ── Impersonation-locked sidebar ──────────────────────────────────────────
+  // ── Fleet preview sidebar ─────────────────────────────────────────────────
   if (opts.impersonating) {
     const fleetName    = opts.impersonatingFleet    || 'Fleet';
     const impLocation  = opts.impersonatingLocation || null;
@@ -19,7 +19,7 @@ function buildSidebar(activeItem, opts) {
   <div class="sidebar${pinCls}">
     <div class="sb-logo-area">
       <img src="smartequiplogo.png" class="sb-logo-img"/>
-      <div class="sb-logo-sub">${fleetName} · Impersonation</div>
+      <div class="sb-logo-sub">${fleetName} · Fleet Preview</div>
     </div>
     <div style="background:#0E1F3D;border-radius:8px;margin:0 10px 8px;padding:10px 12px;">
       <div style="font-size:10px;font-weight:600;color:#7B9FCC;letter-spacing:.6px;text-transform:uppercase;margin-bottom:6px;">Viewing as</div>
@@ -27,12 +27,12 @@ function buildSidebar(activeItem, opts) {
       ${impLocation  ? `<div style="font-size:11px;color:#7B9FCC;display:flex;align-items:center;gap:4px;"><i class="ti ti-map-pin" style="font-size:11px;"></i>${impLocation}</div>` : ''}
     </div>
     <div class="sb-nav">
-      <div class="sb-section-label">Fleet view</div>
+      <div class="sb-section-label">Fleet preview</div>
       <div class="sb-item active"><i class="ti ti-search"></i><span class="sb-lbl"> Search parts</span></div>
     </div>
     <div style="margin-top:auto;">
       <div class="sb-item" onclick="Router.navigate('supplier-portal')" style="color:#1C3969;border-top:1px solid #0E1F3D;">
-        <i class="ti ti-arrow-left"></i><span class="sb-lbl"> Exit impersonation</span>
+        <i class="ti ti-arrow-left"></i><span class="sb-lbl"> Exit preview</span>
       </div>
       <div class="sb-pin-row" id="sb-pin-btn"><i class="ti ${pinIcon}"></i><span class="sb-pin-label">${pinLabel}</span></div>
     </div>

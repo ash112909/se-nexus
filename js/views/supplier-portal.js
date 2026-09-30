@@ -2081,7 +2081,7 @@ function render_supplier_portal(el) {
     </div>`;
   }
 
-  // ── Impersonation ────────────────────────────────────────────────────────────
+  // ── Fleet preview ────────────────────────────────────────────────────────────
 
   const IMPERSONATION_ROLES = [
     { value: 'mechanic',    label: 'Mechanic / Technician' },
@@ -2103,7 +2103,7 @@ function render_supplier_portal(el) {
           <div style="width:36px;height:36px;border-radius:8px;background:#1C3969;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">${fleetName.split(' ').map(w=>w[0]).join('').slice(0,3)}</div>
           <div>
             <div style="font-size:13px;font-weight:600;color:#111318;">${fleetName}</div>
-            <div style="font-size:11px;color:#7A7F8E;">Select a location and role to impersonate</div>
+            <div style="font-size:11px;color:#7A7F8E;">Select a location and role to preview as</div>
           </div>
         </div>
         <div class="modal-form-field">
@@ -2122,7 +2122,7 @@ function render_supplier_portal(el) {
         </div>`,
       actions: [
         { label: 'Cancel', onClick: () => Modal.close() },
-        { label: 'Enter impersonation view', primary: true, onClick: () => {
+        { label: 'Enter fleet preview', primary: true, onClick: () => {
           const locationEl = document.getElementById('sp-imp-location');
           const roleEl     = document.getElementById('sp-imp-role');
           const location   = locationEl?.value;

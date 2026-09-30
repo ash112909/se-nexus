@@ -2378,7 +2378,7 @@ function render_parts_search(el) {
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
       ${buildTopbarRight()}
     </div>
-    ${_impersonating ? `<div style="background:#FFF7ED;border-bottom:2px solid #1C3969;padding:9px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:500;color:#1C3969;flex-shrink:0;"><i class="ti ti-eye" style="font-size:13px;"></i> Viewing as <strong style="margin:0 3px;">${_impersonatingFleet || 'fleet'}</strong> — you are seeing this supplier page as this fleet would see it.<button onclick="Router.navigate('supplier-portal')" style="margin-left:auto;background:#152B52;color:#FFFFFF;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;">Exit impersonation</button></div>` : ''}
+    ${_impersonating ? `<div style="background:#FFF7ED;border-bottom:2px solid #1C3969;padding:9px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:500;color:#1C3969;flex-shrink:0;"><i class="ti ti-eye" style="font-size:13px;"></i> Fleet preview — <strong style="margin:0 3px;">${_impersonatingFleet || 'fleet'}</strong>${_impersonatingLocation ? ' · ' + _impersonatingLocation : ''}${_impersonatingRoleLabel ? ' · ' + _impersonatingRoleLabel : ''}<button onclick="Router.navigate('supplier-portal')" style="margin-left:auto;background:#152B52;color:#FFFFFF;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;">Exit preview</button></div>` : ''}
     <div id="ps-wo-ribbon"></div>
     <div class="ps-search-area">
       <div class="search-mode-row" id="ps-mode-row"></div>
