@@ -2633,10 +2633,12 @@ function render_supplier_portal(el) {
     if (titleEl) titleEl.textContent = 'Pricing Catalog';
     const contentEl = document.getElementById('sp-content');
 
-    // Build fleet list: "Default" + actual onboarded fleets
+    // Catalog list — no fleet-specific overrides
     const fleetList = [
-      { id:'default', name:'Default pricing', sub:'Baseline for all fleets', logoText:'ALL' },
-      ..._fleets.map(f => ({ id:f.fleetId, name:f.fleetName, sub:f.city, logoText:f.logoText })),
+      { id:'default',    name:'Default pricing',  sub:'Baseline for all accounts', logoText:'ALL', isDefault:true },
+      { id:'cat-fleet',  name:'Fleet Pricing',     sub:'Volume-adjusted pricing',   logoText:'FLP' },
+      { id:'cat-region', name:'Regional Pricing',  sub:'Non-USD / region-specific', logoText:'REG' },
+      { id:'cat-contract',name:'Contract Pricing', sub:'Fixed rates under agreement',logoText:'CON' },
     ];
 
     const activeFl = fleetList.find(f => f.id === _pricingFleetId) || fleetList[0];
@@ -2698,14 +2700,14 @@ function render_supplier_portal(el) {
 </style>
 <div class="pc-shell">
   <div class="pc-toolbar">
-    <!-- Fleet picker -->
+    <!-- Catalog picker -->
     <div style="display:flex;align-items:center;gap:6px;">
-      <span style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;">Fleet</span>
+      <span style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;">Catalog</span>
       <button class="pc-fleet-btn" id="pc-fleet-btn" onclick="pcToggleDrop(event)">
-        <div class="pc-fl-logo">${activeFl.logoText}</div>
+        <div class="pc-fl-logo${activeFl.isDefault?' is-default':''}" style="${activeFl.isDefault?'background:#065F46;color:#D1FAE5;':''}">${activeFl.logoText}</div>
         <div class="pc-fl-label">
-          <div class="pc-fl-name">${activeFl.name}</div>
-          <div class="pc-fl-sub">${activeRowCount} price${activeRowCount!==1?'s':''} set${_pricingFleetId==='default'?'':' · '+activeFl.sub}</div>
+          <div class="pc-fl-name">${activeFl.name}${activeFl.isDefault?' · Default':''}</div>
+          <div class="pc-fl-sub">${activeRowCount} price${activeRowCount!==1?'s':''} set</div>
         </div>
         <i class="ti ti-chevron-down pc-fl-chevron"></i>
       </button>
@@ -2730,10 +2732,10 @@ function render_supplier_portal(el) {
     </div>
   </div>
   <div class="pc-body">
-    ${_pricingFleetId !== 'default' ? `
+    ${!activeFl.isDefault ? `
     <div style="display:flex;align-items:center;gap:8px;background:#FFFBF2;border:0.5px solid #F5C97A;border-radius:8px;padding:9px 13px;margin-bottom:14px;font-size:12px;color:#7A7F8E;">
       <i class="ti ti-info-circle" style="color:#B45309;font-size:14px;flex-shrink:0;"></i>
-      Parts not listed here <strong style="color:#111318;">inherit default pricing</strong>. Add a row to set a fleet-specific contract price that overrides the default.
+      Parts not listed here <strong style="color:#111318;">inherit Default pricing</strong>. Add a row only when this catalog needs a different contract price.
     </div>` : ''}
     <div id="pc-table-wrap"></div>
   </div>
@@ -2767,7 +2769,7 @@ function render_supplier_portal(el) {
       drop.innerHTML = `
         <div class="pc-drop-search-wrap">
           <i class="ti ti-search pc-drop-search-icon"></i>
-          <input class="pc-drop-search" id="pc-drop-search" type="text" placeholder="Search fleets…" autocomplete="off"/>
+          <input class="pc-drop-search" id="pc-drop-search" type="text" placeholder="Search catalogs…" autocomplete="off"/>
         </div>
         <div class="pc-drop-list" id="pc-drop-list"></div>`;
       document.body.appendChild(drop);
@@ -2777,7 +2779,7 @@ function render_supplier_portal(el) {
         const list = document.getElementById('pc-drop-list');
         if (!list) return;
         const filtered = fleetList.filter(f => !q || f.name.toLowerCase().includes(q) || (f.sub||'').toLowerCase().includes(q));
-        if (!filtered.length) { list.innerHTML = '<div class="pc-drop-empty">No fleets match</div>'; return; }
+        if (!filtered.length) { list.innerHTML = '<div class="pc-drop-empty">No catalogs match</div>'; return; }
         // Default always first, then rest
         const def = filtered.find(f => f.id === 'default');
         const rest = filtered.filter(f => f.id !== 'default');
@@ -2789,9 +2791,9 @@ function render_supplier_portal(el) {
           if (f === 'divider') return '<div class="pc-drop-divider"></div>';
           const cnt = (_pricingData[f.id] || []).length;
           return `<div class="pc-drop-item ${_pricingFleetId===f.id?'active':''}" onclick="pcSelectFleet('${f.id}')">
-            <div class="pc-drop-logo">${f.logoText}</div>
+            <div class="pc-drop-logo" style="${f.isDefault?'background:#065F46;color:#D1FAE5;':''}">${f.logoText}</div>
             <div style="flex:1;min-width:0;">
-              <div class="pc-drop-name">${f.name}</div>
+              <div class="pc-drop-name">${f.name}${f.isDefault?' <span style="font-size:10px;font-weight:400;color:#6EE7B7;">· Default</span>':''}</div>
               ${f.sub ? `<div class="pc-drop-city">${f.sub}</div>` : ''}
             </div>
             <span class="pc-drop-count">${cnt}</span>
