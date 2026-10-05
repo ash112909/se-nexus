@@ -4572,22 +4572,22 @@ groupKeys.map(pg => {
   let _paSelectedCatalog = 'Default Catalog';
 
   const _paCatalogDefs = [
-    { id:'pc-1', name:'Default Catalog', isDefault:true,  description:'Standard pricing for all accounts.' },
-    { id:'pc-2', name:'Fleet Pricing',   isDefault:false, description:'Volume-adjusted pricing.' },
-    { id:'pc-3', name:'Regional Pricing',isDefault:false, description:'Non-USD / region-specific pricing.' },
-    { id:'pc-4', name:'Contract Pricing',isDefault:false, description:'Fixed rates under a signed agreement.' },
+    { id:'pc-1', name:'Default Catalog', isDefault:true,  description:'Standard pricing for all accounts.', catAdjustment:null },
+    { id:'pc-2', name:'Fleet Pricing',   isDefault:false, description:'Volume-adjusted pricing.',           catAdjustment:'-10%' },
+    { id:'pc-3', name:'Regional Pricing',isDefault:false, description:'Non-USD / region-specific pricing.', catAdjustment:null },
+    { id:'pc-4', name:'Contract Pricing',isDefault:false, description:'Fixed rates under a signed agreement.', catAdjustment:'-15%' },
   ];
   const _paCurrencies = ['USD','EUR','GBP','CAD','AUD'];
 
   const _paAccounts = [
-    { id:'pa-001', accountNum:'MCR-001',   catalog:'Default Catalog',   currency:'USD', adjustment:null,   credentials:true,  username:'mcr_buyer', erpAcct:'ERP-1001', note:'' },
-    { id:'pa-002', accountNum:'MCR-002',   catalog:'Fleet Pricing',     currency:'USD', adjustment:'-5%',  credentials:true,  username:'mcr_ops',   erpAcct:'ERP-1002', note:'' },
-    { id:'pa-003', accountNum:'BLS-001',   catalog:'Regional Pricing',  currency:'EUR', adjustment:null,   credentials:false, username:'',          erpAcct:'',         note:'Awaiting ERP setup' },
-    { id:'pa-004', accountNum:'SBR-001',   catalog:'Fleet Pricing',     currency:'USD', adjustment:'+2%',  credentials:true,  username:'sbr_purch', erpAcct:'ERP-2001', note:'' },
-    { id:'pa-005', accountNum:'URI-001',   catalog:'Contract Pricing',  currency:'USD', adjustment:'-8%',  credentials:true,  username:'uri_buyer', erpAcct:'ERP-3001', note:'' },
-    { id:'pa-006', accountNum:'URI-002',   catalog:'Contract Pricing',  currency:'USD', adjustment:'-8%',  credentials:true,  username:'uri_ops',   erpAcct:'ERP-3002', note:'' },
-    { id:'pa-007', accountNum:'AHR-001',   catalog:'Default Catalog',   currency:'USD', adjustment:null,   credentials:false, username:'',          erpAcct:'',         note:'' },
-    { id:'pa-008', accountNum:'NEF-001',   catalog:'Default Catalog',   currency:'USD', adjustment:null,   credentials:true,  username:'nef_buyer', erpAcct:'ERP-4001', note:'' },
+    { id:'pa-001', accountNum:'MCR-001',   catalog:'Default Catalog',   currency:'USD', adjustment:null,   credentials:true,  username:'mcr_buyer', erpAcct:'ERP-1001', note:'', partOverrides:[] },
+    { id:'pa-002', accountNum:'MCR-002',   catalog:'Fleet Pricing',     currency:'USD', adjustment:'-5%',  credentials:true,  username:'mcr_ops',   erpAcct:'ERP-1002', note:'', partOverrides:[{id:'po-1',partNum:'1520539',desc:'Hydraulic Lift Cylinder',price:'460.00',note:'Negotiated rate'}] },
+    { id:'pa-003', accountNum:'BLS-001',   catalog:'Regional Pricing',  currency:'EUR', adjustment:null,   credentials:false, username:'',          erpAcct:'',         note:'Awaiting ERP setup', partOverrides:[] },
+    { id:'pa-004', accountNum:'SBR-001',   catalog:'Fleet Pricing',     currency:'USD', adjustment:'+2%',  credentials:true,  username:'sbr_purch', erpAcct:'ERP-2001', note:'', partOverrides:[] },
+    { id:'pa-005', accountNum:'URI-001',   catalog:'Contract Pricing',  currency:'USD', adjustment:'-8%',  credentials:true,  username:'uri_buyer', erpAcct:'ERP-3001', note:'', partOverrides:[{id:'po-2',partNum:'2640087',desc:'Control Module',price:'312.00',note:''},{id:'po-3',partNum:'3310087',desc:'Platform Chain Set',price:'288.00',note:''}] },
+    { id:'pa-006', accountNum:'URI-002',   catalog:'Contract Pricing',  currency:'USD', adjustment:'-8%',  credentials:true,  username:'uri_ops',   erpAcct:'ERP-3002', note:'', partOverrides:[] },
+    { id:'pa-007', accountNum:'AHR-001',   catalog:'Default Catalog',   currency:'USD', adjustment:null,   credentials:false, username:'',          erpAcct:'',         note:'', partOverrides:[] },
+    { id:'pa-008', accountNum:'NEF-001',   catalog:'Default Catalog',   currency:'USD', adjustment:null,   credentials:true,  username:'nef_buyer', erpAcct:'ERP-4001', note:'', partOverrides:[] },
   ];
 
   function renderPricingAssignments() {
@@ -4643,9 +4643,9 @@ groupKeys.map(pg => {
 .pa-ftab:hover:not(.active){background:#F5F2EE;}
 /* Table */
 .pa-table{background:#fff;border:0.5px solid #E8E4DF;border-radius:12px;overflow:hidden;}
-.pa-th{display:grid;grid-template-columns:150px 80px 90px 1fr 130px 100px;background:#FAFAF9;border-bottom:0.5px solid #E8E4DF;padding:0 14px;}
+.pa-th{display:grid;grid-template-columns:150px 80px 90px 110px 1fr 130px 100px;background:#FAFAF9;border-bottom:0.5px solid #E8E4DF;padding:0 14px;}
 .pa-th-cell{font-size:10px;font-weight:600;color:#9CA3AF;letter-spacing:.7px;text-transform:uppercase;padding:9px 7px;}
-.pa-row{display:grid;grid-template-columns:150px 80px 90px 1fr 130px 100px;padding:0 14px;border-bottom:0.5px solid #F5F2EE;align-items:center;}
+.pa-row{display:grid;grid-template-columns:150px 80px 90px 110px 1fr 130px 100px;padding:0 14px;border-bottom:0.5px solid #F5F2EE;align-items:center;}
 .pa-row:last-child{border-bottom:none;}
 .pa-row:hover{background:#FAFAF9;}
 .pa-td{padding:10px 7px;font-size:12px;color:#3A3D4A;}
@@ -4666,6 +4666,15 @@ groupKeys.map(pg => {
         </div>
         <i class="ti ti-chevron-down" style="font-size:12px;color:#9CA3AF;flex-shrink:0;margin-left:2px;"></i>
       </button>
+    </div>
+    <div style="width:0.5px;height:22px;background:#E8E4DF;flex-shrink:0;"></div>
+    <!-- Catalog-level adjustment -->
+    <div style="display:flex;align-items:center;gap:5px;">
+      <span style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;">Catalog adj.</span>
+      ${selectedDef.catAdjustment
+        ? `<span style="font-size:11px;font-weight:700;background:${selectedDef.catAdjustment.startsWith('-')?'#D1FAE5':'#FEF3C7'};color:${selectedDef.catAdjustment.startsWith('-')?'#065F46':'#92400E'};border-radius:5px;padding:2px 8px;">${selectedDef.catAdjustment}</span>`
+        : `<span style="font-size:11px;color:#C4BFB9;font-style:italic;">None</span>`}
+      <button onclick="window._paEditCatAdj()" style="height:22px;padding:0 7px;border-radius:5px;border:0.5px solid #E2DDD8;background:#fff;font-size:10px;font-weight:600;font-family:inherit;cursor:pointer;color:#5A5F6E;">Edit</button>
     </div>
     <div style="width:0.5px;height:22px;background:#E8E4DF;flex-shrink:0;"></div>
     <!-- Search -->
@@ -4706,18 +4715,24 @@ groupKeys.map(pg => {
           <div class="pa-th">
             <div class="pa-th-cell">Account #</div>
             <div class="pa-th-cell">Currency</div>
-            <div class="pa-th-cell">Adjustment</div>
+            <div class="pa-th-cell">Acct adj.</div>
+            <div class="pa-th-cell">Part overrides</div>
             <div class="pa-th-cell">Note</div>
             <div class="pa-th-cell">ERP credentials</div>
             <div class="pa-th-cell"></div>
           </div>
-          ${filtered.map(a=>`
+          ${filtered.map(a=>{
+            const overrides = a.partOverrides||[];
+            return `
           <div class="pa-row">
             <div class="pa-td"><span style="font-family:monospace;font-weight:600;color:#111318;">${a.accountNum}</span></div>
             <div class="pa-td" style="font-size:11px;font-weight:600;color:#5A5F6E;">${a.currency}</div>
             <div class="pa-td">${a.adjustment
               ? `<span style="font-size:11px;font-weight:700;background:${a.adjustment.startsWith('-')?'#D1FAE5':'#FEF3C7'};color:${a.adjustment.startsWith('-')?'#065F46':'#92400E'};border-radius:4px;padding:2px 6px;">${a.adjustment}</span>`
               : '<span style="color:#C4BFB9;">—</span>'}</div>
+            <div class="pa-td">${overrides.length
+              ? `<span style="font-size:11px;color:#1C3969;font-weight:600;cursor:pointer;text-decoration:underline;" onclick="window._paEdit('${a.id}','parts')">${overrides.length} override${overrides.length!==1?'s':''}</span>`
+              : `<span style="font-size:11px;color:#C4BFB9;cursor:pointer;" onclick="window._paEdit('${a.id}','parts')">+ Add</span>`}</div>
             <div class="pa-td" style="font-size:11px;color:${a.note?'#5A5F6E':'#C4BFB9'};font-style:${a.note?'normal':'italic'};">${a.note||'—'}</div>
             <div class="pa-td">${a.credentials
               ? `<span class="pa-cred-ok"><i class="ti ti-check" style="font-size:11px;"></i> ${a.username||'Set'}</span>`
@@ -4726,7 +4741,7 @@ groupKeys.map(pg => {
               <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#1C3969;" onclick="window._paEdit('${a.id}')">Edit</button>
               <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#A32D2D;" onclick="window._paRemove('${a.id}')">Remove</button>
             </div>
-          </div>`).join('')}
+          </div>`;}).join('')}
         </div>`}
   </div>
 </div>`;
@@ -4799,13 +4814,20 @@ groupKeys.map(pg => {
     };
     window._paSelectCatalog = function(name) { _paSelectedCatalog = name; _paSearch = ''; _paFilter = 'all'; renderPricingAssignments(); };
 
-    // ── Account modal (add + edit) ───────────────────────────────────────────
-    function _paAccountModal(title, existing, onSave) {
-      const catOpts = _paCatalogDefs.map(c=>`<option value="${c.name}"${(existing?existing.catalog:_paSelectedCatalog)===c.name?' selected':''}>${c.name}${c.isDefault?' (Default)':''}</option>`).join('');
-      const curOpts = _paCurrencies.map(c=>`<option value="${c}"${(existing?existing.currency:'USD')===c?' selected':''}>${c}</option>`).join('');
-      Modal.show({
-        title,
-        body: `
+    // ── Account modal (add + edit, tabbed) ──────────────────────────────────
+    function _paAccountModal(title, existing, startTab, onSave) {
+      let _modalTab = startTab || 'account';
+      const partOverrides = existing ? [...(existing.partOverrides||[])] : [];
+
+      function paModalRender() {
+        const catOpts = _paCatalogDefs.map(c=>`<option value="${c.name}"${(existing?existing.catalog:_paSelectedCatalog)===c.name?' selected':''}>${c.name}${c.isDefault?' (Default)':''}</option>`).join('');
+        const curOpts = _paCurrencies.map(c=>`<option value="${c}"${(existing?existing.currency:'USD')===c?' selected':''}>${c}</option>`).join('');
+        const tabs = [['account','Account'],['parts',`Part overrides${partOverrides.length?' ('+partOverrides.length+')':''}` ]];
+        const tabBar = `<div style="display:flex;gap:2px;margin-bottom:14px;background:#F5F2EE;border-radius:8px;padding:3px;">
+          ${tabs.map(([k,l])=>`<div onclick="window._paModalTab('${k}')" style="flex:1;text-align:center;padding:5px 10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;${_modalTab===k?'background:#fff;color:#111318;box-shadow:0 1px 3px rgba(0,0,0,.08);':'color:#7A7F8E;'}">${l}</div>`).join('')}
+        </div>`;
+
+        const accountBody = `
           <div class="modal-form-field"><label class="modal-form-label">Account # *</label><input class="modal-form-input" id="pa-acct" value="${existing?existing.accountNum:''}" placeholder="e.g. MCR-001"/></div>
           <div class="modal-form-field">
             <label class="modal-form-label">Price catalog</label>
@@ -4814,7 +4836,7 @@ groupKeys.map(pg => {
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             <div class="modal-form-field"><label class="modal-form-label">Currency</label><select class="modal-form-select" id="pa-cur">${curOpts}</select></div>
-            <div class="modal-form-field"><label class="modal-form-label">Adjustment</label><input class="modal-form-input" id="pa-adj" value="${existing&&existing.adjustment||''}" placeholder="-5% or +2%"/></div>
+            <div class="modal-form-field"><label class="modal-form-label">Account adj. <span style="font-weight:400;color:#9CA3AF;">(optional)</span></label><input class="modal-form-input" id="pa-adj" value="${existing&&existing.adjustment||''}" placeholder="-5% or +2%"/></div>
           </div>
           <div class="modal-form-field"><label class="modal-form-label">Note <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9CA3AF;">(optional)</span></label><input class="modal-form-input" id="pa-note" value="${existing&&existing.note||''}" placeholder="e.g. pending ERP setup"/></div>
           <div style="background:#F5F2EE;border-radius:8px;padding:10px 12px;margin-top:2px;">
@@ -4824,23 +4846,74 @@ groupKeys.map(pg => {
               <div><div style="font-size:11px;color:#7A7F8E;margin-bottom:3px;">Username</div><input class="modal-form-input" id="pa-user" value="${existing&&existing.username||''}" placeholder="buyer_user"/></div>
             </div>
           </div>
-          <div id="pa-err" style="font-size:11px;color:#A32D2D;display:none;margin-top:6px;">Account # is required</div>`,
+          <div id="pa-err" style="font-size:11px;color:#A32D2D;display:none;margin-top:6px;">Account # is required</div>`;
+
+        function poRowHtml(po, i) {
+          return `<div id="po-row-${po.id}" style="display:grid;grid-template-columns:120px 1fr 100px 28px;gap:6px;align-items:center;margin-bottom:6px;">
+            <input class="modal-form-input" style="font-family:monospace;font-size:11px;" placeholder="Part #" value="${po.partNum}" oninput="window._paPoSet('${po.id}','partNum',this.value)"/>
+            <input class="modal-form-input" style="font-size:11px;" placeholder="Description" value="${po.desc||''}" oninput="window._paPoSet('${po.id}','desc',this.value)"/>
+            <input class="modal-form-input" style="font-size:11px;" placeholder="Price" value="${po.price||''}" oninput="window._paPoSet('${po.id}','price',this.value)"/>
+            <button onclick="window._paPoRemove('${po.id}')" style="height:34px;width:28px;border-radius:6px;border:0.5px solid #FECACA;background:#FEF2F2;color:#B91C1C;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;">×</button>
+          </div>`;
+        }
+
+        const partsBody = `
+          <div style="font-size:12px;color:#5A5F6E;margin-bottom:10px;">Override the price for specific parts for this account. These take precedence over catalog and account-level adjustments.</div>
+          <div style="display:grid;grid-template-columns:120px 1fr 100px 28px;gap:6px;margin-bottom:6px;">
+            <div style="font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;padding:0 4px;">Part #</div>
+            <div style="font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;padding:0 4px;">Description</div>
+            <div style="font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.6px;padding:0 4px;">Fixed price</div>
+            <div></div>
+          </div>
+          <div id="pa-po-list">${partOverrides.map((po,i)=>poRowHtml(po,i)).join('')}</div>
+          <button onclick="window._paPoAdd()" style="margin-top:4px;height:32px;padding:0 12px;border-radius:7px;border:0.5px dashed #D1D5DB;background:#FAFAF9;font-size:12px;font-weight:500;font-family:inherit;color:#5A5F6E;cursor:pointer;width:100%;"><i class="ti ti-plus" style="font-size:12px;margin-right:4px;"></i>Add part override</button>`;
+
+        const body = document.getElementById('pa-modal-body');
+        if (body) {
+          body.innerHTML = tabBar + (_modalTab==='account' ? accountBody : partsBody);
+        }
+      }
+
+      Modal.show({
+        title,
+        wide: true,
+        body: '<div id="pa-modal-body"></div>',
         actions: [
           { label:'Cancel', onClick:()=>Modal.close() },
           { label:'Save', primary:true, onClick:()=>{
             const acct = document.getElementById('pa-acct')?.value.trim();
-            if (!acct) { document.getElementById('pa-err').style.display='block'; return; }
-            const cat = document.getElementById('pa-cat')?.value;
-            onSave({ accountNum:acct, catalog:cat, currency:document.getElementById('pa-cur')?.value||'USD', adjustment:document.getElementById('pa-adj')?.value.trim()||null, note:document.getElementById('pa-note')?.value.trim()||'', credentials:!!document.getElementById('pa-erp')?.value.trim(), username:document.getElementById('pa-user')?.value.trim()||'', erpAcct:document.getElementById('pa-erp')?.value.trim()||'' });
+            if (_modalTab==='account' && !acct && !existing) { document.getElementById('pa-err').style.display='block'; return; }
+            const cat = document.getElementById('pa-cat')?.value || (existing&&existing.catalog) || _paSelectedCatalog;
+            onSave({ accountNum: acct||(existing&&existing.accountNum)||'', catalog:cat, currency:document.getElementById('pa-cur')?.value||(existing&&existing.currency)||'USD', adjustment:document.getElementById('pa-adj')?.value.trim()||null, note:document.getElementById('pa-note')?.value.trim()||'', credentials:!!(document.getElementById('pa-erp')?.value.trim()||(existing&&existing.erpAcct)), username:document.getElementById('pa-user')?.value.trim()||(existing&&existing.username)||'', erpAcct:document.getElementById('pa-erp')?.value.trim()||(existing&&existing.erpAcct)||'', partOverrides:[...partOverrides] });
             _paSelectedCatalog = cat; _paFilter = 'all';
             Modal.close(); renderPricingAssignments();
           }},
         ]
       });
+
+      window._paModalTab = function(tab) { _modalTab = tab; paModalRender(); };
+      window._paPoSet    = function(id, field, val) { const po=partOverrides.find(p=>p.id===id); if(po) po[field]=val; };
+      window._paPoAdd    = function() { partOverrides.push({id:'po-'+Date.now(),partNum:'',desc:'',price:'',note:''}); paModalRender(); };
+      window._paPoRemove = function(id) { const i=partOverrides.findIndex(p=>p.id===id); if(i>-1) partOverrides.splice(i,1); paModalRender(); };
+
+      setTimeout(paModalRender, 0);
     }
 
-    window._paAdd    = () => _paAccountModal('Add account', null, d => _paAccounts.push({ id:'pa-'+(Date.now()), ...d }));
-    window._paEdit   = id => { const a = _paAccounts.find(x=>x.id===id); if (a) _paAccountModal('Edit account', a, d => Object.assign(a,d)); };
+    window._paEditCatAdj = () => {
+      const def = _paCatalogDefs.find(c=>c.name===_paSelectedCatalog);
+      if (!def) return;
+      Modal.show({ title:`Catalog adjustment — ${def.name}`,
+        body:`<div style="font-size:12px;color:#5A5F6E;margin-bottom:12px;">A catalog-level adjustment applies to <strong>all accounts</strong> in this catalog before any account-level adjustment. Enter a percentage (e.g. <code>-10%</code>) or a flat amount (e.g. <code>-25.00</code>), or leave blank to remove.</div>
+          <div class="modal-form-field"><label class="modal-form-label">Adjustment</label><input id="pa-cadj-val" class="modal-form-input" placeholder="e.g. -10% or -25.00" value="${def.catAdjustment||''}"/></div>`,
+        actions:[
+          {label:'Remove adjustment', onClick:()=>{ def.catAdjustment=null; Modal.close(); renderPricingAssignments(); }},
+          {label:'Cancel', onClick:()=>Modal.close()},
+          {label:'Save', primary:true, onClick:()=>{ const v=document.getElementById('pa-cadj-val')?.value.trim(); def.catAdjustment=v||null; Modal.close(); renderPricingAssignments(); }},
+        ]
+      });
+    };
+    window._paAdd    = () => _paAccountModal('Add account', null, 'account', d => _paAccounts.push({ id:'pa-'+(Date.now()), partOverrides:[], ...d }));
+    window._paEdit   = (id, tab) => { const a = _paAccounts.find(x=>x.id===id); if (a) _paAccountModal('Edit account', a, tab||'account', d => Object.assign(a,d)); };
     window._paRemove = id => {
       const a = _paAccounts.find(x=>x.id===id); if (!a) return;
       Modal.show({ title:'Remove account', body:`<p style="font-size:13px;color:#5A5F6E;">Remove <strong>${a.accountNum}</strong> from <strong>${a.catalog}</strong>?</p>`,
