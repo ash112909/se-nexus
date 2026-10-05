@@ -2827,6 +2827,7 @@ function render_supplier_portal(el) {
     window.pcNewCatalog = function() {
       Modal.show({
         title: 'Create catalog',
+        wide: true,
         body: `
 <div style="display:flex;flex-direction:column;gap:12px;">
   <div class="modal-form-field"><label class="modal-form-label">Catalog name</label><input id="pcnc-name" class="modal-form-input" placeholder="e.g. Regional Pricing" autofocus/></div>
@@ -2835,22 +2836,65 @@ function render_supplier_portal(el) {
     <i class="ti ti-info-circle" style="font-size:13px;vertical-align:-2px;margin-right:4px;"></i>
     Most suppliers use only the <strong>Default pricing</strong> catalog. Create an additional catalog only if you need different pricing for a specific account type.
   </div>
+  <div style="border-top:0.5px solid #E8E4DF;padding-top:12px;">
+    <div style="font-size:12px;font-weight:600;color:#3A3D4A;margin-bottom:8px;">Import prices (optional)</div>
+    <div id="pcnc-import-area" style="border:1.5px dashed #D1D5DB;border-radius:9px;padding:18px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;"
+      onclick="document.getElementById('pcnc-csv-input').click()"
+      ondragover="event.preventDefault();this.style.borderColor='#1C3969';this.style.background='#F0F5FF'"
+      ondragleave="this.style.borderColor='#D1D5DB';this.style.background=''"
+      ondrop="event.preventDefault();this.style.borderColor='#D1D5DB';this.style.background='';pcncHandleFile(event.dataTransfer.files[0])">
+      <input type="file" id="pcnc-csv-input" accept=".csv" style="display:none" onchange="pcncHandleFile(this.files[0])"/>
+      <i class="ti ti-table-import" style="font-size:20px;color:#9CA3AF;display:block;margin-bottom:6px;"></i>
+      <div id="pcnc-file-label" style="font-size:12px;color:#6B7280;">Drop a CSV here or <span style="color:#1C3969;font-weight:600;text-decoration:underline;">browse</span></div>
+      <div style="font-size:10px;color:#B0AAA3;margin-top:4px;">Columns: partNum, description, listPrice, contractPrice, effectiveDate</div>
+    </div>
+  </div>
 </div>`,
         actions: [
           { label:'Cancel', onClick:()=>Modal.close() },
-          { label:'Create &amp; add first price', primary:true, onClick:()=>{
+          { label:'Create catalog', primary:true, onClick:()=>{
             const name = document.getElementById('pcnc-name')?.value.trim();
             if (!name) { document.getElementById('pcnc-name').focus(); return; }
             const newId = 'cat-' + name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
             fleetList.push({ id:newId, name, sub:document.getElementById('pcnc-desc')?.value.trim()||'', logoText:name.split(' ').map(w=>w[0]).join('').slice(0,3).toUpperCase() });
             _pricingCreatedIds.add(newId);
             _pricingFleetId = newId;
-            Modal.close();
-            renderPricing();
-            setTimeout(()=>window.pcAddRow(), 80);
+            // If a CSV was staged, apply it; otherwise open add-price modal
+            const staged = window._pcncStagedRows;
+            window._pcncStagedRows = null;
+            if (staged && staged.length) {
+              if (!_pricingData[newId]) _pricingData[newId] = [];
+              _pricingData[newId].push(...staged);
+              Modal.close();
+              renderPricing();
+            } else {
+              Modal.close();
+              renderPricing();
+              setTimeout(()=>window.pcAddRow(), 80);
+            }
           }},
         ],
       });
+      window._pcncStagedRows = null;
+      window.pcncHandleFile = function(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const lines = e.target.result.split(/\r?\n/).filter(l=>l.trim());
+          const headers = lines[0].split(',').map(h=>h.trim().toLowerCase());
+          const rows = lines.slice(1).map(line => {
+            const cols = line.split(',');
+            const get = key => (cols[headers.indexOf(key)]||'').replace(/^"|"$/g,'').trim();
+            return { id:'pr-'+Math.random().toString(36).slice(2), partNum:get('partnum'), desc:get('description'), machine:get('machine')||'All', category:get('category')||'', listPrice:parseFloat(get('listprice'))||0, contractPrice:parseFloat(get('contractprice'))||0, currency:get('currency')||'USD', effectiveDate:get('effectivedate')||new Date().toISOString().slice(0,10), expiryDate:'', active:true };
+          }).filter(r=>r.partNum);
+          window._pcncStagedRows = rows;
+          const lbl = document.getElementById('pcnc-file-label');
+          const area = document.getElementById('pcnc-import-area');
+          if (lbl) lbl.innerHTML = `<span style="color:#065F46;font-weight:600;"><i class="ti ti-check" style="font-size:13px;"></i> ${file.name} — ${rows.length} row${rows.length!==1?'s':''} ready</span>`;
+          if (area) { area.style.borderColor='#059669'; area.style.background='#F0FDF4'; }
+        };
+        reader.readAsText(file);
+      };
     };
     window.pcAddRow = function(editId) {
       // If catalog hasn't been formally created yet, gate through creation first
