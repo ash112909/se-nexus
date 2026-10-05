@@ -2750,7 +2750,7 @@ function render_supplier_portal(el) {
 
     // ── Fleet picker dropdown ─────────────────────────────────────────────────
     let _pcDropOpen = false;
-    function pcCloseDrop() {
+    window.pcCloseDrop = function pcCloseDrop() {
       const drop = document.getElementById('pc-fleet-drop');
       if (drop) drop.remove();
       const btn = document.getElementById('pc-fleet-btn');
