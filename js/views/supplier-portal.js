@@ -5090,24 +5090,117 @@ groupKeys.map(pg => {
     window._dmEditMapping = function(id) {
       const m = _dmMappings.find(x=>x.id===id); if (!m) return;
       Modal.show({
-        title: 'Edit mapping preference',
-        body: `<div style="font-size:13px;color:#4B5268;margin-bottom:12px;">${m.branchName} → ${m.dealerName}</div>
-          <div class="modal-form-field"><label class="modal-form-label">Preference</label><select class="modal-form-select" id="dm-pref">
-            <option value="1st"${m.preference==='1st'?' selected':''}>1st</option>
-            <option value="2nd"${m.preference==='2nd'?' selected':''}>2nd</option>
-            <option value="N/A"${m.preference==='N/A'?' selected':''}>None (N/A)</option>
-          </select></div>`,
+        title: 'Edit dealer mapping',
+        wide: true,
+        body: `<div style="font-size:13px;color:#4B5268;margin-bottom:12px;font-weight:500;">${m.branchName} → ${m.dealerName}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="modal-form-field"><label class="modal-form-label">Preference</label><select class="modal-form-select" id="dm-pref">
+              <option value="1st"${m.preference==='1st'?' selected':''}>1st choice</option>
+              <option value="2nd"${m.preference==='2nd'?' selected':''}>2nd choice</option>
+              <option value="N/A"${m.preference==='N/A'?' selected':''}>None (N/A)</option>
+            </select></div>
+            <div class="modal-form-field"><label class="modal-form-label">Routing email</label><input class="modal-form-input" id="dm-email" value="${m.email}" placeholder="orders@dealer.com"/></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:2px;">
+            <div class="modal-form-field"><label class="modal-form-label">ERP account #</label><input class="modal-form-input" id="dm-erp" value="${m.erpAcct||''}" placeholder="ERP-XXXX"/></div>
+            <div class="modal-form-field"><label class="modal-form-label">ERP configured</label><select class="modal-form-select" id="dm-erp-set">
+              <option value="1"${m.hasErp?' selected':''}>Yes — configured</option>
+              <option value="0"${!m.hasErp?' selected':''}>No — not set</option>
+            </select></div>
+          </div>`,
         actions: [
           { label: 'Cancel', onClick: () => Modal.close() },
-          { label: 'Save', primary: true, onClick: () => { m.preference=document.getElementById('dm-pref')?.value||m.preference; Modal.close(); renderDealerMapping(); } },
+          { label: 'Save', primary: true, onClick: () => {
+            m.preference = document.getElementById('dm-pref')?.value || m.preference;
+            m.email      = document.getElementById('dm-email')?.value.trim() || m.email;
+            m.erpAcct    = document.getElementById('dm-erp')?.value.trim() || '';
+            m.hasErp     = document.getElementById('dm-erp-set')?.value === '1';
+            Modal.close(); renderDealerMapping();
+          }},
         ]
       });
     };
     window._dmRemoveMapping = function(id) {
+      const m = _dmMappings.find(x=>x.id===id);
       Modal.show({
         title: 'Remove mapping',
-        body: `<div style="font-size:13px;color:#4B5268;">Are you sure you want to remove this dealer mapping? The branch will fall back to the next available dealer.</div>`,
+        body: `<div style="font-size:13px;color:#4B5268;">Remove <strong>${m?.dealerName||'this dealer'}</strong> from <strong>${m?.branchName||'this branch'}</strong>? The branch will fall back to the next available dealer.</div>`,
         actions: [{ label: 'Cancel', onClick: () => Modal.close() }, { label: 'Remove', danger: true, onClick: () => { const i=_dmMappings.findIndex(x=>x.id===id); if(i>-1)_dmMappings.splice(i,1); Modal.close(); renderDealerMapping(); } }]
+      });
+    };
+    window._dmAddMappingForBranch = function(branchId, branchName) {
+      const dealerOpts = _dealers.map(d=>`<option value="${d.id}">${d.name} — ${d.city}, ${d.state}</option>`).join('');
+      Modal.show({
+        title: `Add dealer — ${branchName}`,
+        wide: true,
+        body: `
+          <div class="modal-form-field"><label class="modal-form-label">Distributor</label><select class="modal-form-select" id="dm-new-dealer">${dealerOpts}</select></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="modal-form-field"><label class="modal-form-label">Preference</label><select class="modal-form-select" id="dm-new-pref">
+              <option value="1st">1st choice</option>
+              <option value="2nd">2nd choice</option>
+              <option value="N/A">None (N/A)</option>
+            </select></div>
+            <div class="modal-form-field"><label class="modal-form-label">Routing email</label><input class="modal-form-input" id="dm-new-email" type="email" placeholder="orders@dealer.com"/></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="modal-form-field"><label class="modal-form-label">ERP account #</label><input class="modal-form-input" id="dm-new-erp" placeholder="ERP-XXXX"/></div>
+            <div class="modal-form-field"><label class="modal-form-label">ERP configured</label><select class="modal-form-select" id="dm-new-erp-set">
+              <option value="0">No — not yet</option>
+              <option value="1">Yes — configured</option>
+            </select></div>
+          </div>`,
+        actions: [
+          { label: 'Cancel', onClick: () => Modal.close() },
+          { label: 'Add mapping', primary: true, onClick: () => {
+            const dealerId = document.getElementById('dm-new-dealer')?.value;
+            const dealer = _dealers.find(d=>d.id===dealerId);
+            if (!dealer) return;
+            _dmMappings.push({ id:'dm-'+(Date.now()), fleetId:_dmFleetId, branchId, branchName, dealerId, dealerName:dealer.name, preference:document.getElementById('dm-new-pref')?.value||'1st', email:document.getElementById('dm-new-email')?.value.trim()||dealer.email, erpAcct:document.getElementById('dm-new-erp')?.value.trim()||'', hasErp:document.getElementById('dm-new-erp-set')?.value==='1' });
+            Modal.close(); renderDealerMapping();
+          }},
+        ]
+      });
+    };
+    window._dmEditDealer = function(id) {
+      const d = _dealers.find(x=>x.id===id); if (!d) return;
+      Modal.show({
+        title: 'Edit distributor',
+        wide: true,
+        body: `
+          <div style="font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px;">Dealer info</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="modal-form-field" style="margin-bottom:0;"><label class="modal-form-label">Name *</label><input class="modal-form-input" id="de-name" value="${d.name}"/></div>
+            <div class="modal-form-field" style="margin-bottom:0;"><label class="modal-form-label">RMS #</label><input class="modal-form-input" id="de-rms" value="${d.rmsNum||''}"/></div>
+          </div>
+          <div style="font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.6px;text-transform:uppercase;margin:12px 0 8px;">Address</div>
+          <div class="modal-form-field"><label class="modal-form-label">Street</label><input class="modal-form-input" id="de-addr" value="${d.address||''}"/></div>
+          <div style="display:grid;grid-template-columns:1fr 80px 80px;gap:8px;">
+            <div class="modal-form-field" style="margin-bottom:0;"><label class="modal-form-label">City</label><input class="modal-form-input" id="de-city" value="${d.city||''}"/></div>
+            <div class="modal-form-field" style="margin-bottom:0;"><label class="modal-form-label">State</label><input class="modal-form-input" id="de-state" maxlength="2" value="${d.state||''}"/></div>
+            <div class="modal-form-field" style="margin-bottom:0;"><label class="modal-form-label">Country</label><input class="modal-form-input" id="de-cty" value="${d.country||'US'}"/></div>
+          </div>
+          <div style="font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.6px;text-transform:uppercase;margin:12px 0 8px;">Contact &amp; ERP</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="modal-form-field" style="margin-bottom:0;"><label class="modal-form-label">Email</label><input class="modal-form-input" id="de-email" type="email" value="${d.email||''}"/></div>
+            <div class="modal-form-field" style="margin-bottom:0;"><label class="modal-form-label">Phone</label><input class="modal-form-input" id="de-phone" value="${d.phone||''}"/></div>
+          </div>
+          <div class="modal-form-field" style="margin-top:8px;"><label class="modal-form-label">ERP account #</label><input class="modal-form-input" id="de-erp" value="${d.erpAcct||''}" placeholder="ERP-XXXX"/></div>`,
+        actions: [
+          { label: 'Cancel', onClick: () => Modal.close() },
+          { label: 'Save', primary: true, onClick: () => {
+            d.name    = document.getElementById('de-name')?.value.trim() || d.name;
+            d.rmsNum  = document.getElementById('de-rms')?.value.trim() || '';
+            d.address = document.getElementById('de-addr')?.value.trim() || '';
+            d.city    = document.getElementById('de-city')?.value.trim() || '';
+            d.state   = document.getElementById('de-state')?.value.trim() || '';
+            d.country = document.getElementById('de-cty')?.value.trim() || 'US';
+            d.email   = document.getElementById('de-email')?.value.trim() || '';
+            d.phone   = document.getElementById('de-phone')?.value.trim() || '';
+            d.erpAcct = document.getElementById('de-erp')?.value.trim() || '';
+            Modal.close(); renderDealerMapping();
+          }},
+        ]
       });
     };
   }
@@ -5162,7 +5255,7 @@ groupKeys.map(pg => {
         <div class="dm-td"><span style="font-family:monospace;font-size:11px;">${d.rmsNum||'—'}</span></div>
         <div class="dm-td"><span style="font-family:monospace;font-size:11px;">${d.erpAcct||'<span style="color:#B45309;font-style:italic;">Not set</span>'}</span></div>
         <div class="dm-td" style="justify-content:flex-end;gap:6px;">
-          <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#1C3969;">Edit</button>
+          <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#1C3969;" onclick="window._dmEditDealer('${d.id}')">Edit</button>
         </div>
       </div>`).join('')}
     </div>`;
@@ -5170,88 +5263,173 @@ groupKeys.map(pg => {
 
   // ── Email Routing ─────────────────────────────────────────────────────────
 
+  let _erSearch = '';
+  let _erFilter = 'all'; // 'all' | 'no-override' | 'missing'
+
   const _erDefaultEmails = ['orders@skyjack.com'];
-  const _erFleetEmails = _fleets.reduce((acc, f) => {
-    acc[f.fleetId] = [];
-    return acc;
-  }, {});
-  _erFleetEmails['mcr'] = ['james.w@midcounty.com', 'purchasing@midcounty.com'];
-  _erFleetEmails['boels'] = ['parts@boels.com'];
-  _erFleetEmails['unitedrent'] = ['uri.procurement@unitedrentals.com', 'uri.ops@unitedrentals.com'];
-  _erFleetEmails['sunbelt'] = [];
+
+  // Per-account routing rules (account # → { emails[], ccEmails[], label })
+  const _erRules = [
+    { id:'er-001', accountNum:'MCR-001', label:'Mid-County Rental', emails:['james.w@midcounty.com','purchasing@midcounty.com'], ccEmails:[], active:true, note:'' },
+    { id:'er-002', accountNum:'MCR-002', label:'Mid-County Rental (ops)', emails:['mcr-ops-parts@midcounty.com'], ccEmails:['purchasing@midcounty.com'], active:true, note:'' },
+    { id:'er-003', accountNum:'BLS-001', label:'Boels Rental', emails:['parts@boels.com'], ccEmails:[], active:false, note:'Pending account setup' },
+    { id:'er-004', accountNum:'URI-001', label:'United Rentals', emails:['uri.procurement@unitedrentals.com'], ccEmails:['uri.ops@unitedrentals.com'], active:true, note:'' },
+    { id:'er-005', accountNum:'URI-002', label:'United Rentals (ops)', emails:['uri.ops@unitedrentals.com'], ccEmails:[], active:true, note:'' },
+    { id:'er-006', accountNum:'NEF-001', label:'Neff Corporation', emails:[], ccEmails:[], active:true, note:'Routes to default' },
+  ];
 
   function renderEmailRouting() {
     const titleEl = document.getElementById('sp-topbar-title');
-    if (titleEl) titleEl.textContent = 'Order Email Routing';
+    if (titleEl) titleEl.textContent = 'Email Routing';
     const contentEl = document.getElementById('sp-content');
+
+    const q = _erSearch.toLowerCase();
+    const noOverride = _erRules.filter(r=>!r.emails.length).length;
+    const filtered = _erRules.filter(r => {
+      const mQ = !q || r.accountNum.toLowerCase().includes(q) || r.label.toLowerCase().includes(q) || r.emails.some(e=>e.toLowerCase().includes(q));
+      const mF = _erFilter==='all' || (_erFilter==='no-override' && !r.emails.length) || (_erFilter==='missing' && !r.active);
+      return mQ && mF;
+    });
 
     contentEl.innerHTML = `
 <style>
-.er-shell { display:flex; flex:1; flex-direction:column; min-height:0; overflow:hidden; }
-.er-body { flex:1; overflow-y:auto; padding:20px; }
-.er-section-title { font-size:12px; font-weight:700; color:#111318; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
-.er-fleet-card { background:#fff; border:0.5px solid #E8E4DF; border-radius:10px; overflow:hidden; margin-bottom:8px; }
-.er-fleet-header { display:flex; align-items:center; gap:10px; padding:12px 16px; background:#FAFAF9; border-bottom:0.5px solid #F0ECE8; }
-.er-fleet-emails { padding:10px 16px; display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
-.er-email-chip { display:inline-flex; align-items:center; gap:4px; background:#EFF6FF; color:#1E40AF; border-radius:20px; padding:4px 10px; font-size:11px; font-weight:500; border:0.5px solid #BFDBFE; }
-.er-email-chip-remove { cursor:pointer; color:#93C5FD; font-size:10px; }
-.er-email-chip-remove:hover { color:#A32D2D; }
-.er-missing-warn { display:flex; align-items:center; gap:5px; font-size:11px; color:#B45309; background:#FEF3C7; border-radius:6px; padding:4px 10px; border:0.5px solid #FDE68A; }
+.er-shell{display:flex;flex:1;flex-direction:column;min-height:0;overflow:hidden;}
+.er-toolbar{padding:10px 20px;background:#fff;border-bottom:0.5px solid #E8E4DF;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;}
+.er-body{flex:1;overflow-y:auto;padding:20px;}
+.er-ftab{padding:4px 11px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:0.5px solid transparent;color:#5A5F6E;white-space:nowrap;}
+.er-ftab.active{background:#111318;color:#fff;}
+.er-ftab:hover:not(.active){background:#F5F2EE;}
+.er-table{background:#fff;border:0.5px solid #E8E4DF;border-radius:12px;overflow:hidden;}
+.er-th{display:grid;grid-template-columns:140px 1fr 200px 80px 80px 100px;background:#FAFAF9;border-bottom:0.5px solid #E8E4DF;padding:0 14px;}
+.er-th-cell{font-size:10px;font-weight:600;color:#9CA3AF;letter-spacing:.7px;text-transform:uppercase;padding:9px 7px;}
+.er-row{display:grid;grid-template-columns:140px 1fr 200px 80px 80px 100px;padding:0 14px;border-bottom:0.5px solid #F5F2EE;align-items:center;}
+.er-row:last-child{border-bottom:none;}
+.er-row:hover{background:#FAFAF9;}
+.er-td{padding:10px 7px;font-size:12px;color:#3A3D4A;}
+.er-chip{display:inline-flex;align-items:center;gap:3px;background:#EFF6FF;color:#1E40AF;border-radius:10px;padding:2px 7px;font-size:10px;font-weight:500;border:0.5px solid #BFDBFE;margin:1px;}
+.er-default-card{background:#fff;border:0.5px solid #E8E4DF;border-radius:10px;padding:14px 16px;margin-bottom:20px;}
 </style>
 <div class="er-shell">
+  <div class="er-toolbar">
+    <!-- Search -->
+    <div style="position:relative;">
+      <i class="ti ti-search" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:13px;color:#9CA3AF;pointer-events:none;"></i>
+      <input type="text" placeholder="Search account, label, email…" value="${_erSearch.replace(/"/g,'&quot;')}"
+        oninput="window._erSetSearch(this.value)"
+        style="width:240px;height:34px;background:#F5F2EE;border:1.5px solid #E2DDD8;border-radius:9px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;color:#111318;outline:none;"/>
+    </div>
+    <!-- Filters -->
+    <div style="display:flex;gap:3px;">
+      <div class="er-ftab${_erFilter==='all'?' active':''}" onclick="window._erSetFilter('all')">All (${_erRules.length})</div>
+      ${noOverride>0?`<div class="er-ftab${_erFilter==='no-override'?' active':''}" onclick="window._erSetFilter('no-override')"><i class="ti ti-alert-triangle" style="font-size:10px;margin-right:2px;color:${_erFilter==='no-override'?'inherit':'#B45309'};"></i>Routes to default (${noOverride})</div>`:''}
+    </div>
+    <!-- Actions -->
+    <div style="margin-left:auto;display:flex;gap:6px;">
+      <button class="sp-btn sp-btn-ghost" onclick="window._erEditDefault()"><i class="ti ti-star" style="font-size:12px;"></i> Default address</button>
+      <button class="sp-btn sp-btn-primary" onclick="window._erAdd()"><i class="ti ti-plus" style="font-size:12px;"></i> Add rule</button>
+    </div>
+  </div>
   <div class="er-body">
-    <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
-      <i class="ti ti-info-circle" style="font-size:16px;color:#1E40AF;flex-shrink:0;"></i>
-      <div style="font-size:12px;color:#1E40AF;line-height:1.5;">Order emails route to the addresses configured per fleet. If no address is set for a fleet, orders fall through to your default address. At least one email must always remain on the default list.</div>
-    </div>
-    <div style="margin-bottom:24px;">
-      <div class="er-section-title"><i class="ti ti-star" style="font-size:12px;color:#B45309;"></i> Default email address(es)</div>
-      <div class="er-fleet-card">
-        <div class="er-fleet-emails">
-          ${_erDefaultEmails.map((e,i)=>`<span class="er-email-chip">${e}${_erDefaultEmails.length>1?`<span class="er-email-chip-remove" onclick="window._erRemoveDefault(${i})">✕</span>`:''}</span>`).join('')}
-          <button style="background:none;border:0.5px dashed #9CA3AF;border-radius:20px;padding:4px 10px;font-size:11px;color:#7A7F8E;cursor:pointer;font-family:inherit;" onclick="window._erAddDefault()">+ Add email</button>
-        </div>
+    <!-- Default address banner -->
+    <div class="er-default-card" style="display:flex;align-items:center;gap:12px;">
+      <div style="width:32px;height:32px;border-radius:8px;background:#FEF3C7;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-star" style="font-size:14px;color:#B45309;"></i></div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin-bottom:3px;">Default — fallback for all accounts</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">${_erDefaultEmails.map(e=>`<span class="er-chip">${e}</span>`).join('')}</div>
       </div>
+      <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 9px;font-size:11px;font-family:inherit;cursor:pointer;color:#1C3969;" onclick="window._erEditDefault()">Edit</button>
     </div>
-    <div class="er-section-title"><i class="ti ti-building-warehouse" style="font-size:13px;color:#7A7F8E;"></i> Fleet email addresses (${_fleets.length} fleets)</div>
-    ${_fleets.map(f => {
-      const emails = _erFleetEmails[f.fleetId] || [];
-      return `<div class="er-fleet-card">
-        <div class="er-fleet-header">
-          <div style="width:28px;height:28px;border-radius:7px;background:#152B52;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#8AAFD4;flex-shrink:0;">${f.logoText}</div>
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:12px;font-weight:600;color:#111318;">${f.fleetName}</div>
-            <div style="font-size:11px;color:#7A7F8E;">${f.city} · ${f.locations} locations</div>
+
+    ${filtered.length===0
+      ? `<div style="padding:56px;text-align:center;color:#9CA3AF;font-size:13px;"><i class="ti ti-mail" style="font-size:28px;display:block;margin-bottom:10px;opacity:.4;"></i>${_erRules.length===0?'No routing rules yet. <button class="sp-btn sp-btn-primary" style="margin-left:8px;height:28px;font-size:11px;" onclick="window._erAdd()">Add first rule</button>':'No rules match your search.'}</div>`
+      : `<div class="er-table">
+        <div class="er-th">
+          <div class="er-th-cell">Account #</div>
+          <div class="er-th-cell">To (primary)</div>
+          <div class="er-th-cell">CC</div>
+          <div class="er-th-cell">Status</div>
+          <div class="er-th-cell">Note</div>
+          <div class="er-th-cell"></div>
+        </div>
+        ${filtered.map(r=>`
+        <div class="er-row">
+          <div class="er-td">
+            <div style="font-family:monospace;font-weight:600;color:#111318;">${r.accountNum}</div>
+            <div style="font-size:10px;color:#9CA3AF;margin-top:1px;">${r.label}</div>
           </div>
-          <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 9px;font-size:11px;font-family:inherit;cursor:pointer;color:#1C3969;" onclick="window._erAddFleetEmail('${f.fleetId}','${f.fleetName}')">+ Add</button>
-        </div>
-        <div class="er-fleet-emails">
-          ${emails.length ? emails.map((e,i)=>`<span class="er-email-chip">${e}<span class="er-email-chip-remove" onclick="window._erRemoveFleetEmail('${f.fleetId}',${i})">✕</span></span>`).join('') : `<span class="er-missing-warn"><i class="ti ti-alert-triangle" style="font-size:11px;"></i> No email set — orders will route to default</span>`}
-        </div>
-      </div>`;
-    }).join('')}
+          <div class="er-td">${r.emails.length
+            ? r.emails.map(e=>`<span class="er-chip">${e}</span>`).join('')
+            : `<span style="font-size:11px;color:#B45309;font-style:italic;">Routes to default</span>`}</div>
+          <div class="er-td">${r.ccEmails.length?r.ccEmails.map(e=>`<span class="er-chip" style="background:#F0FDF4;color:#065F46;border-color:#BBF7D0;">${e}</span>`).join(''):'<span style="color:#C4BFB9;">—</span>'}</div>
+          <div class="er-td"><span style="font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;${r.active?'background:#D1FAE5;color:#065F46;':'background:#F0ECE8;color:#7A7F8E;'}">${r.active?'Active':'Inactive'}</span></div>
+          <div class="er-td" style="font-size:11px;color:${r.note?'#5A5F6E':'#C4BFB9'};font-style:${r.note?'normal':'italic'};">${r.note||'—'}</div>
+          <div class="er-td" style="justify-content:flex-end;gap:6px;">
+            <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#1C3969;" onclick="window._erEdit('${r.id}')">Edit</button>
+            <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#A32D2D;" onclick="window._erRemove('${r.id}')">Remove</button>
+          </div>
+        </div>`).join('')}
+      </div>`}
   </div>
 </div>`;
 
-    window._erAddDefault = () => {
+    window._erSetSearch = v => { _erSearch = v; renderEmailRouting(); };
+    window._erSetFilter = v => { _erFilter = v; renderEmailRouting(); };
+
+    window._erEditDefault = () => {
       Modal.show({
-        title: 'Add default email',
-        body: `<div class="modal-form-field"><label class="modal-form-label">Email address *</label><input class="modal-form-input" id="er-email" type="email" placeholder="orders@company.com"/></div>`,
-        actions: [{ label: 'Cancel', onClick: () => Modal.close() }, { label: 'Add', primary: true, onClick: () => { const e=document.getElementById('er-email')?.value.trim(); if(e){ _erDefaultEmails.push(e); Modal.close(); renderEmailRouting(); } } }]
+        title: 'Default email address(es)',
+        body: `<div style="font-size:12px;color:#5A5F6E;margin-bottom:12px;">Orders route here when no account-specific rule matches. At least one address is required.</div>
+          <div id="er-def-list">${_erDefaultEmails.map((e,i)=>`<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center;"><input class="modal-form-input" value="${e}" style="flex:1;" oninput="window._erDefUpdate(${i},this.value)"/>${_erDefaultEmails.length>1?`<button onclick="window._erDefRemove(${i})" style="height:34px;width:28px;border-radius:6px;border:0.5px solid #FECACA;background:#FEF2F2;color:#B91C1C;cursor:pointer;font-size:13px;">×</button>`:''}</div>`).join('')}</div>
+          <button onclick="window._erDefAdd()" style="margin-top:4px;height:32px;padding:0 12px;border-radius:7px;border:0.5px dashed #D1D5DB;background:#FAFAF9;font-size:12px;font-weight:500;font-family:inherit;color:#5A5F6E;cursor:pointer;width:100%;"><i class="ti ti-plus" style="font-size:12px;margin-right:4px;"></i>Add address</button>`,
+        actions: [
+          { label:'Cancel', onClick:()=>Modal.close() },
+          { label:'Save', primary:true, onClick:()=>{ Modal.close(); renderEmailRouting(); }},
+        ]
+      });
+      window._erDefUpdate = (i,v) => { _erDefaultEmails[i]=v; };
+      window._erDefRemove = (i) => { if(_erDefaultEmails.length>1){ _erDefaultEmails.splice(i,1); window._erEditDefault(); } };
+      window._erDefAdd    = () => { _erDefaultEmails.push(''); window._erEditDefault(); };
+    };
+
+    function _erRuleModal(title, existing, onSave) {
+      Modal.show({
+        title, wide: true,
+        body: `
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="modal-form-field"><label class="modal-form-label">Account # *</label><input class="modal-form-input" id="er-acct" value="${existing?existing.accountNum:''}" placeholder="e.g. MCR-001"/></div>
+            <div class="modal-form-field"><label class="modal-form-label">Label</label><input class="modal-form-input" id="er-label" value="${existing?existing.label:''}" placeholder="e.g. Mid-County Rental"/></div>
+          </div>
+          <div class="modal-form-field"><label class="modal-form-label">To (primary) — one per line</label><textarea class="modal-form-input" id="er-emails" rows="3" style="resize:vertical;" placeholder="orders@account.com">${existing?existing.emails.join('\n'):''}</textarea></div>
+          <div class="modal-form-field"><label class="modal-form-label">CC — one per line <span style="font-weight:400;color:#9CA3AF;">(optional)</span></label><textarea class="modal-form-input" id="er-cc" rows="2" style="resize:vertical;" placeholder="manager@account.com">${existing?existing.ccEmails.join('\n'):''}</textarea></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="modal-form-field"><label class="modal-form-label">Status</label><select class="modal-form-select" id="er-active">
+              <option value="1"${!existing||existing.active?' selected':''}>Active</option>
+              <option value="0"${existing&&!existing.active?' selected':''}>Inactive</option>
+            </select></div>
+            <div class="modal-form-field"><label class="modal-form-label">Note <span style="font-weight:400;color:#9CA3AF;">(optional)</span></label><input class="modal-form-input" id="er-note" value="${existing?existing.note:''}" placeholder="e.g. pending setup"/></div>
+          </div>
+          <div id="er-err" style="font-size:11px;color:#A32D2D;display:none;">Account # is required</div>`,
+        actions: [
+          { label:'Cancel', onClick:()=>Modal.close() },
+          { label:'Save', primary:true, onClick:()=>{
+            const acct = document.getElementById('er-acct')?.value.trim();
+            if(!acct){ document.getElementById('er-err').style.display='block'; return; }
+            const parseEmails = id => (document.getElementById(id)?.value||'').split('\n').map(e=>e.trim()).filter(Boolean);
+            onSave({ accountNum:acct, label:document.getElementById('er-label')?.value.trim()||acct, emails:parseEmails('er-emails'), ccEmails:parseEmails('er-cc'), active:document.getElementById('er-active')?.value==='1', note:document.getElementById('er-note')?.value.trim()||'' });
+            Modal.close(); renderEmailRouting();
+          }},
+        ]
+      });
+    }
+
+    window._erAdd    = () => _erRuleModal('Add routing rule', null, d => _erRules.push({ id:'er-'+(Date.now()), ...d }));
+    window._erEdit   = id => { const r=_erRules.find(x=>x.id===id); if(r) _erRuleModal('Edit routing rule', r, d=>Object.assign(r,d)); };
+    window._erRemove = id => {
+      const r=_erRules.find(x=>x.id===id);
+      Modal.show({ title:'Remove routing rule', body:`<p style="font-size:13px;color:#5A5F6E;">Remove the routing rule for <strong>${r?.accountNum||'this account'}</strong>? Orders for this account will fall back to the default address.</p>`,
+        actions:[{label:'Cancel',onClick:()=>Modal.close()},{label:'Remove',danger:true,onClick:()=>{ const i=_erRules.findIndex(x=>x.id===id); if(i>-1)_erRules.splice(i,1); Modal.close(); renderEmailRouting(); }}]
       });
     };
-    window._erRemoveDefault = idx => {
-      if (_erDefaultEmails.length <= 1) { Modal.show({ title: 'Cannot remove', body: '<div style="font-size:13px;color:#4B5268;">You must keep at least one default email address.</div>', actions: [{ label: 'OK', onClick: () => Modal.close() }] }); return; }
-      _erDefaultEmails.splice(idx, 1); renderEmailRouting();
-    };
-    window._erAddFleetEmail = (fleetId, fleetName) => {
-      Modal.show({
-        title: `Add email — ${fleetName}`,
-        body: `<div class="modal-form-field"><label class="modal-form-label">Email address *</label><input class="modal-form-input" id="er-fl-email" type="email" placeholder="orders@fleet.com"/></div>`,
-        actions: [{ label: 'Cancel', onClick: () => Modal.close() }, { label: 'Add', primary: true, onClick: () => { const e=document.getElementById('er-fl-email')?.value.trim(); if(e){ if(!_erFleetEmails[fleetId]) _erFleetEmails[fleetId]=[]; _erFleetEmails[fleetId].push(e); Modal.close(); renderEmailRouting(); } } }]
-      });
-    };
-    window._erRemoveFleetEmail = (fleetId, idx) => { _erFleetEmails[fleetId].splice(idx,1); renderEmailRouting(); };
   }
 
   // ── Job Scheduler ─────────────────────────────────────────────────────────
