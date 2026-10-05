@@ -3936,11 +3936,13 @@ groupKeys.map(pg => {
   // ── Enhanced Catalog ─────────────────────────────────────────────────────────
 
   let _catSearch = '';
-  let _catFilter = 'all'; // 'all' | 'no-image' | 'no-category'
+  let _catFilter = 'all'; // 'all' | 'no-image' | 'no-category' | 'no-price'
   let _catDetailId = null;
   let _catDetailSection = 'basic'; // 'basic' | 'categories' | 'images' | 'addl'
   let _catView = 'items'; // 'items' | 'categories'
   let _catCatView = 'table'; // 'table' | 'tree'
+  let _catSortCol = 'num';
+  let _catSortDir = 'asc';
 
   const _catItems = [
     { id:'ci-001', num:'SKJ-104210', code:'HYD-CYL-A', desc:'Lift Cylinder Assembly', detailedDesc:'Complete lift cylinder assembly for SJIII scissor lifts. Includes seals, piston rod, and end caps.', uom:'EA', categories:['Hydraulic System','Lift Cylinders'], hasImage:true,  price:489.00, addlInfo:[{name:'Weight',desc:'12.4 kg'},{name:'Stroke',desc:'1,200 mm'},{name:'Bore',desc:'63 mm'}] },
@@ -3970,75 +3972,95 @@ groupKeys.map(pg => {
     { id:'cat-10', name:'Fluids & Lubricants', parent:null, itemCount:1 },
   ];
 
+  function _catGetFiltered() {
+    const q = _catSearch.toLowerCase();
+    return _catItems.filter(it => {
+      const matchSearch = !q || it.num.toLowerCase().includes(q) || it.desc.toLowerCase().includes(q) || it.code.toLowerCase().includes(q);
+      const matchFilter =
+        _catFilter === 'all'         ? true :
+        _catFilter === 'no-image'    ? !it.hasImage :
+        _catFilter === 'no-category' ? it.categories.length === 0 :
+        _catFilter === 'no-price'    ? it.price == null : true;
+      return matchSearch && matchFilter;
+    }).sort((a, b) => {
+      let va = a[_catSortCol], vb = b[_catSortCol];
+      if (va == null) va = ''; if (vb == null) vb = '';
+      const cmp = typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb));
+      return _catSortDir === 'asc' ? cmp : -cmp;
+    });
+  }
+
   function renderCatalog() {
     const titleEl = document.getElementById('sp-topbar-title');
     if (titleEl) titleEl.textContent = 'Enhanced Catalog';
     const contentEl = document.getElementById('sp-content');
+    const filtered = _catGetFiltered();
+    const noImg  = _catItems.filter(i => !i.hasImage).length;
+    const noCat  = _catItems.filter(i => i.categories.length === 0).length;
+    const noPrice = _catItems.filter(i => i.price == null).length;
 
-    const filtered = _catItems.filter(it => {
-      const q = _catSearch.toLowerCase();
-      const matchSearch = !q || it.num.toLowerCase().includes(q) || it.desc.toLowerCase().includes(q) || it.code.toLowerCase().includes(q);
-      const matchFilter =
-        _catFilter === 'all' ? true :
-        _catFilter === 'no-image' ? !it.hasImage :
-        _catFilter === 'no-category' ? it.categories.length === 0 : true;
-      return matchSearch && matchFilter;
-    });
-
-    const noImg = _catItems.filter(i => !i.hasImage).length;
-    const noCat = _catItems.filter(i => i.categories.length === 0).length;
+    const filterTabs = [
+      ['all','All',_catItems.length],
+      ['no-image','Missing image', noImg],
+      ['no-category','No category', noCat],
+      ['no-price','No price', noPrice],
+    ];
 
     contentEl.innerHTML = `
 <style>
-.cat-shell { display:flex; flex:1; flex-direction:column; min-height:0; overflow:hidden; }
-.cat-toolbar { padding:10px 20px; background:#fff; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:8px; flex-shrink:0; flex-wrap:wrap; }
-.cat-view-toggle { display:flex; gap:2px; background:#F0ECE8; border-radius:8px; padding:3px; }
-.cat-view-btn { padding:5px 12px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; border:none; font-family:inherit; color:#5A5F6E; background:transparent; }
-.cat-view-btn.active { background:#fff; color:#111318; box-shadow:0 1px 3px rgba(0,0,0,.1); }
-.cat-body { flex:1; display:flex; min-height:0; overflow:hidden; }
-.cat-list { flex:1; overflow-y:auto; padding:16px 20px; }
-.cat-item-table { background:#fff; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
-.cat-th { display:grid; grid-template-columns:120px 1fr 140px 80px 80px 60px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
-.cat-th-cell { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.7px; text-transform:uppercase; padding:9px 6px; }
-.cat-row { display:grid; grid-template-columns:120px 1fr 140px 80px 80px 60px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; cursor:pointer; transition:background .1s; }
-.cat-row:last-child { border-bottom:none; }
-.cat-row:hover { background:#FAFAF9; }
-.cat-row.open { background:#EFF6FF; }
-.cat-td { padding:10px 6px; font-size:12px; color:#3A3D4A; }
-.cat-img-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
-.cat-detail-panel { width:400px; flex-shrink:0; border-left:0.5px solid #E8E4DF; background:#fff; display:flex; flex-direction:column; overflow:hidden; animation:slideInRight .15s ease; }
-@keyframes slideInRight { from { transform:translateX(20px); opacity:0; } to { transform:translateX(0); opacity:1; } }
-.cat-dp-header { padding:16px 18px 12px; border-bottom:0.5px solid #F0ECE8; flex-shrink:0; }
-.cat-dp-nav { display:flex; gap:0; border-bottom:0.5px solid #E8E4DF; flex-shrink:0; overflow-x:auto; }
-.cat-dp-nav-item { padding:9px 16px; font-size:12px; font-weight:500; color:#7A7F8E; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
-.cat-dp-nav-item.active { color:#1C3969; border-bottom-color:#1C3969; font-weight:600; }
-.cat-dp-body { flex:1; overflow-y:auto; padding:16px 18px; }
-.cat-field-row { margin-bottom:14px; }
-.cat-field-label { font-size:11px; font-weight:600; color:#9CA3AF; margin-bottom:4px; text-transform:uppercase; letter-spacing:.5px; }
-.cat-field-input { width:100%; height:34px; border:1px solid #E2DDD8; border-radius:8px; padding:0 10px; font-size:13px; font-family:inherit; color:#111318; outline:none; }
-.cat-field-input:focus { border-color:#1C3969; }
-.cat-field-textarea { width:100%; min-height:60px; border:1px solid #E2DDD8; border-radius:8px; padding:8px 10px; font-size:12px; font-family:inherit; color:#111318; outline:none; resize:vertical; }
-.cat-field-textarea:focus { border-color:#1C3969; }
-.cat-dp-actions { padding:12px 18px; border-top:0.5px solid #F0ECE8; display:flex; gap:8px; justify-content:flex-end; flex-shrink:0; }
-.cat-tag { display:inline-flex; align-items:center; gap:4px; background:#F0ECE8; color:#5A5F6E; border-radius:6px; padding:3px 8px; font-size:11px; font-weight:500; margin:2px; }
-.cat-tag-remove { cursor:pointer; color:#9CA3AF; font-size:10px; }
-.cat-tag-remove:hover { color:#A32D2D; }
-.cat-img-thumb { width:72px; height:72px; border-radius:8px; background:#F5F2EE; border:1px dashed #E2DDD8; display:flex; align-items:center; justify-content:center; font-size:10px; color:#9CA3AF; cursor:pointer; }
-.cat-img-thumb.has-img { border-style:solid; border-color:#E2DDD8; background:#E8F4FF; }
-.cat-addl-row { display:flex; gap:8px; align-items:flex-start; margin-bottom:8px; }
-.cat-addl-del { width:24px; height:24px; border-radius:6px; border:0.5px solid #E2DDD8; background:none; cursor:pointer; color:#9CA3AF; font-size:11px; display:flex; align-items:center; justify-content:center; margin-top:5px; flex-shrink:0; }
-.cat-addl-del:hover { background:#FEF2F2; color:#A32D2D; border-color:#FECACA; }
-/* Category tree */
-.cat-tree-node { padding:6px 10px 6px 0; display:flex; align-items:center; gap:6px; cursor:pointer; border-radius:7px; }
-.cat-tree-node:hover { background:#F5F2EE; }
-.cat-tree-child { padding-left:20px; }
-.cat-tree-name { font-size:13px; color:#111318; flex:1; }
-.cat-tree-count { font-size:11px; color:#9CA3AF; background:#F0ECE8; border-radius:8px; padding:1px 7px; }
-.cat-cat-table { background:#fff; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
-.cat-cat-th { display:grid; grid-template-columns:1fr 1fr 80px 80px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
-.cat-cat-row { display:grid; grid-template-columns:1fr 1fr 80px 80px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; }
-.cat-cat-row:last-child { border-bottom:none; }
-.cat-cat-row:hover { background:#FAFAF9; }
+.cat-shell{display:flex;flex:1;flex-direction:column;min-height:0;overflow:hidden;}
+.cat-toolbar{padding:10px 20px;background:#fff;border-bottom:0.5px solid #E8E4DF;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;}
+.cat-view-toggle{display:flex;gap:2px;background:#F0ECE8;border-radius:8px;padding:3px;}
+.cat-view-btn{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:inherit;color:#5A5F6E;background:transparent;}
+.cat-view-btn.active{background:#fff;color:#111318;box-shadow:0 1px 3px rgba(0,0,0,.1);}
+.cat-ftab{height:28px;padding:0 10px;border-radius:7px;border:0.5px solid transparent;background:transparent;font-size:12px;font-weight:500;font-family:inherit;color:#5A5F6E;cursor:pointer;white-space:nowrap;}
+.cat-ftab.active{background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE;font-weight:600;}
+.cat-ftab:hover:not(.active){background:#F5F2EE;}
+.cat-body{flex:1;display:flex;min-height:0;overflow:hidden;}
+.cat-list{flex:1;overflow-y:auto;padding:16px 20px;}
+.cat-item-table{background:#fff;border:0.5px solid #E8E4DF;border-radius:12px;overflow:hidden;}
+.cat-th{display:grid;grid-template-columns:130px 1fr 160px 64px 72px 90px 52px;background:#FAFAF9;border-bottom:0.5px solid #E8E4DF;padding:0 14px;}
+.cat-th-cell{font-size:10px;font-weight:600;color:#9CA3AF;letter-spacing:.7px;text-transform:uppercase;padding:9px 6px;display:flex;align-items:center;gap:4px;cursor:pointer;user-select:none;}
+.cat-th-cell:hover{color:#5A5F6E;}
+.cat-th-sort{font-size:9px;color:#CBD5E1;}
+.cat-row{display:grid;grid-template-columns:130px 1fr 160px 64px 72px 90px 52px;padding:0 14px;border-bottom:0.5px solid #F5F2EE;align-items:center;cursor:pointer;transition:background .1s;}
+.cat-row:last-child{border-bottom:none;}
+.cat-row:hover{background:#FAFAF9;}
+.cat-row.open{background:#EFF6FF;}
+.cat-td{padding:10px 6px;font-size:12px;color:#3A3D4A;}
+.cat-img-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.cat-detail-panel{width:420px;flex-shrink:0;border-left:0.5px solid #E8E4DF;background:#fff;display:flex;flex-direction:column;overflow:hidden;animation:slideInRight .15s ease;}
+@keyframes slideInRight{from{transform:translateX(20px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+.cat-dp-header{padding:14px 18px 12px;border-bottom:0.5px solid #F0ECE8;flex-shrink:0;position:relative;}
+.cat-dp-nav{display:flex;gap:0;border-bottom:0.5px solid #E8E4DF;flex-shrink:0;overflow-x:auto;}
+.cat-dp-nav-item{padding:9px 14px;font-size:12px;font-weight:500;color:#7A7F8E;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;}
+.cat-dp-nav-item.active{color:#1C3969;border-bottom-color:#1C3969;font-weight:600;}
+.cat-dp-body{flex:1;overflow-y:auto;padding:14px 18px;}
+.cat-dp-actions{padding:10px 18px;border-top:0.5px solid #F0ECE8;display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;}
+.cat-field-row{margin-bottom:12px;}
+.cat-field-label{font-size:10px;font-weight:600;color:#9CA3AF;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;}
+.cat-field-input{width:100%;height:32px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;}
+.cat-field-input:focus{border-color:#1C3969;box-shadow:0 0 0 3px rgba(28,57,105,.08);}
+.cat-field-textarea{width:100%;min-height:56px;border:1px solid #E2DDD8;border-radius:8px;padding:7px 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;resize:vertical;}
+.cat-field-textarea:focus{border-color:#1C3969;box-shadow:0 0 0 3px rgba(28,57,105,.08);}
+.cat-tag{display:inline-flex;align-items:center;gap:4px;background:#F0ECE8;color:#5A5F6E;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:500;margin:2px;}
+.cat-tag-remove{cursor:pointer;color:#9CA3AF;font-size:10px;line-height:1;}
+.cat-tag-remove:hover{color:#A32D2D;}
+.cat-img-thumb{width:80px;height:80px;border-radius:10px;background:#F5F2EE;border:1.5px dashed #D4CFC9;display:flex;align-items:center;justify-content:center;font-size:10px;color:#9CA3AF;cursor:pointer;flex-direction:column;gap:4px;}
+.cat-img-thumb.has-img{border-style:solid;border-color:#BFDBFE;background:#EFF6FF;}
+.cat-addl-row{display:flex;gap:8px;align-items:center;margin-bottom:6px;}
+.cat-addl-del{width:24px;height:24px;border-radius:6px;border:0.5px solid #E2DDD8;background:none;cursor:pointer;color:#9CA3AF;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.cat-addl-del:hover{background:#FEF2F2;color:#A32D2D;border-color:#FECACA;}
+.cat-tree-node{padding:7px 10px 7px 8px;display:flex;align-items:center;gap:7px;border-radius:8px;}
+.cat-tree-node:hover{background:#F5F2EE;}
+.cat-tree-name{font-size:13px;color:#111318;flex:1;}
+.cat-tree-count{font-size:11px;color:#9CA3AF;background:#F0ECE8;border-radius:8px;padding:1px 7px;}
+.cat-cat-table{background:#fff;border:0.5px solid #E8E4DF;border-radius:12px;overflow:hidden;}
+.cat-cat-th{display:grid;grid-template-columns:1fr 160px 70px 100px;background:#FAFAF9;border-bottom:0.5px solid #E8E4DF;padding:0 14px;}
+.cat-cat-row{display:grid;grid-template-columns:1fr 160px 70px 100px;padding:0 14px;border-bottom:0.5px solid #F5F2EE;align-items:center;}
+.cat-cat-row:last-child{border-bottom:none;}
+.cat-cat-row:hover{background:#FAFAF9;}
+.cat-empty{padding:56px 20px;text-align:center;color:#9CA3AF;font-size:13px;}
 </style>
 <div class="cat-shell">
   <div class="cat-toolbar">
@@ -4047,22 +4069,23 @@ groupKeys.map(pg => {
       <button class="cat-view-btn${_catView==='categories'?' active':''}" onclick="window._catSetView('categories')"><i class="ti ti-folder" style="font-size:11px;"></i> Categories</button>
     </div>
     ${_catView==='items' ? `
-    <div style="position:relative;">
+    <div style="position:relative;flex-shrink:0;">
       <i class="ti ti-search" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:13px;color:#9CA3AF;pointer-events:none;"></i>
-      <input type="text" placeholder="Search by item number, description…" value="${_catSearch}"
-        oninput="window._catSearch=this.value;renderCatalog()"
-        style="width:240px;height:32px;background:#F5F2EE;border:1px solid #E2DDD8;border-radius:9px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;color:#111318;outline:none;"/>
+      <input type="text" id="cat-search-input" placeholder="Search by item #, description, code…" value="${_catSearch.replace(/"/g,'&quot;')}"
+        oninput="window._catSetSearch(this.value)"
+        style="width:260px;height:32px;background:#F5F2EE;border:1px solid #E2DDD8;border-radius:9px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;color:#111318;outline:none;"/>
     </div>
-    <div style="display:flex;gap:4px;margin-left:4px;">
-      ${[['all','All',_catItems.length],['no-image','Missing image',noImg],['no-category','No category',noCat]].map(([v,l,c])=>`
-        <button onclick="window._catFilter='${v}';renderCatalog()" class="pc-ftab${_catFilter===v?' active':''}">${l}${c&&v!=='all'?` <span style="font-size:10px;opacity:.7;">${c}</span>`:''}</button>
-      `).join('')}
+    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+      ${filterTabs.map(([v,l,c])=>`<button class="cat-ftab${_catFilter===v?' active':''}" onclick="window._catSetFilter('${v}')">${l}${c&&v!=='all'?` <span style="font-size:10px;opacity:.65;">${c}</span>`:''}</button>`).join('')}
     </div>
-    <button class="sp-btn sp-btn-primary" style="margin-left:auto;font-size:12px;" onclick="window._catAddItem()"><i class="ti ti-plus" style="font-size:12px;"></i> Add item</button>
+    <div style="margin-left:auto;display:flex;gap:8px;">
+      <button class="sp-btn sp-btn-ghost" style="font-size:12px;" onclick="window._catImport()"><i class="ti ti-upload" style="font-size:12px;"></i> Import</button>
+      <button class="sp-btn sp-btn-primary" style="font-size:12px;" onclick="window._catAddItem()"><i class="ti ti-plus" style="font-size:12px;"></i> Add item</button>
+    </div>
     ` : `
     <div class="cat-view-toggle" style="margin-left:4px;">
-      <button class="cat-view-btn${_catCatView==='table'?' active':''}" onclick="window._catCatView='table';renderCatalog()">Table</button>
-      <button class="cat-view-btn${_catCatView==='tree'?' active':''}" onclick="window._catCatView='tree';renderCatalog()">Tree</button>
+      <button class="cat-view-btn${_catCatView==='table'?' active':''}" onclick="window._catSetCatView('table')">Table</button>
+      <button class="cat-view-btn${_catCatView==='tree'?' active':''}" onclick="window._catSetCatView('tree')">Tree</button>
     </div>
     <button class="sp-btn sp-btn-primary" style="margin-left:auto;font-size:12px;" onclick="window._catAddCategory()"><i class="ti ti-plus" style="font-size:12px;"></i> Add category</button>
     `}
@@ -4075,9 +4098,16 @@ groupKeys.map(pg => {
   </div>
 </div>`;
 
-    window._catSetView = function(v) { _catView = v; _catDetailId = null; renderCatalog(); };
-    window._catFilter = _catFilter;
-    window._catSearch = _catSearch;
+    // ── State setters (update module-level vars, then re-render) ─────────────
+    window._catSetView    = function(v) { _catView = v; _catDetailId = null; renderCatalog(); };
+    window._catSetFilter  = function(v) { _catFilter = v; renderCatalog(); };
+    window._catSetSearch  = function(v) { _catSearch = v; renderCatalog(); };
+    window._catSetCatView = function(v) { _catCatView = v; renderCatalog(); };
+    window._catSetSort    = function(col) {
+      if (_catSortCol === col) _catSortDir = _catSortDir === 'asc' ? 'desc' : 'asc';
+      else { _catSortCol = col; _catSortDir = 'asc'; }
+      renderCatalog();
+    };
 
     window._catSelectItem = function(id) {
       _catDetailId = _catDetailId === id ? null : id;
@@ -4086,6 +4116,7 @@ groupKeys.map(pg => {
     };
     window._catDetailNav = function(s) { _catDetailSection = s; renderCatalog(); };
 
+    // ── Add item ─────────────────────────────────────────────────────────────
     window._catAddItem = function() {
       Modal.show({
         title: 'Add item',
@@ -4093,21 +4124,137 @@ groupKeys.map(pg => {
           <div class="modal-form-field"><label class="modal-form-label">Item number *</label><input class="modal-form-input" id="ci-num" placeholder="e.g. SKJ-NEW-001"/></div>
           <div class="modal-form-field"><label class="modal-form-label">Part code</label><input class="modal-form-input" id="ci-code" placeholder="e.g. HYD-XXX-A"/></div>
           <div class="modal-form-field"><label class="modal-form-label">Description *</label><input class="modal-form-input" id="ci-desc" placeholder="Short description"/></div>
-          <div class="modal-form-field"><label class="modal-form-label">Purchase UOM</label><input class="modal-form-input" id="ci-uom" placeholder="EA / KIT / GL…"/></div>
-          <div id="ci-err" style="font-size:11px;color:#A32D2D;display:none;margin-top:-8px;">Item number and description are required</div>`,
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="modal-form-field"><label class="modal-form-label">Purchase UOM</label><input class="modal-form-input" id="ci-uom" placeholder="EA / KIT / GL…"/></div>
+            <div class="modal-form-field"><label class="modal-form-label">List price (USD)</label><input class="modal-form-input" id="ci-price" type="number" min="0" step="0.01" placeholder="0.00"/></div>
+          </div>
+          <div id="ci-err" style="font-size:11px;color:#A32D2D;display:none;">Item number and description are required</div>`,
         actions: [
           { label: 'Cancel', onClick: () => Modal.close() },
           { label: 'Add item', primary: true, onClick: () => {
             const num = document.getElementById('ci-num')?.value.trim();
             const desc = document.getElementById('ci-desc')?.value.trim();
             if (!num || !desc) { document.getElementById('ci-err').style.display='block'; return; }
-            _catItems.push({ id:'ci-'+(Date.now()), num, code:document.getElementById('ci-code')?.value.trim()||'', desc, detailedDesc:'', uom:document.getElementById('ci-uom')?.value.trim()||'EA', categories:[], hasImage:false, price:null, addlInfo:[] });
+            const priceRaw = document.getElementById('ci-price')?.value;
+            _catItems.push({ id:'ci-'+(Date.now()), num, code:document.getElementById('ci-code')?.value.trim()||'', desc, detailedDesc:'', uom:document.getElementById('ci-uom')?.value.trim()||'EA', categories:[], hasImage:false, price: priceRaw ? parseFloat(priceRaw) : null, addlInfo:[] });
             Modal.close(); renderCatalog();
           }},
         ]
       });
     };
 
+    // ── Import (stub) ────────────────────────────────────────────────────────
+    window._catImport = function() {
+      Modal.show({
+        title: 'Import items',
+        body: `<p style="font-size:13px;color:#5A5F6E;line-height:1.6;margin-bottom:12px;">Upload a CSV or Excel file to bulk-add or update catalog items. The file must include <strong>Item Number</strong> and <strong>Description</strong> columns. Optional columns: Part Code, UOM, Price, Categories.</p>
+          <div style="border:2px dashed #D4CFC9;border-radius:10px;padding:28px;text-align:center;background:#FAFAF9;cursor:pointer;">
+            <i class="ti ti-upload" style="font-size:28px;color:#9CA3AF;display:block;margin-bottom:8px;"></i>
+            <div style="font-size:13px;font-weight:600;color:#5A5F6E;margin-bottom:4px;">Click to choose file or drag and drop</div>
+            <div style="font-size:11px;color:#9CA3AF;">.csv, .xlsx — max 5 MB</div>
+          </div>
+          <div style="margin-top:10px;"><a href="#" style="font-size:12px;color:#1C3969;">Download template</a></div>`,
+        actions: [{ label: 'Cancel', onClick: () => Modal.close() }]
+      });
+    };
+
+    // ── Delete item ──────────────────────────────────────────────────────────
+    window._catDeleteItem = function(id) {
+      const it = _catItems.find(x=>x.id===id); if (!it) return;
+      Modal.show({
+        title: 'Remove item',
+        body: `<p style="font-size:13px;color:#5A5F6E;">Remove <strong>${it.num}</strong> — ${it.desc} from the catalog? This cannot be undone.</p>`,
+        actions: [
+          { label: 'Cancel', onClick: () => Modal.close() },
+          { label: 'Remove', danger: true, onClick: () => {
+            const idx = _catItems.findIndex(x=>x.id===id);
+            if (idx > -1) _catItems.splice(idx, 1);
+            if (_catDetailId === id) _catDetailId = null;
+            Modal.close(); renderCatalog();
+          }},
+        ]
+      });
+    };
+
+    // ── Save basic info ──────────────────────────────────────────────────────
+    window._catSaveBasic = function(id) {
+      const it = _catItems.find(x=>x.id===id); if (!it) return;
+      const num  = document.getElementById('cf-num')?.value.trim();
+      const desc = document.getElementById('cf-desc')?.value.trim();
+      if (!num || !desc) return;
+      it.num = num;
+      it.code = document.getElementById('cf-code')?.value.trim() || '';
+      it.desc = desc;
+      it.detailedDesc = document.getElementById('cf-ddesc')?.value.trim() || '';
+      it.uom = document.getElementById('cf-uom')?.value.trim() || it.uom;
+      const priceVal = document.getElementById('cf-price')?.value;
+      it.price = priceVal !== '' && priceVal != null ? parseFloat(priceVal) : null;
+      renderCatalog();
+    };
+
+    // ── Category membership ──────────────────────────────────────────────────
+    window._catRemoveCategoryFromItem = function(itemId, cat) {
+      const it = _catItems.find(x=>x.id===itemId); if (!it) return;
+      it.categories = it.categories.filter(c=>c!==cat);
+      renderCatalog();
+    };
+    window._catAddToCategory = function(itemId, cat) {
+      const it = _catItems.find(x=>x.id===itemId); if (!it) return;
+      if (!it.categories.includes(cat)) it.categories.push(cat);
+      renderCatalog();
+    };
+
+    // ── Image management ─────────────────────────────────────────────────────
+    window._catUploadImage = function(id) {
+      Modal.show({
+        title: 'Upload image',
+        body: `<p style="font-size:13px;color:#5A5F6E;margin-bottom:12px;">Select an image file for this catalog item. Supported formats: JPG, PNG, WebP — max 4 MB.</p>
+          <div style="border:2px dashed #D4CFC9;border-radius:10px;padding:28px;text-align:center;background:#FAFAF9;cursor:pointer;" onclick="window._catSimulateUpload('${id}')">
+            <i class="ti ti-photo" style="font-size:28px;color:#9CA3AF;display:block;margin-bottom:8px;"></i>
+            <div style="font-size:13px;font-weight:600;color:#5A5F6E;margin-bottom:4px;">Click to choose image</div>
+            <div style="font-size:11px;color:#9CA3AF;">.jpg, .png, .webp — max 4 MB</div>
+          </div>`,
+        actions: [{ label: 'Cancel', onClick: () => Modal.close() }]
+      });
+    };
+    window._catSimulateUpload = function(id) {
+      const it = _catItems.find(x=>x.id===id); if (!it) return;
+      it.hasImage = true;
+      Modal.close(); renderCatalog();
+    };
+    window._catRemoveImage = function(id) {
+      const it = _catItems.find(x=>x.id===id); if (!it) return;
+      Modal.show({
+        title: 'Remove image',
+        body: '<p style="font-size:13px;color:#5A5F6E;">Remove the image from this item? This cannot be undone.</p>',
+        actions: [
+          { label: 'Cancel', onClick: () => Modal.close() },
+          { label: 'Remove', danger: true, onClick: () => { it.hasImage = false; Modal.close(); renderCatalog(); }},
+        ]
+      });
+    };
+
+    // ── Additional attributes ────────────────────────────────────────────────
+    window._catRemoveAddl = function(itemId, idx) {
+      const it = _catItems.find(x=>x.id===itemId); if (!it) return;
+      it.addlInfo.splice(idx, 1);
+      renderCatalog();
+    };
+    window._catSaveAddl = function(itemId) {
+      const it = _catItems.find(x=>x.id===itemId); if (!it) return;
+      document.querySelectorAll('.cat-addl-name-inp').forEach((inp, i) => {
+        if (it.addlInfo[i]) it.addlInfo[i].name = inp.value.trim();
+      });
+      document.querySelectorAll('.cat-addl-val-inp').forEach((inp, i) => {
+        if (it.addlInfo[i]) it.addlInfo[i].desc = inp.value.trim();
+      });
+      const newName = document.getElementById('cf-addl-name')?.value.trim();
+      const newVal  = document.getElementById('cf-addl-desc')?.value.trim();
+      if (newName) { it.addlInfo.push({ name: newName, desc: newVal || '' }); }
+      renderCatalog();
+    };
+
+    // ── Category management ──────────────────────────────────────────────────
     window._catAddCategory = function() {
       const parentOpts = '<option value="">— root level —</option>' + _catCategories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
       Modal.show({
@@ -4115,75 +4262,95 @@ groupKeys.map(pg => {
         body: `
           <div class="modal-form-field"><label class="modal-form-label">Name *</label><input class="modal-form-input" id="ccat-name" placeholder="Category name"/></div>
           <div class="modal-form-field"><label class="modal-form-label">Parent category</label><select class="modal-form-select" id="ccat-parent">${parentOpts}</select></div>
-          <div id="ccat-err" style="font-size:11px;color:#A32D2D;display:none;margin-top:-8px;">Name is required</div>`,
+          <div id="ccat-err" style="font-size:11px;color:#A32D2D;display:none;">Name is required</div>`,
         actions: [
           { label: 'Cancel', onClick: () => Modal.close() },
           { label: 'Add', primary: true, onClick: () => {
             const name = document.getElementById('ccat-name')?.value.trim();
             if (!name) { document.getElementById('ccat-err').style.display='block'; return; }
-            _catCategories.push({ id:'cat-'+(Date.now()), name, parent:document.getElementById('ccat-parent')?.value||null, itemCount:0 });
+            const parentId = document.getElementById('ccat-parent')?.value || null;
+            _catCategories.push({ id:'cat-'+(Date.now()), name, parent: parentId||null, itemCount:0 });
             Modal.close(); renderCatalog();
           }},
         ]
       });
     };
-
-    window._catSaveBasic = function(id) {
-      const it = _catItems.find(x=>x.id===id); if (!it) return;
-      it.num = document.getElementById('cf-num')?.value.trim() || it.num;
-      it.code = document.getElementById('cf-code')?.value.trim() || it.code;
-      it.desc = document.getElementById('cf-desc')?.value.trim() || it.desc;
-      it.detailedDesc = document.getElementById('cf-ddesc')?.value.trim() || '';
-      it.uom = document.getElementById('cf-uom')?.value.trim() || it.uom;
-      renderCatalog();
+    window._catEditCategory = function(id) {
+      const cat = _catCategories.find(x=>x.id===id); if (!cat) return;
+      const parentOpts = '<option value="">— root level —</option>' + _catCategories.filter(c=>c.id!==id).map(c=>`<option value="${c.id}"${c.id===cat.parent?' selected':''}>${c.name}</option>`).join('');
+      Modal.show({
+        title: 'Edit category',
+        body: `
+          <div class="modal-form-field"><label class="modal-form-label">Name *</label><input class="modal-form-input" id="ccat-edit-name" value="${cat.name}"/></div>
+          <div class="modal-form-field"><label class="modal-form-label">Parent category</label><select class="modal-form-select" id="ccat-edit-parent">${parentOpts}</select></div>
+          <div id="ccat-edit-err" style="font-size:11px;color:#A32D2D;display:none;">Name is required</div>`,
+        actions: [
+          { label: 'Cancel', onClick: () => Modal.close() },
+          { label: 'Save', primary: true, onClick: () => {
+            const name = document.getElementById('ccat-edit-name')?.value.trim();
+            if (!name) { document.getElementById('ccat-edit-err').style.display='block'; return; }
+            // Update name in items too if it changed
+            const oldName = cat.name;
+            cat.name = name;
+            cat.parent = document.getElementById('ccat-edit-parent')?.value || null;
+            if (oldName !== name) {
+              _catItems.forEach(it => {
+                const idx = it.categories.indexOf(oldName);
+                if (idx > -1) it.categories[idx] = name;
+              });
+            }
+            Modal.close(); renderCatalog();
+          }},
+        ]
+      });
     };
-
-    window._catRemoveCategory = function(itemId, cat) {
-      const it = _catItems.find(x=>x.id===itemId); if (!it) return;
-      it.categories = it.categories.filter(c=>c!==cat);
-      renderCatalog();
-    };
-
-    window._catAddToCategory = function(itemId, cat) {
-      const it = _catItems.find(x=>x.id===itemId); if (!it) return;
-      if (!it.categories.includes(cat)) it.categories.push(cat);
-      renderCatalog();
-    };
-
-    window._catRemoveAddl = function(itemId, idx) {
-      const it = _catItems.find(x=>x.id===itemId); if (!it) return;
-      it.addlInfo.splice(idx, 1);
-      renderCatalog();
-    };
-
-    window._catAddAddl = function(itemId) {
-      const name = document.getElementById('cf-addl-name')?.value.trim();
-      const desc = document.getElementById('cf-addl-desc')?.value.trim();
-      if (!name) return;
-      const it = _catItems.find(x=>x.id===itemId); if (!it) return;
-      it.addlInfo.push({ name, desc });
-      renderCatalog();
+    window._catDeleteCategory = function(id) {
+      const cat = _catCategories.find(x=>x.id===id); if (!cat) return;
+      const childCount = _catCategories.filter(c=>c.parent===id).length;
+      const itemsUsing = _catItems.filter(it=>it.categories.includes(cat.name)).length;
+      Modal.show({
+        title: 'Remove category',
+        body: `<p style="font-size:13px;color:#5A5F6E;line-height:1.6;">Remove <strong>${cat.name}</strong>?${itemsUsing ? ` It is currently assigned to <strong>${itemsUsing}</strong> item${itemsUsing>1?'s':''} — those items will be unassigned.` : ''}${childCount ? ` It has <strong>${childCount}</strong> sub-categor${childCount>1?'ies':'y'} which will become root-level.` : ''}</p>`,
+        actions: [
+          { label: 'Cancel', onClick: () => Modal.close() },
+          { label: 'Remove', danger: true, onClick: () => {
+            // Remove from items
+            _catItems.forEach(it => { it.categories = it.categories.filter(c=>c!==cat.name); });
+            // Promote children to root
+            _catCategories.filter(c=>c.parent===id).forEach(c => c.parent = null);
+            const idx = _catCategories.findIndex(x=>x.id===id);
+            if (idx > -1) _catCategories.splice(idx, 1);
+            Modal.close(); renderCatalog();
+          }},
+        ]
+      });
     };
   }
 
   function _renderCatItemsList(items) {
-    if (!items.length) return '<div style="padding:48px;text-align:center;color:#9CA3AF;font-size:13px;">No items match the current filters.</div>';
+    if (!items.length) return '<div class="cat-empty"><i class="ti ti-search" style="font-size:24px;display:block;margin-bottom:8px;"></i>No items match the current filters.</div>';
+    const sortIcon = col => {
+      if (_catSortCol !== col) return '<i class="ti ti-selector cat-th-sort"></i>';
+      return `<i class="ti ti-arrow-${_catSortDir==='asc'?'up':'down'} cat-th-sort" style="color:#1C3969;"></i>`;
+    };
     return `<div class="cat-item-table">
   <div class="cat-th">
-    <div class="cat-th-cell">Item #</div>
-    <div class="cat-th-cell">Description</div>
-    <div class="cat-th-cell">Categories</div>
-    <div class="cat-th-cell">UOM</div>
-    <div class="cat-th-cell">Image</div>
+    <div class="cat-th-cell" onclick="window._catSetSort('num')">Item # ${sortIcon('num')}</div>
+    <div class="cat-th-cell" onclick="window._catSetSort('desc')">Description ${sortIcon('desc')}</div>
+    <div class="cat-th-cell" onclick="window._catSetSort('categories')">Categories ${sortIcon('categories')}</div>
+    <div class="cat-th-cell" onclick="window._catSetSort('uom')">UOM ${sortIcon('uom')}</div>
+    <div class="cat-th-cell" onclick="window._catSetSort('price')">Price ${sortIcon('price')}</div>
+    <div class="cat-th-cell" onclick="window._catSetSort('hasImage')">Image ${sortIcon('hasImage')}</div>
     <div class="cat-th-cell"></div>
   </div>
   ${items.map(it => `
   <div class="cat-row${_catDetailId===it.id?' open':''}" onclick="window._catSelectItem('${it.id}')">
-    <div class="cat-td"><span style="font-family:monospace;font-size:11px;font-weight:600;color:#111318;">${it.num}</span><div style="font-size:10px;color:#9CA3AF;">${it.code}</div></div>
-    <div class="cat-td" style="flex-direction:column;align-items:flex-start;gap:1px;">${it.desc}</div>
-    <div class="cat-td" style="flex-wrap:wrap;gap:2px;">${it.categories.length ? it.categories.map(c=>`<span style="font-size:10px;background:#F0ECE8;color:#5A5F6E;border-radius:4px;padding:1px 6px;">${c}</span>`).join('') : '<span style="font-size:11px;color:#E5A22D;font-weight:500;">— none —</span>'}</div>
-    <div class="cat-td">${it.uom}</div>
-    <div class="cat-td"><span class="cat-img-dot" style="background:${it.hasImage?'#16A34A':'#E5A22D'};"></span> <span style="font-size:11px;color:${it.hasImage?'#15803D':'#B45309'};margin-left:3px;">${it.hasImage?'Yes':'Missing'}</span></div>
+    <div class="cat-td"><span style="font-family:monospace;font-size:11px;font-weight:600;color:#111318;">${it.num}</span><div style="font-size:10px;color:#9CA3AF;margin-top:1px;">${it.code}</div></div>
+    <div class="cat-td">${it.desc}</div>
+    <div class="cat-td" style="flex-wrap:wrap;gap:2px;">${it.categories.length ? it.categories.map(c=>`<span style="font-size:10px;background:#F0ECE8;color:#5A5F6E;border-radius:4px;padding:1px 6px;white-space:nowrap;">${c}</span>`).join('') : '<span style="font-size:11px;color:#E5A22D;font-weight:500;">—</span>'}</div>
+    <div class="cat-td" style="font-size:11px;color:#7A7F8E;">${it.uom}</div>
+    <div class="cat-td" style="font-family:monospace;font-size:11px;">${it.price != null ? '$'+it.price.toFixed(2) : '<span style="color:#B45309;">—</span>'}</div>
+    <div class="cat-td"><span class="cat-img-dot" style="background:${it.hasImage?'#16A34A':'#D97706'};"></span> <span style="font-size:11px;color:${it.hasImage?'#15803D':'#B45309'};margin-left:3px;">${it.hasImage?'Yes':'Missing'}</span></div>
     <div class="cat-td" style="justify-content:flex-end;"><i class="ti ti-chevron-${_catDetailId===it.id?'left':'right'}" style="font-size:13px;color:#9CA3AF;"></i></div>
   </div>`).join('')}
 </div>`;
@@ -4195,20 +4362,20 @@ groupKeys.map(pg => {
       const children = cat => _catCategories.filter(c => c.parent === cat.id);
       const renderRow = (c, indent) => `
         <div class="cat-cat-row">
-          <div class="cat-td" style="padding-left:${indent}px;font-size:12px;font-weight:600;color:#111318;">${c.name}</div>
-          <div class="cat-td" style="font-size:11px;color:#7A7F8E;">${c.parent ? _catCategories.find(x=>x.id===c.parent)?.name || '—' : '— root —'}</div>
-          <div class="cat-td">${c.itemCount}</div>
+          <div class="cat-td" style="padding-left:${indent}px;font-size:12px;font-weight:${indent>14?'400':'600'};color:#111318;">${indent>14?'↳ ':''}${c.name}</div>
+          <div class="cat-td" style="font-size:11px;color:#7A7F8E;">${c.parent ? (_catCategories.find(x=>x.id===c.parent)?.name || '—') : '— root —'}</div>
+          <div class="cat-td" style="font-size:12px;font-variant-numeric:tabular-nums;">${c.itemCount}</div>
           <div class="cat-td" style="justify-content:flex-end;gap:6px;">
-            <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#1C3969;" onclick="event.stopPropagation()">Edit</button>
-            <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#A32D2D;" onclick="event.stopPropagation()">Remove</button>
+            <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#1C3969;" onclick="event.stopPropagation();window._catEditCategory('${c.id}')">Edit</button>
+            <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#A32D2D;" onclick="event.stopPropagation();window._catDeleteCategory('${c.id}')">Remove</button>
           </div>
         </div>`;
       let rows = '';
-      roots.forEach(r => { rows += renderRow(r, 14); children(r).forEach(c => { rows += renderRow(c, 30); }); });
+      roots.forEach(r => { rows += renderRow(r, 14); children(r).forEach(c => { rows += renderRow(c, 28); }); });
       return `<div class="cat-cat-table">
         <div class="cat-cat-th">
           <div class="cat-th-cell">Name</div><div class="cat-th-cell">Parent</div><div class="cat-th-cell">Items</div><div class="cat-th-cell"></div>
-        </div>${rows}</div>`;
+        </div>${rows || '<div class="cat-empty">No categories yet.</div>'}</div>`;
     }
     // Tree view
     const roots = _catCategories.filter(c => !c.parent);
@@ -4216,84 +4383,101 @@ groupKeys.map(pg => {
     const renderNode = (c, depth) => {
       const kids = children(c);
       return `<div style="padding-left:${depth*18}px;">
-        <div class="cat-tree-node" style="padding-left:8px;">
-          <i class="ti ti-${kids.length?'folder':'file'}" style="font-size:13px;color:#7A7F8E;flex-shrink:0;"></i>
+        <div class="cat-tree-node">
+          <i class="ti ti-${kids.length?'folder':'tag'}" style="font-size:13px;color:#7A7F8E;flex-shrink:0;"></i>
           <span class="cat-tree-name">${c.name}</span>
-          <span class="cat-tree-count">${c.itemCount} items</span>
-          <button style="background:none;border:0.5px solid #E2DDD8;border-radius:5px;padding:2px 7px;font-size:10px;font-family:inherit;cursor:pointer;color:#1C3969;flex-shrink:0;">Edit</button>
-          <button style="background:none;border:0.5px solid transparent;padding:2px 4px;font-size:11px;cursor:pointer;color:#9CA3AF;flex-shrink:0;" title="Remove"><i class="ti ti-trash"></i></button>
+          <span class="cat-tree-count">${c.itemCount}</span>
+          <button style="background:none;border:0.5px solid #E2DDD8;border-radius:5px;padding:2px 7px;font-size:10px;font-family:inherit;cursor:pointer;color:#1C3969;flex-shrink:0;" onclick="event.stopPropagation();window._catEditCategory('${c.id}')">Edit</button>
+          <button style="background:none;border:0.5px solid transparent;padding:2px 4px;font-size:12px;cursor:pointer;color:#9CA3AF;flex-shrink:0;" title="Remove" onclick="event.stopPropagation();window._catDeleteCategory('${c.id}')"><i class="ti ti-trash"></i></button>
         </div>
         ${kids.map(kid => renderNode(kid, depth+1)).join('')}
       </div>`;
     };
-    return `<div style="background:#fff;border:0.5px solid #E8E4DF;border-radius:12px;padding:8px 4px;">${roots.map(r=>renderNode(r,0)).join('')}</div>`;
+    if (!roots.length) return '<div class="cat-empty">No categories yet. Click <strong>Add category</strong> to create one.</div>';
+    return `<div style="background:#fff;border:0.5px solid #E8E4DF;border-radius:12px;padding:6px 4px;">${roots.map(r=>renderNode(r,0)).join('')}</div>`;
   }
 
   function _renderCatDetailPanel() {
     const it = _catItems.find(x => x.id === _catDetailId);
     if (!it) return '';
-    const sections = [['basic','Basic Info'],['categories','Categories'],['images','Images'],['addl','Additional Info']];
+    const sections = [['basic','Basic Info'],['categories','Categories'],['images','Images'],['addl','Attributes']];
     let body = '';
+    let footer = '';
     if (_catDetailSection === 'basic') {
       body = `
-        <div class="cat-field-row"><div class="cat-field-label">Item number</div><input class="cat-field-input" id="cf-num" value="${it.num}"/></div>
-        <div class="cat-field-row"><div class="cat-field-label">Part code</div><input class="cat-field-input" id="cf-code" value="${it.code}"/></div>
-        <div class="cat-field-row"><div class="cat-field-label">Description</div><input class="cat-field-input" id="cf-desc" value="${it.desc}"/></div>
+        <div class="cat-field-row"><div class="cat-field-label">Item number</div><input class="cat-field-input" id="cf-num" value="${it.num.replace(/"/g,'&quot;')}"/></div>
+        <div class="cat-field-row"><div class="cat-field-label">Part code</div><input class="cat-field-input" id="cf-code" value="${it.code.replace(/"/g,'&quot;')}"/></div>
+        <div class="cat-field-row"><div class="cat-field-label">Description</div><input class="cat-field-input" id="cf-desc" value="${it.desc.replace(/"/g,'&quot;')}"/></div>
         <div class="cat-field-row"><div class="cat-field-label">Detailed description</div><textarea class="cat-field-textarea" id="cf-ddesc">${it.detailedDesc}</textarea></div>
-        <div class="cat-field-row"><div class="cat-field-label">Purchase UOM</div><input class="cat-field-input" id="cf-uom" value="${it.uom}" style="width:100px;"/></div>`;
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="cat-field-row"><div class="cat-field-label">Purchase UOM</div><input class="cat-field-input" id="cf-uom" value="${it.uom}"/></div>
+          <div class="cat-field-row"><div class="cat-field-label">List price (USD)</div><input class="cat-field-input" id="cf-price" type="number" min="0" step="0.01" value="${it.price != null ? it.price : ''}"/></div>
+        </div>`;
+      footer = `<div class="cat-dp-actions">
+        <button class="sp-btn sp-btn-ghost" style="font-size:12px;color:#A32D2D;border-color:#FECACA;margin-right:auto;" onclick="window._catDeleteItem('${it.id}')"><i class="ti ti-trash" style="font-size:11px;"></i> Delete</button>
+        <button class="sp-btn sp-btn-ghost" style="font-size:12px;" onclick="window._catSelectItem('${it.id}')">Cancel</button>
+        <button class="sp-btn sp-btn-primary" style="font-size:12px;" onclick="window._catSaveBasic('${it.id}')">Save</button>
+      </div>`;
     } else if (_catDetailSection === 'categories') {
       const allCatNames = _catCategories.map(c=>c.name);
       const available = allCatNames.filter(n => !it.categories.includes(n));
       body = `
-        <div style="font-size:12px;font-weight:600;color:#111318;margin-bottom:8px;">In ${it.categories.length} categor${it.categories.length===1?'y':'ies'}</div>
-        <div style="margin-bottom:16px;display:flex;flex-wrap:wrap;gap:4px;">
-          ${it.categories.length ? it.categories.map(c=>`<span class="cat-tag">${c}<span class="cat-tag-remove" onclick="window._catRemoveCategory('${it.id}','${c}')">✕</span></span>`).join('') : '<span style="font-size:12px;color:#9CA3AF;">Not in any categories yet</span>'}
+        <div style="font-size:12px;font-weight:600;color:#111318;margin-bottom:8px;">Assigned (${it.categories.length})</div>
+        <div style="margin-bottom:16px;display:flex;flex-wrap:wrap;gap:4px;min-height:24px;">
+          ${it.categories.length ? it.categories.map(c=>`<span class="cat-tag">${c}<span class="cat-tag-remove" onclick="window._catRemoveCategoryFromItem('${it.id}','${c.replace(/'/g,"\\'")}')">✕</span></span>`).join('') : '<span style="font-size:12px;color:#9CA3AF;">Not in any categories</span>'}
         </div>
         <div style="font-size:12px;font-weight:600;color:#111318;margin-bottom:8px;">Add to category</div>
-        ${available.length ? available.map(c=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:#F9F8F7;border-radius:8px;margin-bottom:4px;"><span style="font-size:12px;color:#3A3D4A;">${c}</span><button style="background:#1C3969;color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;" onclick="window._catAddToCategory('${it.id}','${c}')">Add</button></div>`).join('') : '<div style="font-size:12px;color:#9CA3AF;">Item is in all available categories</div>'}`;
+        ${available.length ? available.map(c=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:#F9F8F7;border-radius:8px;margin-bottom:4px;"><span style="font-size:12px;color:#3A3D4A;">${c}</span><button style="background:#1C3969;color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;" onclick="window._catAddToCategory('${it.id}','${c.replace(/'/g,"\\'")}')">Add</button></div>`).join('') : '<div style="font-size:12px;color:#9CA3AF;padding:8px 0;">Item is assigned to all categories.</div>'}`;
     } else if (_catDetailSection === 'images') {
       body = `
-        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
-          ${it.hasImage ? `
-            <div class="cat-img-thumb has-img" style="position:relative;">
-              <i class="ti ti-photo" style="font-size:22px;color:#1C3969;"></i>
-              <div style="position:absolute;top:4px;right:4px;background:#fff;border-radius:4px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;" onclick="alert('Remove image')"><i class="ti ti-x" style="font-size:10px;color:#A32D2D;"></i></div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+          ${it.hasImage ? `<div class="cat-img-thumb has-img" style="position:relative;" title="Image 1">
+              <i class="ti ti-photo" style="font-size:24px;color:#1C3969;"></i>
+              <div style="font-size:9px;color:#1C3969;margin-top:2px;">Main image</div>
+              <div style="position:absolute;top:4px;right:4px;background:rgba(255,255,255,.9);border-radius:4px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:0.5px solid #E2DDD8;" onclick="window._catRemoveImage('${it.id}')" title="Remove"><i class="ti ti-x" style="font-size:10px;color:#A32D2D;"></i></div>
             </div>` : ''}
-          <div class="cat-img-thumb" onclick="alert('Upload image')" title="Upload image">
-            <div style="text-align:center;"><i class="ti ti-upload" style="font-size:18px;display:block;margin-bottom:4px;"></i>Upload</div>
+          <div class="cat-img-thumb" onclick="window._catUploadImage('${it.id}')" title="Upload image">
+            <i class="ti ti-upload" style="font-size:20px;"></i>
+            <span style="font-size:10px;">Upload</span>
           </div>
         </div>
-        ${!it.hasImage ? '<div style="font-size:11px;color:#B45309;background:#FEF3C7;border-radius:6px;padding:8px 10px;">No images uploaded. Adding images improves catalog search results and fleet ordering confidence.</div>' : ''}`;
+        ${!it.hasImage ? '<div style="font-size:11px;color:#B45309;background:#FEF3C7;border-radius:6px;padding:8px 10px;line-height:1.5;"><strong>No images.</strong> Adding images improves catalog search and fleet ordering confidence.</div>' : '<div style="font-size:11px;color:#15803D;background:#D1FAE5;border-radius:6px;padding:8px 10px;">Image uploaded. Fleet users will see this image when viewing the part.</div>'}`;
     } else if (_catDetailSection === 'addl') {
       body = `
-        ${it.addlInfo.map((a,i)=>`
-          <div class="cat-addl-row">
-            <button class="cat-addl-del" onclick="window._catRemoveAddl('${it.id}',${i})"><i class="ti ti-trash"></i></button>
-            <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-              <input class="cat-field-input" value="${a.name}" placeholder="Name"/>
-              <input class="cat-field-input" value="${a.desc}" placeholder="Value"/>
-            </div>
-          </div>`).join('')}
-        <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid #F0ECE8;">
-          <div style="font-size:11px;font-weight:600;color:#9CA3AF;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">Add attribute</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
+        <div style="margin-bottom:8px;">
+          ${it.addlInfo.map((a,i)=>`
+            <div class="cat-addl-row">
+              <button class="cat-addl-del" onclick="window._catRemoveAddl('${it.id}',${i})" title="Remove attribute"><i class="ti ti-trash"></i></button>
+              <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                <input class="cat-field-input cat-addl-name-inp" value="${a.name.replace(/"/g,'&quot;')}" placeholder="Name"/>
+                <input class="cat-field-input cat-addl-val-inp" value="${a.desc.replace(/"/g,'&quot;')}" placeholder="Value"/>
+              </div>
+            </div>`).join('')}
+        </div>
+        <div style="border-top:0.5px solid #F0ECE8;padding-top:12px;margin-top:4px;">
+          <div style="font-size:10px;font-weight:600;color:#9CA3AF;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">New attribute</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
             <input class="cat-field-input" id="cf-addl-name" placeholder="Name (e.g. Weight)"/>
             <input class="cat-field-input" id="cf-addl-desc" placeholder="Value (e.g. 12.4 kg)"/>
           </div>
-          <button class="sp-btn sp-btn-primary" style="font-size:11px;" onclick="window._catAddAddl('${it.id}')">Add attribute</button>
         </div>`;
+      footer = `<div class="cat-dp-actions"><button class="sp-btn sp-btn-primary" style="font-size:12px;" onclick="window._catSaveAddl('${it.id}')">Save attributes</button></div>`;
     }
     return `<div class="cat-detail-panel">
   <div class="cat-dp-header">
-    <div style="font-size:14px;font-weight:700;color:#111318;margin-bottom:2px;">${it.desc}</div>
-    <div style="font-size:11px;color:#7A7F8E;font-family:monospace;">${it.num}</div>
-    <button style="position:absolute;top:58px;right:18px;background:none;border:none;font-size:16px;color:#9CA3AF;cursor:pointer;" onclick="window._catSelectItem('${it.id}')">✕</button>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#111318;margin-bottom:2px;">${it.desc}</div>
+        <div style="font-size:11px;color:#7A7F8E;font-family:monospace;">${it.num}</div>
+      </div>
+      <button style="flex-shrink:0;background:#F5F2EE;border:none;width:26px;height:26px;border-radius:7px;cursor:pointer;font-size:13px;color:#5A5F6E;display:flex;align-items:center;justify-content:center;" onclick="window._catSelectItem('${it.id}')" title="Close"><i class="ti ti-x"></i></button>
+    </div>
   </div>
   <div class="cat-dp-nav">
     ${sections.map(([s,l])=>`<div class="cat-dp-nav-item${_catDetailSection===s?' active':''}" onclick="window._catDetailNav('${s}')">${l}</div>`).join('')}
   </div>
   <div class="cat-dp-body">${body}</div>
-  ${_catDetailSection === 'basic' ? `<div class="cat-dp-actions"><button class="sp-btn sp-btn-ghost" style="font-size:12px;">Cancel</button><button class="sp-btn sp-btn-primary" style="font-size:12px;" onclick="window._catSaveBasic('${it.id}')">Save changes</button></div>` : ''}
+  ${footer}
 </div>`;
   }
 
