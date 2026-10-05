@@ -4575,7 +4575,7 @@ groupKeys.map(pg => {
     <div style="display:flex;align-items:center;gap:6px;">
       <span style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;">Catalog</span>
       <button class="pa-cat-btn" id="pa-cat-btn" onclick="paToggleDrop(event)">
-        <div class="pa-cat-logo${selectedDef.isDefault?' is-default':''}">${selectedDef.isDefault?'★':'#'}</div>
+        <div class="pa-cat-logo${selectedDef.isDefault?' is-default':''}">${selectedDef.isDefault?'ALL':selectedDef.name.split(' ').map(w=>w[0]).join('').slice(0,3).toUpperCase()}</div>
         <div class="pa-cat-label">
           <div class="pa-cat-name">${selectedDef.name}${selectedDef.isDefault?' · Default':''}</div>
           <div class="pa-cat-sub">${accountsInCatalog.length} account${accountsInCatalog.length!==1?'s':''}</div>
@@ -4669,33 +4669,49 @@ groupKeys.map(pg => {
       drop.id = 'pa-cat-drop';
       drop.className = 'pa-cat-drop';
       drop.style.cssText = `top:${rect.bottom+4}px;left:${rect.left}px;`;
-      drop.innerHTML = `<div class="pa-drop-list" id="pa-drop-list"></div>
+      drop.innerHTML = `
+        <div style="padding:8px 8px 4px;">
+          <div style="display:flex;align-items:center;gap:6px;background:#F5F2EE;border-radius:8px;padding:6px 10px;">
+            <i class="ti ti-search" style="font-size:13px;color:#9CA3AF;flex-shrink:0;"></i>
+            <input id="pa-drop-search" type="text" placeholder="Search catalogs..." autocomplete="off"
+              style="border:none;background:transparent;outline:none;font-size:12px;color:#111318;width:100%;"
+              oninput="event.stopPropagation();paBuildDropList(this.value)">
+          </div>
+        </div>
+        <div class="pa-drop-list" id="pa-drop-list"></div>
         <div class="pa-drop-action" onclick="event.stopPropagation();paCloseDrop();window._paNewCatalog();">
           <i class="ti ti-plus" style="font-size:13px;"></i> New catalog
         </div>`;
       document.body.appendChild(drop);
-      const list = document.getElementById('pa-drop-list');
-      // Default first, then rest
-      const def  = _paCatalogDefs.find(c=>c.isDefault);
-      const rest = _paCatalogDefs.filter(c=>!c.isDefault);
-      list.innerHTML = [
-        ...(def ? [def] : []),
-        ...(def && rest.length ? ['divider'] : []),
-        ...rest,
-      ].map(c => {
-        if (c === 'divider') return '<div class="pa-drop-divider"></div>';
-        const cnt = _paAccounts.filter(a=>a.catalog===c.name).length;
-        return `<div class="pa-drop-item${_paSelectedCatalog===c.name?' active':''}" onclick="event.stopPropagation();paCloseDrop();window._paSelectCatalog('${c.name.replace(/'/g,"\\'")}')">
-          <div class="pa-drop-logo${c.isDefault?' is-default':''}">${c.isDefault?'★':'#'}</div>
-          <div style="flex:1;min-width:0;">
-            <div class="pa-drop-name">${c.name}${c.isDefault?' <span style="font-size:10px;font-weight:400;color:#6EE7B7;">· Default</span>':''}</div>
-            <div class="pa-drop-meta">${c.description}</div>
-          </div>
-          <span class="pa-drop-count">${cnt}</span>
-        </div>`;
-      }).join('');
+      function paBuildDropList(q) {
+        const list = document.getElementById('pa-drop-list');
+        if (!list) return;
+        const lq = (q||'').toLowerCase();
+        const def  = _paCatalogDefs.find(c=>c.isDefault);
+        const rest = _paCatalogDefs.filter(c=>!c.isDefault);
+        const items = [
+          ...(def ? [def] : []),
+          ...(def && rest.length ? ['divider'] : []),
+          ...rest,
+        ].filter(c => c === 'divider' || !lq || c.name.toLowerCase().includes(lq) || c.description.toLowerCase().includes(lq));
+        list.innerHTML = items.map(c => {
+          if (c === 'divider') return '<div class="pa-drop-divider"></div>';
+          const cnt = _paAccounts.filter(a=>a.catalog===c.name).length;
+          const initials = c.isDefault ? 'ALL' : c.name.split(' ').map(w=>w[0]).join('').slice(0,3).toUpperCase();
+          return `<div class="pa-drop-item${_paSelectedCatalog===c.name?' active':''}" onclick="event.stopPropagation();paCloseDrop();window._paSelectCatalog('${c.name.replace(/'/g,"\\'")}')">
+            <div class="pa-drop-logo${c.isDefault?' is-default':''}">${initials}</div>
+            <div style="flex:1;min-width:0;">
+              <div class="pa-drop-name">${c.name}${c.isDefault?' <span style="font-size:10px;font-weight:400;color:#6EE7B7;">· Default</span>':''}</div>
+              <div class="pa-drop-meta">${c.description}</div>
+            </div>
+            <span class="pa-drop-count">${cnt}</span>
+          </div>`;
+        }).join('');
+      }
+      paBuildDropList('');
       drop.addEventListener('click', e=>e.stopPropagation());
       document.addEventListener('click', paCloseDrop, { once:true });
+      setTimeout(()=>{ const s=document.getElementById('pa-drop-search'); if(s)s.focus(); }, 50);
     };
     window._paSelectCatalog = function(name) { _paSelectedCatalog = name; _paSearch = ''; _paFilter = 'all'; renderPricingAssignments(); };
 
