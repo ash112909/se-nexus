@@ -4483,21 +4483,27 @@ groupKeys.map(pg => {
 
   // ── Pricing Assignments ────────────────────────────────────────────────────
 
-  let _paFilter = { catalog: 'all', priceType: 'all' };
   let _paSearch = '';
+  let _paSelectedCatalog = 'Default Catalog'; // catalog-centric primary axis
 
-  const _paCatalogs = ['Default Catalog','Fleet Pricing','Regional Pricing','Contract Pricing'];
+  // Catalogs: Default is always first and is the recommended one
+  const _paCatalogDefs = [
+    { id:'pc-1', name:'Default Catalog', isDefault:true,  description:'Standard pricing for all accounts not on a special arrangement.' },
+    { id:'pc-2', name:'Fleet Pricing',   isDefault:false, description:'Volume-adjusted pricing for high-frequency fleet customers.' },
+    { id:'pc-3', name:'Regional Pricing',isDefault:false, description:'Currency and region-specific pricing for non-USD accounts.' },
+    { id:'pc-4', name:'Contract Pricing',isDefault:false, description:'Fixed contract prices for accounts under a signed pricing agreement.' },
+  ];
   const _paCurrencies = ['USD','EUR','GBP','CAD','AUD'];
 
   const _paAccounts = [
-    { id:'pa-001', accountNum:'MCR-001',   catalog:'Default Catalog',   currency:'USD', adjustment:null,   credentials:true,  username:'mcr_buyer', erpAcct:'ERP-1001' },
-    { id:'pa-002', accountNum:'MCR-002',   catalog:'Fleet Pricing',     currency:'USD', adjustment:'-5%',  credentials:true,  username:'mcr_ops',   erpAcct:'ERP-1002' },
-    { id:'pa-003', accountNum:'BLS-001',   catalog:'Regional Pricing',  currency:'EUR', adjustment:null,   credentials:false, username:'',          erpAcct:'' },
-    { id:'pa-004', accountNum:'SBR-001',   catalog:'Fleet Pricing',     currency:'USD', adjustment:'+2%',  credentials:true,  username:'sbr_purch', erpAcct:'ERP-2001' },
-    { id:'pa-005', accountNum:'URI-001',   catalog:'Contract Pricing',  currency:'USD', adjustment:'-8%',  credentials:true,  username:'uri_buyer', erpAcct:'ERP-3001' },
-    { id:'pa-006', accountNum:'URI-002',   catalog:'Contract Pricing',  currency:'USD', adjustment:'-8%',  credentials:true,  username:'uri_ops',   erpAcct:'ERP-3002' },
-    { id:'pa-007', accountNum:'AHR-001',   catalog:'Default Catalog',   currency:'USD', adjustment:null,   credentials:false, username:'',          erpAcct:'' },
-    { id:'pa-008', accountNum:'NEF-001',   catalog:'Default Catalog',   currency:'USD', adjustment:null,   credentials:true,  username:'nef_buyer', erpAcct:'ERP-4001' },
+    { id:'pa-001', accountNum:'MCR-001',   catalog:'Default Catalog',   currency:'USD', adjustment:null,   credentials:true,  username:'mcr_buyer', erpAcct:'ERP-1001', note:'' },
+    { id:'pa-002', accountNum:'MCR-002',   catalog:'Fleet Pricing',     currency:'USD', adjustment:'-5%',  credentials:true,  username:'mcr_ops',   erpAcct:'ERP-1002', note:'' },
+    { id:'pa-003', accountNum:'BLS-001',   catalog:'Regional Pricing',  currency:'EUR', adjustment:null,   credentials:false, username:'',          erpAcct:'',         note:'Awaiting ERP setup' },
+    { id:'pa-004', accountNum:'SBR-001',   catalog:'Fleet Pricing',     currency:'USD', adjustment:'+2%',  credentials:true,  username:'sbr_purch', erpAcct:'ERP-2001', note:'' },
+    { id:'pa-005', accountNum:'URI-001',   catalog:'Contract Pricing',  currency:'USD', adjustment:'-8%',  credentials:true,  username:'uri_buyer', erpAcct:'ERP-3001', note:'' },
+    { id:'pa-006', accountNum:'URI-002',   catalog:'Contract Pricing',  currency:'USD', adjustment:'-8%',  credentials:true,  username:'uri_ops',   erpAcct:'ERP-3002', note:'' },
+    { id:'pa-007', accountNum:'AHR-001',   catalog:'Default Catalog',   currency:'USD', adjustment:null,   credentials:false, username:'',          erpAcct:'',         note:'' },
+    { id:'pa-008', accountNum:'NEF-001',   catalog:'Default Catalog',   currency:'USD', adjustment:null,   credentials:true,  username:'nef_buyer', erpAcct:'ERP-4001', note:'' },
   ];
 
   function renderPricingAssignments() {
@@ -4505,119 +4511,206 @@ groupKeys.map(pg => {
     if (titleEl) titleEl.textContent = 'Pricing Assignments';
     const contentEl = document.getElementById('sp-content');
 
-    const filtered = _paAccounts.filter(a => {
-      const q = _paSearch.toLowerCase();
-      const matchSearch = !q || a.accountNum.toLowerCase().includes(q);
-      const matchCat = _paFilter.catalog === 'all' || a.catalog === _paFilter.catalog;
-      const matchType = _paFilter.priceType === 'all' || a.currency === _paFilter.priceType;
-      return matchSearch && matchCat && matchType;
-    });
+    // Ensure selected catalog is valid
+    if (!_paCatalogDefs.find(c=>c.name===_paSelectedCatalog)) {
+      _paSelectedCatalog = _paCatalogDefs[0].name;
+    }
 
-    const catOpts = ['all',..._paCatalogs].map(c=>`<option value="${c}"${_paFilter.catalog===c?' selected':''}>${c==='all'?'All catalogs':c}</option>`).join('');
-    const typeOpts = ['all',..._paCurrencies].map(c=>`<option value="${c}"${_paFilter.priceType===c?' selected':''}>${c==='all'?'All currencies':c}</option>`).join('');
+    const selectedDef = _paCatalogDefs.find(c=>c.name===_paSelectedCatalog);
+    const q = _paSearch.toLowerCase();
+    const accountsInCatalog = _paAccounts.filter(a => a.catalog === _paSelectedCatalog);
+    const filteredAccounts  = accountsInCatalog.filter(a =>
+      !q || a.accountNum.toLowerCase().includes(q) || (a.username||'').toLowerCase().includes(q) || (a.erpAcct||'').toLowerCase().includes(q)
+    );
+    const missingCreds = accountsInCatalog.filter(a=>!a.credentials).length;
 
     contentEl.innerHTML = `
 <style>
-.pa-shell { display:flex; flex:1; flex-direction:column; min-height:0; overflow:hidden; }
-.pa-toolbar { padding:10px 20px; background:#fff; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:8px; flex-shrink:0; flex-wrap:wrap; }
-.pa-body { flex:1; overflow-y:auto; padding:20px; }
-.pa-table { background:#fff; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
-.pa-th { display:grid; grid-template-columns:140px 1fr 80px 90px 120px 100px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
-.pa-th-cell { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.7px; text-transform:uppercase; padding:9px 7px; }
-.pa-row { display:grid; grid-template-columns:140px 1fr 80px 90px 120px 100px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; }
-.pa-row:last-child { border-bottom:none; }
-.pa-row:hover { background:#FAFAF9; }
-.pa-td { padding:10px 7px; font-size:12px; color:#3A3D4A; }
-.pa-cred-ok { display:inline-flex; align-items:center; gap:3px; font-size:11px; color:#15803D; font-weight:500; }
-.pa-cred-missing { display:inline-flex; align-items:center; gap:3px; font-size:11px; color:#B45309; font-weight:500; }
+.pa-shell{display:flex;flex:1;min-height:0;overflow:hidden;}
+.pa-sidebar{width:260px;flex-shrink:0;border-right:0.5px solid #E8E4DF;background:#FAFAF9;display:flex;flex-direction:column;overflow:hidden;}
+.pa-sb-header{padding:14px 16px 10px;border-bottom:0.5px solid #E8E4DF;flex-shrink:0;}
+.pa-catalog-row{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;border-left:3px solid transparent;transition:background .1s;}
+.pa-catalog-row:hover{background:#F0ECE8;}
+.pa-catalog-row.active{background:#EFF6FF;border-left-color:#1C3969;}
+.pa-catalog-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;}
+.pa-catalog-name{font-size:12px;font-weight:600;color:#111318;line-height:1.3;}
+.pa-catalog-meta{font-size:11px;color:#9CA3AF;}
+.pa-default-badge{display:inline-flex;align-items:center;gap:3px;background:#D1FAE5;color:#065F46;border-radius:4px;padding:1px 6px;font-size:10px;font-weight:600;}
+.pa-main{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
+.pa-toolbar{padding:10px 20px;background:#fff;border-bottom:0.5px solid #E8E4DF;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;}
+.pa-body{flex:1;overflow-y:auto;padding:20px;}
+.pa-table{background:#fff;border:0.5px solid #E8E4DF;border-radius:12px;overflow:hidden;}
+.pa-th{display:grid;grid-template-columns:140px 80px 90px 1fr 120px 100px;background:#FAFAF9;border-bottom:0.5px solid #E8E4DF;padding:0 14px;}
+.pa-th-cell{font-size:10px;font-weight:600;color:#9CA3AF;letter-spacing:.7px;text-transform:uppercase;padding:9px 7px;}
+.pa-row{display:grid;grid-template-columns:140px 80px 90px 1fr 120px 100px;padding:0 14px;border-bottom:0.5px solid #F5F2EE;align-items:center;}
+.pa-row:last-child{border-bottom:none;}
+.pa-row:hover{background:#FAFAF9;}
+.pa-td{padding:10px 7px;font-size:12px;color:#3A3D4A;}
+.pa-cred-ok{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#15803D;font-weight:500;}
+.pa-cred-missing{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:#B45309;font-weight:500;}
+.pa-new-cat-row{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;color:#7A7F8E;font-size:12px;border-top:0.5px solid #E8E4DF;margin-top:auto;}
+.pa-new-cat-row:hover{color:#1C3969;background:#F5F2EE;}
 </style>
 <div class="pa-shell">
-  <div class="pa-toolbar">
-    <div style="position:relative;">
-      <i class="ti ti-search" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:13px;color:#9CA3AF;pointer-events:none;"></i>
-      <input type="text" placeholder="Search by account #" value="${_paSearch}"
-        oninput="window._paSearch=this.value;renderPricingAssignments()"
-        style="width:200px;height:32px;background:#F5F2EE;border:1px solid #E2DDD8;border-radius:9px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;color:#111318;outline:none;"/>
+
+  <!-- Left: catalog list -->
+  <div class="pa-sidebar">
+    <div class="pa-sb-header">
+      <div style="font-size:11px;font-weight:700;color:#111318;margin-bottom:2px;">Price Catalogs</div>
+      <div style="font-size:11px;color:#9CA3AF;">Click a catalog to manage its accounts</div>
     </div>
-    <select onchange="window._paFilter.catalog=this.value;renderPricingAssignments()" style="height:32px;border:1px solid #E2DDD8;border-radius:8px;padding:0 8px;font-size:12px;font-family:inherit;color:#111318;outline:none;background:#fff;">${catOpts}</select>
-    <select onchange="window._paFilter.priceType=this.value;renderPricingAssignments()" style="height:32px;border:1px solid #E2DDD8;border-radius:8px;padding:0 8px;font-size:12px;font-family:inherit;color:#111318;outline:none;background:#fff;">${typeOpts}</select>
-    <div style="margin-left:auto;display:flex;gap:6px;">
-      <button class="sp-btn sp-btn-ghost" style="font-size:12px;" onclick="window._paImport()"><i class="ti ti-upload" style="font-size:12px;"></i> Import</button>
-      <button class="sp-btn sp-btn-ghost" style="font-size:12px;" onclick="window._paExport()"><i class="ti ti-download" style="font-size:12px;"></i> Export</button>
-      <button class="sp-btn sp-btn-primary" style="font-size:12px;" onclick="window._paAdd()"><i class="ti ti-plus" style="font-size:12px;"></i> Add assignment</button>
+    <div style="flex:1;overflow-y:auto;">
+      ${_paCatalogDefs.map(cat => {
+        const count = _paAccounts.filter(a=>a.catalog===cat.name).length;
+        const active = _paSelectedCatalog === cat.name;
+        const iconBg = cat.isDefault ? '#D1FAE5' : active ? '#DBEAFE' : '#F0ECE8';
+        const iconColor = cat.isDefault ? '#065F46' : '#5A5F6E';
+        return `<div class="pa-catalog-row${active?' active':''}" onclick="window._paSelectCatalog('${cat.name.replace(/'/g,"\\'")}')">
+          <div class="pa-catalog-icon" style="background:${iconBg};color:${iconColor};">
+            <i class="ti ti-${cat.isDefault?'star':'book'}"></i>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span class="pa-catalog-name">${cat.name}</span>
+              ${cat.isDefault ? '<span class="pa-default-badge"><i class="ti ti-check" style="font-size:9px;"></i> Default</span>' : ''}
+            </div>
+            <div class="pa-catalog-meta">${count} account${count===1?'':'s'}</div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="pa-new-cat-row" onclick="window._paNewCatalog()">
+      <i class="ti ti-plus" style="font-size:13px;"></i>
+      <span>New catalog</span>
     </div>
   </div>
-  <div class="pa-body">
-    ${filtered.length === 0 ? '<div style="padding:48px;text-align:center;color:#9CA3AF;font-size:13px;">No accounts match the current filters.</div>' : `
-    <div class="pa-table">
-      <div class="pa-th">
-        <div class="pa-th-cell">Account #</div>
-        <div class="pa-th-cell">Price catalog</div>
-        <div class="pa-th-cell">Currency</div>
-        <div class="pa-th-cell">Adjustment</div>
-        <div class="pa-th-cell">Credentials</div>
-        <div class="pa-th-cell"></div>
+
+  <!-- Right: accounts in selected catalog -->
+  <div class="pa-main">
+    <div class="pa-toolbar">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:#111318;">${selectedDef.name} ${selectedDef.isDefault ? '<span class="pa-default-badge" style="vertical-align:middle;"><i class="ti ti-check" style="font-size:9px;"></i> Default</span>' : ''}</div>
+        <div style="font-size:11px;color:#9CA3AF;margin-top:1px;">${selectedDef.description}</div>
       </div>
-      ${filtered.map(a => `
-      <div class="pa-row">
-        <div class="pa-td"><span style="font-family:monospace;font-weight:600;color:#111318;">${a.accountNum}</span></div>
-        <div class="pa-td">${a.catalog}</div>
-        <div class="pa-td">${a.currency}</div>
-        <div class="pa-td">${a.adjustment ? `<span style="font-size:11px;font-weight:700;background:${a.adjustment.startsWith('-')?'#D1FAE5':'#FEF3C7'};color:${a.adjustment.startsWith('-')?'#065F46':'#92400E'};border-radius:4px;padding:2px 6px;">${a.adjustment}</span>` : '<span style="color:#B0AAA3;">—</span>'}</div>
-        <div class="pa-td">${a.credentials ? `<span class="pa-cred-ok"><i class="ti ti-check" style="font-size:11px;"></i> Set</span>` : `<span class="pa-cred-missing"><i class="ti ti-alert-triangle" style="font-size:11px;"></i> Missing</span>`}</div>
-        <div class="pa-td" style="justify-content:flex-end;gap:6px;">
-          <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#1C3969;" onclick="window._paEdit('${a.id}')">Edit</button>
-          <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#A32D2D;" onclick="window._paRemove('${a.id}')">Remove</button>
+      <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
+        <div style="position:relative;">
+          <i class="ti ti-search" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:#9CA3AF;pointer-events:none;"></i>
+          <input type="text" placeholder="Search accounts…" value="${_paSearch.replace(/"/g,'&quot;')}"
+            oninput="window._paSetSearch(this.value)"
+            style="width:180px;height:30px;background:#F5F2EE;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px 0 28px;font-size:12px;font-family:inherit;color:#111318;outline:none;"/>
         </div>
-      </div>`).join('')}
-    </div>`}
+        <button class="sp-btn sp-btn-ghost" style="font-size:12px;" onclick="window._paImport()"><i class="ti ti-upload" style="font-size:12px;"></i> Import</button>
+        <button class="sp-btn sp-btn-ghost" style="font-size:12px;" onclick="window._paExport()"><i class="ti ti-download" style="font-size:12px;"></i> Export</button>
+        <button class="sp-btn sp-btn-primary" style="font-size:12px;" onclick="window._paAdd()"><i class="ti ti-plus" style="font-size:12px;"></i> Assign account</button>
+      </div>
+    </div>
+    <div class="pa-body">
+      ${missingCreds > 0 ? `<div style="background:#FEF3C7;border:0.5px solid #FCD34D;border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;font-size:12px;color:#92400E;">
+        <i class="ti ti-alert-triangle" style="font-size:14px;flex-shrink:0;"></i>
+        <span><strong>${missingCreds}</strong> account${missingCreds>1?'s are':' is'} missing ERP credentials — orders cannot be processed until credentials are set.</span>
+      </div>` : ''}
+      ${filteredAccounts.length === 0 ? `<div style="padding:56px;text-align:center;color:#9CA3AF;font-size:13px;">
+        <i class="ti ti-users" style="font-size:28px;display:block;margin-bottom:10px;opacity:.4;"></i>
+        ${accountsInCatalog.length === 0
+          ? `No accounts are assigned to <strong>${selectedDef.name}</strong> yet.<br><br><button class="sp-btn sp-btn-primary" style="font-size:12px;" onclick="window._paAdd()">Assign first account</button>`
+          : 'No accounts match your search.'}
+      </div>` : `
+      <div class="pa-table">
+        <div class="pa-th">
+          <div class="pa-th-cell">Account #</div>
+          <div class="pa-th-cell">Currency</div>
+          <div class="pa-th-cell">Adjustment</div>
+          <div class="pa-th-cell">Note</div>
+          <div class="pa-th-cell">ERP Credentials</div>
+          <div class="pa-th-cell"></div>
+        </div>
+        ${filteredAccounts.map(a => `
+        <div class="pa-row">
+          <div class="pa-td"><span style="font-family:monospace;font-weight:600;color:#111318;font-size:12px;">${a.accountNum}</span></div>
+          <div class="pa-td" style="font-size:11px;font-weight:600;color:#5A5F6E;">${a.currency}</div>
+          <div class="pa-td">${a.adjustment ? `<span style="font-size:11px;font-weight:700;background:${a.adjustment.startsWith('-')?'#D1FAE5':'#FEF3C7'};color:${a.adjustment.startsWith('-')?'#065F46':'#92400E'};border-radius:4px;padding:2px 6px;">${a.adjustment}</span>` : '<span style="color:#C4BFB9;font-size:12px;">—</span>'}</div>
+          <div class="pa-td" style="font-size:11px;color:#9CA3AF;font-style:${a.note?'normal':'italic'};">${a.note||'—'}</div>
+          <div class="pa-td">${a.credentials
+            ? `<span class="pa-cred-ok"><i class="ti ti-check" style="font-size:11px;"></i> ${a.username||'Set'}</span>`
+            : `<span class="pa-cred-missing"><i class="ti ti-alert-triangle" style="font-size:11px;"></i> Missing</span>`}</div>
+          <div class="pa-td" style="justify-content:flex-end;gap:6px;">
+            <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#1C3969;" onclick="window._paEdit('${a.id}')">Edit</button>
+            <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#A32D2D;" onclick="window._paRemove('${a.id}')">Remove</button>
+          </div>
+        </div>`).join('')}
+      </div>`}
+    </div>
   </div>
 </div>`;
 
-    window._paSearch = _paSearch;
-    window._paFilter = _paFilter;
+    // ── State setters ────────────────────────────────────────────────────────
+    window._paSetSearch      = function(v) { _paSearch = v; renderPricingAssignments(); };
+    window._paSelectCatalog  = function(name) { _paSelectedCatalog = name; _paSearch = ''; renderPricingAssignments(); };
 
+    // ── Account modal (shared for add + edit) ────────────────────────────────
     function _paAccountModal(title, existing, onSave) {
-      const catOpts2 = _paCatalogs.map(c=>`<option value="${c}"${existing&&existing.catalog===c?' selected':''}>${c}</option>`).join('');
-      const curOpts2 = _paCurrencies.map(c=>`<option value="${c}"${existing&&existing.currency===c?' selected':''}>${c}</option>`).join('');
+      // Catalog select — default to current catalog; if editing, show its catalog (with move-to-different option)
+      const catOpts = _paCatalogDefs.map(c=>`<option value="${c.name}"${(existing?existing.catalog:_paSelectedCatalog)===c.name?' selected':''}>${c.name}${c.isDefault?' (Default)':''}</option>`).join('');
+      const curOpts = _paCurrencies.map(c=>`<option value="${c}"${(existing?existing.currency:'USD')===c?' selected':''}>${c}</option>`).join('');
       Modal.show({
         title,
         body: `
           <div class="modal-form-field"><label class="modal-form-label">Account # *</label><input class="modal-form-input" id="pa-acct" value="${existing?existing.accountNum:''}" placeholder="e.g. MCR-001"/></div>
-          <div class="modal-form-field"><label class="modal-form-label">Price catalog *</label><select class="modal-form-select" id="pa-cat">${catOpts2}</select></div>
-          <div class="modal-form-field"><label class="modal-form-label">Currency</label><select class="modal-form-select" id="pa-cur">${curOpts2}</select></div>
-          <div class="modal-form-field"><label class="modal-form-label">Adjustment</label><input class="modal-form-input" id="pa-adj" value="${existing&&existing.adjustment?existing.adjustment:''}" placeholder="e.g. -5% or +2%"/></div>
-          <div style="background:#F5F2EE;border-radius:8px;padding:10px 12px;margin-top:4px;">
+          <div class="modal-form-field">
+            <label class="modal-form-label">Price catalog *</label>
+            <select class="modal-form-select" id="pa-cat">${catOpts}</select>
+            ${!existing ? '<div style="font-size:11px;color:#15803D;margin-top:4px;display:flex;align-items:center;gap:4px;"><i class="ti ti-info-circle"></i> Default Catalog is recommended for most accounts.</div>' : ''}
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="modal-form-field"><label class="modal-form-label">Currency</label><select class="modal-form-select" id="pa-cur">${curOpts}</select></div>
+            <div class="modal-form-field"><label class="modal-form-label">Adjustment</label><input class="modal-form-input" id="pa-adj" value="${existing&&existing.adjustment?existing.adjustment:''}" placeholder="-5% or +2%"/></div>
+          </div>
+          <div class="modal-form-field"><label class="modal-form-label">Note</label><input class="modal-form-input" id="pa-note" value="${existing&&existing.note?existing.note:''}" placeholder="Optional — e.g. pending ERP setup"/></div>
+          <div style="background:#F5F2EE;border-radius:8px;padding:10px 12px;margin-top:2px;">
             <div style="font-size:11px;font-weight:600;color:#111318;margin-bottom:8px;">ERP Credentials</div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
               <div><div style="font-size:11px;color:#7A7F8E;margin-bottom:3px;">ERP Account #</div><input class="modal-form-input" id="pa-erp" value="${existing&&existing.erpAcct?existing.erpAcct:''}" placeholder="ERP-XXXX"/></div>
               <div><div style="font-size:11px;color:#7A7F8E;margin-bottom:3px;">Username</div><input class="modal-form-input" id="pa-user" value="${existing&&existing.username?existing.username:''}" placeholder="buyer_user"/></div>
             </div>
           </div>
-          <div id="pa-err" style="font-size:11px;color:#A32D2D;display:none;margin-top:6px;">Account # and catalog are required</div>`,
+          <div id="pa-err" style="font-size:11px;color:#A32D2D;display:none;margin-top:6px;">Account # is required</div>`,
         actions: [
           { label: 'Cancel', onClick: () => Modal.close() },
           { label: 'Save', primary: true, onClick: () => {
             const acct = document.getElementById('pa-acct')?.value.trim();
-            const cat  = document.getElementById('pa-cat')?.value;
-            if (!acct || !cat) { document.getElementById('pa-err').style.display='block'; return; }
-            onSave({ accountNum:acct, catalog:cat, currency:document.getElementById('pa-cur')?.value||'USD', adjustment:document.getElementById('pa-adj')?.value.trim()||null, credentials:!!document.getElementById('pa-erp')?.value.trim(), username:document.getElementById('pa-user')?.value.trim()||'', erpAcct:document.getElementById('pa-erp')?.value.trim()||'' });
+            if (!acct) { document.getElementById('pa-err').style.display='block'; return; }
+            const cat = document.getElementById('pa-cat')?.value;
+            onSave({
+              accountNum: acct,
+              catalog:    cat,
+              currency:   document.getElementById('pa-cur')?.value || 'USD',
+              adjustment: document.getElementById('pa-adj')?.value.trim() || null,
+              note:       document.getElementById('pa-note')?.value.trim() || '',
+              credentials: !!document.getElementById('pa-erp')?.value.trim(),
+              username:   document.getElementById('pa-user')?.value.trim() || '',
+              erpAcct:    document.getElementById('pa-erp')?.value.trim() || '',
+            });
+            // After save, switch to the catalog the account was placed in
+            _paSelectedCatalog = cat;
             Modal.close(); renderPricingAssignments();
           }},
         ]
       });
     }
 
-    window._paAdd = () => _paAccountModal('Add pricing assignment', null, d => _paAccounts.push({ id:'pa-'+(Date.now()), ...d }));
-    window._paEdit = id => { const a = _paAccounts.find(x=>x.id===id); if (a) _paAccountModal('Edit assignment', a, d => Object.assign(a,d)); };
+    window._paAdd = () => _paAccountModal('Assign account to catalog', null, d => _paAccounts.push({ id:'pa-'+(Date.now()), ...d }));
+    window._paEdit = id => {
+      const a = _paAccounts.find(x=>x.id===id);
+      if (a) _paAccountModal('Edit assignment', a, d => Object.assign(a, d));
+    };
     window._paRemove = id => {
+      const a = _paAccounts.find(x=>x.id===id); if (!a) return;
       Modal.show({
         title: 'Remove assignment',
-        body: `<div style="font-size:13px;color:#4B5268;margin-bottom:12px;">Type <strong>DELETE</strong> to confirm removal of this pricing assignment.</div><input class="modal-form-input" id="pa-del-confirm" placeholder="DELETE"/>`,
+        body: `<p style="font-size:13px;color:#5A5F6E;">Remove account <strong>${a.accountNum}</strong> from <strong>${a.catalog}</strong>? This will prevent orders from this account from being processed.</p>`,
         actions: [
           { label: 'Cancel', onClick: () => Modal.close() },
           { label: 'Remove', danger: true, onClick: () => {
-            if (document.getElementById('pa-del-confirm')?.value !== 'DELETE') { return; }
             const idx = _paAccounts.findIndex(x=>x.id===id);
             if (idx>-1) _paAccounts.splice(idx,1);
             Modal.close(); renderPricingAssignments();
@@ -4625,25 +4718,65 @@ groupKeys.map(pg => {
         ]
       });
     };
+
+    // ── New catalog ──────────────────────────────────────────────────────────
+    window._paNewCatalog = () => {
+      Modal.show({
+        title: 'Create catalog',
+        body: `
+          <div style="background:#EFF6FF;border:0.5px solid #BFDBFE;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#1E40AF;line-height:1.5;">
+            <strong>Most accounts work well on the Default Catalog.</strong> Create a separate catalog only when you need a distinct pricing structure — for example, a different currency, a negotiated contract rate, or a regional variant.
+          </div>
+          <div class="modal-form-field"><label class="modal-form-label">Catalog name *</label><input class="modal-form-input" id="pc-name" placeholder="e.g. Contract Pricing — Northeast"/></div>
+          <div class="modal-form-field"><label class="modal-form-label">Description</label><input class="modal-form-input" id="pc-desc" placeholder="Brief description of who this catalog is for"/></div>
+          <div id="pc-err" style="font-size:11px;color:#A32D2D;display:none;">Name is required</div>`,
+        actions: [
+          { label: 'Cancel', onClick: () => Modal.close() },
+          { label: 'Create catalog', primary: true, onClick: () => {
+            const name = document.getElementById('pc-name')?.value.trim();
+            if (!name) { document.getElementById('pc-err').style.display='block'; return; }
+            const desc = document.getElementById('pc-desc')?.value.trim();
+            _paCatalogDefs.push({ id:'pc-'+(Date.now()), name, isDefault:false, description: desc || 'Custom catalog' });
+            _paSelectedCatalog = name;
+            Modal.close(); renderPricingAssignments();
+          }},
+        ]
+      });
+    };
+
+    // ── Import / Export ──────────────────────────────────────────────────────
     window._paImport = () => Modal.show({
       title: 'Import assignments',
       body: `
-        <div class="modal-form-field"><label class="modal-form-label">Email address(es) for job status</label><input class="modal-form-input" id="pa-imp-email" placeholder="you@company.com"/></div>
-        <div class="modal-form-field"><label class="modal-form-label">Schedule</label><select class="modal-form-select"><option>Now</option><option>Later</option></select></div>
-        <div style="border:2px dashed #E2DDD8;border-radius:10px;padding:24px;text-align:center;cursor:pointer;background:#FAFAF9;" onclick="alert('File picker')">
-          <i class="ti ti-upload" style="font-size:24px;color:#9CA3AF;display:block;margin-bottom:6px;"></i>
-          <div style="font-size:13px;color:#5A5F6E;font-weight:500;">Click to upload .xlsx or .csv</div>
-          <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">Or drag and drop here</div>
+        <div class="modal-form-field"><label class="modal-form-label">Target catalog</label>
+          <select class="modal-form-select">${_paCatalogDefs.map(c=>`<option${c.name===_paSelectedCatalog?' selected':''}>${c.name}</option>`).join('')}</select>
         </div>
-        <div style="margin-top:10px;"><a href="#" style="font-size:11px;color:#1C3969;" onclick="event.preventDefault()"><i class="ti ti-download" style="font-size:11px;"></i> Download import template</a></div>`,
-      actions: [{ label: 'Cancel', onClick: () => Modal.close() }, { label: 'Confirm import', primary: true, onClick: () => { Modal.close(); setTab('jobs'); } }]
+        <div class="modal-form-field"><label class="modal-form-label">Notify on completion</label><input class="modal-form-input" id="pa-imp-email" placeholder="you@company.com"/></div>
+        <div style="border:2px dashed #D4CFC9;border-radius:10px;padding:28px;text-align:center;cursor:pointer;background:#FAFAF9;">
+          <i class="ti ti-upload" style="font-size:26px;color:#9CA3AF;display:block;margin-bottom:8px;"></i>
+          <div style="font-size:13px;color:#5A5F6E;font-weight:500;">Click to upload .xlsx or .csv</div>
+          <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">Columns: Account #, Currency, Adjustment, ERP Account, Username</div>
+        </div>
+        <div style="margin-top:10px;"><a href="#" style="font-size:12px;color:#1C3969;" onclick="event.preventDefault()"><i class="ti ti-download" style="font-size:11px;margin-right:3px;"></i>Download template</a></div>`,
+      actions: [
+        { label: 'Cancel', onClick: () => Modal.close() },
+        { label: 'Start import', primary: true, onClick: () => { Modal.close(); setTab('jobs'); } }
+      ]
     });
     window._paExport = () => Modal.show({
       title: 'Export assignments',
       body: `
-        <div class="modal-form-field"><label class="modal-form-label">Source</label><select class="modal-form-select"><option>Current page</option><option>All records</option></select></div>
+        <div class="modal-form-field"><label class="modal-form-label">Source</label>
+          <select class="modal-form-select">
+            <option>Current catalog — ${_paSelectedCatalog}</option>
+            <option>All catalogs</option>
+          </select>
+        </div>
         <div class="modal-form-field"><label class="modal-form-label">Format</label><select class="modal-form-select"><option>.xlsx</option><option>.csv</option></select></div>`,
-      actions: [{ label: 'Cancel', onClick: () => Modal.close() }, { label: 'Download', primary: true, onClick: () => { Modal.close(); } }]
+      actions: [
+        { label: 'Cancel', onClick: () => Modal.close() },
+        { label: 'Download', primary: true, onClick: () => { Modal.close(); } }
+      ]
     });
   }
 
