@@ -3933,6 +3933,938 @@ groupKeys.map(pg => {
     </div>`;
   }
 
+  // ── Enhanced Catalog ─────────────────────────────────────────────────────────
+
+  let _catSearch = '';
+  let _catFilter = 'all'; // 'all' | 'no-image' | 'no-category'
+  let _catDetailId = null;
+  let _catDetailSection = 'basic'; // 'basic' | 'categories' | 'images' | 'addl'
+  let _catView = 'items'; // 'items' | 'categories'
+  let _catCatView = 'table'; // 'table' | 'tree'
+
+  const _catItems = [
+    { id:'ci-001', num:'SKJ-104210', code:'HYD-CYL-A', desc:'Lift Cylinder Assembly', detailedDesc:'Complete lift cylinder assembly for SJIII scissor lifts. Includes seals, piston rod, and end caps.', uom:'EA', categories:['Hydraulic System','Lift Cylinders'], hasImage:true,  price:489.00, addlInfo:[{name:'Weight',desc:'12.4 kg'},{name:'Stroke',desc:'1,200 mm'},{name:'Bore',desc:'63 mm'}] },
+    { id:'ci-002', num:'SKJ-103100', code:'HYD-SEAL-B', desc:'Hydraulic Cylinder Seal Kit', detailedDesc:'Replacement seal kit for SKJ-104210 and SJIII 3219 lift cylinders. NBR compound.', uom:'KIT', categories:['Hydraulic System','Seals & O-Rings'], hasImage:true,  price:38.50, addlInfo:[{name:'Material',desc:'Nitrile rubber (NBR)'},{name:'Temp range',desc:'-30°C to +100°C'}] },
+    { id:'ci-003', num:'SKJ-HYD-200', code:'HYD-PUMP-A', desc:'Hydraulic Pump Assembly', detailedDesc:'Gear-type hydraulic pump for SJIII and SJ6832 RT platforms. 12V DC motor-driven.', uom:'EA', categories:['Hydraulic System'], hasImage:false, price:312.00, addlInfo:[] },
+    { id:'ci-004', num:'SKJ-MAN-300', code:'HYD-MAN-A', desc:'Hydraulic Manifold Block', detailedDesc:'Cast aluminum manifold with integrated solenoid ports. Fits SJIII 3219, 3220, 4626, 4632.', uom:'EA', categories:[], hasImage:false, price:276.00, addlInfo:[{name:'Material',desc:'Aluminum alloy 6061'},{name:'Ports',desc:'6 × SAE 8'}] },
+    { id:'ci-005', num:'SKJ-MTR-400', code:'DRV-MTR-A', desc:'Drive Motor — Traction', detailedDesc:'24V DC traction motor with integral brake. IP67 rated for outdoor use.', uom:'EA', categories:['Drive System','Motors'], hasImage:true,  price:654.00, addlInfo:[{name:'Voltage',desc:'24V DC'},{name:'Rating',desc:'1.2 kW continuous'}] },
+    { id:'ci-006', num:'SKJ-BAT-500', code:'ELC-BAT-A', desc:'Battery — 6V 225Ah Flooded', detailedDesc:'Deep cycle flooded lead-acid battery for SJIII and SJ6832 platforms. Set of 4 required.', uom:'EA', categories:['Electrical System','Batteries'], hasImage:true,  price:189.00, addlInfo:[{name:'Capacity',desc:'225 Ah @ 20hr'},{name:'CCA',desc:'1,050 A'}] },
+    { id:'ci-007', num:'SKJ-CTL-502', code:'ELC-CTL-A', desc:'Main Control Board', detailedDesc:'Programmable platform control module for SJIII. Handles lift, drive, and safety interlock logic.', uom:'EA', categories:['Electrical System'], hasImage:false, price:940.00, addlInfo:[] },
+    { id:'ci-008', num:'SKJ-HF046-1G', code:'FLD-OIL-A', desc:'Hydraulic Oil — AW46 1 Gallon', detailedDesc:'Anti-wear hydraulic oil ISO VG 46. Recommended for all Skyjack platforms.', uom:'GL', categories:['Fluids & Lubricants'], hasImage:true,  price:22.00, addlInfo:[{name:'Viscosity',desc:'ISO VG 46'},{name:'Base oil',desc:'Mineral'}] },
+    { id:'ci-009', num:'SKJ-TIR-402', code:'STR-TIRE-A', desc:'Non-Marking Tire 15×5-6', detailedDesc:'Solid polyurethane non-marking tire for indoor scissor lift use. Press-fit hub bore.', uom:'EA', categories:['Structure & Wheels'], hasImage:true,  price:87.50, addlInfo:[{name:'Compound',desc:'Polyurethane'},{name:'Hub bore',desc:'25.4 mm'}] },
+    { id:'ci-010', num:'SKJ-PIN-600', code:'STR-PIN-A', desc:'Scissor Arm Pin Kit', detailedDesc:'Complete arm pin and retaining clip kit for one scissor stack. Includes all 8 pin positions.', uom:'KIT', categories:['Structure & Wheels','Fasteners'], hasImage:false, price:64.00, addlInfo:[] },
+    { id:'ci-011', num:'SKJ-CHR-501', code:'ELC-CHR-A', desc:'On-Board Battery Charger 24V', detailedDesc:'Automatic multi-stage charger for 24V lead-acid battery packs. 25A output.', uom:'EA', categories:['Electrical System'], hasImage:true, price:215.00, addlInfo:[{name:'Output',desc:'25A @ 24V'},{name:'Input',desc:'120/240V AC 50/60Hz'}] },
+    { id:'ci-012', num:'SKJ-HYD-999', code:'HYD-MAN-C', desc:'Custom Hydraulic Manifold Block — SJIII Series', detailedDesc:'Custom-spec manifold for SJIII series with extended port configuration. Available by request only.', uom:'EA', categories:[], hasImage:false, price:null, addlInfo:[] },
+  ];
+
+  const _catCategories = [
+    { id:'cat-1', name:'Hydraulic System', parent:null, itemCount:5 },
+    { id:'cat-2', name:'Lift Cylinders', parent:'cat-1', itemCount:2 },
+    { id:'cat-3', name:'Seals & O-Rings', parent:'cat-1', itemCount:1 },
+    { id:'cat-4', name:'Drive System', parent:null, itemCount:2 },
+    { id:'cat-5', name:'Motors', parent:'cat-4', itemCount:1 },
+    { id:'cat-6', name:'Electrical System', parent:null, itemCount:3 },
+    { id:'cat-7', name:'Batteries', parent:'cat-6', itemCount:1 },
+    { id:'cat-8', name:'Structure & Wheels', parent:null, itemCount:2 },
+    { id:'cat-9', name:'Fasteners', parent:'cat-8', itemCount:1 },
+    { id:'cat-10', name:'Fluids & Lubricants', parent:null, itemCount:1 },
+  ];
+
+  function renderCatalog() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Enhanced Catalog';
+    const contentEl = document.getElementById('sp-content');
+
+    const filtered = _catItems.filter(it => {
+      const q = _catSearch.toLowerCase();
+      const matchSearch = !q || it.num.toLowerCase().includes(q) || it.desc.toLowerCase().includes(q) || it.code.toLowerCase().includes(q);
+      const matchFilter =
+        _catFilter === 'all' ? true :
+        _catFilter === 'no-image' ? !it.hasImage :
+        _catFilter === 'no-category' ? it.categories.length === 0 : true;
+      return matchSearch && matchFilter;
+    });
+
+    const noImg = _catItems.filter(i => !i.hasImage).length;
+    const noCat = _catItems.filter(i => i.categories.length === 0).length;
+
+    contentEl.innerHTML = `
+<style>
+.cat-shell { display:flex; flex:1; flex-direction:column; min-height:0; overflow:hidden; }
+.cat-toolbar { padding:10px 20px; background:#fff; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:8px; flex-shrink:0; flex-wrap:wrap; }
+.cat-view-toggle { display:flex; gap:2px; background:#F0ECE8; border-radius:8px; padding:3px; }
+.cat-view-btn { padding:5px 12px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; border:none; font-family:inherit; color:#5A5F6E; background:transparent; }
+.cat-view-btn.active { background:#fff; color:#111318; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+.cat-body { flex:1; display:flex; min-height:0; overflow:hidden; }
+.cat-list { flex:1; overflow-y:auto; padding:16px 20px; }
+.cat-item-table { background:#fff; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
+.cat-th { display:grid; grid-template-columns:120px 1fr 140px 80px 80px 60px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
+.cat-th-cell { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.7px; text-transform:uppercase; padding:9px 6px; }
+.cat-row { display:grid; grid-template-columns:120px 1fr 140px 80px 80px 60px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; cursor:pointer; transition:background .1s; }
+.cat-row:last-child { border-bottom:none; }
+.cat-row:hover { background:#FAFAF9; }
+.cat-row.open { background:#EFF6FF; }
+.cat-td { padding:10px 6px; font-size:12px; color:#3A3D4A; }
+.cat-img-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+.cat-detail-panel { width:400px; flex-shrink:0; border-left:0.5px solid #E8E4DF; background:#fff; display:flex; flex-direction:column; overflow:hidden; animation:slideInRight .15s ease; }
+@keyframes slideInRight { from { transform:translateX(20px); opacity:0; } to { transform:translateX(0); opacity:1; } }
+.cat-dp-header { padding:16px 18px 12px; border-bottom:0.5px solid #F0ECE8; flex-shrink:0; }
+.cat-dp-nav { display:flex; gap:0; border-bottom:0.5px solid #E8E4DF; flex-shrink:0; overflow-x:auto; }
+.cat-dp-nav-item { padding:9px 16px; font-size:12px; font-weight:500; color:#7A7F8E; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
+.cat-dp-nav-item.active { color:#1C3969; border-bottom-color:#1C3969; font-weight:600; }
+.cat-dp-body { flex:1; overflow-y:auto; padding:16px 18px; }
+.cat-field-row { margin-bottom:14px; }
+.cat-field-label { font-size:11px; font-weight:600; color:#9CA3AF; margin-bottom:4px; text-transform:uppercase; letter-spacing:.5px; }
+.cat-field-input { width:100%; height:34px; border:1px solid #E2DDD8; border-radius:8px; padding:0 10px; font-size:13px; font-family:inherit; color:#111318; outline:none; }
+.cat-field-input:focus { border-color:#1C3969; }
+.cat-field-textarea { width:100%; min-height:60px; border:1px solid #E2DDD8; border-radius:8px; padding:8px 10px; font-size:12px; font-family:inherit; color:#111318; outline:none; resize:vertical; }
+.cat-field-textarea:focus { border-color:#1C3969; }
+.cat-dp-actions { padding:12px 18px; border-top:0.5px solid #F0ECE8; display:flex; gap:8px; justify-content:flex-end; flex-shrink:0; }
+.cat-tag { display:inline-flex; align-items:center; gap:4px; background:#F0ECE8; color:#5A5F6E; border-radius:6px; padding:3px 8px; font-size:11px; font-weight:500; margin:2px; }
+.cat-tag-remove { cursor:pointer; color:#9CA3AF; font-size:10px; }
+.cat-tag-remove:hover { color:#A32D2D; }
+.cat-img-thumb { width:72px; height:72px; border-radius:8px; background:#F5F2EE; border:1px dashed #E2DDD8; display:flex; align-items:center; justify-content:center; font-size:10px; color:#9CA3AF; cursor:pointer; }
+.cat-img-thumb.has-img { border-style:solid; border-color:#E2DDD8; background:#E8F4FF; }
+.cat-addl-row { display:flex; gap:8px; align-items:flex-start; margin-bottom:8px; }
+.cat-addl-del { width:24px; height:24px; border-radius:6px; border:0.5px solid #E2DDD8; background:none; cursor:pointer; color:#9CA3AF; font-size:11px; display:flex; align-items:center; justify-content:center; margin-top:5px; flex-shrink:0; }
+.cat-addl-del:hover { background:#FEF2F2; color:#A32D2D; border-color:#FECACA; }
+/* Category tree */
+.cat-tree-node { padding:6px 10px 6px 0; display:flex; align-items:center; gap:6px; cursor:pointer; border-radius:7px; }
+.cat-tree-node:hover { background:#F5F2EE; }
+.cat-tree-child { padding-left:20px; }
+.cat-tree-name { font-size:13px; color:#111318; flex:1; }
+.cat-tree-count { font-size:11px; color:#9CA3AF; background:#F0ECE8; border-radius:8px; padding:1px 7px; }
+.cat-cat-table { background:#fff; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
+.cat-cat-th { display:grid; grid-template-columns:1fr 1fr 80px 80px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
+.cat-cat-row { display:grid; grid-template-columns:1fr 1fr 80px 80px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; }
+.cat-cat-row:last-child { border-bottom:none; }
+.cat-cat-row:hover { background:#FAFAF9; }
+</style>
+<div class="cat-shell">
+  <div class="cat-toolbar">
+    <div class="cat-view-toggle">
+      <button class="cat-view-btn${_catView==='items'?' active':''}" onclick="window._catSetView('items')"><i class="ti ti-list" style="font-size:11px;"></i> Items</button>
+      <button class="cat-view-btn${_catView==='categories'?' active':''}" onclick="window._catSetView('categories')"><i class="ti ti-folder" style="font-size:11px;"></i> Categories</button>
+    </div>
+    ${_catView==='items' ? `
+    <div style="position:relative;">
+      <i class="ti ti-search" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:13px;color:#9CA3AF;pointer-events:none;"></i>
+      <input type="text" placeholder="Search by item number, description…" value="${_catSearch}"
+        oninput="window._catSearch=this.value;renderCatalog()"
+        style="width:240px;height:32px;background:#F5F2EE;border:1px solid #E2DDD8;border-radius:9px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;color:#111318;outline:none;"/>
+    </div>
+    <div style="display:flex;gap:4px;margin-left:4px;">
+      ${[['all','All',_catItems.length],['no-image','Missing image',noImg],['no-category','No category',noCat]].map(([v,l,c])=>`
+        <button onclick="window._catFilter='${v}';renderCatalog()" class="pc-ftab${_catFilter===v?' active':''}">${l}${c&&v!=='all'?` <span style="font-size:10px;opacity:.7;">${c}</span>`:''}</button>
+      `).join('')}
+    </div>
+    <button class="sp-btn sp-btn-primary" style="margin-left:auto;font-size:12px;" onclick="window._catAddItem()"><i class="ti ti-plus" style="font-size:12px;"></i> Add item</button>
+    ` : `
+    <div class="cat-view-toggle" style="margin-left:4px;">
+      <button class="cat-view-btn${_catCatView==='table'?' active':''}" onclick="window._catCatView='table';renderCatalog()">Table</button>
+      <button class="cat-view-btn${_catCatView==='tree'?' active':''}" onclick="window._catCatView='tree';renderCatalog()">Tree</button>
+    </div>
+    <button class="sp-btn sp-btn-primary" style="margin-left:auto;font-size:12px;" onclick="window._catAddCategory()"><i class="ti ti-plus" style="font-size:12px;"></i> Add category</button>
+    `}
+  </div>
+  <div class="cat-body">
+    <div class="cat-list">
+      ${_catView === 'items' ? _renderCatItemsList(filtered) : _renderCatCategoriesView()}
+    </div>
+    ${_catDetailId && _catView==='items' ? _renderCatDetailPanel() : ''}
+  </div>
+</div>`;
+
+    window._catSetView = function(v) { _catView = v; _catDetailId = null; renderCatalog(); };
+    window._catFilter = _catFilter;
+    window._catSearch = _catSearch;
+
+    window._catSelectItem = function(id) {
+      _catDetailId = _catDetailId === id ? null : id;
+      _catDetailSection = 'basic';
+      renderCatalog();
+    };
+    window._catDetailNav = function(s) { _catDetailSection = s; renderCatalog(); };
+
+    window._catAddItem = function() {
+      Modal.show({
+        title: 'Add item',
+        body: `
+          <div class="modal-form-field"><label class="modal-form-label">Item number *</label><input class="modal-form-input" id="ci-num" placeholder="e.g. SKJ-NEW-001"/></div>
+          <div class="modal-form-field"><label class="modal-form-label">Part code</label><input class="modal-form-input" id="ci-code" placeholder="e.g. HYD-XXX-A"/></div>
+          <div class="modal-form-field"><label class="modal-form-label">Description *</label><input class="modal-form-input" id="ci-desc" placeholder="Short description"/></div>
+          <div class="modal-form-field"><label class="modal-form-label">Purchase UOM</label><input class="modal-form-input" id="ci-uom" placeholder="EA / KIT / GL…"/></div>
+          <div id="ci-err" style="font-size:11px;color:#A32D2D;display:none;margin-top:-8px;">Item number and description are required</div>`,
+        actions: [
+          { label: 'Cancel', onClick: () => Modal.close() },
+          { label: 'Add item', primary: true, onClick: () => {
+            const num = document.getElementById('ci-num')?.value.trim();
+            const desc = document.getElementById('ci-desc')?.value.trim();
+            if (!num || !desc) { document.getElementById('ci-err').style.display='block'; return; }
+            _catItems.push({ id:'ci-'+(Date.now()), num, code:document.getElementById('ci-code')?.value.trim()||'', desc, detailedDesc:'', uom:document.getElementById('ci-uom')?.value.trim()||'EA', categories:[], hasImage:false, price:null, addlInfo:[] });
+            Modal.close(); renderCatalog();
+          }},
+        ]
+      });
+    };
+
+    window._catAddCategory = function() {
+      const parentOpts = '<option value="">— root level —</option>' + _catCategories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+      Modal.show({
+        title: 'Add category',
+        body: `
+          <div class="modal-form-field"><label class="modal-form-label">Name *</label><input class="modal-form-input" id="ccat-name" placeholder="Category name"/></div>
+          <div class="modal-form-field"><label class="modal-form-label">Parent category</label><select class="modal-form-select" id="ccat-parent">${parentOpts}</select></div>
+          <div id="ccat-err" style="font-size:11px;color:#A32D2D;display:none;margin-top:-8px;">Name is required</div>`,
+        actions: [
+          { label: 'Cancel', onClick: () => Modal.close() },
+          { label: 'Add', primary: true, onClick: () => {
+            const name = document.getElementById('ccat-name')?.value.trim();
+            if (!name) { document.getElementById('ccat-err').style.display='block'; return; }
+            _catCategories.push({ id:'cat-'+(Date.now()), name, parent:document.getElementById('ccat-parent')?.value||null, itemCount:0 });
+            Modal.close(); renderCatalog();
+          }},
+        ]
+      });
+    };
+
+    window._catSaveBasic = function(id) {
+      const it = _catItems.find(x=>x.id===id); if (!it) return;
+      it.num = document.getElementById('cf-num')?.value.trim() || it.num;
+      it.code = document.getElementById('cf-code')?.value.trim() || it.code;
+      it.desc = document.getElementById('cf-desc')?.value.trim() || it.desc;
+      it.detailedDesc = document.getElementById('cf-ddesc')?.value.trim() || '';
+      it.uom = document.getElementById('cf-uom')?.value.trim() || it.uom;
+      renderCatalog();
+    };
+
+    window._catRemoveCategory = function(itemId, cat) {
+      const it = _catItems.find(x=>x.id===itemId); if (!it) return;
+      it.categories = it.categories.filter(c=>c!==cat);
+      renderCatalog();
+    };
+
+    window._catAddToCategory = function(itemId, cat) {
+      const it = _catItems.find(x=>x.id===itemId); if (!it) return;
+      if (!it.categories.includes(cat)) it.categories.push(cat);
+      renderCatalog();
+    };
+
+    window._catRemoveAddl = function(itemId, idx) {
+      const it = _catItems.find(x=>x.id===itemId); if (!it) return;
+      it.addlInfo.splice(idx, 1);
+      renderCatalog();
+    };
+
+    window._catAddAddl = function(itemId) {
+      const name = document.getElementById('cf-addl-name')?.value.trim();
+      const desc = document.getElementById('cf-addl-desc')?.value.trim();
+      if (!name) return;
+      const it = _catItems.find(x=>x.id===itemId); if (!it) return;
+      it.addlInfo.push({ name, desc });
+      renderCatalog();
+    };
+  }
+
+  function _renderCatItemsList(items) {
+    if (!items.length) return '<div style="padding:48px;text-align:center;color:#9CA3AF;font-size:13px;">No items match the current filters.</div>';
+    return `<div class="cat-item-table">
+  <div class="cat-th">
+    <div class="cat-th-cell">Item #</div>
+    <div class="cat-th-cell">Description</div>
+    <div class="cat-th-cell">Categories</div>
+    <div class="cat-th-cell">UOM</div>
+    <div class="cat-th-cell">Image</div>
+    <div class="cat-th-cell"></div>
+  </div>
+  ${items.map(it => `
+  <div class="cat-row${_catDetailId===it.id?' open':''}" onclick="window._catSelectItem('${it.id}')">
+    <div class="cat-td"><span style="font-family:monospace;font-size:11px;font-weight:600;color:#111318;">${it.num}</span><div style="font-size:10px;color:#9CA3AF;">${it.code}</div></div>
+    <div class="cat-td" style="flex-direction:column;align-items:flex-start;gap:1px;">${it.desc}</div>
+    <div class="cat-td" style="flex-wrap:wrap;gap:2px;">${it.categories.length ? it.categories.map(c=>`<span style="font-size:10px;background:#F0ECE8;color:#5A5F6E;border-radius:4px;padding:1px 6px;">${c}</span>`).join('') : '<span style="font-size:11px;color:#E5A22D;font-weight:500;">— none —</span>'}</div>
+    <div class="cat-td">${it.uom}</div>
+    <div class="cat-td"><span class="cat-img-dot" style="background:${it.hasImage?'#16A34A':'#E5A22D'};"></span> <span style="font-size:11px;color:${it.hasImage?'#15803D':'#B45309'};margin-left:3px;">${it.hasImage?'Yes':'Missing'}</span></div>
+    <div class="cat-td" style="justify-content:flex-end;"><i class="ti ti-chevron-${_catDetailId===it.id?'left':'right'}" style="font-size:13px;color:#9CA3AF;"></i></div>
+  </div>`).join('')}
+</div>`;
+  }
+
+  function _renderCatCategoriesView() {
+    if (_catCatView === 'table') {
+      const roots = _catCategories.filter(c => !c.parent);
+      const children = cat => _catCategories.filter(c => c.parent === cat.id);
+      const renderRow = (c, indent) => `
+        <div class="cat-cat-row">
+          <div class="cat-td" style="padding-left:${indent}px;font-size:12px;font-weight:600;color:#111318;">${c.name}</div>
+          <div class="cat-td" style="font-size:11px;color:#7A7F8E;">${c.parent ? _catCategories.find(x=>x.id===c.parent)?.name || '—' : '— root —'}</div>
+          <div class="cat-td">${c.itemCount}</div>
+          <div class="cat-td" style="justify-content:flex-end;gap:6px;">
+            <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#1C3969;" onclick="event.stopPropagation()">Edit</button>
+            <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#A32D2D;" onclick="event.stopPropagation()">Remove</button>
+          </div>
+        </div>`;
+      let rows = '';
+      roots.forEach(r => { rows += renderRow(r, 14); children(r).forEach(c => { rows += renderRow(c, 30); }); });
+      return `<div class="cat-cat-table">
+        <div class="cat-cat-th">
+          <div class="cat-th-cell">Name</div><div class="cat-th-cell">Parent</div><div class="cat-th-cell">Items</div><div class="cat-th-cell"></div>
+        </div>${rows}</div>`;
+    }
+    // Tree view
+    const roots = _catCategories.filter(c => !c.parent);
+    const children = cat => _catCategories.filter(c => c.parent === cat.id);
+    const renderNode = (c, depth) => {
+      const kids = children(c);
+      return `<div style="padding-left:${depth*18}px;">
+        <div class="cat-tree-node" style="padding-left:8px;">
+          <i class="ti ti-${kids.length?'folder':'file'}" style="font-size:13px;color:#7A7F8E;flex-shrink:0;"></i>
+          <span class="cat-tree-name">${c.name}</span>
+          <span class="cat-tree-count">${c.itemCount} items</span>
+          <button style="background:none;border:0.5px solid #E2DDD8;border-radius:5px;padding:2px 7px;font-size:10px;font-family:inherit;cursor:pointer;color:#1C3969;flex-shrink:0;">Edit</button>
+          <button style="background:none;border:0.5px solid transparent;padding:2px 4px;font-size:11px;cursor:pointer;color:#9CA3AF;flex-shrink:0;" title="Remove"><i class="ti ti-trash"></i></button>
+        </div>
+        ${kids.map(kid => renderNode(kid, depth+1)).join('')}
+      </div>`;
+    };
+    return `<div style="background:#fff;border:0.5px solid #E8E4DF;border-radius:12px;padding:8px 4px;">${roots.map(r=>renderNode(r,0)).join('')}</div>`;
+  }
+
+  function _renderCatDetailPanel() {
+    const it = _catItems.find(x => x.id === _catDetailId);
+    if (!it) return '';
+    const sections = [['basic','Basic Info'],['categories','Categories'],['images','Images'],['addl','Additional Info']];
+    let body = '';
+    if (_catDetailSection === 'basic') {
+      body = `
+        <div class="cat-field-row"><div class="cat-field-label">Item number</div><input class="cat-field-input" id="cf-num" value="${it.num}"/></div>
+        <div class="cat-field-row"><div class="cat-field-label">Part code</div><input class="cat-field-input" id="cf-code" value="${it.code}"/></div>
+        <div class="cat-field-row"><div class="cat-field-label">Description</div><input class="cat-field-input" id="cf-desc" value="${it.desc}"/></div>
+        <div class="cat-field-row"><div class="cat-field-label">Detailed description</div><textarea class="cat-field-textarea" id="cf-ddesc">${it.detailedDesc}</textarea></div>
+        <div class="cat-field-row"><div class="cat-field-label">Purchase UOM</div><input class="cat-field-input" id="cf-uom" value="${it.uom}" style="width:100px;"/></div>`;
+    } else if (_catDetailSection === 'categories') {
+      const allCatNames = _catCategories.map(c=>c.name);
+      const available = allCatNames.filter(n => !it.categories.includes(n));
+      body = `
+        <div style="font-size:12px;font-weight:600;color:#111318;margin-bottom:8px;">In ${it.categories.length} categor${it.categories.length===1?'y':'ies'}</div>
+        <div style="margin-bottom:16px;display:flex;flex-wrap:wrap;gap:4px;">
+          ${it.categories.length ? it.categories.map(c=>`<span class="cat-tag">${c}<span class="cat-tag-remove" onclick="window._catRemoveCategory('${it.id}','${c}')">✕</span></span>`).join('') : '<span style="font-size:12px;color:#9CA3AF;">Not in any categories yet</span>'}
+        </div>
+        <div style="font-size:12px;font-weight:600;color:#111318;margin-bottom:8px;">Add to category</div>
+        ${available.length ? available.map(c=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:#F9F8F7;border-radius:8px;margin-bottom:4px;"><span style="font-size:12px;color:#3A3D4A;">${c}</span><button style="background:#1C3969;color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;" onclick="window._catAddToCategory('${it.id}','${c}')">Add</button></div>`).join('') : '<div style="font-size:12px;color:#9CA3AF;">Item is in all available categories</div>'}`;
+    } else if (_catDetailSection === 'images') {
+      body = `
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+          ${it.hasImage ? `
+            <div class="cat-img-thumb has-img" style="position:relative;">
+              <i class="ti ti-photo" style="font-size:22px;color:#1C3969;"></i>
+              <div style="position:absolute;top:4px;right:4px;background:#fff;border-radius:4px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;" onclick="alert('Remove image')"><i class="ti ti-x" style="font-size:10px;color:#A32D2D;"></i></div>
+            </div>` : ''}
+          <div class="cat-img-thumb" onclick="alert('Upload image')" title="Upload image">
+            <div style="text-align:center;"><i class="ti ti-upload" style="font-size:18px;display:block;margin-bottom:4px;"></i>Upload</div>
+          </div>
+        </div>
+        ${!it.hasImage ? '<div style="font-size:11px;color:#B45309;background:#FEF3C7;border-radius:6px;padding:8px 10px;">No images uploaded. Adding images improves catalog search results and fleet ordering confidence.</div>' : ''}`;
+    } else if (_catDetailSection === 'addl') {
+      body = `
+        ${it.addlInfo.map((a,i)=>`
+          <div class="cat-addl-row">
+            <button class="cat-addl-del" onclick="window._catRemoveAddl('${it.id}',${i})"><i class="ti ti-trash"></i></button>
+            <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              <input class="cat-field-input" value="${a.name}" placeholder="Name"/>
+              <input class="cat-field-input" value="${a.desc}" placeholder="Value"/>
+            </div>
+          </div>`).join('')}
+        <div style="margin-top:12px;padding-top:12px;border-top:0.5px solid #F0ECE8;">
+          <div style="font-size:11px;font-weight:600;color:#9CA3AF;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">Add attribute</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
+            <input class="cat-field-input" id="cf-addl-name" placeholder="Name (e.g. Weight)"/>
+            <input class="cat-field-input" id="cf-addl-desc" placeholder="Value (e.g. 12.4 kg)"/>
+          </div>
+          <button class="sp-btn sp-btn-primary" style="font-size:11px;" onclick="window._catAddAddl('${it.id}')">Add attribute</button>
+        </div>`;
+    }
+    return `<div class="cat-detail-panel">
+  <div class="cat-dp-header">
+    <div style="font-size:14px;font-weight:700;color:#111318;margin-bottom:2px;">${it.desc}</div>
+    <div style="font-size:11px;color:#7A7F8E;font-family:monospace;">${it.num}</div>
+    <button style="position:absolute;top:58px;right:18px;background:none;border:none;font-size:16px;color:#9CA3AF;cursor:pointer;" onclick="window._catSelectItem('${it.id}')">✕</button>
+  </div>
+  <div class="cat-dp-nav">
+    ${sections.map(([s,l])=>`<div class="cat-dp-nav-item${_catDetailSection===s?' active':''}" onclick="window._catDetailNav('${s}')">${l}</div>`).join('')}
+  </div>
+  <div class="cat-dp-body">${body}</div>
+  ${_catDetailSection === 'basic' ? `<div class="cat-dp-actions"><button class="sp-btn sp-btn-ghost" style="font-size:12px;">Cancel</button><button class="sp-btn sp-btn-primary" style="font-size:12px;" onclick="window._catSaveBasic('${it.id}')">Save changes</button></div>` : ''}
+</div>`;
+  }
+
+  // ── Pricing Assignments ────────────────────────────────────────────────────
+
+  let _paFilter = { catalog: 'all', priceType: 'all' };
+  let _paSearch = '';
+
+  const _paCatalogs = ['Default Catalog','Fleet Pricing','Regional Pricing','Contract Pricing'];
+  const _paCurrencies = ['USD','EUR','GBP','CAD','AUD'];
+
+  const _paAccounts = [
+    { id:'pa-001', accountNum:'MCR-001',   catalog:'Default Catalog',   currency:'USD', adjustment:null,   credentials:true,  username:'mcr_buyer', erpAcct:'ERP-1001' },
+    { id:'pa-002', accountNum:'MCR-002',   catalog:'Fleet Pricing',     currency:'USD', adjustment:'-5%',  credentials:true,  username:'mcr_ops',   erpAcct:'ERP-1002' },
+    { id:'pa-003', accountNum:'BLS-001',   catalog:'Regional Pricing',  currency:'EUR', adjustment:null,   credentials:false, username:'',          erpAcct:'' },
+    { id:'pa-004', accountNum:'SBR-001',   catalog:'Fleet Pricing',     currency:'USD', adjustment:'+2%',  credentials:true,  username:'sbr_purch', erpAcct:'ERP-2001' },
+    { id:'pa-005', accountNum:'URI-001',   catalog:'Contract Pricing',  currency:'USD', adjustment:'-8%',  credentials:true,  username:'uri_buyer', erpAcct:'ERP-3001' },
+    { id:'pa-006', accountNum:'URI-002',   catalog:'Contract Pricing',  currency:'USD', adjustment:'-8%',  credentials:true,  username:'uri_ops',   erpAcct:'ERP-3002' },
+    { id:'pa-007', accountNum:'AHR-001',   catalog:'Default Catalog',   currency:'USD', adjustment:null,   credentials:false, username:'',          erpAcct:'' },
+    { id:'pa-008', accountNum:'NEF-001',   catalog:'Default Catalog',   currency:'USD', adjustment:null,   credentials:true,  username:'nef_buyer', erpAcct:'ERP-4001' },
+  ];
+
+  function renderPricingAssignments() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Pricing Assignments';
+    const contentEl = document.getElementById('sp-content');
+
+    const filtered = _paAccounts.filter(a => {
+      const q = _paSearch.toLowerCase();
+      const matchSearch = !q || a.accountNum.toLowerCase().includes(q);
+      const matchCat = _paFilter.catalog === 'all' || a.catalog === _paFilter.catalog;
+      const matchType = _paFilter.priceType === 'all' || a.currency === _paFilter.priceType;
+      return matchSearch && matchCat && matchType;
+    });
+
+    const catOpts = ['all',..._paCatalogs].map(c=>`<option value="${c}"${_paFilter.catalog===c?' selected':''}>${c==='all'?'All catalogs':c}</option>`).join('');
+    const typeOpts = ['all',..._paCurrencies].map(c=>`<option value="${c}"${_paFilter.priceType===c?' selected':''}>${c==='all'?'All currencies':c}</option>`).join('');
+
+    contentEl.innerHTML = `
+<style>
+.pa-shell { display:flex; flex:1; flex-direction:column; min-height:0; overflow:hidden; }
+.pa-toolbar { padding:10px 20px; background:#fff; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:8px; flex-shrink:0; flex-wrap:wrap; }
+.pa-body { flex:1; overflow-y:auto; padding:20px; }
+.pa-table { background:#fff; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
+.pa-th { display:grid; grid-template-columns:140px 1fr 80px 90px 120px 100px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
+.pa-th-cell { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.7px; text-transform:uppercase; padding:9px 7px; }
+.pa-row { display:grid; grid-template-columns:140px 1fr 80px 90px 120px 100px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; }
+.pa-row:last-child { border-bottom:none; }
+.pa-row:hover { background:#FAFAF9; }
+.pa-td { padding:10px 7px; font-size:12px; color:#3A3D4A; }
+.pa-cred-ok { display:inline-flex; align-items:center; gap:3px; font-size:11px; color:#15803D; font-weight:500; }
+.pa-cred-missing { display:inline-flex; align-items:center; gap:3px; font-size:11px; color:#B45309; font-weight:500; }
+</style>
+<div class="pa-shell">
+  <div class="pa-toolbar">
+    <div style="position:relative;">
+      <i class="ti ti-search" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:13px;color:#9CA3AF;pointer-events:none;"></i>
+      <input type="text" placeholder="Search by account #" value="${_paSearch}"
+        oninput="window._paSearch=this.value;renderPricingAssignments()"
+        style="width:200px;height:32px;background:#F5F2EE;border:1px solid #E2DDD8;border-radius:9px;padding:0 10px 0 30px;font-size:12px;font-family:inherit;color:#111318;outline:none;"/>
+    </div>
+    <select onchange="window._paFilter.catalog=this.value;renderPricingAssignments()" style="height:32px;border:1px solid #E2DDD8;border-radius:8px;padding:0 8px;font-size:12px;font-family:inherit;color:#111318;outline:none;background:#fff;">${catOpts}</select>
+    <select onchange="window._paFilter.priceType=this.value;renderPricingAssignments()" style="height:32px;border:1px solid #E2DDD8;border-radius:8px;padding:0 8px;font-size:12px;font-family:inherit;color:#111318;outline:none;background:#fff;">${typeOpts}</select>
+    <div style="margin-left:auto;display:flex;gap:6px;">
+      <button class="sp-btn sp-btn-ghost" style="font-size:12px;" onclick="window._paImport()"><i class="ti ti-upload" style="font-size:12px;"></i> Import</button>
+      <button class="sp-btn sp-btn-ghost" style="font-size:12px;" onclick="window._paExport()"><i class="ti ti-download" style="font-size:12px;"></i> Export</button>
+      <button class="sp-btn sp-btn-primary" style="font-size:12px;" onclick="window._paAdd()"><i class="ti ti-plus" style="font-size:12px;"></i> Add assignment</button>
+    </div>
+  </div>
+  <div class="pa-body">
+    ${filtered.length === 0 ? '<div style="padding:48px;text-align:center;color:#9CA3AF;font-size:13px;">No accounts match the current filters.</div>' : `
+    <div class="pa-table">
+      <div class="pa-th">
+        <div class="pa-th-cell">Account #</div>
+        <div class="pa-th-cell">Price catalog</div>
+        <div class="pa-th-cell">Currency</div>
+        <div class="pa-th-cell">Adjustment</div>
+        <div class="pa-th-cell">Credentials</div>
+        <div class="pa-th-cell"></div>
+      </div>
+      ${filtered.map(a => `
+      <div class="pa-row">
+        <div class="pa-td"><span style="font-family:monospace;font-weight:600;color:#111318;">${a.accountNum}</span></div>
+        <div class="pa-td">${a.catalog}</div>
+        <div class="pa-td">${a.currency}</div>
+        <div class="pa-td">${a.adjustment ? `<span style="font-size:11px;font-weight:700;background:${a.adjustment.startsWith('-')?'#D1FAE5':'#FEF3C7'};color:${a.adjustment.startsWith('-')?'#065F46':'#92400E'};border-radius:4px;padding:2px 6px;">${a.adjustment}</span>` : '<span style="color:#B0AAA3;">—</span>'}</div>
+        <div class="pa-td">${a.credentials ? `<span class="pa-cred-ok"><i class="ti ti-check" style="font-size:11px;"></i> Set</span>` : `<span class="pa-cred-missing"><i class="ti ti-alert-triangle" style="font-size:11px;"></i> Missing</span>`}</div>
+        <div class="pa-td" style="justify-content:flex-end;gap:6px;">
+          <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#1C3969;" onclick="window._paEdit('${a.id}')">Edit</button>
+          <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#A32D2D;" onclick="window._paRemove('${a.id}')">Remove</button>
+        </div>
+      </div>`).join('')}
+    </div>`}
+  </div>
+</div>`;
+
+    window._paSearch = _paSearch;
+    window._paFilter = _paFilter;
+
+    function _paAccountModal(title, existing, onSave) {
+      const catOpts2 = _paCatalogs.map(c=>`<option value="${c}"${existing&&existing.catalog===c?' selected':''}>${c}</option>`).join('');
+      const curOpts2 = _paCurrencies.map(c=>`<option value="${c}"${existing&&existing.currency===c?' selected':''}>${c}</option>`).join('');
+      Modal.show({
+        title,
+        body: `
+          <div class="modal-form-field"><label class="modal-form-label">Account # *</label><input class="modal-form-input" id="pa-acct" value="${existing?existing.accountNum:''}" placeholder="e.g. MCR-001"/></div>
+          <div class="modal-form-field"><label class="modal-form-label">Price catalog *</label><select class="modal-form-select" id="pa-cat">${catOpts2}</select></div>
+          <div class="modal-form-field"><label class="modal-form-label">Currency</label><select class="modal-form-select" id="pa-cur">${curOpts2}</select></div>
+          <div class="modal-form-field"><label class="modal-form-label">Adjustment</label><input class="modal-form-input" id="pa-adj" value="${existing&&existing.adjustment?existing.adjustment:''}" placeholder="e.g. -5% or +2%"/></div>
+          <div style="background:#F5F2EE;border-radius:8px;padding:10px 12px;margin-top:4px;">
+            <div style="font-size:11px;font-weight:600;color:#111318;margin-bottom:8px;">ERP Credentials</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div><div style="font-size:11px;color:#7A7F8E;margin-bottom:3px;">ERP Account #</div><input class="modal-form-input" id="pa-erp" value="${existing&&existing.erpAcct?existing.erpAcct:''}" placeholder="ERP-XXXX"/></div>
+              <div><div style="font-size:11px;color:#7A7F8E;margin-bottom:3px;">Username</div><input class="modal-form-input" id="pa-user" value="${existing&&existing.username?existing.username:''}" placeholder="buyer_user"/></div>
+            </div>
+          </div>
+          <div id="pa-err" style="font-size:11px;color:#A32D2D;display:none;margin-top:6px;">Account # and catalog are required</div>`,
+        actions: [
+          { label: 'Cancel', onClick: () => Modal.close() },
+          { label: 'Save', primary: true, onClick: () => {
+            const acct = document.getElementById('pa-acct')?.value.trim();
+            const cat  = document.getElementById('pa-cat')?.value;
+            if (!acct || !cat) { document.getElementById('pa-err').style.display='block'; return; }
+            onSave({ accountNum:acct, catalog:cat, currency:document.getElementById('pa-cur')?.value||'USD', adjustment:document.getElementById('pa-adj')?.value.trim()||null, credentials:!!document.getElementById('pa-erp')?.value.trim(), username:document.getElementById('pa-user')?.value.trim()||'', erpAcct:document.getElementById('pa-erp')?.value.trim()||'' });
+            Modal.close(); renderPricingAssignments();
+          }},
+        ]
+      });
+    }
+
+    window._paAdd = () => _paAccountModal('Add pricing assignment', null, d => _paAccounts.push({ id:'pa-'+(Date.now()), ...d }));
+    window._paEdit = id => { const a = _paAccounts.find(x=>x.id===id); if (a) _paAccountModal('Edit assignment', a, d => Object.assign(a,d)); };
+    window._paRemove = id => {
+      Modal.show({
+        title: 'Remove assignment',
+        body: `<div style="font-size:13px;color:#4B5268;margin-bottom:12px;">Type <strong>DELETE</strong> to confirm removal of this pricing assignment.</div><input class="modal-form-input" id="pa-del-confirm" placeholder="DELETE"/>`,
+        actions: [
+          { label: 'Cancel', onClick: () => Modal.close() },
+          { label: 'Remove', danger: true, onClick: () => {
+            if (document.getElementById('pa-del-confirm')?.value !== 'DELETE') { return; }
+            const idx = _paAccounts.findIndex(x=>x.id===id);
+            if (idx>-1) _paAccounts.splice(idx,1);
+            Modal.close(); renderPricingAssignments();
+          }},
+        ]
+      });
+    };
+    window._paImport = () => Modal.show({
+      title: 'Import assignments',
+      body: `
+        <div class="modal-form-field"><label class="modal-form-label">Email address(es) for job status</label><input class="modal-form-input" id="pa-imp-email" placeholder="you@company.com"/></div>
+        <div class="modal-form-field"><label class="modal-form-label">Schedule</label><select class="modal-form-select"><option>Now</option><option>Later</option></select></div>
+        <div style="border:2px dashed #E2DDD8;border-radius:10px;padding:24px;text-align:center;cursor:pointer;background:#FAFAF9;" onclick="alert('File picker')">
+          <i class="ti ti-upload" style="font-size:24px;color:#9CA3AF;display:block;margin-bottom:6px;"></i>
+          <div style="font-size:13px;color:#5A5F6E;font-weight:500;">Click to upload .xlsx or .csv</div>
+          <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">Or drag and drop here</div>
+        </div>
+        <div style="margin-top:10px;"><a href="#" style="font-size:11px;color:#1C3969;" onclick="event.preventDefault()"><i class="ti ti-download" style="font-size:11px;"></i> Download import template</a></div>`,
+      actions: [{ label: 'Cancel', onClick: () => Modal.close() }, { label: 'Confirm import', primary: true, onClick: () => { Modal.close(); setTab('jobs'); } }]
+    });
+    window._paExport = () => Modal.show({
+      title: 'Export assignments',
+      body: `
+        <div class="modal-form-field"><label class="modal-form-label">Source</label><select class="modal-form-select"><option>Current page</option><option>All records</option></select></div>
+        <div class="modal-form-field"><label class="modal-form-label">Format</label><select class="modal-form-select"><option>.xlsx</option><option>.csv</option></select></div>`,
+      actions: [{ label: 'Cancel', onClick: () => Modal.close() }, { label: 'Download', primary: true, onClick: () => { Modal.close(); } }]
+    });
+  }
+
+  // ── Dealer Mapping ─────────────────────────────────────────────────────────
+
+  let _dmSubView = 'locations'; // 'locations' | 'distributors'
+  let _dmFleetId = null;
+  let _dmBranchId = null;
+
+  const _dealers = [
+    { id:'d-001', name:'UpLift Equipment Services', address:'402 W Commerce St', city:'Austin', state:'TX', country:'US', email:'orders@upliftequip.com', phone:'512-555-0140', rmsNum:'RMS-4421', erpAcct:'ERP-D001' },
+    { id:'d-002', name:'CraneRight Distributors',  address:'810 Industrial Blvd', city:'San Antonio', state:'TX', country:'US', email:'parts@craneright.com', phone:'210-555-0293', rmsNum:'RMS-4422', erpAcct:'ERP-D002' },
+    { id:'d-003', name:'Southwest Aerial Parts',   address:'1200 N Belt Line Rd', city:'Irving', state:'TX', country:'US', email:'sales@swaerial.com',   phone:'972-555-0187', rmsNum:'RMS-4423', erpAcct:'' },
+    { id:'d-004', name:'Lone Star Equipment Co.',  address:'3301 S Congress Ave', city:'Austin', state:'TX', country:'US', email:'supply@lsec.com',        phone:'512-555-0302', rmsNum:'RMS-4424', erpAcct:'ERP-D004' },
+    { id:'d-005', name:'Gulf Coast Lift Parts',    address:'700 Market St',       city:'Houston', state:'TX', country:'US', email:'orders@gclift.com',     phone:'713-555-0211', rmsNum:'RMS-4425', erpAcct:'ERP-D005' },
+  ];
+
+  const _dmMappings = [
+    { id:'dm-001', fleetId:'mcr', branchId:'austin',     branchName:'Austin Branch',      dealerId:'d-001', dealerName:'UpLift Equipment Services', preference:'1st', email:'orders@upliftequip.com', hasErp:true },
+    { id:'dm-002', fleetId:'mcr', branchId:'austin',     branchName:'Austin Branch',      dealerId:'d-004', dealerName:'Lone Star Equipment Co.',  preference:'2nd', email:'supply@lsec.com',        hasErp:true },
+    { id:'dm-003', fleetId:'mcr', branchId:'san-marcos', branchName:'San Marcos Branch',  dealerId:'d-001', dealerName:'UpLift Equipment Services', preference:'1st', email:'orders@upliftequip.com', hasErp:true },
+    { id:'dm-004', fleetId:'mcr', branchId:'kyle',       branchName:'Kyle Branch',         dealerId:'d-002', dealerName:'CraneRight Distributors',  preference:'1st', email:'parts@craneright.com',   hasErp:true },
+    { id:'dm-005', fleetId:'boels', branchId:'dallas-n', branchName:'Dallas North',        dealerId:'d-003', dealerName:'Southwest Aerial Parts',   preference:'1st', email:'sales@swaerial.com',     hasErp:false },
+    { id:'dm-006', fleetId:'sunbelt', branchId:'hou-c',  branchName:'Houston Central',     dealerId:'d-005', dealerName:'Gulf Coast Lift Parts',    preference:'1st', email:'orders@gclift.com',      hasErp:true },
+  ];
+
+  function renderDealerMapping() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Dealer Mapping';
+    const contentEl = document.getElementById('sp-content');
+
+    contentEl.innerHTML = `
+<style>
+.dm-shell { display:flex; flex:1; flex-direction:column; min-height:0; overflow:hidden; }
+.dm-toolbar { padding:10px 20px; background:#fff; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:8px; flex-shrink:0; flex-wrap:wrap; }
+.dm-subtab { padding:5px 14px; border-radius:20px; font-size:11px; font-weight:600; cursor:pointer; border:0.5px solid transparent; color:#5A5F6E; }
+.dm-subtab.active { background:#111318; color:#fff; }
+.dm-subtab:hover:not(.active) { background:#F5F2EE; }
+.dm-body { flex:1; overflow-y:auto; padding:20px; }
+.dm-table { background:#fff; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
+.dm-th { display:grid; grid-template-columns:1fr 1fr 80px 140px 90px 100px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
+.dm-th-cell { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.7px; text-transform:uppercase; padding:9px 7px; }
+.dm-row { display:grid; grid-template-columns:1fr 1fr 80px 140px 90px 100px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; cursor:pointer; }
+.dm-row:last-child { border-bottom:none; }
+.dm-row:hover { background:#FAFAF9; }
+.dm-td { padding:10px 7px; font-size:12px; color:#3A3D4A; }
+.dm-dist-th { display:grid; grid-template-columns:1fr 160px 100px 80px 80px 80px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
+.dm-dist-row { display:grid; grid-template-columns:1fr 160px 100px 80px 80px 80px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; }
+.dm-dist-row:last-child { border-bottom:none; }
+.dm-dist-row:hover { background:#FAFAF9; }
+.dm-pref-pill { font-size:10px; font-weight:700; border-radius:10px; padding:2px 7px; }
+</style>
+<div class="dm-shell">
+  <div class="dm-toolbar">
+    <div style="display:flex;gap:4px;">
+      <span class="dm-subtab${_dmSubView==='locations'?' active':''}" onclick="window._dmSetView('locations')">Locations &amp; Mapping</span>
+      <span class="dm-subtab${_dmSubView==='distributors'?' active':''}" onclick="window._dmSetView('distributors')">My Distributors</span>
+    </div>
+    ${_dmSubView === 'locations' ? `
+      <select id="dm-fleet-select" onchange="window._dmFleetId=this.value;window._dmBranchId=null;renderDealerMapping()" style="margin-left:8px;height:32px;border:1px solid #E2DDD8;border-radius:8px;padding:0 8px;font-size:12px;font-family:inherit;color:#111318;outline:none;background:#fff;">
+        <option value="">— Select fleet —</option>
+        ${_fleets.map(f=>`<option value="${f.fleetId}"${_dmFleetId===f.fleetId?' selected':''}>${f.fleetName}</option>`).join('')}
+      </select>
+      <button class="sp-btn sp-btn-ghost" style="font-size:12px;margin-left:auto;" onclick="window._dmImport()"><i class="ti ti-upload" style="font-size:12px;"></i> Import</button>
+    ` : `
+      <button class="sp-btn sp-btn-primary" style="font-size:12px;margin-left:auto;" onclick="window._dmAddDealer()"><i class="ti ti-plus" style="font-size:12px;"></i> Add distributor</button>
+      <button class="sp-btn sp-btn-ghost" style="font-size:12px;" onclick="window._dmExport()"><i class="ti ti-download" style="font-size:12px;"></i> Export</button>
+    `}
+  </div>
+  <div class="dm-body">
+    ${_dmSubView === 'locations' ? _renderDmLocations() : _renderDmDistributors()}
+  </div>
+</div>`;
+
+    window._dmSetView = function(v) { _dmSubView = v; _dmFleetId = null; _dmBranchId = null; renderDealerMapping(); };
+    window._dmFleetId = _dmFleetId;
+    window._dmBranchId = _dmBranchId;
+
+    window._dmImport = () => Modal.show({
+      title: 'Import dealer mappings',
+      body: `
+        <div class="modal-form-field"><label class="modal-form-label">Job type</label><select class="modal-form-select"><option>Dealer Update (overwrite)</option><option>Add branches only</option></select></div>
+        <div class="modal-form-field"><label class="modal-form-label">Email for job status</label><input class="modal-form-input" id="dm-imp-email" placeholder="you@company.com"/></div>
+        <div class="modal-form-field"><label class="modal-form-label">Schedule</label><select class="modal-form-select"><option>Now</option><option>Later</option></select></div>
+        <div style="border:2px dashed #E2DDD8;border-radius:10px;padding:24px;text-align:center;cursor:pointer;background:#FAFAF9;" onclick="alert('File picker')">
+          <i class="ti ti-upload" style="font-size:24px;color:#9CA3AF;display:block;margin-bottom:6px;"></i>
+          <div style="font-size:13px;color:#5A5F6E;font-weight:500;">Upload .xlsx or .csv</div>
+        </div>
+        <div style="margin-top:8px;"><a href="#" style="font-size:11px;color:#1C3969;" onclick="event.preventDefault()"><i class="ti ti-download" style="font-size:11px;"></i> Download template</a></div>`,
+      actions: [{ label: 'Cancel', onClick: () => Modal.close() }, { label: 'Confirm', primary: true, onClick: () => { Modal.close(); setTab('jobs'); } }]
+    });
+    window._dmExport = () => Modal.show({
+      title: 'Export distributors',
+      body: `
+        <div class="modal-form-field"><label class="modal-form-label">Type</label><select class="modal-form-select"><option>Dealer export</option><option>Preference export</option></select></div>
+        <div class="modal-form-field"><label class="modal-form-label">Status</label><select class="modal-form-select"><option>Active only</option><option>All</option></select></div>
+        <div class="modal-form-field"><label class="modal-form-label">Format</label><select class="modal-form-select"><option>.xlsx</option><option>.csv</option></select></div>`,
+      actions: [{ label: 'Cancel', onClick: () => Modal.close() }, { label: 'Export', primary: true, onClick: () => Modal.close() }]
+    });
+    window._dmAddDealer = () => Modal.show({
+      title: 'Add distributor',
+      body: `
+        <div style="font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px;">Dealer info</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="modal-form-field" style="margin-bottom:0;"><label class="modal-form-label">Name *</label><input class="modal-form-input" id="dd-name" placeholder="Dealer name"/></div>
+          <div class="modal-form-field" style="margin-bottom:0;"><label class="modal-form-label">RMS #</label><input class="modal-form-input" id="dd-rms" placeholder="RMS-XXXX"/></div>
+        </div>
+        <div style="font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.6px;text-transform:uppercase;margin:12px 0 8px;">Address</div>
+        <div class="modal-form-field"><label class="modal-form-label">Street</label><input class="modal-form-input" id="dd-addr"/></div>
+        <div style="display:grid;grid-template-columns:1fr 80px 80px;gap:8px;">
+          <div class="modal-form-field" style="margin-bottom:0;"><label class="modal-form-label">City</label><input class="modal-form-input" id="dd-city"/></div>
+          <div class="modal-form-field" style="margin-bottom:0;"><label class="modal-form-label">State</label><input class="modal-form-input" id="dd-state" maxlength="2"/></div>
+          <div class="modal-form-field" style="margin-bottom:0;"><label class="modal-form-label">Country</label><input class="modal-form-input" id="dd-cty" value="US"/></div>
+        </div>
+        <div style="font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.6px;text-transform:uppercase;margin:12px 0 8px;">Contact</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div class="modal-form-field" style="margin-bottom:0;"><label class="modal-form-label">Email</label><input class="modal-form-input" id="dd-email" type="email"/></div>
+          <div class="modal-form-field" style="margin-bottom:0;"><label class="modal-form-label">Phone</label><input class="modal-form-input" id="dd-phone"/></div>
+        </div>
+        <div id="dd-err" style="font-size:11px;color:#A32D2D;margin-top:8px;display:none;">Dealer name is required</div>`,
+      actions: [
+        { label: 'Cancel', onClick: () => Modal.close() },
+        { label: 'Add distributor', primary: true, onClick: () => {
+          const name = document.getElementById('dd-name')?.value.trim();
+          if (!name) { document.getElementById('dd-err').style.display='block'; return; }
+          _dealers.push({ id:'d-'+(Date.now()), name, address:document.getElementById('dd-addr')?.value||'', city:document.getElementById('dd-city')?.value||'', state:document.getElementById('dd-state')?.value||'', country:document.getElementById('dd-cty')?.value||'US', email:document.getElementById('dd-email')?.value||'', phone:document.getElementById('dd-phone')?.value||'', rmsNum:document.getElementById('dd-rms')?.value||'', erpAcct:'' });
+          Modal.close(); renderDealerMapping();
+        }},
+      ]
+    });
+    window._dmEditMapping = function(id) {
+      const m = _dmMappings.find(x=>x.id===id); if (!m) return;
+      Modal.show({
+        title: 'Edit mapping preference',
+        body: `<div style="font-size:13px;color:#4B5268;margin-bottom:12px;">${m.branchName} → ${m.dealerName}</div>
+          <div class="modal-form-field"><label class="modal-form-label">Preference</label><select class="modal-form-select" id="dm-pref">
+            <option value="1st"${m.preference==='1st'?' selected':''}>1st</option>
+            <option value="2nd"${m.preference==='2nd'?' selected':''}>2nd</option>
+            <option value="N/A"${m.preference==='N/A'?' selected':''}>None (N/A)</option>
+          </select></div>`,
+        actions: [
+          { label: 'Cancel', onClick: () => Modal.close() },
+          { label: 'Save', primary: true, onClick: () => { m.preference=document.getElementById('dm-pref')?.value||m.preference; Modal.close(); renderDealerMapping(); } },
+        ]
+      });
+    };
+    window._dmRemoveMapping = function(id) {
+      Modal.show({
+        title: 'Remove mapping',
+        body: `<div style="font-size:13px;color:#4B5268;">Are you sure you want to remove this dealer mapping? The branch will fall back to the next available dealer.</div>`,
+        actions: [{ label: 'Cancel', onClick: () => Modal.close() }, { label: 'Remove', danger: true, onClick: () => { const i=_dmMappings.findIndex(x=>x.id===id); if(i>-1)_dmMappings.splice(i,1); Modal.close(); renderDealerMapping(); } }]
+      });
+    };
+  }
+
+  function _renderDmLocations() {
+    if (!_dmFleetId) {
+      return `<div style="padding:64px;text-align:center;"><i class="ti ti-building-warehouse" style="font-size:40px;color:#E2DDD8;display:block;margin-bottom:12px;"></i><div style="font-size:14px;font-weight:600;color:#9CA3AF;margin-bottom:4px;">Select a fleet to view mappings</div><div style="font-size:12px;color:#B0B5C3;">Choose a fleet from the dropdown above to see its branch-to-dealer assignments.</div></div>`;
+    }
+    const fleet = _fleets.find(f=>f.fleetId===_dmFleetId);
+    const fleetMappings = _dmMappings.filter(m=>m.fleetId===_dmFleetId);
+    const branches = [...new Set(fleetMappings.map(m=>m.branchId))];
+    if (!branches.length) {
+      return `<div style="padding:48px;text-align:center;color:#9CA3AF;font-size:13px;">No mappings configured for ${fleet?.fleetName||'this fleet'}.</div>`;
+    }
+    return branches.map(bId => {
+      const bMappings = fleetMappings.filter(m=>m.branchId===bId);
+      const branchName = bMappings[0]?.branchName || bId;
+      return `<div style="margin-bottom:20px;">
+        <div style="font-size:13px;font-weight:700;color:#111318;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+          <i class="ti ti-map-pin" style="font-size:13px;color:#7A7F8E;"></i>${branchName}
+          <button style="margin-left:auto;background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 9px;font-size:11px;font-family:inherit;cursor:pointer;color:#1C3969;" onclick="window._dmAddMappingForBranch('${bId}','${branchName}')">+ Add dealer</button>
+        </div>
+        <div class="dm-table">
+          <div class="dm-th"><div class="dm-th-cell">Dealer</div><div class="dm-th-cell">Email(s)</div><div class="dm-th-cell">Pref.</div><div class="dm-th-cell">ERP config</div><div class="dm-th-cell"></div><div class="dm-th-cell"></div></div>
+          ${bMappings.map(m=>`<div class="dm-row">
+            <div class="dm-td"><span style="font-size:12px;font-weight:600;color:#111318;">${m.dealerName}</span></div>
+            <div class="dm-td" style="font-size:11px;color:#5A5F6E;">${m.email}</div>
+            <div class="dm-td"><span class="dm-pref-pill" style="background:${m.preference==='1st'?'#D1FAE5':m.preference==='2nd'?'#DBEAFE':'#F0ECE8'};color:${m.preference==='1st'?'#065F46':m.preference==='2nd'?'#1E40AF':'#7A7F8E'};">${m.preference}</span></div>
+            <div class="dm-td">${m.hasErp?`<span style="font-size:11px;color:#15803D;font-weight:500;"><i class="ti ti-check" style="font-size:11px;"></i> Configured</span>`:`<span style="font-size:11px;color:#B45309;font-weight:500;"><i class="ti ti-alert-triangle" style="font-size:11px;"></i> Not set</span>`}</div>
+            <div class="dm-td"><button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#1C3969;" onclick="event.stopPropagation();window._dmEditMapping('${m.id}')">Edit</button></div>
+            <div class="dm-td"><button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#A32D2D;" onclick="event.stopPropagation();window._dmRemoveMapping('${m.id}')">Remove</button></div>
+          </div>`).join('')}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function _renderDmDistributors() {
+    return `<div class="dm-table">
+      <div class="dm-dist-th">
+        <div class="dm-th-cell">Name</div>
+        <div class="dm-th-cell">City / State</div>
+        <div class="dm-th-cell">Email</div>
+        <div class="dm-th-cell">RMS #</div>
+        <div class="dm-th-cell">ERP Acct</div>
+        <div class="dm-th-cell"></div>
+      </div>
+      ${_dealers.map(d=>`<div class="dm-dist-row">
+        <div class="dm-td"><div style="font-size:12px;font-weight:600;color:#111318;">${d.name}</div><div style="font-size:11px;color:#9CA3AF;">${d.address}</div></div>
+        <div class="dm-td" style="font-size:12px;">${d.city}, ${d.state} ${d.country}</div>
+        <div class="dm-td" style="font-size:11px;">${d.email||'—'}</div>
+        <div class="dm-td"><span style="font-family:monospace;font-size:11px;">${d.rmsNum||'—'}</span></div>
+        <div class="dm-td"><span style="font-family:monospace;font-size:11px;">${d.erpAcct||'<span style="color:#B45309;font-style:italic;">Not set</span>'}</span></div>
+        <div class="dm-td" style="justify-content:flex-end;gap:6px;">
+          <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#1C3969;">Edit</button>
+        </div>
+      </div>`).join('')}
+    </div>`;
+  }
+
+  // ── Email Routing ─────────────────────────────────────────────────────────
+
+  const _erDefaultEmails = ['orders@skyjack.com'];
+  const _erFleetEmails = _fleets.reduce((acc, f) => {
+    acc[f.fleetId] = [];
+    return acc;
+  }, {});
+  _erFleetEmails['mcr'] = ['james.w@midcounty.com', 'purchasing@midcounty.com'];
+  _erFleetEmails['boels'] = ['parts@boels.com'];
+  _erFleetEmails['unitedrent'] = ['uri.procurement@unitedrentals.com', 'uri.ops@unitedrentals.com'];
+  _erFleetEmails['sunbelt'] = [];
+
+  function renderEmailRouting() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Order Email Routing';
+    const contentEl = document.getElementById('sp-content');
+
+    contentEl.innerHTML = `
+<style>
+.er-shell { display:flex; flex:1; flex-direction:column; min-height:0; overflow:hidden; }
+.er-body { flex:1; overflow-y:auto; padding:20px; }
+.er-section-title { font-size:12px; font-weight:700; color:#111318; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+.er-fleet-card { background:#fff; border:0.5px solid #E8E4DF; border-radius:10px; overflow:hidden; margin-bottom:8px; }
+.er-fleet-header { display:flex; align-items:center; gap:10px; padding:12px 16px; background:#FAFAF9; border-bottom:0.5px solid #F0ECE8; }
+.er-fleet-emails { padding:10px 16px; display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
+.er-email-chip { display:inline-flex; align-items:center; gap:4px; background:#EFF6FF; color:#1E40AF; border-radius:20px; padding:4px 10px; font-size:11px; font-weight:500; border:0.5px solid #BFDBFE; }
+.er-email-chip-remove { cursor:pointer; color:#93C5FD; font-size:10px; }
+.er-email-chip-remove:hover { color:#A32D2D; }
+.er-missing-warn { display:flex; align-items:center; gap:5px; font-size:11px; color:#B45309; background:#FEF3C7; border-radius:6px; padding:4px 10px; border:0.5px solid #FDE68A; }
+</style>
+<div class="er-shell">
+  <div class="er-body">
+    <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
+      <i class="ti ti-info-circle" style="font-size:16px;color:#1E40AF;flex-shrink:0;"></i>
+      <div style="font-size:12px;color:#1E40AF;line-height:1.5;">Order emails route to the addresses configured per fleet. If no address is set for a fleet, orders fall through to your default address. At least one email must always remain on the default list.</div>
+    </div>
+    <div style="margin-bottom:24px;">
+      <div class="er-section-title"><i class="ti ti-star" style="font-size:12px;color:#B45309;"></i> Default email address(es)</div>
+      <div class="er-fleet-card">
+        <div class="er-fleet-emails">
+          ${_erDefaultEmails.map((e,i)=>`<span class="er-email-chip">${e}${_erDefaultEmails.length>1?`<span class="er-email-chip-remove" onclick="window._erRemoveDefault(${i})">✕</span>`:''}</span>`).join('')}
+          <button style="background:none;border:0.5px dashed #9CA3AF;border-radius:20px;padding:4px 10px;font-size:11px;color:#7A7F8E;cursor:pointer;font-family:inherit;" onclick="window._erAddDefault()">+ Add email</button>
+        </div>
+      </div>
+    </div>
+    <div class="er-section-title"><i class="ti ti-building-warehouse" style="font-size:13px;color:#7A7F8E;"></i> Fleet email addresses (${_fleets.length} fleets)</div>
+    ${_fleets.map(f => {
+      const emails = _erFleetEmails[f.fleetId] || [];
+      return `<div class="er-fleet-card">
+        <div class="er-fleet-header">
+          <div style="width:28px;height:28px;border-radius:7px;background:#152B52;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#8AAFD4;flex-shrink:0;">${f.logoText}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:600;color:#111318;">${f.fleetName}</div>
+            <div style="font-size:11px;color:#7A7F8E;">${f.city} · ${f.locations} locations</div>
+          </div>
+          <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 9px;font-size:11px;font-family:inherit;cursor:pointer;color:#1C3969;" onclick="window._erAddFleetEmail('${f.fleetId}','${f.fleetName}')">+ Add</button>
+        </div>
+        <div class="er-fleet-emails">
+          ${emails.length ? emails.map((e,i)=>`<span class="er-email-chip">${e}<span class="er-email-chip-remove" onclick="window._erRemoveFleetEmail('${f.fleetId}',${i})">✕</span></span>`).join('') : `<span class="er-missing-warn"><i class="ti ti-alert-triangle" style="font-size:11px;"></i> No email set — orders will route to default</span>`}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+</div>`;
+
+    window._erAddDefault = () => {
+      Modal.show({
+        title: 'Add default email',
+        body: `<div class="modal-form-field"><label class="modal-form-label">Email address *</label><input class="modal-form-input" id="er-email" type="email" placeholder="orders@company.com"/></div>`,
+        actions: [{ label: 'Cancel', onClick: () => Modal.close() }, { label: 'Add', primary: true, onClick: () => { const e=document.getElementById('er-email')?.value.trim(); if(e){ _erDefaultEmails.push(e); Modal.close(); renderEmailRouting(); } } }]
+      });
+    };
+    window._erRemoveDefault = idx => {
+      if (_erDefaultEmails.length <= 1) { Modal.show({ title: 'Cannot remove', body: '<div style="font-size:13px;color:#4B5268;">You must keep at least one default email address.</div>', actions: [{ label: 'OK', onClick: () => Modal.close() }] }); return; }
+      _erDefaultEmails.splice(idx, 1); renderEmailRouting();
+    };
+    window._erAddFleetEmail = (fleetId, fleetName) => {
+      Modal.show({
+        title: `Add email — ${fleetName}`,
+        body: `<div class="modal-form-field"><label class="modal-form-label">Email address *</label><input class="modal-form-input" id="er-fl-email" type="email" placeholder="orders@fleet.com"/></div>`,
+        actions: [{ label: 'Cancel', onClick: () => Modal.close() }, { label: 'Add', primary: true, onClick: () => { const e=document.getElementById('er-fl-email')?.value.trim(); if(e){ if(!_erFleetEmails[fleetId]) _erFleetEmails[fleetId]=[]; _erFleetEmails[fleetId].push(e); Modal.close(); renderEmailRouting(); } } }]
+      });
+    };
+    window._erRemoveFleetEmail = (fleetId, idx) => { _erFleetEmails[fleetId].splice(idx,1); renderEmailRouting(); };
+  }
+
+  // ── Job Scheduler ─────────────────────────────────────────────────────────
+
+  const _jobs = [
+    { id:'job-001', file:'pricing-assignments-2026-09-30.xlsx', operation:'Pricing Import',    status:'completed',  requested:'Sep 30, 2026 · 9:14 AM', completed:'Sep 30, 2026 · 9:16 AM', canRollback:false },
+    { id:'job-002', file:'dealer-mappings-v2.xlsx',             operation:'Dealer Update',      status:'completed',  requested:'Sep 29, 2026 · 2:33 PM', completed:'Sep 29, 2026 · 2:35 PM', canRollback:true  },
+    { id:'job-003', file:'pricing-assignments-sept.csv',        operation:'Pricing Import',    status:'rolledback', requested:'Sep 28, 2026 · 11:02 AM', completed:'Sep 28, 2026 · 11:04 AM', canRollback:false },
+    { id:'job-004', file:'dealer-mappings-v1.xlsx',             operation:'Dealer Update',      status:'completed',  requested:'Sep 21, 2026 · 3:11 PM', completed:'Sep 21, 2026 · 3:14 PM', canRollback:false },
+    { id:'job-005', file:'branch-add-oct.xlsx',                 operation:'Add Branches',       status:'scheduled',  requested:'Oct 6, 2026 · 8:00 AM',  completed:'—', canRollback:false },
+    { id:'job-006', file:'pricing-oct-01.xlsx',                 operation:'Pricing Import',    status:'failed',     requested:'Oct 1, 2026 · 7:45 AM',  completed:'Oct 1, 2026 · 7:45 AM', canRollback:false },
+  ];
+
+  const JOB_STATUS = {
+    completed:   { label:'Completed',   color:'#065F46', bg:'#D1FAE5' },
+    rolledback:  { label:'Rolled back', color:'#5A5F6E', bg:'#F0ECE8' },
+    scheduled:   { label:'Scheduled',   color:'#1E40AF', bg:'#DBEAFE' },
+    failed:      { label:'Failed',      color:'#A32D2D', bg:'#FEF2F2' },
+    processing:  { label:'Processing',  color:'#B45309', bg:'#FEF3C7' },
+  };
+
+  function renderJobs() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Job Scheduler';
+    const contentEl = document.getElementById('sp-content');
+
+    contentEl.innerHTML = `
+<style>
+.jobs-shell { display:flex; flex:1; flex-direction:column; min-height:0; overflow:hidden; }
+.jobs-body { flex:1; overflow-y:auto; padding:20px; }
+.jobs-table { background:#fff; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
+.jobs-th { display:grid; grid-template-columns:1fr 160px 110px 160px 160px 140px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
+.jobs-th-cell { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.7px; text-transform:uppercase; padding:9px 7px; }
+.jobs-row { display:grid; grid-template-columns:1fr 160px 110px 160px 160px 140px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; }
+.jobs-row:last-child { border-bottom:none; }
+.jobs-row:hover { background:#FAFAF9; }
+.jobs-td { padding:10px 7px; font-size:12px; color:#3A3D4A; }
+</style>
+<div class="jobs-shell">
+  <div class="jobs-body">
+    <div class="jobs-table">
+      <div class="jobs-th">
+        <div class="jobs-th-cell">File name</div>
+        <div class="jobs-th-cell">Operation</div>
+        <div class="jobs-th-cell">Status</div>
+        <div class="jobs-th-cell">Date requested</div>
+        <div class="jobs-th-cell">Date completed</div>
+        <div class="jobs-th-cell">Actions</div>
+      </div>
+      ${_jobs.map(j => {
+        const s = JOB_STATUS[j.status] || JOB_STATUS.scheduled;
+        return `<div class="jobs-row">
+          <div class="jobs-td" style="flex-direction:column;align-items:flex-start;gap:1px;">
+            <span style="font-size:12px;font-weight:500;color:#111318;font-family:monospace;">${j.file}</span>
+          </div>
+          <div class="jobs-td">${j.operation}</div>
+          <div class="jobs-td"><span class="sp-status-pill" style="background:${s.bg};color:${s.color};">${s.label}</span></div>
+          <div class="jobs-td" style="font-size:11px;color:#7A7F8E;">${j.requested}</div>
+          <div class="jobs-td" style="font-size:11px;color:#7A7F8E;">${j.completed}</div>
+          <div class="jobs-td" style="gap:6px;">
+            ${j.status === 'scheduled' ? `<button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 9px;font-size:11px;font-family:inherit;cursor:pointer;color:#A32D2D;" onclick="window._jobCancel('${j.id}')">Cancel</button>` : ''}
+            ${j.canRollback ? `<button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 9px;font-size:11px;font-family:inherit;cursor:pointer;color:#1C3969;" onclick="window._jobRollback('${j.id}')"><i class="ti ti-history" style="font-size:11px;"></i> Rollback</button>` : ''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+</div>`;
+
+    window._jobCancel = id => {
+      Modal.show({
+        title: 'Cancel scheduled job',
+        body: `<div style="font-size:13px;color:#4B5268;">Are you sure you want to cancel this scheduled job? This cannot be undone.</div>`,
+        actions: [{ label: 'Go back', onClick: () => Modal.close() }, { label: 'Cancel job', danger: true, onClick: () => { const j=_jobs.find(x=>x.id===id); if(j){ j.status='rolledback'; j.completed='Cancelled'; } Modal.close(); renderJobs(); } }]
+      });
+    };
+    window._jobRollback = id => {
+      Modal.show({
+        title: 'Rollback dealer mapping',
+        body: `<div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:12px;color:#78350F;line-height:1.5;">Rolling back will restore the dealer mapping state to before this import was applied. A new job will be created to record the rollback.</div><div style="font-size:13px;color:#4B5268;">Confirm rollback of this dealer update job?</div>`,
+        actions: [{ label: 'Cancel', onClick: () => Modal.close() }, { label: 'Confirm rollback', primary: true, onClick: () => {
+          const j = _jobs.find(x=>x.id===id); if(j){ j.canRollback=false; j.status='rolledback'; }
+          const now = new Date(); const dateStr = now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' · '+now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+          _jobs.unshift({ id:'job-rb-'+(Date.now()), file:'Rollback: '+(_jobs.find(x=>x.id===id)?.file||''), operation:'Dealer Rollback', status:'completed', requested:dateStr, completed:dateStr, canRollback:false });
+          Modal.close(); renderJobs();
+        } }]
+      });
+    };
+  }
+
+  window._dmAddMappingForBranch = function(branchId, branchName) {
+    const dealerOpts = _dealers.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+    Modal.show({
+      title: `Add dealer — ${branchName}`,
+      body: `
+        <div class="modal-form-field"><label class="modal-form-label">Dealer *</label><select class="modal-form-select" id="dma-dealer">${dealerOpts}</select></div>
+        <div class="modal-form-field"><label class="modal-form-label">Preference</label><select class="modal-form-select" id="dma-pref"><option value="1st">1st</option><option value="2nd">2nd</option><option value="N/A">None (N/A)</option></select></div>`,
+      actions: [
+        { label: 'Cancel', onClick: () => Modal.close() },
+        { label: 'Add', primary: true, onClick: () => {
+          const dId = document.getElementById('dma-dealer')?.value;
+          const d = _dealers.find(x=>x.id===dId);
+          if (!d || !_dmFleetId) return;
+          _dmMappings.push({ id:'dm-'+(Date.now()), fleetId:_dmFleetId, branchId, branchName, dealerId:d.id, dealerName:d.name, preference:document.getElementById('dma-pref')?.value||'1st', email:d.email, hasErp:!!d.erpAcct });
+          Modal.close(); renderDealerMapping();
+        }},
+      ]
+    });
+  };
+
   function setTab(tab) {
     _activeTab = tab;
     el.querySelectorAll('.sb-item[data-sp-tab]').forEach(item => {
@@ -3940,23 +4872,28 @@ groupKeys.map(pg => {
     });
 
     const contentEl = document.getElementById('sp-content');
-    const fullHeight = ['manuals', 'news', 'analytics', 'doc-upload', 'extractor', 'pricing'].includes(tab);
+    const fullHeight = ['manuals', 'news', 'analytics', 'doc-upload', 'extractor', 'pricing', 'catalog', 'pricing-assignments', 'dealer-mapping', 'email-routing', 'jobs'].includes(tab);
     if (fullHeight) {
       contentEl.style.cssText = 'flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0;';
     } else {
       contentEl.style.cssText = 'flex:1;overflow-y:auto;padding:28px;';
     }
 
-    if (tab === 'home')       renderHome();
-    if (tab === 'fleets')     renderFleets();
-    if (tab === 'requests')   renderRequests();
-    if (tab === 'orders')     { _ordMsgSubView = 'orders'; renderOrders(); }
-    if (tab === 'manuals')    renderManuals();
-    if (tab === 'news')       { _spNewsSubView = 'feed'; renderNews(); }
-    if (tab === 'analytics')  renderAnalytics();
-    if (tab === 'doc-upload') renderDocUpload();
-    if (tab === 'pricing')    renderPricing();
-    if (tab === 'extractor')  renderExtractor();
+    if (tab === 'home')                 renderHome();
+    if (tab === 'fleets')               renderFleets();
+    if (tab === 'requests')             renderRequests();
+    if (tab === 'orders')               { _ordMsgSubView = 'orders'; renderOrders(); }
+    if (tab === 'manuals')              renderManuals();
+    if (tab === 'news')                 { _spNewsSubView = 'feed'; renderNews(); }
+    if (tab === 'analytics')            renderAnalytics();
+    if (tab === 'doc-upload')           renderDocUpload();
+    if (tab === 'pricing')              renderPricing();
+    if (tab === 'extractor')            renderExtractor();
+    if (tab === 'catalog')              renderCatalog();
+    if (tab === 'pricing-assignments')  renderPricingAssignments();
+    if (tab === 'dealer-mapping')       renderDealerMapping();
+    if (tab === 'email-routing')        renderEmailRouting();
+    if (tab === 'jobs')                 renderJobs();
   }
 
   el.querySelectorAll('.sb-item[data-sp-tab]').forEach(item => {
