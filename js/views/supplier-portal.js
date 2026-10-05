@@ -2627,6 +2627,8 @@ function render_supplier_portal(el) {
   let _pricingFleetId = 'default';
   let _pricingSearch = '';
   let _pricingFilter = 'all';
+  // Track which catalogs have been formally "created" (default always counts)
+  const _pricingCreatedIds = new Set(['default', 'cat-fleet', 'cat-region', 'cat-contract']);
 
   function renderPricing() {
     const titleEl = document.getElementById('sp-topbar-title');
@@ -2771,7 +2773,10 @@ function render_supplier_portal(el) {
           <i class="ti ti-search pc-drop-search-icon"></i>
           <input class="pc-drop-search" id="pc-drop-search" type="text" placeholder="Search catalogs…" autocomplete="off"/>
         </div>
-        <div class="pc-drop-list" id="pc-drop-list"></div>`;
+        <div class="pc-drop-list" id="pc-drop-list"></div>
+        <div style="border-top:0.5px solid #F0ECE8;padding:8px 12px;display:flex;align-items:center;gap:7px;cursor:pointer;font-size:12px;color:#7A7F8E;" onmouseover="this.style.background='#F5F2EE'" onmouseout="this.style.background=''" onclick="pcCloseDrop();pcNewCatalog();">
+          <i class="ti ti-plus" style="font-size:13px;"></i> New catalog
+        </div>`;
       document.body.appendChild(drop);
       const searchEl = document.getElementById('pc-drop-search');
       searchEl.focus();
@@ -2819,13 +2824,46 @@ function render_supplier_portal(el) {
       a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(lines.join('\n'));
       a.download = `pricing-${_pricingFleetId}.csv`; a.click();
     };
+    window.pcNewCatalog = function() {
+      Modal.show({
+        title: 'Create catalog',
+        body: `
+<div style="display:flex;flex-direction:column;gap:12px;">
+  <div class="modal-form-field"><label class="modal-form-label">Catalog name</label><input id="pcnc-name" class="modal-form-input" placeholder="e.g. Regional Pricing" autofocus/></div>
+  <div class="modal-form-field"><label class="modal-form-label">Description <span class="lbl-opt">(optional)</span></label><input id="pcnc-desc" class="modal-form-input" placeholder="Who or what this catalog applies to"/></div>
+  <div style="background:#F0F9FF;border:0.5px solid #BAE6FD;border-radius:8px;padding:10px 12px;font-size:12px;color:#0369A1;">
+    <i class="ti ti-info-circle" style="font-size:13px;vertical-align:-2px;margin-right:4px;"></i>
+    Most suppliers use only the <strong>Default pricing</strong> catalog. Create an additional catalog only if you need different pricing for a specific account type.
+  </div>
+</div>`,
+        actions: [
+          { label:'Cancel', onClick:()=>Modal.close() },
+          { label:'Create &amp; add first price', primary:true, onClick:()=>{
+            const name = document.getElementById('pcnc-name')?.value.trim();
+            if (!name) { document.getElementById('pcnc-name').focus(); return; }
+            const newId = 'cat-' + name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+            fleetList.push({ id:newId, name, sub:document.getElementById('pcnc-desc')?.value.trim()||'', logoText:name.split(' ').map(w=>w[0]).join('').slice(0,3).toUpperCase() });
+            _pricingCreatedIds.add(newId);
+            _pricingFleetId = newId;
+            Modal.close();
+            renderPricing();
+            setTimeout(()=>window.pcAddRow(), 80);
+          }},
+        ],
+      });
+    };
     window.pcAddRow = function(editId) {
+      // If catalog hasn't been formally created yet, gate through creation first
+      if (!editId && !_pricingCreatedIds.has(_pricingFleetId)) {
+        window.pcNewCatalog();
+        return;
+      }
       const rows = _pricingData[_pricingFleetId] || [];
       const existing = editId ? rows.find(r => r.id === editId) : null;
       const defaultRows = _pricingData['default'] || [];
       const prefill = window._pcPrefill; window._pcPrefill = null;
       const a = existing || prefill || { partNum:'', desc:'', machine:'All', category:'', listPrice:'', contractPrice:'', currency:'USD', effectiveDate:new Date().toISOString().slice(0,10), expiryDate:'', active:true };
-      const fleetLabel = fleetList.find(f => f.id === _pricingFleetId)?.name || 'this fleet';
+      const fleetLabel = fleetList.find(f => f.id === _pricingFleetId)?.name || 'this catalog';
       Modal.show({
         title: editId ? 'Edit price' : `Add price — ${fleetLabel}`,
         wide: true,
@@ -2840,14 +2878,14 @@ function render_supplier_portal(el) {
   <div id="pc-default-banner" style="display:none;background:#D6E4F7;border:0.5px solid #1C396940;border-radius:7px;padding:8px 11px;font-size:11px;color:#1C3969;"></div>
   <div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:12px;">
     <div class="modal-form-field"><label class="modal-form-label">List price (MSRP)</label><input id="pc-f-list" class="modal-form-input" type="number" step="0.01" min="0" placeholder="0.00" value="${a.listPrice}"/></div>
-    <div class="modal-form-field"><label class="modal-form-label">Contract price <span class="lbl-opt">(for ${fleetLabel})</span></label><input id="pc-f-fleet" class="modal-form-input" type="number" step="0.01" min="0" placeholder="0.00" value="${a.contractPrice}"/></div>
+    <div class="modal-form-field"><label class="modal-form-label">Contract price <span class="lbl-opt">(${fleetLabel})</span></label><input id="pc-f-fleet" class="modal-form-input" type="number" step="0.01" min="0" placeholder="0.00" value="${a.contractPrice}"/></div>
     <div class="modal-form-field"><label class="modal-form-label">Currency</label><select id="pc-f-currency" class="modal-form-select"><option>USD</option><option>CAD</option><option>EUR</option></select></div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
     <div class="modal-form-field"><label class="modal-form-label">Effective date</label><input id="pc-f-eff" class="modal-form-input" type="date" value="${a.effectiveDate}"/></div>
     <div class="modal-form-field"><label class="modal-form-label">Expiry date <span class="lbl-opt">(optional)</span></label><input id="pc-f-exp" class="modal-form-input" type="date" value="${a.expiryDate||''}"/></div>
   </div>
-  <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#3A3D4A;cursor:pointer;"><input type="checkbox" id="pc-f-active" ${a.active?'checked':''} style="accent-color:#1C3969;"/> Active (visible to this fleet)</label>
+  <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#3A3D4A;cursor:pointer;"><input type="checkbox" id="pc-f-active" ${a.active?'checked':''} style="accent-color:#1C3969;"/> Active</label>
 </div>`,
         actions: [
           { label: editId ? 'Save changes' : 'Add price', style:'primary', onClick: () => {
