@@ -65,6 +65,7 @@ function buildSidebar(activeItem, opts) {
       <div class="sb-item ${activeItem==='sp-news'?'active':''}"     data-sp-tab="news"><i class="ti ti-news"></i><span class="sb-lbl"> News &amp; Updates</span></div>
       <div class="sb-section-label">Products &amp; Pricing</div>
       <div class="sb-item ${activeItem==='sp-catalog'?'active':''}"            data-sp-tab="catalog"><i class="ti ti-package"></i><span class="sb-lbl"> Enhanced Catalog</span></div>
+      <div class="sb-item ${activeItem==='sp-parts-master'?'active':''}"       data-sp-tab="parts-master"><i class="ti ti-forms"></i><span class="sb-lbl"> Parts Master</span></div>
       <div class="sb-item ${activeItem==='sp-pricing'?'active':''}"            data-sp-tab="pricing"><i class="ti ti-list-numbers"></i><span class="sb-lbl"> Pricing Catalog</span></div>
       <div class="sb-item ${activeItem==='sp-pricing-assignments'?'active':''}" data-sp-tab="pricing-assignments"><i class="ti ti-link"></i><span class="sb-lbl"> Pricing Assignments</span></div>
       <div class="sb-section-label">Operations</div>

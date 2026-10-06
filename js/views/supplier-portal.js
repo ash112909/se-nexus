@@ -2646,6 +2646,268 @@ function render_supplier_portal(el) {
     'cat-contract': { updatedAt:'2026-06-30', status:'inactive', description:'Fixed rates under agreement' },
   };
 
+  // ── Parts Master ─────────────────────────────────────────────────────────────
+  const _masterParts = [
+    { id:'mp-001', partNum:'1001502', desc:'Battery — 12V 105Ah',             category:'Electrical',  machine:'All',                 uom:'EA', weight:'28 kg', active:true, notes:'' },
+    { id:'mp-002', partNum:'1001719', desc:'Hydraulic Oil Filter',             category:'Hydraulics',  machine:'All',                 uom:'EA', weight:'0.4 kg', active:true, notes:'' },
+    { id:'mp-003', partNum:'1100156', desc:'Control Board — ACLE',             category:'Electrical',  machine:'All',                 uom:'EA', weight:'1.1 kg', active:true, notes:'' },
+    { id:'mp-004', partNum:'1520539', desc:'Hydraulic Lift Cylinder',          category:'Hydraulics',  machine:'Skyjack SJIII 3219',  uom:'EA', weight:'14.2 kg', active:true, notes:'' },
+    { id:'mp-005', partNum:'1520678', desc:'Platform Overload Sensor',         category:'Electrical',  machine:'Skyjack SJIII 4632',  uom:'EA', weight:'0.2 kg', active:true, notes:'' },
+    { id:'mp-006', partNum:'2200341', desc:'Drive Motor Brush Set',            category:'Drive',       machine:'All',                 uom:'SET', weight:'0.6 kg', active:true, notes:'' },
+    { id:'mp-007', partNum:'2201095', desc:'Wheel Assembly — Non-Marking',     category:'Drive',       machine:'Skyjack SJ9250 RT',   uom:'EA', weight:'22 kg', active:true, notes:'' },
+    { id:'mp-008', partNum:'2310044', desc:'Steer Cylinder',                   category:'Hydraulics',  machine:'All',                 uom:'EA', weight:'5.5 kg', active:true, notes:'' },
+    { id:'mp-009', partNum:'3310087', desc:'Platform Chain Set',               category:'Structure',   machine:'Skyjack SJIII 4632',  uom:'SET', weight:'3.8 kg', active:true, notes:'' },
+    { id:'mp-010', partNum:'3400218', desc:'Scissor Arm Pin Kit',              category:'Structure',   machine:'All',                 uom:'KIT', weight:'1.2 kg', active:true, notes:'' },
+    { id:'mp-011', partNum:'4101002', desc:'Emergency Lowering Valve',         category:'Hydraulics',  machine:'All',                 uom:'EA', weight:'0.3 kg', active:true, notes:'' },
+    { id:'mp-012', partNum:'4102550', desc:'Pothole Protection Cylinder',      category:'Hydraulics',  machine:'Skyjack SJ9250 RT',   uom:'EA', weight:'4.1 kg', active:true, notes:'' },
+    { id:'mp-013', partNum:'5000819', desc:'Load Sensing Module',              category:'Electrical',  machine:'All',                 uom:'EA', weight:'0.5 kg', active:true, notes:'' },
+    { id:'mp-014', partNum:'5001234', desc:'Tilt Sensor Assembly',             category:'Electrical',  machine:'All',                 uom:'EA', weight:'0.3 kg', active:true, notes:'' },
+    { id:'mp-015', partNum:'6600041', desc:'Hydraulic Pump — Gear Type',       category:'Hydraulics',  machine:'All',                 uom:'EA', weight:'6.7 kg', active:true, notes:'' },
+    { id:'mp-016', partNum:'6700210', desc:'Contactor — 48V 300A',            category:'Electrical',  machine:'All',                 uom:'EA', weight:'0.9 kg', active:false, notes:'Superseded by 6700211' },
+    { id:'mp-017', partNum:'6700211', desc:'Contactor — 48V 300A (Rev B)',     category:'Electrical',  machine:'All',                 uom:'EA', weight:'0.9 kg', active:true, notes:'Replaces 6700210' },
+    { id:'mp-018', partNum:'7200302', desc:'Brake Assembly — Rear',            category:'Drive',       machine:'All',                 uom:'EA', weight:'8.4 kg', active:true, notes:'' },
+    { id:'mp-019', partNum:'7200501', desc:'Joystick Controller',              category:'Electrical',  machine:'All',                 uom:'EA', weight:'0.4 kg', active:true, notes:'' },
+    { id:'mp-020', partNum:'8800077', desc:'Outrigger Pad Kit',                category:'Structure',   machine:'Skyjack SJ9250 RT',   uom:'KIT', weight:'12 kg', active:true, notes:'' },
+  ];
+  let _pmSearch = '';
+  let _pmFilter = 'all'; // 'all' | 'active' | 'inactive'
+  let _pmCategory = 'all';
+
+  const _pmCategories = ['Electrical', 'Hydraulics', 'Drive', 'Structure'];
+
+  function renderPartsMaster() {
+    const titleEl = document.getElementById('sp-topbar-title');
+    if (titleEl) titleEl.textContent = 'Parts Master';
+    const contentEl = document.getElementById('sp-content');
+
+    contentEl.innerHTML = `
+<style>
+.pm-shell { display:flex; flex:1; flex-direction:column; min-height:0; overflow:hidden; }
+.pm-toolbar { padding:10px 20px; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:8px; flex-shrink:0; flex-wrap:wrap; }
+.pm-body { flex:1; padding:16px 20px 40px; overflow-y:auto; }
+.pm-search-wrap { position:relative; }
+.pm-search-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:14px; pointer-events:none; }
+.pm-search-input { width:240px; height:34px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:9px; padding:0 10px 0 30px; font-size:12px; font-family:inherit; color:#111318; outline:none; }
+.pm-search-input:focus { border-color:#1C3969; background:#FFFFFF; }
+.pm-search-input::placeholder { color:#B0AAA3; }
+.pm-ftab { padding:4px 11px; border-radius:20px; font-size:11px; font-weight:500; cursor:pointer; border:0.5px solid transparent; color:#5A5F6E; white-space:nowrap; }
+.pm-ftab.active { background:#111318; color:#FFFFFF; }
+.pm-ftab:hover:not(.active) { background:#F5F2EE; }
+.pm-cat-select { height:34px; border:1px solid #E2DDD8; border-radius:9px; padding:0 10px; font-size:12px; font-family:inherit; color:#111318; outline:none; background:#FFFFFF; cursor:pointer; }
+.pm-cat-select:focus { border-color:#1C3969; }
+.pm-table { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
+.pm-head { display:grid; grid-template-columns:110px 1fr 120px 160px 70px 70px 1fr 100px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
+.pm-row { display:grid; grid-template-columns:110px 1fr 120px 160px 70px 70px 1fr 100px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; }
+.pm-row:last-child { border-bottom:none; }
+.pm-row:hover { background:#FAFAF9; }
+.pm-th { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.7px; text-transform:uppercase; padding:9px 7px; }
+.pm-td { padding:11px 7px; font-size:12px; color:#3A3D4A; }
+.pm-partnum { font-size:12px; font-weight:600; color:#111318; font-variant-numeric:tabular-nums; }
+.pm-desc { font-size:12px; color:#111318; font-weight:500; }
+.pm-machine { font-size:11px; color:#7A7F8E; }
+.pm-cat-pill { display:inline-block; font-size:10px; font-weight:600; border-radius:10px; padding:2px 8px; }
+.pm-cat-Electrical { background:#EDE9FE; color:#5B21B6; }
+.pm-cat-Hydraulics  { background:#DBEAFE; color:#1D4ED8; }
+.pm-cat-Drive       { background:#FEF3C7; color:#92400E; }
+.pm-cat-Structure   { background:#D1FAE5; color:#065F46; }
+.pm-status-active   { font-size:10px; font-weight:600; color:#065F46; background:#D1FAE5; border-radius:10px; padding:2px 8px; display:inline-block; }
+.pm-status-inactive { font-size:10px; font-weight:600; color:#92400E; background:#FEF3C7; border-radius:10px; padding:2px 8px; display:inline-block; }
+.pm-actions { display:flex; gap:4px; opacity:0; transition:opacity .1s; }
+.pm-row:hover .pm-actions { opacity:1; }
+</style>
+<div class="pm-shell">
+  <div class="pm-toolbar">
+    <div class="pm-search-wrap">
+      <i class="ti ti-search pm-search-icon"></i>
+      <input class="pm-search-input" id="pm-search" type="text" placeholder="Search part # or description…" value="${_pmSearch}"/>
+    </div>
+    <select class="pm-cat-select" id="pm-cat" onchange="window._pmSetCategory(this.value)">
+      <option value="all" ${_pmCategory==='all'?'selected':''}>All categories</option>
+      ${_pmCategories.map(c=>`<option value="${c}" ${_pmCategory===c?'selected':''}>${c}</option>`).join('')}
+    </select>
+    <div style="display:flex;gap:3px;">
+      ${[['all','All'],['active','Active'],['inactive','Inactive']].map(([v,l])=>
+        `<div class="pm-ftab ${_pmFilter===v?'active':''}" onclick="window._pmSetFilter('${v}')">${l}</div>`
+      ).join('')}
+    </div>
+    <div style="margin-left:auto;display:flex;gap:6px;">
+      <button class="sp-btn sp-btn-ghost" onclick="window._pmImport()"><i class="ti ti-table-import" style="font-size:12px;"></i> Import</button>
+      <button class="sp-btn sp-btn-ghost" onclick="window._pmExport()"><i class="ti ti-download" style="font-size:12px;"></i> Export</button>
+      <button class="sp-btn sp-btn-primary" onclick="window._pmAddPart()"><i class="ti ti-plus" style="font-size:12px;"></i> Add part</button>
+    </div>
+  </div>
+  <div class="pm-body"><div id="pm-table-wrap"></div></div>
+</div>`;
+
+    document.getElementById('pm-search').addEventListener('input', function() {
+      _pmSearch = this.value; pmRenderTable();
+    });
+
+    window._pmSetFilter   = function(v) { _pmFilter = v; pmRenderTable(); };
+    window._pmSetCategory = function(v) { _pmCategory = v; pmRenderTable(); };
+    window._pmExport = function() {
+      const rows = _masterParts;
+      const lines = ['partNum,description,category,machine,uom,weight,active,notes',
+        ...rows.map(r=>`${r.partNum},"${r.desc}","${r.category}","${r.machine}",${r.uom},${r.weight},${r.active},"${r.notes}"`)];
+      const a = document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(lines.join('\n')); a.download='parts-master.csv'; a.click();
+    };
+    window._pmImport = function() {
+      Modal.show({ title:'Import parts CSV', body:`<p style="font-size:13px;color:#5A5F6E;">Upload a CSV with columns <code>partNum, description, category, machine, uom, weight, notes</code>. Existing part numbers will be updated; new ones added. Demo only.</p>`, actions:[{label:'Close',onClick:()=>Modal.close()}] });
+    };
+    window._pmAddPart = function(editId) {
+      const existing = editId ? _masterParts.find(p=>p.id===editId) : null;
+      Modal.show({
+        title: existing ? `Edit part — ${existing.partNum}` : 'Add part',
+        wide: true,
+        body: `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;padding:4px 0;">
+          <div>
+            <label style="font-size:11px;font-weight:600;color:#5A5F6E;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px;">Part number <span style="color:#DC2626;">*</span></label>
+            <input id="pm-f-partnum" value="${existing?.partNum||''}" placeholder="e.g. 1520539" style="width:100%;height:34px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;" ${existing?'readonly style="width:100%;height:34px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;background:#F5F2EE;"':''}/>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:#5A5F6E;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px;">UOM</label>
+            <select id="pm-f-uom" style="width:100%;height:34px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;background:#FFFFFF;">
+              ${['EA','SET','KIT','PK','M','L'].map(u=>`<option value="${u}" ${(existing?.uom||'EA')===u?'selected':''}>${u}</option>`).join('')}
+            </select>
+          </div>
+          <div style="grid-column:1/-1;">
+            <label style="font-size:11px;font-weight:600;color:#5A5F6E;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px;">Description <span style="color:#DC2626;">*</span></label>
+            <input id="pm-f-desc" value="${existing?.desc||''}" placeholder="Full part description" style="width:100%;height:34px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;"/>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:#5A5F6E;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px;">Category</label>
+            <select id="pm-f-cat" style="width:100%;height:34px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;background:#FFFFFF;">
+              ${_pmCategories.map(c=>`<option value="${c}" ${(existing?.category||'Electrical')===c?'selected':''}>${c}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:#5A5F6E;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px;">Weight</label>
+            <input id="pm-f-weight" value="${existing?.weight||''}" placeholder="e.g. 1.2 kg" style="width:100%;height:34px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;"/>
+          </div>
+          <div style="grid-column:1/-1;">
+            <label style="font-size:11px;font-weight:600;color:#5A5F6E;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px;">Applies to machine</label>
+            <input id="pm-f-machine" value="${existing?.machine||'All'}" placeholder="e.g. Skyjack SJIII 4632, or All" style="width:100%;height:34px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;"/>
+          </div>
+          <div style="grid-column:1/-1;">
+            <label style="font-size:11px;font-weight:600;color:#5A5F6E;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px;">Notes</label>
+            <input id="pm-f-notes" value="${existing?.notes||''}" placeholder="Optional — supersedes, hazmat flags, etc." style="width:100%;height:34px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;"/>
+          </div>
+          <div style="grid-column:1/-1;display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" id="pm-f-active" ${(existing?.active!==false)?'checked':''} style="width:15px;height:15px;cursor:pointer;"/>
+            <label for="pm-f-active" style="font-size:13px;color:#3A3D4A;cursor:pointer;">Active (available for pricing)</label>
+          </div>
+        </div>`,
+        actions: [
+          { label:'Cancel', onClick:()=>Modal.close() },
+          ...(existing ? [{ label:'Delete part', danger:true, onClick:()=>{
+            const idx = _masterParts.findIndex(p=>p.id===editId);
+            if (idx>-1) _masterParts.splice(idx,1);
+            Modal.close(); pmRenderTable();
+          }}] : []),
+          { label: existing?'Save changes':'Add part', primary:true, onClick:()=>{
+            const partNum = document.getElementById('pm-f-partnum')?.value.trim();
+            const desc    = document.getElementById('pm-f-desc')?.value.trim();
+            if (!partNum || !desc) return;
+            if (existing) {
+              existing.desc    = desc;
+              existing.category= document.getElementById('pm-f-cat')?.value||existing.category;
+              existing.machine = document.getElementById('pm-f-machine')?.value.trim()||existing.machine;
+              existing.uom     = document.getElementById('pm-f-uom')?.value||existing.uom;
+              existing.weight  = document.getElementById('pm-f-weight')?.value.trim()||existing.weight;
+              existing.notes   = document.getElementById('pm-f-notes')?.value.trim();
+              existing.active  = document.getElementById('pm-f-active')?.checked;
+            } else {
+              if (_masterParts.find(p=>p.partNum===partNum)) {
+                document.getElementById('pm-f-partnum').style.borderColor='#DC2626';
+                document.getElementById('pm-f-partnum').title='Part number already exists';
+                return;
+              }
+              _masterParts.push({
+                id:'mp-'+Date.now(),
+                partNum,
+                desc,
+                category: document.getElementById('pm-f-cat')?.value||'Electrical',
+                machine:  document.getElementById('pm-f-machine')?.value.trim()||'All',
+                uom:      document.getElementById('pm-f-uom')?.value||'EA',
+                weight:   document.getElementById('pm-f-weight')?.value.trim()||'',
+                notes:    document.getElementById('pm-f-notes')?.value.trim()||'',
+                active:   document.getElementById('pm-f-active')?.checked!==false,
+              });
+            }
+            Modal.close(); pmRenderTable();
+          }},
+        ],
+      });
+    };
+
+    function pmRenderTable() {
+      const wrap = document.getElementById('pm-table-wrap');
+      if (!wrap) return;
+      const q = _pmSearch.toLowerCase();
+      const rows = _masterParts
+        .filter(p => _pmFilter==='all' || (_pmFilter==='active'?p.active:!p.active))
+        .filter(p => _pmCategory==='all' || p.category===_pmCategory)
+        .filter(p => !q || p.partNum.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q) || (p.machine||'').toLowerCase().includes(q));
+
+      const active = _masterParts.filter(p=>p.active).length;
+      wrap.innerHTML = `
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <div style="flex:1;background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:14px 16px;">
+            <div style="font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;">Total parts</div>
+            <div style="font-size:22px;font-weight:700;color:#111318;font-variant-numeric:tabular-nums;">${_masterParts.length}</div>
+          </div>
+          <div style="flex:1;background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:14px 16px;">
+            <div style="font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;">Active</div>
+            <div style="font-size:22px;font-weight:700;color:#111318;font-variant-numeric:tabular-nums;">${active}</div>
+          </div>
+          <div style="flex:1;background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:14px 16px;">
+            <div style="font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;">Categories</div>
+            <div style="font-size:22px;font-weight:700;color:#111318;font-variant-numeric:tabular-nums;">${_pmCategories.length}</div>
+          </div>
+          <div style="flex:1;background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:14px 16px;">
+            <div style="font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;">Priced</div>
+            <div style="font-size:22px;font-weight:700;color:#111318;font-variant-numeric:tabular-nums;">${_masterParts.filter(p=>{const all=Object.values(_pricingData).flat();return all.some(r=>r.partNum===p.partNum);}).length}</div>
+          </div>
+        </div>
+        ${rows.length ? `
+        <div class="pm-table">
+          <div class="pm-head">
+            <div class="pm-th">Part #</div>
+            <div class="pm-th">Description</div>
+            <div class="pm-th">Category</div>
+            <div class="pm-th">Machine</div>
+            <div class="pm-th">UOM</div>
+            <div class="pm-th">Weight</div>
+            <div class="pm-th">Notes</div>
+            <div class="pm-th"></div>
+          </div>
+          ${rows.map(p=>{
+            const pricedIn = Object.entries(_pricingData).filter(([,arr])=>arr.some(r=>r.partNum===p.partNum)).map(([id])=>_pcFleetList.find(f=>f.id===id)?.name||id);
+            return `<div class="pm-row">
+              <div class="pm-td"><span class="pm-partnum">${p.partNum}</span></div>
+              <div class="pm-td">
+                <div class="pm-desc">${p.desc}</div>
+                ${pricedIn.length?`<div style="font-size:10px;color:#059669;margin-top:1px;"><i class="ti ti-circle-check" style="font-size:10px;"></i> Priced in ${pricedIn.join(', ')}</div>`:'<div style="font-size:10px;color:#B0AAA3;margin-top:1px;">Not yet priced</div>'}
+              </div>
+              <div class="pm-td"><span class="pm-cat-pill pm-cat-${p.category}">${p.category}</span></div>
+              <div class="pm-td pm-machine">${p.machine}</div>
+              <div class="pm-td" style="color:#5A5F6E;">${p.uom}</div>
+              <div class="pm-td" style="color:#5A5F6E;font-variant-numeric:tabular-nums;">${p.weight||'—'}</div>
+              <div class="pm-td" style="font-size:11px;color:#7A7F8E;font-style:${p.notes?'normal':'italic'};">${p.notes||'—'}</div>
+              <div class="pm-td">
+                <div class="pm-actions">
+                  <span class="${p.active?'pm-status-active':'pm-status-inactive'}" style="margin-right:4px;">${p.active?'Active':'Inactive'}</span>
+                  <button class="sp-btn sp-btn-ghost" style="height:26px;font-size:11px;padding:0 8px;" onclick="window._pmAddPart('${p.id}')">Edit</button>
+                </div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>` : `<div style="padding:48px;text-align:center;color:#9CA3AF;font-size:13px;">No parts match the filter. <button class="sp-btn sp-btn-primary" style="margin-left:8px;height:28px;font-size:11px;" onclick="window._pmAddPart()"><i class="ti ti-plus"></i> Add part</button></div>`}`;
+    }
+
+    pmRenderTable();
+  }
+
   function renderPricing() {
     const titleEl = document.getElementById('sp-topbar-title');
     if (titleEl) titleEl.textContent = 'Pricing Catalog';
@@ -3111,12 +3373,41 @@ function render_supplier_portal(el) {
         wide: true,
         body: `
 <div style="display:flex;flex-direction:column;gap:12px;">
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-    <div class="modal-form-field"><label class="modal-form-label">Part number</label><input id="pc-f-pnum" class="modal-form-input" placeholder="e.g. 1520539" value="${a.partNum}" oninput="pcLookupDefault(this.value)"/></div>
-    <div class="modal-form-field"><label class="modal-form-label">Category</label><input id="pc-f-cat" class="modal-form-input" placeholder="e.g. Hydraulics" value="${a.category}"/></div>
+  ${!editId ? `
+  <div class="modal-form-field">
+    <label class="modal-form-label">Part <span style="color:#DC2626;">*</span></label>
+    <div style="position:relative;">
+      <i class="ti ti-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:13px;color:#9CA3AF;pointer-events:none;"></i>
+      <input id="pc-f-part-search" class="modal-form-input" style="padding-left:30px;" placeholder="Search part # or description…" autocomplete="off" oninput="pcPartSearchFilter(this.value)"/>
+    </div>
+    <div id="pc-part-drop" style="display:none;border:1px solid #E2DDD8;border-radius:8px;max-height:180px;overflow-y:auto;background:#FFFFFF;margin-top:4px;box-shadow:0 4px 16px rgba(0,0,0,.10);">
+      ${_masterParts.filter(p=>p.active).map(p=>`
+        <div class="pc-part-opt" data-id="${p.id}" data-pnum="${p.partNum}" data-desc="${p.desc.replace(/"/g,'&quot;')}" data-cat="${p.category}" data-machine="${p.machine.replace(/"/g,'&quot;')}"
+          onclick="pcPickPart(this)" style="padding:8px 12px;cursor:pointer;border-bottom:0.5px solid #F5F2EE;display:flex;align-items:baseline;gap:8px;">
+          <span style="font-size:12px;font-weight:600;color:#111318;font-variant-numeric:tabular-nums;white-space:nowrap;">${p.partNum}</span>
+          <span style="font-size:11px;color:#5A5F6E;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.desc}</span>
+          <span style="font-size:10px;font-weight:600;color:#7A7F8E;background:#F0ECE8;border-radius:6px;padding:1px 6px;white-space:nowrap;">${p.category}</span>
+        </div>`).join('')}
+    </div>
+    <div id="pc-f-part-selected" style="display:${a.partNum?'flex':'none'};align-items:center;gap:8px;background:#F0FAF4;border:0.5px solid #6EE7B7;border-radius:8px;padding:8px 12px;margin-top:6px;">
+      <i class="ti ti-circle-check" style="color:#059669;font-size:15px;flex-shrink:0;"></i>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12px;font-weight:600;color:#111318;" id="pc-sel-label">${a.partNum}${a.desc?' — '+a.desc:''}</div>
+        <div style="font-size:10px;color:#7A7F8E;" id="pc-sel-sub">${a.category||''}${a.machine&&a.machine!=='All'?' · '+a.machine:''}</div>
+      </div>
+      <button onclick="pcClearPartPick()" style="background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:14px;padding:2px;"><i class="ti ti-x"></i></button>
+    </div>
   </div>
-  <div class="modal-form-field"><label class="modal-form-label">Description</label><input id="pc-f-desc" class="modal-form-input" placeholder="Part description" value="${a.desc}"/></div>
-  <div class="modal-form-field"><label class="modal-form-label">Associated machine</label><input id="pc-f-machine" class="modal-form-input" placeholder="e.g. Skyjack SJIII 3219 or All" value="${a.machine}"/></div>
+  ` : `
+  <div style="display:flex;align-items:center;gap:8px;background:#F5F2EE;border-radius:8px;padding:9px 12px;">
+    <div style="flex:1;"><span style="font-size:12px;font-weight:600;color:#111318;">${a.partNum}</span><span style="font-size:12px;color:#5A5F6E;margin-left:8px;">${a.desc}</span></div>
+  </div>
+  `}
+  <div id="pc-price-fields" style="${a.partNum||editId?'':'opacity:.4;pointer-events:none;'}">
+    <input type="hidden" id="pc-f-pnum" value="${a.partNum}"/>
+    <input type="hidden" id="pc-f-desc" value="${a.desc}"/>
+    <input type="hidden" id="pc-f-machine" value="${a.machine}"/>
+    <input type="hidden" id="pc-f-cat" value="${a.category}"/>
   <div id="pc-default-banner" style="display:none;background:#D6E4F7;border:0.5px solid #1C396940;border-radius:7px;padding:8px 11px;font-size:11px;color:#1C3969;"></div>
   <div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:12px;">
     <div class="modal-form-field"><label class="modal-form-label">List price (MSRP)</label><input id="pc-f-list" class="modal-form-input" type="number" step="0.01" min="0" placeholder="0.00" value="${a.listPrice}"/></div>
@@ -3128,6 +3419,7 @@ function render_supplier_portal(el) {
     <div class="modal-form-field"><label class="modal-form-label">Expiry date <span class="lbl-opt">(optional)</span></label><input id="pc-f-exp" class="modal-form-input" type="date" value="${a.expiryDate||''}"/></div>
   </div>
   <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#3A3D4A;cursor:pointer;"><input type="checkbox" id="pc-f-active" ${a.active?'checked':''} style="accent-color:#1C3969;"/> Active</label>
+  </div>
 </div>`,
         actions: [
           { label: editId ? 'Save changes' : 'Add price', style:'primary', onClick: () => {
@@ -3158,15 +3450,52 @@ function render_supplier_portal(el) {
       window.pcLookupDefault = function(pnum) {
         const match = defaultRows.find(r => r.partNum.toLowerCase() === pnum.toLowerCase());
         const banner = document.getElementById('pc-default-banner');
-        if (match) {
-          document.getElementById('pc-f-desc').value    = match.desc;
-          document.getElementById('pc-f-cat').value     = match.category;
-          document.getElementById('pc-f-machine').value = match.machine;
-          document.getElementById('pc-f-list').value    = match.listPrice;
-          if (banner) { banner.style.display = ''; banner.innerHTML = `<i class="ti ti-circle-check" style="margin-right:4px;"></i>Pre-filled from default catalog — set the contract price for this fleet below.`; }
-        } else {
-          if (banner) banner.style.display = 'none';
-        }
+        if (match && banner) { banner.style.display = ''; banner.innerHTML = `<i class="ti ti-circle-check" style="margin-right:4px;"></i>Pre-filled from default catalog — set the contract price for this fleet below.`; }
+        else if (banner) banner.style.display = 'none';
+      };
+      window.pcPartSearchFilter = function(q) {
+        const drop = document.getElementById('pc-part-drop');
+        if (!drop) return;
+        const ql = q.toLowerCase();
+        let any = false;
+        drop.querySelectorAll('.pc-part-opt').forEach(el => {
+          const show = !ql || el.dataset.pnum.toLowerCase().includes(ql) || el.dataset.desc.toLowerCase().includes(ql);
+          el.style.display = show ? '' : 'none';
+          if (show) any = true;
+        });
+        drop.style.display = (q && any) ? '' : 'none';
+      };
+      window.pcPickPart = function(el) {
+        const pnum    = el.dataset.pnum;
+        const desc    = el.dataset.desc;
+        const cat     = el.dataset.cat;
+        const machine = el.dataset.machine;
+        document.getElementById('pc-f-pnum').value    = pnum;
+        document.getElementById('pc-f-desc').value    = desc;
+        document.getElementById('pc-f-cat').value     = cat;
+        document.getElementById('pc-f-machine').value = machine;
+        const selLabel = document.getElementById('pc-sel-label');
+        const selSub   = document.getElementById('pc-sel-sub');
+        const selBanner = document.getElementById('pc-f-part-selected');
+        if (selLabel) selLabel.textContent = pnum + ' — ' + desc;
+        if (selSub)   selSub.textContent   = cat + (machine && machine!=='All' ? ' · '+machine : '');
+        if (selBanner) selBanner.style.display = 'flex';
+        document.getElementById('pc-f-part-search').value = '';
+        document.getElementById('pc-part-drop').style.display = 'none';
+        const fields = document.getElementById('pc-price-fields');
+        if (fields) { fields.style.opacity='1'; fields.style.pointerEvents=''; }
+        window.pcLookupDefault(pnum);
+      };
+      window.pcClearPartPick = function() {
+        document.getElementById('pc-f-pnum').value = '';
+        document.getElementById('pc-f-desc').value = '';
+        document.getElementById('pc-f-cat').value  = '';
+        document.getElementById('pc-f-machine').value = '';
+        const selBanner = document.getElementById('pc-f-part-selected');
+        if (selBanner) selBanner.style.display = 'none';
+        const fields = document.getElementById('pc-price-fields');
+        if (fields) { fields.style.opacity='.4'; fields.style.pointerEvents='none'; }
+        document.getElementById('pc-f-part-search').focus();
       };
     };
     window.pcDeleteRow = function(id) {
@@ -5745,7 +6074,7 @@ groupKeys.map(pg => {
     });
 
     const contentEl = document.getElementById('sp-content');
-    const fullHeight = ['manuals', 'news', 'analytics', 'doc-upload', 'extractor', 'pricing', 'catalog', 'pricing-assignments', 'dealer-mapping', 'email-routing', 'jobs'].includes(tab);
+    const fullHeight = ['manuals', 'news', 'analytics', 'doc-upload', 'extractor', 'pricing', 'catalog', 'parts-master', 'pricing-assignments', 'dealer-mapping', 'email-routing', 'jobs'].includes(tab);
     if (fullHeight) {
       contentEl.style.cssText = 'flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0;';
     } else {
@@ -5760,6 +6089,7 @@ groupKeys.map(pg => {
     if (tab === 'news')                 { _spNewsSubView = 'feed'; renderNews(); }
     if (tab === 'analytics')            renderAnalytics();
     if (tab === 'doc-upload')           renderDocUpload();
+    if (tab === 'parts-master')         renderPartsMaster();
     if (tab === 'pricing')              renderPricing();
     if (tab === 'extractor')            renderExtractor();
     if (tab === 'catalog')              renderCatalog();
