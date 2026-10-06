@@ -2648,26 +2648,26 @@ function render_supplier_portal(el) {
 
   // ── Parts Master ─────────────────────────────────────────────────────────────
   const _masterParts = [
-    { id:'mp-001', partNum:'1001502', desc:'Battery — 12V 105Ah',             category:'Electrical',  machine:'All',                 uom:'EA', weight:'28 kg', active:true, notes:'' },
-    { id:'mp-002', partNum:'1001719', desc:'Hydraulic Oil Filter',             category:'Hydraulics',  machine:'All',                 uom:'EA', weight:'0.4 kg', active:true, notes:'' },
-    { id:'mp-003', partNum:'1100156', desc:'Control Board — ACLE',             category:'Electrical',  machine:'All',                 uom:'EA', weight:'1.1 kg', active:true, notes:'' },
-    { id:'mp-004', partNum:'1520539', desc:'Hydraulic Lift Cylinder',          category:'Hydraulics',  machine:'Skyjack SJIII 3219',  uom:'EA', weight:'14.2 kg', active:true, notes:'' },
-    { id:'mp-005', partNum:'1520678', desc:'Platform Overload Sensor',         category:'Electrical',  machine:'Skyjack SJIII 4632',  uom:'EA', weight:'0.2 kg', active:true, notes:'' },
-    { id:'mp-006', partNum:'2200341', desc:'Drive Motor Brush Set',            category:'Drive',       machine:'All',                 uom:'SET', weight:'0.6 kg', active:true, notes:'' },
-    { id:'mp-007', partNum:'2201095', desc:'Wheel Assembly — Non-Marking',     category:'Drive',       machine:'Skyjack SJ9250 RT',   uom:'EA', weight:'22 kg', active:true, notes:'' },
-    { id:'mp-008', partNum:'2310044', desc:'Steer Cylinder',                   category:'Hydraulics',  machine:'All',                 uom:'EA', weight:'5.5 kg', active:true, notes:'' },
-    { id:'mp-009', partNum:'3310087', desc:'Platform Chain Set',               category:'Structure',   machine:'Skyjack SJIII 4632',  uom:'SET', weight:'3.8 kg', active:true, notes:'' },
-    { id:'mp-010', partNum:'3400218', desc:'Scissor Arm Pin Kit',              category:'Structure',   machine:'All',                 uom:'KIT', weight:'1.2 kg', active:true, notes:'' },
-    { id:'mp-011', partNum:'4101002', desc:'Emergency Lowering Valve',         category:'Hydraulics',  machine:'All',                 uom:'EA', weight:'0.3 kg', active:true, notes:'' },
-    { id:'mp-012', partNum:'4102550', desc:'Pothole Protection Cylinder',      category:'Hydraulics',  machine:'Skyjack SJ9250 RT',   uom:'EA', weight:'4.1 kg', active:true, notes:'' },
-    { id:'mp-013', partNum:'5000819', desc:'Load Sensing Module',              category:'Electrical',  machine:'All',                 uom:'EA', weight:'0.5 kg', active:true, notes:'' },
-    { id:'mp-014', partNum:'5001234', desc:'Tilt Sensor Assembly',             category:'Electrical',  machine:'All',                 uom:'EA', weight:'0.3 kg', active:true, notes:'' },
-    { id:'mp-015', partNum:'6600041', desc:'Hydraulic Pump — Gear Type',       category:'Hydraulics',  machine:'All',                 uom:'EA', weight:'6.7 kg', active:true, notes:'' },
-    { id:'mp-016', partNum:'6700210', desc:'Contactor — 48V 300A',            category:'Electrical',  machine:'All',                 uom:'EA', weight:'0.9 kg', active:false, notes:'Superseded by 6700211' },
-    { id:'mp-017', partNum:'6700211', desc:'Contactor — 48V 300A (Rev B)',     category:'Electrical',  machine:'All',                 uom:'EA', weight:'0.9 kg', active:true, notes:'Replaces 6700210' },
-    { id:'mp-018', partNum:'7200302', desc:'Brake Assembly — Rear',            category:'Drive',       machine:'All',                 uom:'EA', weight:'8.4 kg', active:true, notes:'' },
-    { id:'mp-019', partNum:'7200501', desc:'Joystick Controller',              category:'Electrical',  machine:'All',                 uom:'EA', weight:'0.4 kg', active:true, notes:'' },
-    { id:'mp-020', partNum:'8800077', desc:'Outrigger Pad Kit',                category:'Structure',   machine:'Skyjack SJ9250 RT',   uom:'KIT', weight:'12 kg', active:true, notes:'' },
+    { id:'mp-001', partNum:'1001502', desc:'Battery — 12V 105Ah',             category:'Electrical',  machine:'All',                 active:true, notes:'' },
+    { id:'mp-002', partNum:'1001719', desc:'Hydraulic Oil Filter',             category:'Hydraulics',  machine:'All',                 active:true, notes:'' },
+    { id:'mp-003', partNum:'1100156', desc:'Control Board — ACLE',             category:'Electrical',  machine:'All',                 active:true, notes:'' },
+    { id:'mp-004', partNum:'1520539', desc:'Hydraulic Lift Cylinder',          category:'Hydraulics',  machine:'Skyjack SJIII 3219',  active:true, notes:'' },
+    { id:'mp-005', partNum:'1520678', desc:'Platform Overload Sensor',         category:'Electrical',  machine:'Skyjack SJIII 4632',  active:true, notes:'' },
+    { id:'mp-006', partNum:'2200341', desc:'Drive Motor Brush Set',            category:'Drive',       machine:'All',                 active:true, notes:'' },
+    { id:'mp-007', partNum:'2201095', desc:'Wheel Assembly — Non-Marking',     category:'Drive',       machine:'Skyjack SJ9250 RT',   active:true, notes:'' },
+    { id:'mp-008', partNum:'2310044', desc:'Steer Cylinder',                   category:'Hydraulics',  machine:'All',                 active:true, notes:'' },
+    { id:'mp-009', partNum:'3310087', desc:'Platform Chain Set',               category:'Structure',   machine:'Skyjack SJIII 4632',  active:true, notes:'' },
+    { id:'mp-010', partNum:'3400218', desc:'Scissor Arm Pin Kit',              category:'Structure',   machine:'All',                 active:true, notes:'' },
+    { id:'mp-011', partNum:'4101002', desc:'Emergency Lowering Valve',         category:'Hydraulics',  machine:'All',                 active:true, notes:'' },
+    { id:'mp-012', partNum:'4102550', desc:'Pothole Protection Cylinder',      category:'Hydraulics',  machine:'Skyjack SJ9250 RT',   active:true, notes:'' },
+    { id:'mp-013', partNum:'5000819', desc:'Load Sensing Module',              category:'Electrical',  machine:'All',                 active:true, notes:'' },
+    { id:'mp-014', partNum:'5001234', desc:'Tilt Sensor Assembly',             category:'Electrical',  machine:'All',                 active:true, notes:'' },
+    { id:'mp-015', partNum:'6600041', desc:'Hydraulic Pump — Gear Type',       category:'Hydraulics',  machine:'All',                 active:true, notes:'' },
+    { id:'mp-016', partNum:'6700210', desc:'Contactor — 48V 300A',            category:'Electrical',  machine:'All',                 active:false, notes:'Superseded by 6700211' },
+    { id:'mp-017', partNum:'6700211', desc:'Contactor — 48V 300A (Rev B)',     category:'Electrical',  machine:'All',                 active:true, notes:'Replaces 6700210' },
+    { id:'mp-018', partNum:'7200302', desc:'Brake Assembly — Rear',            category:'Drive',       machine:'All',                 active:true, notes:'' },
+    { id:'mp-019', partNum:'7200501', desc:'Joystick Controller',              category:'Electrical',  machine:'All',                 active:true, notes:'' },
+    { id:'mp-020', partNum:'8800077', desc:'Outrigger Pad Kit',                category:'Structure',   machine:'Skyjack SJ9250 RT',   active:true, notes:'' },
   ];
   let _pmSearch = '';
   let _pmFilter = 'all'; // 'all' | 'active' | 'inactive'
@@ -2696,8 +2696,8 @@ function render_supplier_portal(el) {
 .pm-cat-select { height:34px; border:1px solid #E2DDD8; border-radius:9px; padding:0 10px; font-size:12px; font-family:inherit; color:#111318; outline:none; background:#FFFFFF; cursor:pointer; }
 .pm-cat-select:focus { border-color:#1C3969; }
 .pm-table { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
-.pm-head { display:grid; grid-template-columns:110px 1fr 120px 160px 70px 70px 1fr 100px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
-.pm-row { display:grid; grid-template-columns:110px 1fr 120px 160px 70px 70px 1fr 100px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; }
+.pm-head { display:grid; grid-template-columns:110px 1fr 120px 160px 1fr 100px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
+.pm-row { display:grid; grid-template-columns:110px 1fr 120px 160px 1fr 100px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; }
 .pm-row:last-child { border-bottom:none; }
 .pm-row:hover { background:#FAFAF9; }
 .pm-th { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.7px; text-transform:uppercase; padding:9px 7px; }
@@ -2747,12 +2747,12 @@ function render_supplier_portal(el) {
     window._pmSetCategory = function(v) { _pmCategory = v; pmRenderTable(); };
     window._pmExport = function() {
       const rows = _masterParts;
-      const lines = ['partNum,description,category,machine,uom,weight,active,notes',
-        ...rows.map(r=>`${r.partNum},"${r.desc}","${r.category}","${r.machine}",${r.uom},${r.weight},${r.active},"${r.notes}"`)];
+      const lines = ['partNum,description,category,machine,active,notes',
+        ...rows.map(r=>`${r.partNum},"${r.desc}","${r.category}","${r.machine}",${r.active},"${r.notes}"`)];
       const a = document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(lines.join('\n')); a.download='parts-master.csv'; a.click();
     };
     window._pmImport = function() {
-      Modal.show({ title:'Import parts CSV', body:`<p style="font-size:13px;color:#5A5F6E;">Upload a CSV with columns <code>partNum, description, category, machine, uom, weight, notes</code>. Existing part numbers will be updated; new ones added. Demo only.</p>`, actions:[{label:'Close',onClick:()=>Modal.close()}] });
+      Modal.show({ title:'Import parts CSV', body:`<p style="font-size:13px;color:#5A5F6E;">Upload a CSV with columns <code>partNum, description, category, machine, notes</code>. Existing part numbers will be updated; new ones added. Demo only.</p>`, actions:[{label:'Close',onClick:()=>Modal.close()}] });
     };
     window._pmAddPart = function(editId) {
       const existing = editId ? _masterParts.find(p=>p.id===editId) : null;
@@ -2760,15 +2760,9 @@ function render_supplier_portal(el) {
         title: existing ? `Edit part — ${existing.partNum}` : 'Add part',
         wide: true,
         body: `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;padding:4px 0;">
-          <div>
+          <div style="grid-column:1/-1;">
             <label style="font-size:11px;font-weight:600;color:#5A5F6E;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px;">Part number <span style="color:#DC2626;">*</span></label>
-            <input id="pm-f-partnum" value="${existing?.partNum||''}" placeholder="e.g. 1520539" style="width:100%;height:34px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;" ${existing?'readonly style="width:100%;height:34px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;background:#F5F2EE;"':''}/>
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:600;color:#5A5F6E;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px;">UOM</label>
-            <select id="pm-f-uom" style="width:100%;height:34px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;background:#FFFFFF;">
-              ${['EA','SET','KIT','PK','M','L'].map(u=>`<option value="${u}" ${(existing?.uom||'EA')===u?'selected':''}>${u}</option>`).join('')}
-            </select>
+            <input id="pm-f-partnum" value="${existing?.partNum||''}" placeholder="e.g. 1520539" style="width:100%;height:34px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;${existing?'background:#F5F2EE;':''}" ${existing?'readonly':''}/>
           </div>
           <div style="grid-column:1/-1;">
             <label style="font-size:11px;font-weight:600;color:#5A5F6E;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px;">Description <span style="color:#DC2626;">*</span></label>
@@ -2781,10 +2775,6 @@ function render_supplier_portal(el) {
             </select>
           </div>
           <div>
-            <label style="font-size:11px;font-weight:600;color:#5A5F6E;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px;">Weight</label>
-            <input id="pm-f-weight" value="${existing?.weight||''}" placeholder="e.g. 1.2 kg" style="width:100%;height:34px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;"/>
-          </div>
-          <div style="grid-column:1/-1;">
             <label style="font-size:11px;font-weight:600;color:#5A5F6E;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px;">Applies to machine</label>
             <input id="pm-f-machine" value="${existing?.machine||'All'}" placeholder="e.g. Skyjack SJIII 4632, or All" style="width:100%;height:34px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;"/>
           </div>
@@ -2812,8 +2802,6 @@ function render_supplier_portal(el) {
               existing.desc    = desc;
               existing.category= document.getElementById('pm-f-cat')?.value||existing.category;
               existing.machine = document.getElementById('pm-f-machine')?.value.trim()||existing.machine;
-              existing.uom     = document.getElementById('pm-f-uom')?.value||existing.uom;
-              existing.weight  = document.getElementById('pm-f-weight')?.value.trim()||existing.weight;
               existing.notes   = document.getElementById('pm-f-notes')?.value.trim();
               existing.active  = document.getElementById('pm-f-active')?.checked;
             } else {
@@ -2828,8 +2816,6 @@ function render_supplier_portal(el) {
                 desc,
                 category: document.getElementById('pm-f-cat')?.value||'Electrical',
                 machine:  document.getElementById('pm-f-machine')?.value.trim()||'All',
-                uom:      document.getElementById('pm-f-uom')?.value||'EA',
-                weight:   document.getElementById('pm-f-weight')?.value.trim()||'',
                 notes:    document.getElementById('pm-f-notes')?.value.trim()||'',
                 active:   document.getElementById('pm-f-active')?.checked!==false,
               });
@@ -2876,8 +2862,6 @@ function render_supplier_portal(el) {
             <div class="pm-th">Description</div>
             <div class="pm-th">Category</div>
             <div class="pm-th">Machine</div>
-            <div class="pm-th">UOM</div>
-            <div class="pm-th">Weight</div>
             <div class="pm-th">Notes</div>
             <div class="pm-th"></div>
           </div>
@@ -2891,8 +2875,6 @@ function render_supplier_portal(el) {
               </div>
               <div class="pm-td"><span class="pm-cat-pill pm-cat-${p.category}">${p.category}</span></div>
               <div class="pm-td pm-machine">${p.machine}</div>
-              <div class="pm-td" style="color:#5A5F6E;">${p.uom}</div>
-              <div class="pm-td" style="color:#5A5F6E;font-variant-numeric:tabular-nums;">${p.weight||'—'}</div>
               <div class="pm-td" style="font-size:11px;color:#7A7F8E;font-style:${p.notes?'normal':'italic'};">${p.notes||'—'}</div>
               <div class="pm-td">
                 <div class="pm-actions">
@@ -2968,9 +2950,9 @@ function render_supplier_portal(el) {
 .pc-ftab:hover:not(.active) { background:#F5F2EE; }
 /* Part price table */
 .pc-table { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
-.pc-table-head { display:grid; grid-template-columns:110px 1fr 160px 110px 110px 90px 76px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
+.pc-table-head { display:grid; grid-template-columns:110px 1fr 160px 110px 110px 56px 90px 76px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
 .pc-th { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.7px; text-transform:uppercase; padding:9px 7px; }
-.pc-row { display:grid; grid-template-columns:110px 1fr 160px 110px 110px 90px 76px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; }
+.pc-row { display:grid; grid-template-columns:110px 1fr 160px 110px 110px 56px 90px 76px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; }
 .pc-row:last-child { border-bottom:none; }
 .pc-row:hover { background:#FAFAF9; }
 .pc-td { padding:11px 7px; font-size:12px; color:#3A3D4A; }
@@ -3366,7 +3348,7 @@ function render_supplier_portal(el) {
       const existing = editId ? rows.find(r => r.id === editId) : null;
       const defaultRows = _pricingData['default'] || [];
       const prefill = window._pcPrefill; window._pcPrefill = null;
-      const a = existing || prefill || { partNum:'', desc:'', machine:'All', category:'', listPrice:'', contractPrice:'', currency:'USD', effectiveDate:new Date().toISOString().slice(0,10), expiryDate:'', active:true };
+      const a = existing || prefill || { partNum:'', desc:'', machine:'All', category:'', listPrice:'', contractPrice:'', currency:'USD', uom:'EA', weight:'', effectiveDate:new Date().toISOString().slice(0,10), expiryDate:'', active:true };
       const fleetLabel = fleetList.find(f => f.id === _pricingFleetId)?.name || 'this catalog';
       Modal.show({
         title: editId ? 'Edit price' : `Add price — ${fleetLabel}`,
@@ -3409,14 +3391,16 @@ function render_supplier_portal(el) {
     <input type="hidden" id="pc-f-machine" value="${a.machine}"/>
     <input type="hidden" id="pc-f-cat" value="${a.category}"/>
   <div id="pc-default-banner" style="display:none;background:#D6E4F7;border:0.5px solid #1C396940;border-radius:7px;padding:8px 11px;font-size:11px;color:#1C3969;"></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:12px;">
+  <div style="display:grid;grid-template-columns:1fr 1fr 80px 80px;gap:12px;">
     <div class="modal-form-field"><label class="modal-form-label">List price (MSRP)</label><input id="pc-f-list" class="modal-form-input" type="number" step="0.01" min="0" placeholder="0.00" value="${a.listPrice}"/></div>
     <div class="modal-form-field"><label class="modal-form-label">Contract price <span class="lbl-opt">(${fleetLabel})</span></label><input id="pc-f-fleet" class="modal-form-input" type="number" step="0.01" min="0" placeholder="0.00" value="${a.contractPrice}"/></div>
-    <div class="modal-form-field"><label class="modal-form-label">Currency</label><select id="pc-f-currency" class="modal-form-select"><option>USD</option><option>CAD</option><option>EUR</option></select></div>
+    <div class="modal-form-field"><label class="modal-form-label">Currency</label><select id="pc-f-currency" class="modal-form-select"><option ${(a.currency||'USD')==='USD'?'selected':''}>USD</option><option ${a.currency==='CAD'?'selected':''}>CAD</option><option ${a.currency==='EUR'?'selected':''}>EUR</option></select></div>
+    <div class="modal-form-field"><label class="modal-form-label">UOM</label><select id="pc-f-uom" class="modal-form-select">${['EA','SET','KIT','PK','M','L'].map(u=>`<option value="${u}" ${(a.uom||'EA')===u?'selected':''}>${u}</option>`).join('')}</select></div>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
     <div class="modal-form-field"><label class="modal-form-label">Effective date</label><input id="pc-f-eff" class="modal-form-input" type="date" value="${a.effectiveDate}"/></div>
     <div class="modal-form-field"><label class="modal-form-label">Expiry date <span class="lbl-opt">(optional)</span></label><input id="pc-f-exp" class="modal-form-input" type="date" value="${a.expiryDate||''}"/></div>
+    <div class="modal-form-field"><label class="modal-form-label">Weight <span class="lbl-opt">(optional)</span></label><input id="pc-f-weight" class="modal-form-input" placeholder="e.g. 1.2 kg" value="${a.weight||''}"/></div>
   </div>
   <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#3A3D4A;cursor:pointer;"><input type="checkbox" id="pc-f-active" ${a.active?'checked':''} style="accent-color:#1C3969;"/> Active</label>
   </div>
@@ -3433,6 +3417,8 @@ function render_supplier_portal(el) {
               listPrice:     parseFloat(document.getElementById('pc-f-list').value) || 0,
               contractPrice: parseFloat(document.getElementById('pc-f-fleet').value) || 0,
               currency:      document.getElementById('pc-f-currency').value,
+              uom:           document.getElementById('pc-f-uom')?.value || 'EA',
+              weight:        document.getElementById('pc-f-weight')?.value.trim() || '',
               effectiveDate: document.getElementById('pc-f-eff').value,
               expiryDate:    document.getElementById('pc-f-exp').value,
               active:        document.getElementById('pc-f-active').checked,
@@ -3537,6 +3523,7 @@ function render_supplier_portal(el) {
     <div class="pc-th">Machine</div>
     <div class="pc-th">List (MSRP)</div>
     <div class="pc-th">Contract price</div>
+    <div class="pc-th">UOM</div>
     <div class="pc-th">Effective</div>
     <div class="pc-th"></div>
   </div>
@@ -3552,6 +3539,7 @@ function render_supplier_portal(el) {
         <span style="font-size:13px;font-weight:700;color:#1C3969;">$${r.contractPrice.toFixed(2)}</span>
         ${disc>0?`<span class="pc-discount">-${disc}%</span>`:''}
       </div>
+      <div class="pc-td" style="color:#7A7F8E;font-size:11px;">${r.uom||'EA'}</div>
       <div class="pc-td" style="color:#7A7F8E;">${r.effectiveDate}</div>
       <div class="pc-td" style="display:flex;gap:3px;justify-content:flex-end;">
         <button class="sp-btn sp-btn-ghost" style="height:26px;padding:0 7px;font-size:11px;" onclick="pcAddRow('${r.id}')"><i class="ti ti-pencil"></i></button>
