@@ -2627,21 +2627,32 @@ function render_supplier_portal(el) {
   let _pricingFleetId = 'default';
   let _pricingSearch = '';
   let _pricingFilter = 'all';
+  let _pricingView = 'catalogs'; // 'catalogs' | 'parts'
+  let _pcCatalogSearch = '';
+  // Catalog list — hoisted so mutations (add/delete) persist across renders
+  const _pcFleetList = [
+    { id:'default',     name:'Default pricing',  sub:'Baseline for all accounts', logoText:'ALL', isDefault:true },
+    { id:'cat-fleet',   name:'Fleet Pricing',     sub:'Volume-adjusted pricing',   logoText:'FLP' },
+    { id:'cat-region',  name:'Regional Pricing',  sub:'Non-USD / region-specific', logoText:'REG' },
+    { id:'cat-contract',name:'Contract Pricing',  sub:'Fixed rates under agreement',logoText:'CON' },
+  ];
   // Track which catalogs have been formally "created" (default always counts)
   const _pricingCreatedIds = new Set(['default', 'cat-fleet', 'cat-region', 'cat-contract']);
+  // Catalog metadata (last updated, status) keyed by catalog id
+  const _pcCatalogMeta = {
+    'default':      { updatedAt:'2026-09-18', status:'active', description:'Baseline for all accounts' },
+    'cat-fleet':    { updatedAt:'2026-08-04', status:'active', description:'Volume-adjusted pricing' },
+    'cat-region':   { updatedAt:'2026-07-22', status:'active', description:'Non-USD / region-specific' },
+    'cat-contract': { updatedAt:'2026-06-30', status:'inactive', description:'Fixed rates under agreement' },
+  };
 
   function renderPricing() {
     const titleEl = document.getElementById('sp-topbar-title');
     if (titleEl) titleEl.textContent = 'Pricing Catalog';
     const contentEl = document.getElementById('sp-content');
 
-    // Catalog list — no fleet-specific overrides
-    const fleetList = [
-      { id:'default',    name:'Default pricing',  sub:'Baseline for all accounts', logoText:'ALL', isDefault:true },
-      { id:'cat-fleet',  name:'Fleet Pricing',     sub:'Volume-adjusted pricing',   logoText:'FLP' },
-      { id:'cat-region', name:'Regional Pricing',  sub:'Non-USD / region-specific', logoText:'REG' },
-      { id:'cat-contract',name:'Contract Pricing', sub:'Fixed rates under agreement',logoText:'CON' },
-    ];
+    // Catalog list — use hoisted module-level array so mutations persist
+    const fleetList = _pcFleetList;
 
     const activeFl = fleetList.find(f => f.id === _pricingFleetId) || fleetList[0];
     const activeRowCount = (_pricingData[_pricingFleetId] || []).length;
@@ -2651,6 +2662,11 @@ function render_supplier_portal(el) {
 .pc-shell { display:flex; flex:1; flex-direction:column; min-height:0; overflow:hidden; }
 .pc-toolbar { padding:10px 20px; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:8px; flex-shrink:0; flex-wrap:wrap; }
 .pc-body { flex:1; padding:16px 20px 40px; overflow-y:auto; }
+/* View toggle */
+.pc-view-toggle { display:flex; background:#F5F2EE; border-radius:8px; padding:3px; gap:2px; }
+.pc-vt-btn { display:flex; align-items:center; gap:5px; height:28px; padding:0 10px; border-radius:6px; font-size:11px; font-weight:500; color:#5A5F6E; cursor:pointer; border:none; background:transparent; font-family:inherit; white-space:nowrap; }
+.pc-vt-btn.active { background:#FFFFFF; color:#111318; box-shadow:0 1px 3px rgba(0,0,0,.10); font-weight:600; }
+.pc-vt-btn:hover:not(.active) { background:#ECEAE6; }
 /* Fleet picker button */
 .pc-fleet-btn { display:flex; align-items:center; gap:8px; height:36px; padding:0 10px 0 6px; background:#FFFFFF; border:1px solid #E2DDD8; border-radius:9px; cursor:pointer; font-family:inherit; transition:border-color .15s, background .15s; max-width:260px; }
 .pc-fleet-btn:hover { border-color:#9CA3AF; background:#FAFAF8; }
@@ -2688,7 +2704,7 @@ function render_supplier_portal(el) {
 .pc-ftab { padding:4px 11px; border-radius:20px; font-size:11px; font-weight:500; cursor:pointer; border:0.5px solid transparent; color:#5A5F6E; white-space:nowrap; }
 .pc-ftab.active { background:#111318; color:#FFFFFF; }
 .pc-ftab:hover:not(.active) { background:#F5F2EE; }
-/* Table */
+/* Part price table */
 .pc-table { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
 .pc-table-head { display:grid; grid-template-columns:110px 1fr 160px 110px 110px 90px 76px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
 .pc-th { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.7px; text-transform:uppercase; padding:9px 7px; }
@@ -2699,10 +2715,39 @@ function render_supplier_portal(el) {
 .pc-discount { font-size:10px; font-weight:700; color:#1C3969; background:#D6E4F7; border-radius:4px; padding:1px 5px; margin-left:4px; }
 .pc-inherited-row { background:#FAFFF8; }
 .pc-inherited-tag { font-size:9px; color:#9CA3AF; font-style:italic; margin-top:1px; }
+/* Catalog list table */
+.pcl-table { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
+.pcl-head { display:grid; grid-template-columns:30px 1fr 220px 90px 120px 110px 100px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
+.pcl-row { display:grid; grid-template-columns:30px 1fr 220px 90px 120px 110px 100px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; cursor:pointer; }
+.pcl-row:last-child { border-bottom:none; }
+.pcl-row:hover { background:#FAFAF9; }
+.pcl-th { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.7px; text-transform:uppercase; padding:9px 7px; }
+.pcl-td { padding:12px 7px; font-size:12px; color:#3A3D4A; }
+.pcl-logo { width:24px; height:24px; border-radius:6px; background:#152B52; display:flex; align-items:center; justify-content:center; font-size:7px; font-weight:700; color:#8AAFD4; }
+.pcl-name { font-size:13px; font-weight:600; color:#111318; }
+.pcl-desc { font-size:11px; color:#9CA3AF; margin-top:1px; }
+.pcl-badge-default { display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:600; color:#065F46; background:#D1FAE5; border-radius:10px; padding:1px 7px; }
+.pcl-stat { font-size:12px; font-weight:600; color:#111318; font-variant-numeric:tabular-nums; }
+.pcl-stat-sub { font-size:10px; color:#9CA3AF; margin-top:1px; }
+.pcl-status-active { font-size:10px; font-weight:600; color:#065F46; background:#D1FAE5; border-radius:10px; padding:2px 8px; display:inline-block; }
+.pcl-status-inactive { font-size:10px; font-weight:600; color:#92400E; background:#FEF3C7; border-radius:10px; padding:2px 8px; display:inline-block; }
+.pcl-actions { display:flex; gap:4px; opacity:0; transition:opacity .1s; }
+.pcl-row:hover .pcl-actions { opacity:1; }
 </style>
 <div class="pc-shell">
   <div class="pc-toolbar">
-    <!-- Catalog picker -->
+    <!-- View toggle -->
+    <div class="pc-view-toggle">
+      <button class="pc-vt-btn ${_pricingView==='catalogs'?'active':''}" onclick="window._pcSetView('catalogs')">
+        <i class="ti ti-layout-list" style="font-size:12px;"></i> Catalogs
+      </button>
+      <button class="pc-vt-btn ${_pricingView==='parts'?'active':''}" onclick="window._pcSetView('parts')">
+        <i class="ti ti-tag" style="font-size:12px;"></i> Price list
+      </button>
+    </div>
+    <div style="width:0.5px;height:22px;background:#E8E4DF;flex-shrink:0;"></div>
+    ${_pricingView === 'parts' ? `
+    <!-- Catalog picker (parts view only) -->
     <div style="display:flex;align-items:center;gap:6px;">
       <span style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.8px;white-space:nowrap;">Catalog</span>
       <button class="pc-fleet-btn" id="pc-fleet-btn" onclick="pcToggleDrop(event)">
@@ -2726,20 +2771,33 @@ function render_supplier_portal(el) {
         `<div class="pc-ftab ${_pricingFilter===v?'active':''}" onclick="pcSetFilter('${v}')">${l}</div>`
       ).join('')}
     </div>
-    <!-- Actions -->
+    <!-- Parts actions -->
     <div style="margin-left:auto;display:flex;gap:6px;">
       <button class="sp-btn sp-btn-ghost" onclick="pcImportCSV()"><i class="ti ti-table-import" style="font-size:12px;"></i> Import</button>
       <button class="sp-btn sp-btn-ghost" onclick="pcExportCSV()"><i class="ti ti-download" style="font-size:12px;"></i> Export</button>
       <button class="sp-btn sp-btn-primary" onclick="pcAddRow()"><i class="ti ti-plus" style="font-size:12px;"></i> Add price</button>
     </div>
+    ` : `
+    <!-- Catalog list search -->
+    <div class="pc-search-wrap">
+      <i class="ti ti-search pc-search-icon"></i>
+      <input class="pc-search-input" id="pcl-search" type="text" placeholder="Search catalogs…" value="${_pcCatalogSearch}" style="width:200px;"/>
+    </div>
+    <!-- Catalog list actions -->
+    <div style="margin-left:auto;display:flex;gap:6px;">
+      <button class="sp-btn sp-btn-primary" onclick="pcNewCatalog()"><i class="ti ti-plus" style="font-size:12px;"></i> New catalog</button>
+    </div>
+    `}
   </div>
   <div class="pc-body">
+    ${_pricingView === 'parts' ? `
     ${!activeFl.isDefault ? `
     <div style="display:flex;align-items:center;gap:8px;background:#FFFBF2;border:0.5px solid #F5C97A;border-radius:8px;padding:9px 13px;margin-bottom:14px;font-size:12px;color:#7A7F8E;">
       <i class="ti ti-info-circle" style="color:#B45309;font-size:14px;flex-shrink:0;"></i>
       Parts not listed here <strong style="color:#111318;">inherit Default pricing</strong>. Add a row only when this catalog needs a different contract price.
     </div>` : ''}
     <div id="pc-table-wrap"></div>
+    ` : `<div id="pcl-table-wrap"></div>`}
   </div>
 </div>`;
 
@@ -2812,6 +2870,143 @@ function render_supplier_portal(el) {
     };
     window.pcSelectFleet = function(id) { pcCloseDrop(); _pricingFleetId = id; _pricingSearch = ''; renderPricing(); };
     window.pcSetFilter   = function(v) { _pricingFilter = v; renderPricing(); };
+    window._pcSetView    = function(v) { _pricingView = v; _pricingSearch = ''; _pcCatalogSearch = ''; renderPricing(); };
+    window._pcSetCatalogSearch = function(v) { _pcCatalogSearch = v; pcRenderCatalogList(); };
+    window._pcOpenCatalog = function(id) { _pricingFleetId = id; _pricingView = 'parts'; _pricingSearch = ''; renderPricing(); };
+    window._pcEditCatalogMeta = function(id) {
+      const fl = fleetList.find(f => f.id === id);
+      if (!fl) return;
+      const meta = _pcCatalogMeta[id] || {};
+      Modal.show({
+        title: `Edit catalog — ${fl.name}`, wide: false,
+        body: `<div style="display:flex;flex-direction:column;gap:12px;padding:4px 0;">
+          <div>
+            <label style="font-size:11px;font-weight:600;color:#5A5F6E;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px;">Catalog name</label>
+            <input id="pce-name" value="${fl.name}" style="width:100%;height:34px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;color:#111318;outline:none;" />
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:#5A5F6E;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px;">Description</label>
+            <input id="pce-desc" value="${meta.description||fl.sub||''}" style="width:100%;height:34px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;color:#111318;outline:none;" />
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:#5A5F6E;text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:5px;">Status</label>
+            <select id="pce-status" style="width:100%;height:34px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;color:#111318;outline:none;background:#FFFFFF;">
+              <option value="active" ${(meta.status||'active')==='active'?'selected':''}>Active</option>
+              <option value="inactive" ${meta.status==='inactive'?'selected':''}>Inactive</option>
+            </select>
+          </div>
+        </div>`,
+        actions: [
+          { label:'Cancel', onClick:()=>Modal.close() },
+          { label:'Save', primary:true, onClick:()=>{
+            const name = document.getElementById('pce-name')?.value.trim();
+            if (!name) return;
+            fl.name = name;
+            fl.sub  = document.getElementById('pce-desc')?.value.trim() || fl.sub;
+            if (!_pcCatalogMeta[id]) _pcCatalogMeta[id] = {};
+            _pcCatalogMeta[id].description = fl.sub;
+            _pcCatalogMeta[id].status = document.getElementById('pce-status')?.value || 'active';
+            _pcCatalogMeta[id].updatedAt = new Date().toISOString().slice(0,10);
+            Modal.close();
+            renderPricing();
+          }},
+        ],
+      });
+    };
+    window._pcDeleteCatalog = function(id) {
+      const fl = fleetList.find(f => f.id === id);
+      if (!fl || fl.isDefault) return;
+      Modal.show({
+        title:'Delete catalog',
+        body:`<p style="font-size:13px;color:#5A5F6E;">Delete <strong>${fl.name}</strong>? All ${(_pricingData[id]||[]).length} price entries will be removed. This cannot be undone.</p>`,
+        actions:[
+          { label:'Cancel', onClick:()=>Modal.close() },
+          { label:'Delete catalog', danger:true, onClick:()=>{
+            const idx = fleetList.findIndex(f=>f.id===id);
+            if (idx>-1) fleetList.splice(idx,1);
+            delete _pricingData[id];
+            delete _pcCatalogMeta[id];
+            _pricingCreatedIds.delete(id);
+            if (_pricingFleetId === id) _pricingFleetId = 'default';
+            Modal.close(); renderPricing();
+          }},
+        ],
+      });
+    };
+
+    function pcRenderCatalogList() {
+      const wrap = document.getElementById('pcl-table-wrap');
+      if (!wrap) return;
+      const q = _pcCatalogSearch.toLowerCase();
+      const visible = fleetList.filter(f => !q || f.name.toLowerCase().includes(q) || (f.sub||'').toLowerCase().includes(q));
+      if (!visible.length) {
+        wrap.innerHTML = '<div style="padding:48px;text-align:center;color:#9CA3AF;font-size:13px;">No catalogs match.</div>';
+        return;
+      }
+      const totalItems = fleetList.reduce((s,f) => s + (_pricingData[f.id]||[]).length, 0);
+      wrap.innerHTML = `
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <div style="flex:1;background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:14px 16px;">
+            <div style="font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;">Catalogs</div>
+            <div style="font-size:22px;font-weight:700;color:#111318;font-variant-numeric:tabular-nums;">${fleetList.length}</div>
+          </div>
+          <div style="flex:1;background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:14px 16px;">
+            <div style="font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;">Total line items</div>
+            <div style="font-size:22px;font-weight:700;color:#111318;font-variant-numeric:tabular-nums;">${totalItems}</div>
+          </div>
+          <div style="flex:1;background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:14px 16px;">
+            <div style="font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;">Active</div>
+            <div style="font-size:22px;font-weight:700;color:#111318;font-variant-numeric:tabular-nums;">${fleetList.filter(f=>(_pcCatalogMeta[f.id]?.status||'active')==='active').length}</div>
+          </div>
+        </div>
+        <div class="pcl-table">
+          <div class="pcl-head">
+            <div class="pcl-th"></div>
+            <div class="pcl-th">Catalog</div>
+            <div class="pcl-th">Description</div>
+            <div class="pcl-th">Items</div>
+            <div class="pcl-th">Last updated</div>
+            <div class="pcl-th">Status</div>
+            <div class="pcl-th"></div>
+          </div>
+          ${visible.map(f => {
+            const cnt   = (_pricingData[f.id] || []).length;
+            const meta  = _pcCatalogMeta[f.id] || {};
+            const status = meta.status || 'active';
+            const updated = meta.updatedAt || '—';
+            const activeCnt = (_pricingData[f.id]||[]).filter(r=>r.active).length;
+            return `<div class="pcl-row" onclick="window._pcOpenCatalog('${f.id}')">
+              <div class="pcl-td">
+                <div class="pcl-logo" style="${f.isDefault?'background:#065F46;color:#D1FAE5;':''}">${f.logoText}</div>
+              </div>
+              <div class="pcl-td">
+                <div class="pcl-name">${f.name}</div>
+                ${f.isDefault ? '<div style="margin-top:3px;"><span class="pcl-badge-default"><i class="ti ti-star-filled" style="font-size:9px;"></i> Default</span></div>' : ''}
+              </div>
+              <div class="pcl-td" style="color:#5A5F6E;font-size:11px;">${meta.description||f.sub||'—'}</div>
+              <div class="pcl-td">
+                <div class="pcl-stat">${cnt}</div>
+                ${cnt > 0 ? `<div class="pcl-stat-sub">${activeCnt} active</div>` : '<div class="pcl-stat-sub" style="color:#D1A827;">Empty</div>'}
+              </div>
+              <div class="pcl-td" style="font-size:11px;color:#5A5F6E;font-variant-numeric:tabular-nums;">${updated}</div>
+              <div class="pcl-td"><span class="${status==='active'?'pcl-status-active':'pcl-status-inactive'}">${status==='active'?'Active':'Inactive'}</span></div>
+              <div class="pcl-td" onclick="event.stopPropagation()">
+                <div class="pcl-actions">
+                  <button class="sp-btn sp-btn-ghost" style="height:26px;font-size:11px;padding:0 8px;" onclick="window._pcEditCatalogMeta('${f.id}')">Edit</button>
+                  ${!f.isDefault ? `<button class="sp-btn sp-btn-ghost" style="height:26px;font-size:11px;padding:0 8px;color:#DC2626;" onclick="window._pcDeleteCatalog('${f.id}')">Delete</button>` : ''}
+                </div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`;
+    }
+
+    if (_pricingView === 'catalogs') {
+      const searchEl = document.getElementById('pcl-search');
+      if (searchEl) searchEl.addEventListener('input', function() { _pcCatalogSearch = this.value; pcRenderCatalogList(); });
+      pcRenderCatalogList();
+    }
+
     window.pcImportCSV   = function() {
       Modal.show({ title:'Import pricing CSV', body:'<p style="font-size:13px;color:#5A5F6E;">Upload a CSV with columns <code>partNum, description, listPrice, contractPrice, effectiveDate</code>. Rows will be added to the currently selected fleet. Demo only.</p>', actions:[{label:'Close',onClick:()=>Modal.close()}] });
     };
@@ -2856,7 +3051,9 @@ function render_supplier_portal(el) {
             const name = document.getElementById('pcnc-name')?.value.trim();
             if (!name) { document.getElementById('pcnc-name').focus(); return; }
             const newId = 'cat-' + name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
-            fleetList.push({ id:newId, name, sub:document.getElementById('pcnc-desc')?.value.trim()||'', logoText:name.split(' ').map(w=>w[0]).join('').slice(0,3).toUpperCase() });
+            const sub = document.getElementById('pcnc-desc')?.value.trim()||'';
+            fleetList.push({ id:newId, name, sub, logoText:name.split(' ').map(w=>w[0]).join('').slice(0,3).toUpperCase() });
+            _pcCatalogMeta[newId] = { description: sub, status:'active', updatedAt: new Date().toISOString().slice(0,10) };
             _pricingCreatedIds.add(newId);
             _pricingFleetId = newId;
             // If a CSV was staged, apply it; otherwise open add-price modal
