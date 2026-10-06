@@ -307,7 +307,7 @@ function render_supplier_portal(el) {
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button class="sp-btn sp-btn-primary" onclick="document.querySelector('.sb-item[data-sp-tab=fleets]').click()"><i class="ti ti-building-warehouse" style="font-size:12px;"></i> View My Fleets</button>
         <button class="sp-btn sp-btn-ghost" onclick="document.querySelector('.sb-item[data-sp-tab=news]').click()"><i class="ti ti-news" style="font-size:12px;"></i> News &amp; Updates</button>
-        <button class="sp-btn sp-btn-ghost" onclick="spManagePartNotes()"><i class="ti ti-notes" style="font-size:12px;"></i> Manage Part Notes</button>
+        <button class="sp-btn sp-btn-ghost" onclick="document.querySelector('.sb-item[data-sp-tab=parts-master]').click()"><i class="ti ti-forms" style="font-size:12px;"></i> Parts Master</button>
       </div>`;
   }
 
@@ -2143,28 +2143,6 @@ function render_supplier_portal(el) {
     });
   };
 
-  window.spManagePartNotes = function() {
-    if (!Store.getCmsArticles) return;
-    const notes = Store.getCmsArticles('published').filter(a => a.showOnPartPage && a.supplierNote && a.supplierId === _supplierId);
-    function buildRow(a) {
-      return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:0.5px solid #F0ECE8;">
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:11px;font-weight:600;color:#111318;margin-bottom:3px;">${a.title}</div>
-          <div style="font-size:11px;color:#7A7F8E;">${a.targetPartDesc || ''} ${a.targetPartNum ? '· '+a.targetPartNum : ''}</div>
-          ${a.date ? `<div style="font-size:10px;color:#B0AAA3;margin-top:2px;">${a.date}${a.impersonatingFleet ? ' · '+a.impersonatingFleet : ''}</div>` : ''}
-        </div>
-        <button onclick="Store.deleteCmsArticle('${a.id}');spManagePartNotes();" style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:4px 8px;font-size:11px;color:#D9534F;cursor:pointer;font-family:inherit;flex-shrink:0;">Remove</button>
-      </div>`;
-    }
-    const body = notes.length
-      ? `<div style="max-height:420px;overflow-y:auto;margin:-16px;">${notes.map(buildRow).join('')}</div>`
-      : '<div style="font-size:13px;color:#9CA3AF;text-align:center;padding:24px 0;">No supplier part notes added yet.</div>';
-    Modal.show({
-      title: 'Manage Part Notes',
-      body,
-      actions: [{ label: 'Close', onClick: function() { Modal.close(); } }],
-    });
-  };
 
   // ── Price request global handlers ────────────────────────────────────────────
 
@@ -2745,6 +2723,35 @@ function render_supplier_portal(el) {
 
     window._pmSetFilter   = function(v) { _pmFilter = v; pmRenderTable(); };
     window._pmSetCategory = function(v) { _pmCategory = v; pmRenderTable(); };
+    window._pmEditNoteInline = function(id, cell) {
+      if (cell.querySelector('input')) return;
+      const part = _masterParts.find(p => p.id === id);
+      if (!part) return;
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.value = part.notes || '';
+      input.placeholder = 'Add note…';
+      input.style.cssText = 'width:100%;border:1px solid #7C6E5B;border-radius:4px;padding:2px 6px;font-size:11px;font-family:inherit;background:#fff;color:#2D2926;outline:none;';
+      cell.textContent = '';
+      cell.appendChild(input);
+      input.focus();
+      input.select();
+      function save() {
+        part.notes = input.value.trim();
+        cell.textContent = part.notes || 'Add note…';
+        cell.style.color = part.notes ? '#5A5F6E' : '#C0BAB3';
+        cell.style.fontStyle = part.notes ? 'normal' : 'italic';
+      }
+      input.addEventListener('blur', save);
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { input.blur(); }
+        if (e.key === 'Escape') {
+          cell.textContent = part.notes || 'Add note…';
+          cell.style.color = part.notes ? '#5A5F6E' : '#C0BAB3';
+          cell.style.fontStyle = part.notes ? 'normal' : 'italic';
+        }
+      });
+    };
     window._pmExport = function() {
       const rows = _masterParts;
       const lines = ['partNum,description,category,active,notes',
@@ -2867,7 +2874,7 @@ function render_supplier_portal(el) {
                 ${pricedIn.length?`<div style="font-size:10px;color:#059669;margin-top:1px;"><i class="ti ti-circle-check" style="font-size:10px;"></i> Priced in ${pricedIn.join(', ')}</div>`:'<div style="font-size:10px;color:#B0AAA3;margin-top:1px;">Not yet priced</div>'}
               </div>
               <div class="pm-td"><span class="pm-cat-pill pm-cat-${p.category}">${p.category}</span></div>
-              <div class="pm-td" style="font-size:11px;color:#7A7F8E;font-style:${p.notes?'normal':'italic'};">${p.notes||'—'}</div>
+              <div class="pm-td pm-notes-cell" data-id="${p.id}" onclick="window._pmEditNoteInline('${p.id}',this)" title="Click to edit note" style="cursor:text;font-size:11px;color:${p.notes?'#5A5F6E':'#C0BAB3'};font-style:${p.notes?'normal':'italic'};">${p.notes||'Add note…'}</div>
               <div class="pm-td">
                 <div class="pm-actions">
                   <span class="${p.active?'pm-status-active':'pm-status-inactive'}" style="margin-right:4px;">${p.active?'Active':'Inactive'}</span>
