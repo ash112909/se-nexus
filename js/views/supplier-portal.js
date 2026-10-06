@@ -2801,7 +2801,8 @@ function render_supplier_portal(el) {
   </div>
 </div>`;
 
-    document.getElementById('pc-search').addEventListener('input', function() {
+    const _pcSearchEl = document.getElementById('pc-search');
+    if (_pcSearchEl) _pcSearchEl.addEventListener('input', function() {
       _pricingSearch = this.value;
       pcRenderTable();
     });
