@@ -37,8 +37,15 @@ const GlobalSearch = (() => {
 
   function buildResults(q, cat, supplier) {
     const ql = q.toLowerCase().trim();
-    if (!ql || !cat) return [];
+    if (!ql) return [];
+    const searchCats = cat ? [cat] : CATEGORIES.map(c => c.key);
     const out = [];
+    for (const c of searchCats) { buildCatResults(ql, c, supplier, out); }
+    return out;
+  }
+
+  function buildCatResults(ql, cat, supplier, out) {
+    const q = ql;
 
     if (cat === 'Parts') {
       Store.getParts(q, supplier || '').slice(0, 8).forEach(p => out.push({
@@ -90,7 +97,6 @@ const GlobalSearch = (() => {
       }));
     }
 
-    return out;
   }
 
   // ── View-more destinations per category ──────────────────────────────────
@@ -132,8 +138,7 @@ const GlobalSearch = (() => {
 
     const hasQuery    = !!inp.value.trim();
     const hasCategory = !!catSel.value;
-    const hasSuppOk   = !needsSupplier || (suppSel && !!suppSel.value);
-    btn.disabled = !(hasQuery && hasCategory && hasSuppOk);
+    btn.disabled = !(hasQuery && hasCategory);
   }
 
   function doSearch() {
@@ -144,7 +149,7 @@ const GlobalSearch = (() => {
     _query    = inp.value.trim();
     _category = catSel.value;
     _supplier = suppSel ? suppSel.value : '';
-    _submitted = true;
+    if (_query.length >= 2) _submitted = true;
     _selIdx = 0;
     renderResults();
   }
@@ -155,9 +160,9 @@ const GlobalSearch = (() => {
     const list = document.getElementById('gs-results');
     if (!list) return;
 
-    if (!_submitted || !_query || !_category) {
+    if (!_submitted || !_query) {
       list.innerHTML = `<div class="gs-empty">
-        <div style="font-size:11px;color:#B0AAA3;text-align:center;">Select a category, enter a term, then click Search</div>
+        <div style="font-size:11px;color:#B0AAA3;text-align:center;">Type at least 2 characters to search</div>
       </div>`;
       return;
     }
