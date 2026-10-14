@@ -200,8 +200,8 @@ function render_home(el) {
 
   // Fallback letter avatar for unmapped suppliers
   const AV_COLORS = [
-    { bg:'#D6E4F7', fg:'#1C3969' }, { bg:'#DBEAFE', fg:'#1D4ED8' }, { bg:'#FEE2E2', fg:'#B91C1C' },
-    { bg:'#EDE9FE', fg:'#534AB7' }, { bg:'#DBEAFE', fg:'#1C3969' }, { bg:'#FEF3C7', fg:'#92400E' },
+    { bg:'#D6E4F7', fg:'#1B4FA8' }, { bg:'#DBEAFE', fg:'#1D4ED8' }, { bg:'#FEE2E2', fg:'#B91C1C' },
+    { bg:'#EDE9FE', fg:'#534AB7' }, { bg:'#DBEAFE', fg:'#1B4FA8' }, { bg:'#FEF3C7', fg:'#92400E' },
     { bg:'#F3F4F6', fg:'#374151' }, { bg:'#FFE4E6', fg:'#9F1239' }, { bg:'#E0F2FE', fg:'#0369A1' },
     { bg:'#FDF4FF', fg:'#7E22CE' },
   ];
@@ -226,10 +226,10 @@ function render_home(el) {
   }
 
   const TYPE_META = {
-    bulletin:{ label:'Service Bulletin', color:'#1C3969', bg:'#D6E4F7', icon:'ti-alert-triangle' },
+    bulletin:{ label:'Service Bulletin', color:'#1B4FA8', bg:'#D6E4F7', icon:'ti-alert-triangle' },
     fleet:   { label:'Fleet Update',     color:'#185FA5', bg:'#DBEAFE', icon:'ti-building'       },
     supplier:{ label:'Supplier News',    color:'#534AB7', bg:'#EDE9FE', icon:'ti-news'            },
-    warranty:{ label:'Warranty',         color:'#1C3969', bg:'#DBEAFE', icon:'ti-shield-check'   },
+    warranty:{ label:'Warranty',         color:'#1B4FA8', bg:'#DBEAFE', icon:'ti-shield-check'   },
     safety:  { label:'Safety Alert',     color:'#B91C1C', bg:'#FEE2E2', icon:'ti-alert-octagon'  },
     pricing: { label:'Pricing',          color:'#6B7280', bg:'#F3F4F6', icon:'ti-tag'            },
     training:{ label:'Training',         color:'#5B21B6', bg:'#EDE9FE', icon:'ti-certificate'    },
@@ -443,7 +443,7 @@ function render_home(el) {
 /* ── Welcome bar ──────────────────────────────────────── */
 .home-welcome { background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; padding:18px 28px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
 .hw-brand     { display:flex; align-items:center; gap:10px; flex-shrink:0; }
-.hw-mark      { width:38px; height:38px; background:#1C3969; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.hw-mark      { width:38px; height:38px; background:#1B4FA8; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .hw-name      { font-size:15px; font-weight:800; color:#111318; letter-spacing:-.3px; line-height:1.15; }
 .hw-sub       { font-size:10px; color:#ABA6A0; margin-top:1px; }
 .hw-sep       { width:1px; height:30px; background:#E8E4DF; flex-shrink:0; }
@@ -454,7 +454,7 @@ function render_home(el) {
 .hw-stat      { text-align:center; padding:7px 14px; background:#F5F2EE; border-radius:8px; min-width:64px; }
 .hw-stat-val  { font-size:18px; font-weight:800; color:#111318; line-height:1; }
 .hw-stat-lbl  { font-size:9px; color:#9CA3AF; margin-top:2px; letter-spacing:.2px; white-space:nowrap; }
-.hw-cta       { background:#1C3969; color:#FFFFFF; border:none; border-radius:8px; padding:9px 18px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; flex-shrink:0; }
+.hw-cta       { background:#1B4FA8; color:#FFFFFF; border:none; border-radius:8px; padding:9px 18px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; flex-shrink:0; }
 .hw-cta:hover { background:#152B52; }
 
 /* ── Two-col grid ─────────────────────────────────────── */
@@ -479,7 +479,7 @@ function render_home(el) {
 .wo-mini-row:last-child { border-bottom:none; }
 .wo-mini-row:hover { background:#F9F8F6; }
 .wo-mini-pri   { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-.wo-mini-id    { font-size:11px; font-weight:700; color:#1C3969; white-space:nowrap; }
+.wo-mini-id    { font-size:11px; font-weight:700; color:#1B4FA8; white-space:nowrap; }
 .wo-mini-issue { font-size:12px; color:#111318; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .wo-mini-asset { font-size:11px; color:#5A5F6E; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .wo-mini-assign{ font-size:11px; color:#5A5F6E; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -497,7 +497,7 @@ function render_home(el) {
 .home-slide.active { display:block; }
 .home-car-footer { display:flex; align-items:center; padding:0 4px 14px 4px; }
 .home-dot  { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.2); border:none; cursor:pointer; padding:0; margin-right:5px; transition:all .15s; }
-.home-dot.active { background:#1C3969; width:16px; border-radius:3px; }
+.home-dot.active { background:#1B4FA8; width:16px; border-radius:3px; }
 .home-arr  { width:26px; height:26px; border:0.5px solid rgba(255,255,255,.12); border-radius:6px; background:rgba(255,255,255,.06); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; color:rgba(255,255,255,.5); margin-left:4px; }
 .home-arr:hover { background:rgba(255,255,255,.12); color:#FFF; }
 
@@ -553,7 +553,7 @@ function render_home(el) {
     <!-- News drawer (hidden by default) -->
     <div class="home-news-drawer" id="home-news-drawer">
       <div class="hnd-header">
-        <i class="ti ti-news" style="font-size:14px;color:#1C3969;"></i>
+        <i class="ti ti-news" style="font-size:14px;color:#1B4FA8;"></i>
         <div class="hnd-title">Fleet News &amp; Updates</div>
         <button class="hnd-close" onclick="homeToggleNews()"><i class="ti ti-x"></i></button>
       </div>
@@ -571,7 +571,7 @@ function render_home(el) {
           </div>`;
         }).join('')}
         <div style="padding-top:4px;">
-          <button onclick="Router.navigate('news')" style="background:none;border:none;font-size:12px;color:#1C3969;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">View all updates <i class="ti ti-arrow-right" style="font-size:11px;"></i></button>
+          <button onclick="Router.navigate('news')" style="background:none;border:none;font-size:12px;color:#1B4FA8;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">View all updates <i class="ti ti-arrow-right" style="font-size:11px;"></i></button>
         </div>
       </div>
     </div>
@@ -584,7 +584,7 @@ function render_home(el) {
 
           <!-- Active work orders -->
           <div class="h-lbl">
-            <i class="ti ti-clipboard-list" style="color:#1C3969;"></i> 5 most recently updated work orders
+            <i class="ti ti-clipboard-list" style="color:#1B4FA8;"></i> 5 most recently updated work orders
             <span class="h-lbl-action" onclick="Router.navigate('wo-list')">View all <i class="ti ti-arrow-right" style="font-size:10px;"></i></span>
           </div>
           ${activeWOs.length === 0
@@ -606,7 +606,7 @@ function render_home(el) {
                 const priLabel = wo.priority === 'urgent' ? 'Urgent'
                   : wo.priority === 'high' ? 'High'
                   : wo.priority === 'medium' ? 'Med' : 'Low';
-                const statusColor = wo.status === 'active' ? '#3B6D11' : '#1C3969';
+                const statusColor = wo.status === 'active' ? '#3B6D11' : '#1B4FA8';
                 const statusBg    = wo.status === 'active' ? '#EAF3DE' : '#D6E4F7';
                 const statusLabel = wo.status === 'active' ? 'Active' : wo.status === 'pending' ? 'Pending' : wo.status;
                 const machine = wo.machine || (wo.make && wo.model ? wo.make + ' ' + wo.model : '—');
@@ -624,7 +624,7 @@ function render_home(el) {
             </div>`
           }
 
-          <div class="h-lbl"><i class="ti ti-speakerphone" style="color:#1C3969;"></i> Fleet highlights</div>
+          <div class="h-lbl"><i class="ti ti-speakerphone" style="color:#1B4FA8;"></i> Fleet highlights</div>
           <div class="home-car-wrap">
             ${SLIDES.map((s, i) => `<div class="home-slide${i===0?' active':''}" style="background:${s.bg};" id="hslide-${i}">${s.html}</div>`).join('')}
             <div class="home-car-footer">

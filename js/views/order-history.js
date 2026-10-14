@@ -71,7 +71,7 @@ function render_order_history(el) {
     panel.style.display = 'block';
     panel.innerHTML = `
       <div class="oh-detail-header">
-        <i class="ti ti-truck-delivery" style="font-size:16px;color:#1C3969;"></i>
+        <i class="ti ti-truck-delivery" style="font-size:16px;color:#1B4FA8;"></i>
         <div class="oh-detail-title">${o.poNum ? o.poNum + ' · ' : ''}${o.vendor} · ${o.name}</div>
         <span class="status-pill ${statusPillClass(o.status)}" style="margin-right:8px;">${statusLabel(o.status)}</span>
         <button class="oh-detail-close" onclick="ohCloseDetail()"><i class="ti ti-x"></i></button>
@@ -159,7 +159,7 @@ function render_order_history(el) {
 .oh-tabs { display: flex; align-items: center; gap: 2px; padding: 0 24px; background: #FFFFFF; border-bottom: 1px solid #E8E4DF; flex-wrap: wrap; }
 .oh-tab { padding: 12px 14px; font-size: 13px; font-weight: 500; color: #7A7F8E; cursor: pointer; border-bottom: 2px solid transparent; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
 .oh-tab:hover { color: #3A3D4A; }
-.oh-tab.active { color: #111318; font-weight: 600; border-bottom-color: #1C3969; }
+.oh-tab.active { color: #111318; font-weight: 600; border-bottom-color: #1B4FA8; }
 .oh-tab-badge { font-size: 10px; font-weight: 700; border-radius: 999px; padding: 1px 7px; }
 .oh-badge-neutral { background: #F0ECE8; color: #5A5F6E; }
 .oh-badge-red { background: #FDE8E8; color: #B91C1C; }
@@ -167,11 +167,11 @@ function render_order_history(el) {
 .oh-search-wrap { position: relative; flex: 1; min-width: 180px; max-width: 260px; }
 .oh-search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #B0AAA3; font-size: 14px; pointer-events: none; }
 .oh-search { width: 100%; height: 34px; background: #FFFFFF; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px 0 32px; font-size: 13px; font-family: inherit; color: #111318; outline: none; }
-.oh-search:focus { border-color: #1C3969; }
+.oh-search:focus { border-color: #1B4FA8; }
 .oh-select { height: 34px; background: #FFFFFF; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #3A3D4A; outline: none; cursor: pointer; }
 .oh-btn-ghost { height: 34px; background: #FFFFFF; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 12px; font-size: 12px; font-weight: 500; font-family: inherit; color: #3A3D4A; cursor: pointer; display: flex; align-items: center; gap: 5px; }
 .oh-btn-ghost:hover { background: #F5F2EE; }
-.oh-btn-primary { height: 34px; background: #1C3969; border: none; border-radius: 7px; padding: 0 14px; font-size: 12px; font-weight: 600; font-family: inherit; color: #FFFFFF; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+.oh-btn-primary { height: 34px; background: #1B4FA8; border: none; border-radius: 7px; padding: 0 14px; font-size: 12px; font-weight: 600; font-family: inherit; color: #FFFFFF; cursor: pointer; display: flex; align-items: center; gap: 5px; }
 .oh-btn-primary:hover { background: #152B52; }
 .oh-btn-ghost-ml { margin-left: auto; }
 .oh-table-wrap { flex: 1; overflow-y: auto; min-height: 0; }
@@ -183,7 +183,7 @@ function render_order_history(el) {
 .status-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
 .pill-saved { background: #F0ECE8; color: #5A5F6E; }
 .pill-submitted { background: #DBEAFE; color: #1D4ED8; }
-.pill-delivered { background: #DBEAFE; color: #1C3969; }
+.pill-delivered { background: #DBEAFE; color: #1B4FA8; }
 .pill-backordered { background: #FEF3C7; color: #92400E; }
 .pill-review { background: #EDE9FE; color: #5B21B6; }
 .oh-actions { display: flex; align-items: center; gap: 6px; }
@@ -331,7 +331,7 @@ function render_order_history(el) {
     const msgs = _ohMsgList();
     const locs = Store.getLocations ? Store.getLocations() : [];
     const locOpts = locs.map((l, i) => `<label style="display:flex;align-items:center;gap:8px;padding:${i===locs.length-1?'':''}4px 0;cursor:pointer;">
-      <input type="checkbox" class="oh-loc-cb" value="${l.id}" checked style="accent-color:#1C3969;width:12px;height:12px;">
+      <input type="checkbox" class="oh-loc-cb" value="${l.id}" checked style="accent-color:#1B4FA8;width:12px;height:12px;">
       <span style="font-size:11px;color:#5A5F6E;">${l.name}</span>
     </label>`).join('');
 
@@ -352,12 +352,12 @@ function render_order_history(el) {
             </select>
             ${locs.length > 1 ? `<div style="border:0.5px solid #E2DDD8;border-radius:8px;overflow:hidden;">
               <label style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#F5F2EE;border-bottom:0.5px solid #E2DDD8;cursor:pointer;">
-                <input type="checkbox" id="oh-loc-all" checked onchange="document.querySelectorAll('.oh-loc-cb').forEach(cb=>cb.checked=this.checked)" style="accent-color:#1C3969;width:12px;height:12px;">
+                <input type="checkbox" id="oh-loc-all" checked onchange="document.querySelectorAll('.oh-loc-cb').forEach(cb=>cb.checked=this.checked)" style="accent-color:#1B4FA8;width:12px;height:12px;">
                 <span style="font-size:11px;font-weight:600;color:#111318;">All locations</span>
               </label>
               <div style="padding:6px 10px;">${locOpts}</div>
             </div>` : ''}
-            <button onclick="ohSaveMsg()" style="height:32px;background:#1C3969;border:none;border-radius:6px;font-size:12px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;">Add message</button>
+            <button onclick="ohSaveMsg()" style="height:32px;background:#1B4FA8;border:none;border-radius:6px;font-size:12px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;">Add message</button>
           </div>
         </div>
         <div>

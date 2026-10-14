@@ -1281,9 +1281,9 @@ function render_parts_search(el) {
     <rect x="50" y="90" width="88" height="54" rx="4" fill="#ECEAE6" stroke="#5A5F6E" stroke-width="1.2"/>
     <text x="56" y="108" font-size="7" fill="#3A3D4A" font-family="Inter,sans-serif" font-weight="600">PILOT PUMP</text>
     <text x="56" y="120" font-size="6" fill="#9CA3AF" font-family="Inter,sans-serif">36 bar / 30 L/min</text>
-    <line x1="94" y1="144" x2="94" y2="168" stroke="#1C3969" stroke-width="1.2" stroke-dasharray="4,2"/>
-    <line x1="94" y1="168" x2="180" y2="168" stroke="#1C3969" stroke-width="1.2" stroke-dasharray="4,2"/>
-    <text x="100" y="165" font-size="6" fill="#1C3969" font-family="Inter,sans-serif">Pilot supply</text>
+    <line x1="94" y1="144" x2="94" y2="168" stroke="#1B4FA8" stroke-width="1.2" stroke-dasharray="4,2"/>
+    <line x1="94" y1="168" x2="180" y2="168" stroke="#1B4FA8" stroke-width="1.2" stroke-dasharray="4,2"/>
+    <text x="100" y="165" font-size="6" fill="#1B4FA8" font-family="Inter,sans-serif">Pilot supply</text>
     <!-- Notes -->
     <rect x="6" y="316" width="220" height="64" fill="#ECEAE6" stroke="#8A8878" stroke-width="0.75"/>
     <text x="10" y="328" font-size="7" fill="#3A3D4A" font-family="Inter,sans-serif" font-weight="700">NOTES</text>
@@ -1403,8 +1403,8 @@ function render_parts_search(el) {
     <circle cx="${x+42}" cy="164" r="8" fill="#D6D2CC" stroke="#5A5F6E" stroke-width="1.2"/>
     `;}).join('')}
     <!-- Master link highlight -->
-    <rect x="38" y="148" width="50" height="32" rx="4" fill="none" stroke="#1C3969" stroke-width="2.5"/>
-    <text x="40" y="196" font-size="7" fill="#1C3969" font-family="Inter,sans-serif" font-weight="600">Master link</text>
+    <rect x="38" y="148" width="50" height="32" rx="4" fill="none" stroke="#1B4FA8" stroke-width="2.5"/>
+    <text x="40" y="196" font-size="7" fill="#1B4FA8" font-family="Inter,sans-serif" font-weight="600">Master link</text>
     <!-- Track shoe on one link -->
     <rect x="38" y="180" width="50" height="18" rx="2" fill="#C8C3BC" stroke="#5A5F6E" stroke-width="1.2"/>
     <!-- Grouser bar -->
@@ -1971,9 +1971,9 @@ function render_parts_search(el) {
     'SKJ': {
       displayName: 'Skyjack',
       tagline: 'Aerial Work Platforms',
-      color: '#1C3969',
-      logo: `<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="48" rx="4" fill="#152B52"/><text x="14" y="32" font-size="22" font-weight="800" font-family="Inter,sans-serif" fill="#1C3969" letter-spacing="-0.5">SKYJACK</text></svg>`,
-      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMinYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="120" fill="#152B52"/><defs><linearGradient id="skj-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#152B52"/><stop offset="100%" stop-color="#2A2210"/></linearGradient></defs><rect x="0" y="0" width="800" height="120" fill="url(#skj-grad)"/><text x="28" y="52" font-size="32" font-weight="800" font-family="Inter,sans-serif" fill="#1C3969" letter-spacing="-1">SKYJACK</text><text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#8A8878" letter-spacing="2">AERIAL WORK PLATFORMS</text><rect x="28" y="88" width="64" height="3" rx="1.5" fill="#1C3969"/></svg>`,
+      color: '#1B4FA8',
+      logo: `<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="48" rx="4" fill="#152B52"/><text x="14" y="32" font-size="22" font-weight="800" font-family="Inter,sans-serif" fill="#1B4FA8" letter-spacing="-0.5">SKYJACK</text></svg>`,
+      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMinYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="120" fill="#152B52"/><defs><linearGradient id="skj-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#152B52"/><stop offset="100%" stop-color="#2A2210"/></linearGradient></defs><rect x="0" y="0" width="800" height="120" fill="url(#skj-grad)"/><text x="28" y="52" font-size="32" font-weight="800" font-family="Inter,sans-serif" fill="#1B4FA8" letter-spacing="-1">SKYJACK</text><text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#8A8878" letter-spacing="2">AERIAL WORK PLATFORMS</text><rect x="28" y="88" width="64" height="3" rx="1.5" fill="#1B4FA8"/></svg>`,
       categories: [
         { icon:'ti-crane',    label:'Scissor Lifts',    sub:'SJIII, SJIV Series',     navModelId:'SKJ-SJIII3219', navComp:null },
         { icon:'ti-forklift', label:'Boom Lifts',       sub:'SJ45T, SJ66T',           navModelId:'SKJ-SJ45T',    navComp:null },
@@ -2004,9 +2004,9 @@ function render_parts_search(el) {
     'CAT': {
       displayName: 'Caterpillar',
       tagline: 'Heavy Construction Equipment',
-      color: '#1C3969',
-      logo: `<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="48" rx="4" fill="#1C3969"/><text x="14" y="33" font-size="20" font-weight="900" font-family="Inter,sans-serif" fill="#0A1628" letter-spacing="-0.5">CAT</text><text x="60" y="33" font-size="11" font-weight="600" font-family="Inter,sans-serif" fill="#4A3600" letter-spacing="0.5">CATERPILLAR</text></svg>`,
-      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMinYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="120" fill="#1A0E00"/><defs><linearGradient id="cat-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#1A0E00"/><stop offset="100%" stop-color="#2A1800"/></linearGradient></defs><rect x="0" y="0" width="800" height="120" fill="url(#cat-grad)"/><text x="28" y="52" font-size="32" font-weight="900" font-family="Inter,sans-serif" fill="#1C3969" letter-spacing="-1">CAT</text><text x="110" y="52" font-size="18" font-weight="600" font-family="Inter,sans-serif" fill="#D4880A" letter-spacing="2">CATERPILLAR</text><text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#6A5A38" letter-spacing="2">HEAVY CONSTRUCTION EQUIPMENT</text><rect x="28" y="88" width="64" height="3" rx="1.5" fill="#1C3969"/></svg>`,
+      color: '#1B4FA8',
+      logo: `<svg width="180" height="48" viewBox="0 0 180 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="48" rx="4" fill="#1B4FA8"/><text x="14" y="33" font-size="20" font-weight="900" font-family="Inter,sans-serif" fill="#0A1628" letter-spacing="-0.5">CAT</text><text x="60" y="33" font-size="11" font-weight="600" font-family="Inter,sans-serif" fill="#4A3600" letter-spacing="0.5">CATERPILLAR</text></svg>`,
+      bannerSvg: `<svg width="100%" height="120" viewBox="0 0 800 120" preserveAspectRatio="xMinYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="800" height="120" fill="#1A0E00"/><defs><linearGradient id="cat-grad" x1="0" y1="0" x2="800" y2="0"><stop offset="0%" stop-color="#1A0E00"/><stop offset="100%" stop-color="#2A1800"/></linearGradient></defs><rect x="0" y="0" width="800" height="120" fill="url(#cat-grad)"/><text x="28" y="52" font-size="32" font-weight="900" font-family="Inter,sans-serif" fill="#1B4FA8" letter-spacing="-1">CAT</text><text x="110" y="52" font-size="18" font-weight="600" font-family="Inter,sans-serif" fill="#D4880A" letter-spacing="2">CATERPILLAR</text><text x="28" y="76" font-size="13" font-family="Inter,sans-serif" fill="#6A5A38" letter-spacing="2">HEAVY CONSTRUCTION EQUIPMENT</text><rect x="28" y="88" width="64" height="3" rx="1.5" fill="#1B4FA8"/></svg>`,
       categories: [
         { icon:'ti-backhoe',   label:'Excavators',        sub:'320, 323, 308',        navModelId:'CAT-320',  navComp:null },
         { icon:'ti-bulldozer', label:'Mini Excavators',   sub:'308 Series',           navModelId:'CAT-308',  navComp:null },
@@ -2138,8 +2138,8 @@ function render_parts_search(el) {
     const sm = size==='sm';
     const h = sm ? '20px' : '24px';
     const fs = sm ? '10px' : '11px';
-    const btnStyle = `width:${h};height:${h};border:1px solid #D4B483;border-radius:4px;background:#F5DEB5;color:#1C3969;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit;padding:0;`;
-    const valStyle = `font-size:${fs};font-weight:700;color:#1C3969;min-width:14px;text-align:center;`;
+    const btnStyle = `width:${h};height:${h};border:1px solid #D4B483;border-radius:4px;background:#F5DEB5;color:#1B4FA8;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit;padding:0;`;
+    const valStyle = `font-size:${fs};font-weight:700;color:#1B4FA8;min-width:14px;text-align:center;`;
     return `<div style="display:inline-flex;align-items:center;gap:3px;background:#D6E4F7;border-radius:5px;padding:${sm?'1px 4px':'3px 6px'};">
       <button style="${btnStyle}" onclick="event.stopPropagation();psQtyAdj('${partId}',-1)">−</button>
       <span style="${valStyle}">${qty}</span>
@@ -2210,7 +2210,7 @@ function render_parts_search(el) {
 .search-input-wrap{position:relative;flex:1;}
 .search-icon-abs{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#B0AAA3;font-size:14px;pointer-events:none;}
 .ps-search-input{width:100%;height:36px;background:#F5F2EE;border:1.5px solid #E2DDD8;border-radius:8px;padding:0 10px 0 34px;font-size:13px;font-family:inherit;color:#111318;outline:none;}
-.ps-search-input:focus{border-color:#1C3969;background:#FFFFFF;}
+.ps-search-input:focus{border-color:#1B4FA8;background:#FFFFFF;}
 .ps-search-input::placeholder{color:#B0AAA3;}
 .wo-mode-select{height:36px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;color:#111318;outline:none;background:#FFFFFF;flex:1;}
 .ps-body{display:flex;flex:1;min-height:0;overflow:hidden;}
@@ -2218,10 +2218,10 @@ function render_parts_search(el) {
 .ps-center-panel{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;}
 .ps-detail-panel{width:296px;min-width:296px;background:#FFFFFF;border-left:0.5px solid #E8E4DF;display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;}
 .tree-root-node{display:flex;align-items:center;gap:6px;padding:8px 14px;font-size:12px;font-weight:600;color:#3A3D4A;cursor:pointer;border-bottom:0.5px solid #F0ECE8;}
-.tree-root-node:hover,.tree-root-node.active{background:#D6E4F7;color:#1C3969;}
+.tree-root-node:hover,.tree-root-node.active{background:#D6E4F7;color:#1B4FA8;}
 .tree-node{display:flex;align-items:center;gap:5px;font-size:12px;color:#3A3D4A;cursor:pointer;padding:5px 0;}
 .tree-node:hover{background:#F5F2EE;}
-.tree-node.active{background:#D6E4F7;color:#1C3969;}
+.tree-node.active{background:#D6E4F7;color:#1B4FA8;}
 .tree-toggle{color:#9CA3AF;font-size:10px;width:12px;text-align:center;flex-shrink:0;cursor:pointer;}
 .tree-count{margin-left:auto;font-size:10px;color:#B0AAA3;padding-right:12px;}
 .tree-s{padding-left:10px;font-weight:600;}
@@ -2251,7 +2251,7 @@ function render_parts_search(el) {
 .m-card-name,.c-card-name{font-size:13px;font-weight:600;color:#111318;margin-bottom:3px;}
 .m-card-meta,.c-card-meta{font-size:11px;color:#9CA3AF;margin-bottom:5px;}
 .sub-chip{background:#F5F2EE;color:#7A7F8E;font-size:10px;border-radius:4px;padding:2px 5px;}
-.c-card-icon{font-size:16px;color:#1C3969;margin-bottom:6px;}
+.c-card-icon{font-size:16px;color:#1B4FA8;margin-bottom:6px;}
 .sub-section{background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:10px;overflow:hidden;margin-bottom:10px;}
 .sub-sec-hdr{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;background:#FAFAF8;border-bottom:0.5px solid #F0ECE8;}
 .sub-sec-hdr:hover{background:#F5F2EE;}
@@ -2267,13 +2267,13 @@ function render_parts_search(el) {
 .pdesc{font-size:12px;font-weight:500;color:#111318;margin-bottom:2px;}
 .pbadges{display:flex;gap:3px;flex-wrap:wrap;}
 .badge-oem{background:#F5F2EE;color:#5A5F6E;font-size:9px;font-weight:600;border-radius:4px;padding:1px 5px;}
-.badge-am{background:#D6E4F7;color:#1C3969;font-size:9px;font-weight:600;border-radius:4px;padding:1px 5px;}
+.badge-am{background:#D6E4F7;color:#1B4FA8;font-size:9px;font-weight:600;border-radius:4px;padding:1px 5px;}
 .badge-rec{background:#EAF3DE;color:#3B6D11;font-size:9px;font-weight:600;border-radius:4px;padding:1px 5px;display:inline-flex;align-items:center;gap:2px;}
 .avdot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:3px;flex-shrink:0;}
 .avdot.g{background:#639922;}.avdot.a{background:#BA7517;}
-.avlbl.g{color:#3B6D11;}.avlbl.a{color:#1C3969;}
-.incart-badge{background:#D6E4F7;color:#1C3969;font-size:10px;font-weight:600;border-radius:5px;padding:3px 8px;}
-.add-btn{background:#1C3969;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;}
+.avlbl.g{color:#3B6D11;}.avlbl.a{color:#1B4FA8;}
+.incart-badge{background:#D6E4F7;color:#1B4FA8;font-size:10px;font-weight:600;border-radius:5px;padding:3px 8px;}
+.add-btn{background:#1B4FA8;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;}
 .add-btn:hover{background:#152B52;}
 .diag-wrap{display:flex;flex-direction:column;gap:0;flex:1;overflow:hidden;}
 .diag-tab-row{display:flex;gap:4px;padding:8px 14px;background:#FAFAF8;border-bottom:0.5px solid #E8E4DF;flex-wrap:wrap;flex-shrink:0;}
@@ -2290,16 +2290,16 @@ function render_parts_search(el) {
 .legend-row.inc{background:#FFFBF2;}
 .legend-ref{width:20px;height:20px;border-radius:50%;background:#F5F2EE;border:1.5px solid #D1CBC4;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#3A3D4A;flex-shrink:0;}
 .legend-row.sel .legend-ref{background:#534AB7;border-color:#3B3497;color:#FFF;}
-.legend-row.inc .legend-ref{background:#1C3969;border-color:#D4880A;color:#FFFFFF;}
+.legend-row.inc .legend-ref{background:#1B4FA8;border-color:#D4880A;color:#FFFFFF;}
 .legend-name{flex:1;font-weight:500;color:#111318;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .legend-num{font-size:10px;color:#9CA3AF;min-width:76px;}
 .legend-price{font-weight:700;color:#111318;min-width:46px;text-align:right;}
-.add-sm{background:#1C3969;border:none;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;}
-.incart-sm{background:#D6E4F7;color:#1C3969;font-size:10px;font-weight:600;border-radius:5px;padding:2px 6px;}
+.add-sm{background:#1B4FA8;border:none;border-radius:5px;padding:2px 7px;font-size:10px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;}
+.incart-sm{background:#D6E4F7;color:#1B4FA8;font-size:10px;font-weight:600;border-radius:5px;padding:2px 6px;}
 .cbubble{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;border:2px solid;transition:transform .15s;box-shadow:0 2px 5px rgba(0,0,0,.14);}
 .cbubble:hover{transform:scale(1.15);}
 .cb-def{background:#FFF;border-color:#9CA3AF;color:#3A3D4A;}
-.cb-cart{background:#1C3969;border-color:#D4880A;color:#FFFFFF;}
+.cb-cart{background:#1B4FA8;border-color:#D4880A;color:#FFFFFF;}
 .cb-sel{background:#534AB7;border-color:#3B3497;color:#FFF;}
 .dp-header{display:flex;align-items:flex-start;gap:6px;padding:14px 14px 0;}
 .dp-title{flex:1;font-size:13px;font-weight:700;color:#111318;line-height:1.4;}
@@ -2312,14 +2312,14 @@ function render_parts_search(el) {
 .dp-lbl{font-size:11px;color:#9CA3AF;min-width:76px;flex-shrink:0;}
 .dp-val{font-size:12px;font-weight:500;color:#111318;}
 .dp-avail{display:flex;align-items:center;font-size:12px;font-weight:500;}
-.dp-avail.g{color:#3B6D11;}.dp-avail.a{color:#1C3969;}
+.dp-avail.g{color:#3B6D11;}.dp-avail.a{color:#1B4FA8;}
 .dp-path{padding:4px 14px 8px;font-size:10px;color:#9CA3AF;line-height:1.6;display:flex;align-items:flex-start;gap:4px;}
 .dp-actions{padding:12px 14px;border-top:0.5px solid #F0ECE8;margin-top:auto;}
-.dp-add{flex:1;background:#1C3969;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
+.dp-add{flex:1;background:#1B4FA8;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
 .dp-add:hover{background:#152B52;}
 .dp-wishlist{background:#FFF0F3;border:0.5px solid #F5C5C5;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;color:#A32D2D;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;}
 .dp-wishlist:hover{background:#FCEBEB;}
-.dp-incart{width:100%;background:#D6E4F7;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;color:#1C3969;cursor:default;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
+.dp-incart{width:100%;background:#D6E4F7;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;color:#1B4FA8;cursor:default;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
 .dp-sec-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#9CA3AF;padding:10px 14px 4px;}
 .dp-manref{display:flex;align-items:center;gap:6px;padding:4px 14px;font-size:11px;}
 .dp-manref-link{color:#534AB7;text-decoration:none;font-weight:500;flex:1;}
@@ -2357,7 +2357,7 @@ function render_parts_search(el) {
 .slp-wo-table td{padding:8px 10px;border-bottom:0.5px solid #F0ECE8;font-size:12px;color:#3A3D4A;}
 .slp-wo-table tr:hover td{background:#FAFAF8;cursor:pointer;}
 .wo-status-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;border-radius:4px;padding:2px 6px;}
-.wo-status-badge.active{background:#D6E4F7;color:#1C3969;}
+.wo-status-badge.active{background:#D6E4F7;color:#1B4FA8;}
 .wo-ribbon{background:#152B52;padding:9px 22px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #0E1F3D;flex-shrink:0;flex-wrap:wrap;}
 .wr-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#8A8FA8;}
 .wr-item strong{color:#FFF;font-weight:600;}
@@ -2377,7 +2377,7 @@ function render_parts_search(el) {
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
       ${buildTopbarRight()}
     </div>
-    ${_impersonating ? `<div style="background:#FFF7ED;border-bottom:2px solid #1C3969;padding:9px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:500;color:#1C3969;flex-shrink:0;"><i class="ti ti-eye" style="font-size:13px;"></i> Fleet preview — <strong style="margin:0 3px;">${_impersonatingFleet || 'fleet'}</strong>${_impersonatingLocation ? ' · ' + _impersonatingLocation : ''}${_impersonatingRoleLabel ? ' · ' + _impersonatingRoleLabel : ''}<button onclick="Router.navigate('supplier-portal')" style="margin-left:auto;background:#152B52;color:#FFFFFF;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;">Exit preview</button></div>` : ''}
+    ${_impersonating ? `<div style="background:#FFF7ED;border-bottom:2px solid #1B4FA8;padding:9px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:500;color:#1B4FA8;flex-shrink:0;"><i class="ti ti-eye" style="font-size:13px;"></i> Fleet preview — <strong style="margin:0 3px;">${_impersonatingFleet || 'fleet'}</strong>${_impersonatingLocation ? ' · ' + _impersonatingLocation : ''}${_impersonatingRoleLabel ? ' · ' + _impersonatingRoleLabel : ''}<button onclick="Router.navigate('supplier-portal')" style="margin-left:auto;background:#152B52;color:#FFFFFF;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;">Exit preview</button></div>` : ''}
     <div id="ps-wo-ribbon"></div>
     <div class="ps-search-area">
       <div class="search-mode-row" id="ps-mode-row"></div>
@@ -2413,7 +2413,7 @@ function render_parts_search(el) {
     if (_searchMode === 'wo') {
       const wos = Store.getWorkOrders('active');
       const opts = wos.map(w => `<option value="${w.id}" ${_woFilter == w.id ? 'selected' : ''}>${w.machine} — WO #${w.id} (${w.asset})</option>`).join('');
-      inputRow.innerHTML = `<select class="wo-mode-select" id="ps-wo-select"><option value="">Select a work order…</option>${opts}</select><button onclick="psApplyWoFilter()" style="background:#1C3969;border:none;border-radius:7px;padding:0 14px;height:36px;font-size:12px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;">Go</button>`;
+      inputRow.innerHTML = `<select class="wo-mode-select" id="ps-wo-select"><option value="">Select a work order…</option>${opts}</select><button onclick="psApplyWoFilter()" style="background:#1B4FA8;border:none;border-radius:7px;padding:0 14px;height:36px;font-size:12px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;">Go</button>`;
       document.getElementById('ps-wo-select').addEventListener('change', function() { _woFilter = this.value || null; });
     } else {
       const mode = MODES.find(m => m.id === _searchMode);
@@ -2534,7 +2534,7 @@ function render_parts_search(el) {
   function renderSupplier() {
     const s = CATALOG.find(x=>x.id===_nav.supplierId); if(!s) return;
     const pr = SUPPLIER_PROFILES[s.id] || {};
-    const accent = pr.color || '#1C3969';
+    const accent = pr.color || '#1B4FA8';
     const activeWos = getWosForSupplier(s.id);
 
     const categoryTiles = (pr.categories || []).map(cat => {
@@ -2589,7 +2589,7 @@ function render_parts_search(el) {
         <td>${wo.asset||'—'}</td>
         <td>${wo.description||'—'}</td>
         <td><span class="wo-status-badge active">Active</span></td>
-        <td><button onclick="event.stopPropagation();psNavFromWo('${wo.id}')" style="background:#1C3969;border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;">Browse Parts</button></td>
+        <td><button onclick="event.stopPropagation();psNavFromWo('${wo.id}')" style="background:#1B4FA8;border:none;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;">Browse Parts</button></td>
       </tr>`
     ).join('');
 
@@ -2882,7 +2882,7 @@ function render_parts_search(el) {
       <div class="dp-actions">${_impersonating
         ? `<div style="font-size:11px;color:#9CA3AF;font-style:italic;padding:4px 0;">Cart and list unavailable in view-as-fleet mode.</div>`
         : iC
-          ?`<div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;display:flex;align-items:center;gap:6px;background:#D6E4F7;border-radius:8px;padding:8px 12px;"><i class="ti ti-check" style="color:#1C3969;font-size:13px;"></i><span style="font-size:13px;font-weight:600;color:#1C3969;flex:1;">In cart</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#1C3969;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',-1)">−</button><span style="font-size:14px;font-weight:700;color:#1C3969;min-width:20px;text-align:center;">${cartQty(p.id)}</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#1C3969;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',1)">+</button></div></div>`
+          ?`<div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;display:flex;align-items:center;gap:6px;background:#D6E4F7;border-radius:8px;padding:8px 12px;"><i class="ti ti-check" style="color:#1B4FA8;font-size:13px;"></i><span style="font-size:13px;font-weight:600;color:#1B4FA8;flex:1;">In cart</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#1B4FA8;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',-1)">−</button><span style="font-size:14px;font-weight:700;color:#1B4FA8;min-width:20px;text-align:center;">${cartQty(p.id)}</span><button style="width:28px;height:28px;border:1px solid #D4B483;border-radius:5px;background:#F5DEB5;color:#1B4FA8;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;" onclick="psQtyAdj('${p.id}',1)">+</button></div></div>`
           :`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><button class="dp-add" onclick="psAddPart('${p.id}')"><i class="ti ti-shopping-cart" style="font-size:13px;"></i> ${cartLabel}</button><button class="dp-wishlist" onclick="addToWishList(_psGetPart('${p.id}'))"><i class="ti ti-heart" style="font-size:13px;"></i> Save to list</button></div>`
       }</div>`;
   }
@@ -2904,7 +2904,7 @@ function render_parts_search(el) {
       <div style="font-size:12px;color:#5A5F6E;margin-bottom:12px;">Choose which additional fleets and locations should receive this note. The current fleet already has it.</div>
       <div style="border:0.5px solid #E2DDD8;border-radius:8px;overflow:hidden;max-height:360px;overflow-y:auto;">
         <label style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#F5F2EE;border-bottom:0.5px solid #E2DDD8;cursor:pointer;position:sticky;top:0;z-index:1;">
-          <input type="checkbox" ${allSelected ? 'checked' : ''} onchange="pnToggleAllFleets(this.checked)" style="accent-color:#1C3969;width:14px;height:14px;flex-shrink:0;cursor:pointer;">
+          <input type="checkbox" ${allSelected ? 'checked' : ''} onchange="pnToggleAllFleets(this.checked)" style="accent-color:#1B4FA8;width:14px;height:14px;flex-shrink:0;cursor:pointer;">
           <span style="font-size:12px;font-weight:600;color:#111318;">Select all fleets</span>
           <span style="font-size:11px;color:#9CA3AF;margin-left:auto;">${_pnState.fleets.length} fleet${_pnState.fleets.length !== 1 ? 's' : ''}</span>
         </label>
@@ -2912,20 +2912,20 @@ function render_parts_search(el) {
           const isAllLocs = f.selLocs === 'all';
           return `<div style="${f !== _pnState.fleets[_pnState.fleets.length-1] ? 'border-bottom:0.5px solid #F0ECE8;' : ''}">
             <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;">
-              <input type="checkbox" ${f.selected ? 'checked' : ''} onchange="pnToggleFleet('${f.fleetId}')" style="accent-color:#1C3969;width:14px;height:14px;flex-shrink:0;cursor:pointer;">
+              <input type="checkbox" ${f.selected ? 'checked' : ''} onchange="pnToggleFleet('${f.fleetId}')" style="accent-color:#1B4FA8;width:14px;height:14px;flex-shrink:0;cursor:pointer;">
               <span style="font-size:12px;font-weight:500;color:#111318;flex:1;">${f.fleetName}</span>
               <span style="font-size:10px;color:#9CA3AF;">${f.locs.length} loc${f.locs.length !== 1 ? 's' : ''}</span>
               <button onclick="pnExpandFleet('${f.fleetId}')" style="background:none;border:none;padding:2px 6px;cursor:pointer;color:#9CA3AF;font-size:10px;font-family:inherit;">${f.expanded ? '▲' : '▼'}</button>
             </div>
             ${f.expanded ? `<div style="background:#FAFAF9;padding:4px 12px 8px 36px;border-top:0.5px solid #F0ECE8;">
               <label style="display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;border-bottom:0.5px solid #F0ECE8;margin-bottom:2px;">
-                <input type="checkbox" ${isAllLocs ? 'checked' : ''} onchange="pnToggleAllLocs('${f.fleetId}',this.checked)" style="accent-color:#1C3969;width:12px;height:12px;cursor:pointer;">
+                <input type="checkbox" ${isAllLocs ? 'checked' : ''} onchange="pnToggleAllLocs('${f.fleetId}',this.checked)" style="accent-color:#1B4FA8;width:12px;height:12px;cursor:pointer;">
                 <span style="font-size:11px;font-weight:600;color:#111318;">All locations</span>
               </label>
               ${f.locs.map(l => {
                 const locSel = isAllLocs || (f.selLocs instanceof Set && f.selLocs.has(l.id));
                 return `<label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;">
-                  <input type="checkbox" ${locSel ? 'checked' : ''} onchange="pnToggleLoc('${f.fleetId}','${l.id}')" style="accent-color:#1C3969;width:12px;height:12px;cursor:pointer;">
+                  <input type="checkbox" ${locSel ? 'checked' : ''} onchange="pnToggleLoc('${f.fleetId}','${l.id}')" style="accent-color:#1B4FA8;width:12px;height:12px;cursor:pointer;">
                   <span style="font-size:11px;color:#5A5F6E;">${l.name}</span>
                 </label>`;
               }).join('')}
@@ -2942,7 +2942,7 @@ function render_parts_search(el) {
       <div style="font-size:12px;color:#5A5F6E;margin-bottom:12px;">Choose which locations within your fleet should receive this note.</div>
       <div style="border:0.5px solid #E2DDD8;border-radius:8px;overflow:hidden;">
         <label style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#F5F2EE;border-bottom:0.5px solid #E2DDD8;cursor:pointer;">
-          <input type="checkbox" ${allSel ? 'checked' : ''} onchange="pnToggleAllFleetLocs(this.checked)" style="accent-color:#1C3969;width:14px;height:14px;flex-shrink:0;cursor:pointer;">
+          <input type="checkbox" ${allSel ? 'checked' : ''} onchange="pnToggleAllFleetLocs(this.checked)" style="accent-color:#1B4FA8;width:14px;height:14px;flex-shrink:0;cursor:pointer;">
           <span style="font-size:12px;font-weight:600;color:#111318;">All locations</span>
           <span style="font-size:11px;color:#9CA3AF;margin-left:auto;">${_pnState.locs.length} location${_pnState.locs.length !== 1 ? 's' : ''}</span>
         </label>
@@ -2950,7 +2950,7 @@ function render_parts_search(el) {
           const sel = allSel || (_pnState.selLocs instanceof Set && _pnState.selLocs.has(l.id));
           const last = i === _pnState.locs.length - 1;
           return `<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;${last ? '' : 'border-bottom:0.5px solid #F0ECE8;'}cursor:pointer;">
-            <input type="checkbox" ${sel ? 'checked' : ''} onchange="pnToggleFleetLoc('${l.id}')" style="accent-color:#1C3969;width:14px;height:14px;flex-shrink:0;cursor:pointer;">
+            <input type="checkbox" ${sel ? 'checked' : ''} onchange="pnToggleFleetLoc('${l.id}')" style="accent-color:#1B4FA8;width:14px;height:14px;flex-shrink:0;cursor:pointer;">
             <span style="font-size:12px;color:#111318;">${l.name}</span>
           </label>`;
         }).join('')}

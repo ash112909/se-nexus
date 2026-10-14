@@ -31,7 +31,7 @@ function buildSidebar(activeItem, opts) {
       <div class="sb-item active"><i class="ti ti-search"></i><span class="sb-lbl"> Search parts</span></div>
     </div>
     <div style="margin-top:auto;">
-      <div class="sb-item" onclick="Router.navigate('supplier-portal')" style="color:#1C3969;border-top:1px solid #0E1F3D;">
+      <div class="sb-item" onclick="Router.navigate('supplier-portal')" style="color:#1B4FA8;border-top:1px solid #0E1F3D;">
         <i class="ti ti-arrow-left"></i><span class="sb-lbl"> Exit preview</span>
       </div>
       <div class="sb-pin-row" id="sb-pin-btn"><i class="ti ${pinIcon}"></i><span class="sb-pin-label">${pinLabel}</span></div>
@@ -226,7 +226,7 @@ window.openFeedback = function() {
   card.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:0.5px solid #F0ECE8;flex-shrink:0;">
       <div style="display:flex;align-items:center;gap:8px;">
-        <div style="width:28px;height:28px;background:#1C3969;border-radius:7px;display:flex;align-items:center;justify-content:center;">
+        <div style="width:28px;height:28px;background:#1B4FA8;border-radius:7px;display:flex;align-items:center;justify-content:center;">
           <i class="ti ti-message-circle" style="font-size:14px;color:#FFFFFF;"></i>
         </div>
         <div>

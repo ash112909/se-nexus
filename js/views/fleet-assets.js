@@ -20,7 +20,7 @@ function render_fleet_assets(el) {
   function statusColor(status) {
     if (status === 'Active')     return { color: '#3B6D11', bg: '#EAF3DE' };
     if (status === 'Retired')    return { color: '#6B7280', bg: '#F3F4F6' };
-    if (status === 'In Service') return { color: '#1C3969', bg: '#D6E4F7' };
+    if (status === 'In Service') return { color: '#1B4FA8', bg: '#D6E4F7' };
     return { color: '#BA7517', bg: '#FEF3C7' };
   }
 
@@ -50,19 +50,19 @@ function render_fleet_assets(el) {
 .fa-search-wrap { position:relative; margin-bottom:8px; }
 .fa-search-icon { position:absolute; left:9px; top:50%; transform:translateY(-50%); color:#B0AAA3; font-size:13px; pointer-events:none; }
 .fa-search-input { width:100%; height:34px; background:#F5F2EE; border:1.5px solid #E8E4DF; border-radius:7px; padding:0 30px 0 32px; font-size:13px; font-family:inherit; color:#111318; outline:none; box-sizing:border-box; }
-.fa-search-input:focus { border-color:#1C3969; background:#fff; }
+.fa-search-input:focus { border-color:#1B4FA8; background:#fff; }
 .fa-search-input::placeholder { color:#B0AAA3; }
 .fa-search-clear { position:absolute; right:7px; top:50%; transform:translateY(-50%); background:none; border:none; color:#B0AAA3; font-size:13px; cursor:pointer; padding:2px; display:none; }
 .fa-search-clear.visible { display:block; }
 .fa-filter-row { display:flex; gap:5px; padding-bottom:10px; overflow-x:auto; scrollbar-width:none; }
 .fa-filter-row::-webkit-scrollbar { display:none; }
 .fa-filter-chip { padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; cursor:pointer; border:1px solid #E8E4DF; background:#FFFFFF; color:#6B7280; white-space:nowrap; }
-.fa-filter-chip.active { background:#1C3969; color:#fff; border-color:#1C3969; }
+.fa-filter-chip.active { background:#1B4FA8; color:#fff; border-color:#1B4FA8; }
 .fa-list-count { font-size:11px; color:#9CA3AF; padding:0 14px 6px; }
 .fa-list-scroll { flex:1; overflow-y:auto; }
 .fa-asset-row { padding:11px 14px; border-bottom:0.5px solid #F0ECE8; cursor:pointer; display:flex; align-items:flex-start; gap:9px; transition:background .1s; }
 .fa-asset-row:hover { background:#F9F8F6; }
-.fa-asset-row.active { background:#EBF2FB; border-left:3px solid #1C3969; padding-left:11px; }
+.fa-asset-row.active { background:#EBF2FB; border-left:3px solid #1B4FA8; padding-left:11px; }
 .fa-asset-thumb { width:42px; height:42px; border-radius:7px; background:#F0ECE8; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; overflow:hidden; }
 .fa-asset-row-body { flex:1; min-width:0; }
 .fa-asset-equip { font-size:12px; font-weight:700; color:#111318; }
@@ -81,7 +81,7 @@ function render_fleet_assets(el) {
 .fa-hero-desc { font-size:12px; color:#6B7280; margin-top:8px; line-height:1.6; }
 .fa-hero-actions { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
 .fa-btn { height:32px; border-radius:7px; padding:0 14px; font-size:12px; font-weight:600; font-family:inherit; cursor:pointer; display:flex; align-items:center; gap:6px; border:none; }
-.fa-btn-primary { background:#1C3969; color:#fff; }
+.fa-btn-primary { background:#1B4FA8; color:#fff; }
 .fa-btn-primary:hover { background:#152B52; }
 .fa-btn-ghost { background:#F5F2EE; color:#3A3D4A; border:1px solid #E2DDD8; }
 .fa-btn-ghost:hover { background:#ECEAE7; }
