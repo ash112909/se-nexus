@@ -187,7 +187,7 @@ function render_wo_list(el) {
   el.innerHTML = `
 <style>
 /* ── Shared shell / topbar ─────────────────────── */
-.topbar-search { flex: 1; max-width: 420px; height: 34px; background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 0 10px; color: #6B7280; font-size: 13px; cursor: text; }
+.topbar-search { flex: 0 0 300px; height: 34px; background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 8px; display: flex; align-items: center; gap: 8px; padding: 0 10px; color: #6B7280; font-size: 13px; cursor: text; margin-left: auto; }
 
 /* ── Main tab bar ─────────────────────────────── */
 .wol-main-tabs { display: flex; align-items: center; gap: 0; background: #FFFFFF; border-bottom: 1px solid #E8E4DF; padding: 0 28px; }
