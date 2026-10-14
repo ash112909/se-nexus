@@ -2213,7 +2213,6 @@ function render_parts_search(el) {
 .ps-search-input:focus{border-color:#1C3969;background:#FFFFFF;}
 .ps-search-input::placeholder{color:#B0AAA3;}
 .wo-mode-select{height:36px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:13px;font-family:inherit;color:#111318;outline:none;background:#FFFFFF;flex:1;}
-.ps-breadcrumb{display:flex;align-items:center;padding:5px 20px;background:#FAFAF8;border-bottom:0.5px solid #E8E4DF;font-size:12px;color:#5C6070;gap:4px;flex-shrink:0;flex-wrap:wrap;}
 .ps-body{display:flex;flex:1;min-height:0;overflow:hidden;}
 .ps-tree-panel{width:236px;min-width:236px;background:#FFFFFF;border-right:0.5px solid #E8E4DF;overflow-y:auto;flex-shrink:0;}
 .ps-center-panel{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden;}
@@ -2384,7 +2383,6 @@ function render_parts_search(el) {
       <div class="search-mode-row" id="ps-mode-row"></div>
       <div class="search-input-row" id="ps-input-row"></div>
     </div>
-    <div class="ps-breadcrumb" id="ps-breadcrumb"></div>
     <div class="ps-body">
       <div class="ps-tree-panel" id="ps-tree"></div>
       <div class="ps-center-panel" id="ps-center"></div>

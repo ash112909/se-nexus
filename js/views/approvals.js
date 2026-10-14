@@ -530,11 +530,6 @@ function render_approvals(el) {
   ${buildSidebar('approvals')}
   <div class="main">
     <div class="topbar">
-      <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
-        <a style="color:#5C6070;cursor:pointer;" onclick="Router.navigate('home')">Home</a>
-        <span style="color:#3C4052;">/</span>
-        <span style="color:#FFFFFF;font-weight:500;">Approvals</span>
-      </div>
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
       ${buildTopbarRight()}
     </div>
