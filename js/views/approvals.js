@@ -56,31 +56,32 @@ function render_approvals(el) {
 
   function renderRows() {
     const orders = getOrders();
-    const tbody = document.getElementById('ap-tbody');
-    if (!tbody) return;
+    const list = document.getElementById('ap-list');
+    if (!list) return;
     if (!orders.length) {
-      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:48px;color:#9CA3AF;font-size:13px;">No orders pending approval.</td></tr>';
+      list.innerHTML = '<div style="text-align:center;padding:64px 24px;color:#9CA3AF;font-size:13px;">No orders pending approval.</div>';
       updateBadge(0);
       return;
     }
     updateBadge(orders.length);
-    tbody.innerHTML = orders.map(o => `
-      <tr data-id="${o.id}" class="${o.id === _selectedOrderId ? 'selected-row' : ''}" onclick="apOpenDetail('${o.id}')">
-        <td><strong style="color:#111318;">${o.vendor}</strong></td>
-        <td style="font-size:11px;color:#9CA3AF;">${o.vendorId || '—'}</td>
-        <td>${o.date}</td>
-        <td>${o.user}</td>
-        <td>${o.name}</td>
-        <td>${o.wo}${o.asset && o.asset !== o.wo ? ' · ' + o.asset : ''}</td>
-        <td style="font-weight:600;color:#111318;">$${(+o.amount).toFixed(2)}</td>
-        <td>${approvalTypeBadge(o)}</td>
-        <td><span class="status-pill ${statusPillClass(o.status)}">${statusLabel(o.status)}</span></td>
-        <td>
-          <div class="ap-actions">
-            ${rowActions(o)}
-          </div>
-        </td>
-      </tr>`).join('');
+    list.innerHTML = orders.map(o => `
+      <div class="ap-card ${o.id === _selectedOrderId ? 'ap-card-selected' : ''}" data-id="${o.id}" onclick="apOpenDetail('${o.id}')">
+        <div class="ap-card-left">
+          <div class="ap-card-vendor">${o.vendor}</div>
+          <div class="ap-card-meta">${o.vendorId ? o.vendorId + ' · ' : ''}${o.date}</div>
+          <div class="ap-card-badges">${approvalTypeBadge(o)}</div>
+        </div>
+        <div class="ap-card-mid">
+          <div class="ap-card-row"><span class="ap-card-label">Order</span><span class="ap-card-val">${o.name}</span></div>
+          <div class="ap-card-row"><span class="ap-card-label">WO / Asset</span><span class="ap-card-val">${o.wo}${o.asset && o.asset !== o.wo ? ' · ' + o.asset : ''}</span></div>
+          <div class="ap-card-row"><span class="ap-card-label">Requested by</span><span class="ap-card-val">${o.user}</span></div>
+        </div>
+        <div class="ap-card-right">
+          <div class="ap-card-amount">$${(+o.amount).toFixed(2)}</div>
+          <span class="status-pill ${statusPillClass(o.status)}">${statusLabel(o.status)}</span>
+          <div class="ap-actions">${rowActions(o)}</div>
+        </div>
+      </div>`).join('');
   }
 
   function rowActions(o) {
@@ -470,12 +471,21 @@ function render_approvals(el) {
 .ap-search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #B0AAA3; font-size: 14px; pointer-events: none; }
 .ap-search { width: 100%; height: 34px; background: #FFFFFF; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px 0 32px; font-size: 13px; font-family: inherit; color: #111318; outline: none; }
 .ap-search:focus { border-color: #1B4FA8; }
-.ap-table-wrap { flex: 1; overflow-y: auto; min-height: 0; }
-.ap-table { width: 100%; border-collapse: collapse; }
-.ap-table th { background: #FAFAF8; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: #9CA3AF; padding: 9px 14px; text-align: left; border-bottom: 1px solid #E8E4DF; white-space: nowrap; position: sticky; top: 0; z-index: 1; }
-.ap-table td { padding: 10px 14px; border-bottom: 0.5px solid #F0ECE8; font-size: 13px; color: #3A3D4A; vertical-align: middle; }
-.ap-table tr:hover td { background: #FAFAF8; cursor: pointer; }
-.ap-table tr.selected-row td { background: #D6E4F7; }
+.ap-list-wrap { flex: 1; overflow-y: auto; min-height: 0; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+.ap-list { display: flex; flex-direction: column; gap: 10px; }
+.ap-card { background: #FFFFFF; border: 1px solid #E8E4DF; border-radius: 14px; padding: 16px 20px; display: flex; align-items: flex-start; gap: 20px; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; }
+.ap-card:hover { border-color: #C5D8F5; box-shadow: 0 2px 10px rgba(27,79,168,0.08); }
+.ap-card-selected { border-color: #1B4FA8; background: #F0F6FF; box-shadow: 0 2px 12px rgba(27,79,168,0.13); }
+.ap-card-left { min-width: 180px; max-width: 200px; flex-shrink: 0; }
+.ap-card-vendor { font-size: 14px; font-weight: 700; color: #111318; margin-bottom: 3px; }
+.ap-card-meta { font-size: 11px; color: #9CA3AF; margin-bottom: 8px; }
+.ap-card-badges { display: flex; flex-wrap: wrap; gap: 4px; }
+.ap-card-mid { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.ap-card-row { display: flex; align-items: baseline; gap: 6px; font-size: 13px; }
+.ap-card-label { font-size: 11px; color: #9CA3AF; white-space: nowrap; min-width: 90px; }
+.ap-card-val { color: #3A3D4A; font-weight: 500; }
+.ap-card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; min-width: 130px; }
+.ap-card-amount { font-size: 18px; font-weight: 800; color: #111318; letter-spacing: -0.5px; }
 .status-pill { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
 .pill-saved { background: #F0ECE8; color: #5A5F6E; }
 .pill-submitted { background: #DBEAFE; color: #1D4ED8; }
@@ -550,15 +560,8 @@ function render_approvals(el) {
         </div>
       </div>
 
-      <div class="ap-table-wrap">
-        <table class="ap-table">
-          <thead>
-            <tr>
-              <th>Vendor</th><th>Vendor ID</th><th>Date</th><th>Requested by</th><th>Order name</th><th>WO / Equipment</th><th>Amount</th><th>Reason</th><th>Status</th><th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="ap-tbody"></tbody>
-        </table>
+      <div class="ap-list-wrap">
+        <div class="ap-list" id="ap-list"></div>
       </div>
 
       <div id="ap-detail-panel" style="display:none;" class="ap-detail-panel"></div>

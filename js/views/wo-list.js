@@ -250,12 +250,10 @@ function render_wo_list(el) {
 .hist-tab:hover { color: #3A3D4A; }
 .hist-tab.active { color: #111318; font-weight: 600; border-bottom-color: #1B4FA8; }
 .hist-tab-badge { font-size: 10px; font-weight: 700; border-radius: 999px; padding: 1px 7px; background: #F0ECE8; color: #5A5F6E; }
-.hist-table-wrap { flex: 1; overflow-y: auto; min-height: 0; }
-.oh-table { width: 100%; border-collapse: collapse; }
-.oh-table th { background: #FAFAF8; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: #9CA3AF; padding: 9px 14px; text-align: left; border-bottom: 1px solid #E8E4DF; white-space: nowrap; position: sticky; top: 0; z-index: 1; }
-.oh-table td { padding: 10px 14px; border-bottom: 0.5px solid #F0ECE8; font-size: 13px; color: #3A3D4A; vertical-align: middle; }
-.oh-table tr:hover td { background: #FAFAF8; cursor: pointer; }
-.oh-table tr.selected-row td { background: #D6E4F7; }
+.hist-table-wrap { flex: 1; overflow-y: auto; min-height: 0; padding: 16px 20px; }
+.arch-list { display: flex; flex-direction: column; gap: 10px; }
+.arch-card { background: #FFFFFF; border: 1px solid #E8E4DF; border-radius: 14px; padding: 14px 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; }
+.arch-card:hover { border-color: #C5D8F5; box-shadow: 0 2px 8px rgba(27,79,168,0.07); }
 .status-pill { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
 .pill-saved { background: #F0ECE8; color: #5A5F6E; }
 .pill-submitted { background: #DBEAFE; color: #1D4ED8; }
@@ -382,16 +380,9 @@ function render_wo_list(el) {
         <span class="wol-result-count" id="arch-result-count"></span>
       </div>
 
-      <!-- Archive table -->
+      <!-- Archive list -->
       <div class="hist-table-wrap">
-        <table class="oh-table">
-          <thead>
-            <tr>
-              <th>WO #</th><th>Type</th><th>Machine / Issue</th><th>Assignee</th><th>Closed</th><th>Priority</th>
-            </tr>
-          </thead>
-          <tbody id="arch-tbody"></tbody>
-        </table>
+        <div class="arch-list" id="arch-tbody"></div>
       </div>
 
       <div style="padding:10px 24px;background:#FFFFFF;border-top:0.5px solid #E8E4DF;display:flex;align-items:center;font-size:12px;color:#7A7F8E;">
@@ -446,22 +437,22 @@ function render_wo_list(el) {
     const countEl = document.getElementById('arch-result-count');
     if (countEl) countEl.textContent = wos.length + ' archived';
     if (!wos.length) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:#9CA3AF;font-size:13px;">No archived orders.</td></tr>';
+      tbody.innerHTML = '<div style="text-align:center;padding:48px;color:#9CA3AF;font-size:13px;">No archived orders.</div>';
       return;
     }
     tbody.innerHTML = wos.map(wo => {
       const t = TYPE_META[wo.woType] || TYPE_META.other;
-      return `<tr onclick="Router.navigate('wo-detail',{woId:${wo.id}})" style="cursor:pointer;">
-        <td><strong style="font-size:12px;font-family:monospace;color:#111318;">#${wo.id}</strong>${wo.externalId ? `<div style="font-size:10px;color:#9CA3AF;">${wo.externalId}</div>` : ''}</td>
-        <td><span class="wol-type-pill" style="background:${t.bg};color:${t.color};">${t.label}</span></td>
-        <td>
+      return `<div class="arch-card" onclick="Router.navigate('wo-detail',{woId:${wo.id}})">
+        <div style="min-width:60px;"><strong style="font-size:12px;font-family:monospace;color:#111318;">#${wo.id}</strong>${wo.externalId ? `<div style="font-size:10px;color:#9CA3AF;margin-top:2px;">${wo.externalId}</div>` : ''}</div>
+        <div style="min-width:90px;"><span class="wol-type-pill" style="background:${t.bg};color:${t.color};">${t.label}</span></div>
+        <div style="flex:1;">
           <div style="font-size:13px;font-weight:600;color:#111318;">${wo.machine || wo.asset || '—'}</div>
-          <div style="font-size:12px;color:#7A7F8E;">${wo.issue || ''}</div>
-        </td>
-        <td style="font-size:12px;color:#5A5F6E;">${wo.assignee || '—'}</td>
-        <td style="font-size:12px;color:#9CA3AF;">${wo.closedDate || wo.dueDate || '—'}</td>
-        <td>${priorityCell(wo.priority)}</td>
-      </tr>`;
+          <div style="font-size:12px;color:#7A7F8E;margin-top:2px;">${wo.issue || ''}</div>
+        </div>
+        <div style="font-size:12px;color:#5A5F6E;min-width:100px;">${wo.assignee || '—'}</div>
+        <div style="font-size:12px;color:#9CA3AF;min-width:80px;">${wo.closedDate || wo.dueDate || '—'}</div>
+        <div>${priorityCell(wo.priority)}</div>
+      </div>`;
     }).join('');
   }
 

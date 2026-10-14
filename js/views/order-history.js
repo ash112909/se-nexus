@@ -28,15 +28,15 @@ function render_order_history(el) {
 
   function renderRows() {
     const orders = getDisplayOrders();
-    const tbody = document.getElementById('oh-tbody');
-    if (!tbody) return;
+    const list = document.getElementById('oh-list');
+    if (!list) return;
     if (!orders.length) {
-      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:32px;color:#9CA3AF;font-size:13px;">No orders found.</td></tr>';
+      list.innerHTML = '<div style="text-align:center;padding:64px 24px;color:#9CA3AF;font-size:13px;">No orders found.</div>';
       return;
     }
-    tbody.innerHTML = orders.map(o => {
+    list.innerHTML = orders.map(o => {
       const isApprovals = _currentTab === 'approvals';
-      const approvalBtns = isApprovals ? `
+      const actionBtns = isApprovals ? `
         <div class="oh-actions">
           <button class="oh-action-btn" style="background:#EAF3DE;color:#3B6D11;" onclick="event.stopPropagation();ohApprove('${o.id}')"><i class="ti ti-check"></i></button>
           <button class="oh-action-btn" style="background:#FCEBEB;color:#A32D2D;" onclick="event.stopPropagation();ohReject('${o.id}')"><i class="ti ti-x"></i></button>
@@ -46,18 +46,22 @@ function render_order_history(el) {
           <button class="oh-action-btn"><i class="ti ti-dots"></i></button>
         </div>`;
       return `
-        <tr data-id="${o.id}" class="${o.id === _selectedOrderId ? 'selected-row' : ''}" onclick="ohOpenDetail('${o.id}')">
-          <td><strong style="color:#111318;">${o.vendor}</strong></td>
-          <td style="font-size:11px;color:#9CA3AF;">${o.vendorId || '—'}</td>
-          <td>${o.date}</td>
-          <td>${o.user}</td>
-          <td>${o.name}</td>
-          <td>${o.wo}${o.asset && o.asset !== o.wo ? ' · ' + o.asset : ''}</td>
-          <td style="font-weight:600;color:#111318;">$${(+o.amount).toFixed(2)}</td>
-          <td><span class="status-pill ${statusPillClass(o.status)}">${statusLabel(o.status)}</span></td>
-          <td style="font-size:11px;color:#9CA3AF;">${o.poNum || '—'}</td>
-          <td>${approvalBtns}</td>
-        </tr>`;
+        <div class="oh-card ${o.id === _selectedOrderId ? 'oh-card-selected' : ''}" data-id="${o.id}" onclick="ohOpenDetail('${o.id}')">
+          <div class="oh-card-left">
+            <div class="oh-card-vendor">${o.vendor}</div>
+            <div class="oh-card-meta">${o.vendorId ? o.vendorId + ' · ' : ''}${o.date}${o.poNum ? ' · ' + o.poNum : ''}</div>
+          </div>
+          <div class="oh-card-mid">
+            <div class="oh-card-row"><span class="oh-card-label">Order</span><span class="oh-card-val">${o.name}</span></div>
+            <div class="oh-card-row"><span class="oh-card-label">WO / Asset</span><span class="oh-card-val">${o.wo}${o.asset && o.asset !== o.wo ? ' · ' + o.asset : ''}</span></div>
+            <div class="oh-card-row"><span class="oh-card-label">Requested by</span><span class="oh-card-val">${o.user}</span></div>
+          </div>
+          <div class="oh-card-right">
+            <div class="oh-card-amount">$${(+o.amount).toFixed(2)}</div>
+            <span class="status-pill ${statusPillClass(o.status)}">${statusLabel(o.status)}</span>
+            ${actionBtns}
+          </div>
+        </div>`;
     }).join('');
   }
 
@@ -174,12 +178,20 @@ function render_order_history(el) {
 .oh-btn-primary { height: 34px; background: #1B4FA8; border: none; border-radius: 7px; padding: 0 14px; font-size: 12px; font-weight: 600; font-family: inherit; color: #FFFFFF; cursor: pointer; display: flex; align-items: center; gap: 5px; }
 .oh-btn-primary:hover { background: #152B52; }
 .oh-btn-ghost-ml { margin-left: auto; }
-.oh-table-wrap { flex: 1; overflow-y: auto; min-height: 0; }
-.oh-table { width: 100%; border-collapse: collapse; }
-.oh-table th { background: #FAFAF8; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: #9CA3AF; padding: 9px 14px; text-align: left; border-bottom: 1px solid #E8E4DF; white-space: nowrap; position: sticky; top: 0; z-index: 1; }
-.oh-table td { padding: 10px 14px; border-bottom: 0.5px solid #F0ECE8; font-size: 13px; color: #3A3D4A; vertical-align: middle; }
-.oh-table tr:hover td { background: #FAFAF8; cursor: pointer; }
-.oh-table tr.selected-row td { background: #D6E4F7; }
+.oh-list-wrap { flex: 1; overflow-y: auto; min-height: 0; padding: 16px 20px; }
+.oh-list { display: flex; flex-direction: column; gap: 10px; }
+.oh-card { background: #FFFFFF; border: 1px solid #E8E4DF; border-radius: 14px; padding: 16px 20px; display: flex; align-items: flex-start; gap: 20px; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; }
+.oh-card:hover { border-color: #C5D8F5; box-shadow: 0 2px 10px rgba(27,79,168,0.08); }
+.oh-card-selected { border-color: #1B4FA8; background: #F0F6FF; box-shadow: 0 2px 12px rgba(27,79,168,0.13); }
+.oh-card-left { min-width: 180px; max-width: 200px; flex-shrink: 0; }
+.oh-card-vendor { font-size: 14px; font-weight: 700; color: #111318; margin-bottom: 3px; }
+.oh-card-meta { font-size: 11px; color: #9CA3AF; }
+.oh-card-mid { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.oh-card-row { display: flex; align-items: baseline; gap: 6px; font-size: 13px; }
+.oh-card-label { font-size: 11px; color: #9CA3AF; white-space: nowrap; min-width: 90px; }
+.oh-card-val { color: #3A3D4A; font-weight: 500; }
+.oh-card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; min-width: 130px; }
+.oh-card-amount { font-size: 18px; font-weight: 800; color: #111318; letter-spacing: -0.5px; }
 .status-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
 .pill-saved { background: #F0ECE8; color: #5A5F6E; }
 .pill-submitted { background: #DBEAFE; color: #1D4ED8; }
@@ -218,11 +230,6 @@ function render_order_history(el) {
   ${buildSidebar('order-history')}
   <div class="main">
     <div class="topbar">
-      <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
-        <a style="color:#5C6070;cursor:pointer;" onclick="Router.navigate('home')">Home</a>
-        <span style="color:#3C4052;">/</span>
-        <span style="color:#FFFFFF;font-weight:500;">Order history</span>
-      </div>
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
       ${buildTopbarRight()}
     </div>
@@ -244,15 +251,8 @@ function render_order_history(el) {
         <button class="oh-btn-ghost" onclick="ohManageMessages()" style="color:#534AB7;border-color:#C8C3F2;"><i class="ti ti-speakerphone" style="font-size:12px;"></i> Manage messages</button>
       </div>
 
-      <div class="oh-table-wrap">
-        <table class="oh-table">
-          <thead>
-            <tr>
-              <th>Vendor</th><th>Vendor ID</th><th>Date</th><th>User</th><th>Order name</th><th>WO / Equipment</th><th>Amount</th><th>Status</th><th>PO #</th><th></th>
-            </tr>
-          </thead>
-          <tbody id="oh-tbody"></tbody>
-        </table>
+      <div class="oh-list-wrap">
+        <div class="oh-list" id="oh-list"></div>
       </div>
 
       <div id="oh-detail-panel" style="display:none;" class="oh-detail-panel"></div>
