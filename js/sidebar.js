@@ -195,7 +195,7 @@ function buildTopbarRight() {
     ? 'Fleet Administrator'
     : (loc ? loc.name : 'Austin Branch');
   return `<div class="topbar-right">
-    <button class="topbar-icon-btn" onclick="openFeedback()" title="Submit feedback" style="gap:5px;width:auto;padding:0 10px;font-size:12px;font-weight:600;color:#C8DDEF;">
+    <button class="topbar-icon-btn" onclick="openFeedback()" title="Submit feedback" style="gap:5px;width:auto;padding:0 10px;font-size:12px;font-weight:600;color:#6B7280;">
       <i class="ti ti-message-circle" style="font-size:15px;"></i>
       <span style="font-size:12px;font-weight:600;">Feedback</span>
     </button>

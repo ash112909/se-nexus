@@ -268,7 +268,7 @@ function render_manuals(el) {
     + '.doc-btn-ghost:hover{background:#F5F2EE;}'
     + '</style>'
     + '<h2 class="sr-only">Manuals and documentation</h2><div class="shell">' + buildSidebar('manuals') + '<div class="main">'
-    + '<div class="topbar"><div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;"><a style="color:#5C6070;cursor:pointer;" onclick="Router.navigate(\'home\')">Home</a><span style="color:#3C4052;">/</span><span style="color:#FFFFFF;font-weight:500;">Manuals &amp; docs</span></div><div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>' + buildTopbarRight() + '</div>'
+    + '<div class="topbar"><div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#9CA3AF;"><a style="color:#9CA3AF;cursor:pointer;" onclick="Router.navigate(\'home\')">Home</a><span style="color:#D1D5DB;">/</span><span style="color:#111318;font-weight:500;">Manuals &amp; docs</span></div><div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>' + buildTopbarRight() + '</div>'
     + '<div class="man-content-row">'
     + '<div class="man-vendor-panel"><div class="mvp-label">Supplier</div><div id="man-vendor-list"></div></div>'
     + '<div class="man-main-panel">'

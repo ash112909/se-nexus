@@ -239,7 +239,7 @@ function render_supplier_portal(el) {
   <div class="main" style="display:flex;flex-direction:column;overflow:hidden;">
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5C6070;">
-        <span style="color:#FFFFFF;font-weight:500;" id="sp-topbar-title">Home</span>
+        <span style="color:#111318;font-weight:500;" id="sp-topbar-title">Home</span>
       </div>
       <div class="topbar-search" onclick="GlobalSearch.open()"><i class="ti ti-search"></i> Search parts, serials, manuals…</div>
       ${buildTopbarRight()}

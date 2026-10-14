@@ -56,7 +56,7 @@ function render_fleet_admin(el) {
 .fa-override-note { font-size:11px; color:#534AB7; margin-top:3px; }
 
 /* ── Topbar title ── */
-.fa-topbar-title { font-size:13px; font-weight:500; color:#FFFFFF; }
+.fa-topbar-title { font-size:13px; font-weight:500; color:#111318; }
 
 /* ── Toggle switch ── */
 .fa-toggle { position:relative; width:40px; height:22px; flex-shrink:0; }
