@@ -150,35 +150,34 @@ function render_wo_list(el) {
   function renderOrderRows(wos) {
     if (!wos.length) return '<div class="wol-empty">No orders found.</div>';
     return wos.map(wo => `
-      <div class="wol-row" style="grid-template-columns:${_cols};" onclick="Router.navigate('wo-detail',{woId:${wo.id}})">
-        <div class="wol-td">
-          <span class="wol-wo-id">#${wo.id}</span>
-          ${wo.externalId ? `<div style="font-size:10px;color:#9CA3AF;margin-top:2px;">${wo.externalId}</div>` : ''}
-          ${isWorkOrder(wo) ? '<div style="font-size:9px;font-weight:700;letter-spacing:.6px;color:#4A9A6A;text-transform:uppercase;margin-top:1px;">WO</div>' : ''}
-        </div>
-        <div class="wol-td">${typePill(wo.woType)}</div>
-        <div class="wol-td">
-          <div class="wol-machine">
-            <div class="wol-machine-icon"><i class="ti ${machineIcon(wo.machine, wo.woType)}"></i></div>
-            <div>
-              <div class="wol-machine-name">${(wo.woType === 'stock' || wo.woType === 'other') ? (wo.issue || 'General Order') : `${wo.machine} · ${wo.asset}`}</div>
-              <div class="wol-machine-issue">${wo.issue}</div>
-            </div>
+      <div class="wol-row" onclick="Router.navigate('wo-detail',{woId:${wo.id}})">
+        <div class="wol-machine-icon"><i class="ti ${machineIcon(wo.machine, wo.woType)}"></i></div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+            <span class="wol-machine-name">${(wo.woType === 'stock' || wo.woType === 'other') ? (wo.issue || 'General Order') : `${wo.machine} · ${wo.asset}`}</span>
+            ${typePill(wo.woType)}
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span class="wol-wo-id">#${wo.id}</span>
+            <span class="wol-machine-issue">${wo.issue}</span>
+            ${_isSupervisor && wo.assignee ? `<span style="font-size:11px;color:#9CA3AF;">${wo.assignee}</span>` : ''}
           </div>
         </div>
-        ${_isSupervisor ? `<div class="wol-td"><span style="font-size:12px;color:#5A5F6E;">${wo.assignee || '—'}</span></div>` : ''}
-        <div class="wol-td">${dueDateCell(wo.dueDate, wo.status)}</div>
-        <div class="wol-td">${statusPill(wo)}</div>
-        <div class="wol-td">${priorityCell(wo.priority)}</div>
-        <div class="wol-td" style="text-align:right;"><i class="ti ti-chevron-right wol-arrow"></i></div>
+        <div style="display:flex;align-items:center;gap:12px;flex-shrink:0;">
+          ${dueDateCell(wo.dueDate, wo.status)}
+          ${statusPill(wo)}
+          ${priorityCell(wo.priority)}
+          <i class="ti ti-chevron-right wol-arrow"></i>
+        </div>
       </div>`).join('');
   }
 
   function reRenderOrderTable() {
     const tbody = document.getElementById('wol-tbody');
     if (tbody) tbody.innerHTML = renderOrderRows(getFilteredWOs());
+    const wos = getFilteredWOs();
     const countEl = document.getElementById('wol-result-count');
-    if (countEl) countEl.textContent = getFilteredWOs().length + ' orders';
+    if (countEl) countEl.textContent = wos.length + ' orders';
   }
 
   // ── Build supplier filter options (orders tab) ────────────────────
@@ -215,18 +214,11 @@ function render_wo_list(el) {
 
 /* ── Orders table ─────────────────────────────── */
 .wol-content { flex: 1; overflow-y: auto; }
-.wol-table-wrap { padding: 0 28px 40px; }
-.wol-table { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; overflow: hidden; margin-top: 20px; }
-.wol-thead { display: grid; gap: 0; border-bottom: 1px solid #F0ECE8; padding: 0 18px; background: #FAFAF9; }
-.wol-th { font-size: 11px; font-weight: 600; color: #9CA3AF; letter-spacing: 0.8px; text-transform: uppercase; padding: 10px 8px; }
-.wol-th-sort { cursor: pointer; user-select: none; white-space: nowrap; }
-.wol-th-sort:hover { color: #5A5F6E; }
-.wol-th-sort.sorted { color: #111318; }
-.wol-sort-arrow { margin-left: 4px; font-size: 9px; }
-.wol-row { display: grid; gap: 0; padding: 0 18px; border-bottom: 0.5px solid #F5F2EE; cursor: pointer; transition: background 0.1s; align-items: center; }
-.wol-row:last-child { border-bottom: none; }
-.wol-row:hover { background: #FAFAF9; }
-.wol-td { padding: 12px 8px; font-size: 13px; color: #3A3D4A; }
+.wol-table-wrap { padding: 16px 24px 40px; }
+.wol-table { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+.wol-row { background: #FFFFFF; border: 1px solid #E8E4DF; border-radius: 14px; padding: 14px 18px; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; }
+.wol-row:hover { border-color: #C5D8F5; box-shadow: 0 2px 10px rgba(27,79,168,0.08); }
+.wol-td { font-size: 13px; color: #3A3D4A; }
 .wol-wo-id { font-size: 12px; font-weight: 600; color: #111318; font-family: 'SF Mono', 'Consolas', monospace; }
 .wol-type-pill { display: inline-flex; font-size: 10px; font-weight: 700; border-radius: 4px; padding: 2px 7px; letter-spacing: .4px; white-space: nowrap; }
 .wol-machine { display: flex; align-items: center; gap: 10px; }
@@ -352,19 +344,7 @@ function render_wo_list(el) {
       <!-- Table -->
       <div class="wol-content">
         <div class="wol-table-wrap">
-          <div class="wol-table">
-            <div class="wol-thead" style="grid-template-columns:${_cols};" id="wol-thead">
-              <div class="wol-th wol-th-sort" data-sort="id">Order #</div>
-              <div class="wol-th wol-th-sort" data-sort="woType">Type</div>
-              <div class="wol-th wol-th-sort" data-sort="machine">Machine / Issue</div>
-              ${_isSupervisor ? '<div class="wol-th wol-th-sort" data-sort="assignee">Assignee</div>' : ''}
-              <div class="wol-th wol-th-sort" data-sort="dueDate">Due Date</div>
-              <div class="wol-th wol-th-sort" data-sort="status">Status</div>
-              <div class="wol-th wol-th-sort" data-sort="priority">Priority</div>
-              <div class="wol-th"></div>
-            </div>
-            <div id="wol-tbody"></div>
-          </div>
+          <div class="wol-table" id="wol-tbody"></div>
         </div>
       </div>
     </div>
