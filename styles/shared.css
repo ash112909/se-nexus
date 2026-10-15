@@ -117,3 +117,44 @@ body[data-sb-pinned] .sb-lbl, body[data-sb-pinned] .sb-pin-label { opacity: 1; p
 .nwo-autofill-banner { font-size: 11px; color: #1B4FA8; background: #EAF0FC; border-radius: 10px; padding: 6px 10px; margin-top: 4px; display: none; }
 .wol-type-pick-card { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 22px 16px; background: #FAFAF9; border: 1.5px solid #E8E4DF; border-radius: 16px; cursor: pointer; transition: border-color 0.15s, background 0.15s, box-shadow 0.15s; font-family: inherit; width: 100%; }
 .wol-type-pick-card:hover { border-color: #1B4FA8; background: #F0F5FF; box-shadow: 0 4px 16px rgba(27,79,168,0.1); }
+
+/* ── Shared cart / line-items table (used in wo-detail, approvals, order-review) ── */
+.wod-cart-table { width: 100%; border-collapse: collapse; }
+.wod-cart-table th { font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: #B0AAA3; padding: 8px 12px; text-align: left; background: #FAFAF8; border-bottom: 1px solid #EEEAE6; white-space: nowrap; }
+.wod-cart-table td { padding: 12px 12px; border-bottom: 1px solid #F5F2EE; vertical-align: middle; }
+.cart-row:last-child td { border-bottom: none; }
+.col-st { width: 40px; padding-left: 16px !important; }
+.col-pn { width: 140px; }
+.col-uom { width: 54px; }
+.col-loc { width: 100px; }
+.col-qty { width: 104px; }
+.col-unit { width: 76px; }
+.col-tot { width: 80px; }
+.col-rm { width: 40px; padding-right: 12px !important; }
+.ci-status { display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: default; }
+.ci-ok { color: #639922; }
+.ci-warn { color: #BA7517; }
+.ci-err { color: #A32D2D; }
+.ci-partnum { font-family: 'SF Mono','Consolas',monospace; font-size: 11px; color: #3A3D4A; font-weight: 600; }
+.ci-vendor-line { font-size: 10px; color: #9CA3AF; margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+.ci-desc-name { font-size: 13px; font-weight: 500; color: #111318; line-height: 1.3; }
+.ci-xref { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; border: none; border-radius: 4px; padding: 2px 7px; cursor: pointer; font-family: inherit; }
+.ci-xref-mand { background: #D6E4F7; color: #1B4FA8; }
+.ci-xref-mand:hover { background: #F5DEB5; }
+.ci-xref-opt { background: #EEEDFE; color: #534AB7; }
+.ci-xref-opt:hover { background: #DDD9FE; }
+.ci-local { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; background: #EAF3DE; color: #3B6D11; border: none; border-radius: 4px; padding: 3px 7px; cursor: pointer; font-family: inherit; }
+.ci-local:hover { background: #D5EBBE; }
+.ci-local-sel { background: #3B6D11; color: #FFFFFF; }
+.ci-local-sel:hover { background: #2D5309; }
+.ci-dash { color: #D1CBC4; font-size: 13px; }
+.uom-badge { font-size: 10px; font-weight: 700; background: #F0ECE8; color: #5A5F6E; border-radius: 4px; padding: 2px 6px; letter-spacing: 0.3px; }
+.ci-qty-ctrl { display: flex; align-items: center; gap: 5px; justify-content: center; }
+.qty-btn { width: 22px; height: 22px; border: 1px solid #E2DDD8; border-radius: 4px; background: #F5F2EE; color: #3A3D4A; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit; line-height: 1; padding: 0; }
+.qty-btn:hover { background: #ECEAE6; }
+.qty-val { font-size: 13px; font-weight: 600; color: #111318; min-width: 16px; text-align: center; }
+.ci-remove { background: none; border: none; color: #C8C3BC; cursor: pointer; padding: 4px; border-radius: 5px; }
+.ci-remove:hover { background: #FCEBEB; color: #A32D2D; }
+.cart-unit-pair .cart-row td:first-child { padding-left: 11px !important; }
+.cart-xref-label-row td { padding: 0; border-bottom: none; }
+.cart-xref-label { font-size: 10px; font-weight: 700; color: #534AB7; background: #F3F1FE; padding: 3px 14px; display: flex; align-items: center; gap: 5px; letter-spacing: .3px; }
