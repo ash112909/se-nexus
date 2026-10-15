@@ -1,7 +1,7 @@
 const SUPPLIER_DATA = {
   skyjack: {
     name:'Skyjack', category:'OEM · Aerial Work Platforms',
-    icon:'ti-crane', color:'#1B4FA8', bg:'#D6E4F7', accent:'#1B4FA8',
+    icon:'ti-crane', color:'#111318', bg:'#FEF3C7', accent:'#111318',
     tagline:'SJIII scissor lifts, boom lifts, and telehandlers',
     description:'Primary OEM supplier for your aerial work platform fleet. Stocking dealer relationship with same-day local availability on most wear parts.',
     specialty:['Scissor Lifts','Boom Lifts','Telehandlers'],
@@ -22,7 +22,7 @@ const SUPPLIER_DATA = {
   },
   caterpillar: {
     name:'Caterpillar', category:'OEM · Heavy Equipment',
-    icon:'ti-backhoe', color:'#FFFFFF', bg:'#1B4FA8', accent:'#152B52',
+    icon:'ti-backhoe', color:'#FFFFFF', bg:'#111318', accent:'#0D0D0D',
     tagline:'Cat 320 excavators, undercarriage and track systems',
     description:'OEM parts for Cat heavy equipment. Orders processed through regional Cat dealer network with 2–3 day lead times on most components.',
     specialty:['Excavators','Track Systems','Undercarriage'],
@@ -78,7 +78,7 @@ const SUPPLIER_DATA = {
   },
   parker: {
     name:'Parker Hannifin', category:'Aftermarket · Hydraulics',
-    icon:'ti-droplet', color:'#185FA5', bg:'#DBEAFE', accent:'#3B82F6',
+    icon:'ti-droplet', color:'#1A1A1A', bg:'#FEF3C7', accent:'#666666',
     tagline:'Hose assemblies, control valves, and hydraulic cylinders',
     description:'Cross-fleet hydraulic components. Parker is the preferred aftermarket hydraulics supplier — compatible with Skyjack, Bobcat, and Cat equipment.',
     specialty:['Hose Assemblies','Control Valves','Cylinders'],
@@ -97,7 +97,7 @@ const SUPPLIER_DATA = {
   },
   grainger: {
     name:'Grainger', category:'Distributor · MRO Supply',
-    icon:'ti-package', color:'#1B4FA8', bg:'#DBEAFE', accent:'#10B981',
+    icon:'ti-package', color:'#111318', bg:'#FEF3C7', accent:'#10B981',
     tagline:'Fasteners, lubricants, electrical, and safety PPE',
     description:'Primary MRO distributor for consumables and shop supplies across all branches. Net-30 account with next-day delivery to all locations.',
     specialty:['Fasteners','Lubricants','Electrical','Safety'],
@@ -141,13 +141,13 @@ function render_supplier(el) {
   if (!s) { Router.navigate('home'); return; }
 
   const STOCK = {
-    in_stock: { label:'In stock',   color:'#1B4FA8', bg:'#DBEAFE' },
+    in_stock: { label:'In stock',   color:'#111318', bg:'#FEF3C7' },
     low:      { label:'Low stock',  color:'#B45309', bg:'#FEF3C7' },
     backorder:{ label:'Backorder',  color:'#B91C1C', bg:'#FEE2E2' },
   };
   const ORDER_STATUS = {
-    delivered:  { label:'Delivered',   color:'#1B4FA8', bg:'#DBEAFE' },
-    in_transit: { label:'In transit',  color:'#185FA5', bg:'#DBEAFE' },
+    delivered:  { label:'Delivered',   color:'#111318', bg:'#FEF3C7' },
+    in_transit: { label:'In transit',  color:'#1A1A1A', bg:'#FEF3C7' },
     processing: { label:'Processing',  color:'#B45309', bg:'#FEF3C7' },
   };
 
@@ -169,8 +169,8 @@ function render_supplier(el) {
 .sup-hdr-tags { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
 .sup-hdr-tag  { font-size:11px; background:#F5F2EE; color:#3A3D4A; border-radius:6px; padding:3px 10px; }
 .sup-hdr-actions { display:flex; gap:8px; flex-shrink:0; flex-direction:column; align-items:flex-end; }
-.sup-btn-primary { background:#1B4FA8; color:#FFFFFF; border:none; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
-.sup-btn-primary:hover { background:#152B52; }
+.sup-btn-primary { background:#111318; color:#FFFFFF; border:none; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
+.sup-btn-primary:hover { background:#0D0D0D; }
 .sup-btn-ghost { background:#FFF; color:#3A3D4A; border:0.5px solid #E2DDD8; border-radius:8px; padding:8px 14px; font-size:12px; font-weight:500; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
 .sup-btn-ghost:hover { border-color:#C8C3BC; }
 
@@ -195,7 +195,7 @@ function render_supplier(el) {
 .sup-part-price { font-size:13px; font-weight:700; color:#111318; flex-shrink:0; }
 .sup-stock-pill { font-size:9px; font-weight:700; border-radius:999px; padding:2px 8px; flex-shrink:0; }
 .sup-add-btn { width:24px; height:24px; border-radius:6px; background:#F5F2EE; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; color:#5A5F6E; flex-shrink:0; }
-.sup-add-btn:hover { background:#1B4FA8; color:#FFFFFF; }
+.sup-add-btn:hover { background:#111318; color:#FFFFFF; }
 
 /* Orders */
 .sup-order-row { display:flex; align-items:center; gap:10px; padding:10px 16px; border-bottom:0.5px solid #F5F2EE; }

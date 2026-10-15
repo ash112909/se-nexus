@@ -122,7 +122,7 @@ function render_home(el) {
     'case':        svgFlat('#F0A500','CAS','#1A1A1A',10),
     'caterpillar': svgFlat('#FFC72C','CAT','#1A1A1A',11),
     'continental': svgFlat('#F5A200','CNT','#1A1A1A',10),
-    'cte':         svgFlat('#1D4ED8','CTE','#FFF',11),
+    'cte':         svgFlat('#111318','CTE','#FFF',11),
     'cummins':     svgBadge('#E31C37','C','#FFF',17),
     'danfoss':     svgFlat('#E2001A','DAN','#FFF',10),
     'dewalt':      svgFlat('#FEBD17','DW','#1A1A1A',14),
@@ -156,7 +156,7 @@ function render_home(el) {
     'lift-parts':  svgBadge('#059669','LQ','#FFF',13),
     'lincoln-elc': svgFlat('#CC0000','LNE','#FFF',10),
     'link-belt':   svgFlat('#F59E0B','LBC','#1A1A1A',10),
-    'lubrizol':    svgFlat('#152B52','LBZ','#FFF',10),
+    'lubrizol':    svgFlat('#0D0D0D','LBZ','#FFF',10),
     'manitou':     svgSH('#E10600','#1A1A1A','MAN','#FFF',10),
     'manitowoc':   svgFlat('#003087','MTC','#FFF',10),
     'mcneilus':    svgFlat('#CC0000','MCN','#FFF',10),
@@ -165,7 +165,7 @@ function render_home(el) {
     'mobil-ind':   svgFlat('#CC0000','MOB','#FFF',10),
     'msc':         svgFlat('#0052A5','MSC','#FFF',11),
     'napa':        svgSH('#003DA5','#F7A800','NAPA','#FFF',9),
-    'nat-hyd':     svgFlat('#1D4ED8','NHS','#FFF',10),
+    'nat-hyd':     svgFlat('#111318','NHS','#FFF',10),
     'netzsch':     svgFlat('#E10600','NTZ','#FFF',10),
     'oregon':      svgFlat('#4B5320','ORG','#FFF',10),
     'pce':         svgFlat('#0F4C81','PCE','#FFF',10),
@@ -178,7 +178,7 @@ function render_home(el) {
     'schaeffer':   svgFlat('#003087','SFR','#FFF',10),
     'shell-lub':   svgFlat('#FCD217','SHL','#CC0000',10),
     'skf':         svgFlat('#003DA5','SKF','#FEBD17',11),
-    'skyjack':     svgFlat('#152B52','SJ','#FFF',14),
+    'skyjack':     svgFlat('#0D0D0D','SJ','#FFF',14),
     'stanley':     svgFlat('#FCD217','SWK','#1A1A1A',10),
     'sun-hyd':     svgBadge('#0052A5','SH','#FFF',13),
     'sunbelt-pts': svgFlat('#F97316','SBP','#FFF',10),
@@ -190,7 +190,7 @@ function render_home(el) {
     'twin-power':  svgFlat('#1B3A6B','TP','#FFF',13),
     'united-pts':  svgFlat('#003DA5','UPS','#FFF',10),
     'valeo':       svgFlat('#003DA5','VLO','#FFF',10),
-    'vanair':      svgFlat('#1D4ED8','VNR','#FFF',10),
+    'vanair':      svgFlat('#111318','VNR','#FFF',10),
     'vermeer':     svgFlat('#F59E0B','VMR','#1A1A1A',10),
     'wagner':      svgFlat('#374151','WGR','#FFF',10),
     'wesco':       svgFlat('#CC0000','WSC','#FFF',10),
@@ -200,8 +200,8 @@ function render_home(el) {
 
   // Fallback letter avatar for unmapped suppliers
   const AV_COLORS = [
-    { bg:'#D6E4F7', fg:'#1B4FA8' }, { bg:'#DBEAFE', fg:'#1D4ED8' }, { bg:'#FEE2E2', fg:'#B91C1C' },
-    { bg:'#EDE9FE', fg:'#534AB7' }, { bg:'#DBEAFE', fg:'#1B4FA8' }, { bg:'#FEF3C7', fg:'#92400E' },
+    { bg:'#FEF3C7', fg:'#111318' }, { bg:'#FEF3C7', fg:'#111318' }, { bg:'#FEE2E2', fg:'#B91C1C' },
+    { bg:'#EDE9FE', fg:'#534AB7' }, { bg:'#FEF3C7', fg:'#111318' }, { bg:'#FEF3C7', fg:'#92400E' },
     { bg:'#F3F4F6', fg:'#374151' }, { bg:'#FFE4E6', fg:'#9F1239' }, { bg:'#E0F2FE', fg:'#0369A1' },
     { bg:'#FDF4FF', fg:'#7E22CE' },
   ];
@@ -226,10 +226,10 @@ function render_home(el) {
   }
 
   const TYPE_META = {
-    bulletin:{ label:'Service Bulletin', color:'#1B4FA8', bg:'#D6E4F7', icon:'ti-alert-triangle' },
-    fleet:   { label:'Fleet Update',     color:'#185FA5', bg:'#DBEAFE', icon:'ti-building'       },
+    bulletin:{ label:'Service Bulletin', color:'#111318', bg:'#FEF3C7', icon:'ti-alert-triangle' },
+    fleet:   { label:'Fleet Update',     color:'#1A1A1A', bg:'#FEF3C7', icon:'ti-building'       },
     supplier:{ label:'Supplier News',    color:'#534AB7', bg:'#EDE9FE', icon:'ti-news'            },
-    warranty:{ label:'Warranty',         color:'#1B4FA8', bg:'#DBEAFE', icon:'ti-shield-check'   },
+    warranty:{ label:'Warranty',         color:'#111318', bg:'#FEF3C7', icon:'ti-shield-check'   },
     safety:  { label:'Safety Alert',     color:'#B91C1C', bg:'#FEE2E2', icon:'ti-alert-octagon'  },
     pricing: { label:'Pricing',          color:'#6B7280', bg:'#F3F4F6', icon:'ti-tag'            },
     training:{ label:'Training',         color:'#5B21B6', bg:'#EDE9FE', icon:'ti-certificate'    },
@@ -443,7 +443,7 @@ function render_home(el) {
 /* ── Welcome bar ──────────────────────────────────────── */
 .home-welcome { background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; padding:18px 28px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
 .hw-brand     { display:flex; align-items:center; gap:10px; flex-shrink:0; }
-.hw-mark      { width:38px; height:38px; background:#1B4FA8; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.hw-mark      { width:38px; height:38px; background:#111318; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .hw-name      { font-size:15px; font-weight:800; color:#111318; letter-spacing:-.3px; line-height:1.15; }
 .hw-sub       { font-size:10px; color:#ABA6A0; margin-top:1px; }
 .hw-sep       { width:1px; height:30px; background:#E8E4DF; flex-shrink:0; }
@@ -454,8 +454,8 @@ function render_home(el) {
 .hw-stat      { text-align:center; padding:7px 14px; background:#F5F2EE; border-radius:8px; min-width:64px; }
 .hw-stat-val  { font-size:18px; font-weight:800; color:#111318; line-height:1; }
 .hw-stat-lbl  { font-size:9px; color:#9CA3AF; margin-top:2px; letter-spacing:.2px; white-space:nowrap; }
-.hw-cta       { background:#1B4FA8; color:#FFFFFF; border:none; border-radius:8px; padding:9px 18px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; flex-shrink:0; }
-.hw-cta:hover { background:#152B52; }
+.hw-cta       { background:#111318; color:#FFFFFF; border:none; border-radius:8px; padding:9px 18px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; flex-shrink:0; }
+.hw-cta:hover { background:#0D0D0D; }
 
 /* ── Two-col grid ─────────────────────────────────────── */
 .home-grid   { display:grid; grid-template-columns:1fr 340px; gap:20px; align-items:start; }
@@ -479,7 +479,7 @@ function render_home(el) {
 .wo-mini-row:last-child { border-bottom:none; }
 .wo-mini-row:hover { background:#F9F8F6; }
 .wo-mini-pri   { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-.wo-mini-id    { font-size:11px; font-weight:700; color:#1B4FA8; white-space:nowrap; }
+.wo-mini-id    { font-size:11px; font-weight:700; color:#111318; white-space:nowrap; }
 .wo-mini-issue { font-size:12px; color:#111318; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .wo-mini-asset { font-size:11px; color:#5A5F6E; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .wo-mini-assign{ font-size:11px; color:#5A5F6E; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -497,7 +497,7 @@ function render_home(el) {
 .home-slide.active { display:block; }
 .home-car-footer { display:flex; align-items:center; padding:0 4px 14px 4px; }
 .home-dot  { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.2); border:none; cursor:pointer; padding:0; margin-right:5px; transition:all .15s; }
-.home-dot.active { background:#1B4FA8; width:16px; border-radius:3px; }
+.home-dot.active { background:#111318; width:16px; border-radius:3px; }
 .home-arr  { width:26px; height:26px; border:0.5px solid rgba(255,255,255,.12); border-radius:6px; background:rgba(255,255,255,.06); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; color:rgba(255,255,255,.5); margin-left:4px; }
 .home-arr:hover { background:rgba(255,255,255,.12); color:#FFF; }
 
@@ -553,7 +553,7 @@ function render_home(el) {
     <!-- News drawer (hidden by default) -->
     <div class="home-news-drawer" id="home-news-drawer">
       <div class="hnd-header">
-        <i class="ti ti-news" style="font-size:14px;color:#1B4FA8;"></i>
+        <i class="ti ti-news" style="font-size:14px;color:#111318;"></i>
         <div class="hnd-title">Fleet News &amp; Updates</div>
         <button class="hnd-close" onclick="homeToggleNews()"><i class="ti ti-x"></i></button>
       </div>
@@ -571,7 +571,7 @@ function render_home(el) {
           </div>`;
         }).join('')}
         <div style="padding-top:4px;">
-          <button onclick="Router.navigate('news')" style="background:none;border:none;font-size:12px;color:#1B4FA8;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">View all updates <i class="ti ti-arrow-right" style="font-size:11px;"></i></button>
+          <button onclick="Router.navigate('news')" style="background:none;border:none;font-size:12px;color:#111318;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">View all updates <i class="ti ti-arrow-right" style="font-size:11px;"></i></button>
         </div>
       </div>
     </div>
@@ -584,7 +584,7 @@ function render_home(el) {
 
           <!-- Active work orders -->
           <div class="h-lbl">
-            <i class="ti ti-clipboard-list" style="color:#1B4FA8;"></i> 5 most recently updated work orders
+            <i class="ti ti-clipboard-list" style="color:#111318;"></i> 5 most recently updated work orders
             <span class="h-lbl-action" onclick="Router.navigate('wo-list')">View all <i class="ti ti-arrow-right" style="font-size:10px;"></i></span>
           </div>
           ${activeWOs.length === 0
@@ -606,8 +606,8 @@ function render_home(el) {
                 const priLabel = wo.priority === 'urgent' ? 'Urgent'
                   : wo.priority === 'high' ? 'High'
                   : wo.priority === 'medium' ? 'Med' : 'Low';
-                const statusColor = wo.status === 'active' ? '#3B6D11' : '#1B4FA8';
-                const statusBg    = wo.status === 'active' ? '#EAF3DE' : '#D6E4F7';
+                const statusColor = wo.status === 'active' ? '#3B6D11' : '#111318';
+                const statusBg    = wo.status === 'active' ? '#EAF3DE' : '#FEF3C7';
                 const statusLabel = wo.status === 'active' ? 'Active' : wo.status === 'pending' ? 'Pending' : wo.status;
                 const machine = wo.machine || (wo.make && wo.model ? wo.make + ' ' + wo.model : '—');
                 const assetLabel = [wo.asset, machine].filter(Boolean).join(' · ');
@@ -624,7 +624,7 @@ function render_home(el) {
             </div>`
           }
 
-          <div class="h-lbl"><i class="ti ti-speakerphone" style="color:#1B4FA8;"></i> Fleet highlights</div>
+          <div class="h-lbl"><i class="ti ti-speakerphone" style="color:#111318;"></i> Fleet highlights</div>
           <div class="home-car-wrap">
             ${SLIDES.map((s, i) => `<div class="home-slide${i===0?' active':''}" style="background:${s.bg};" id="hslide-${i}">${s.html}</div>`).join('')}
             <div class="home-car-footer">

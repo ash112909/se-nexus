@@ -31,8 +31,8 @@ function render_wo_list(el) {
   };
 
   const TYPE_META = {
-    equipment: { label: 'Repair',  color: '#185FA5', bg: '#E6F1FB' },
-    pm:        { label: 'PM',      color: '#1B4FA8', bg: '#E1F5EE' },
+    equipment: { label: 'Repair',  color: '#1A1A1A', bg: '#FFFBEB' },
+    pm:        { label: 'PM',      color: '#111318', bg: '#E1F5EE' },
     stock:     { label: 'Stock',   color: '#534AB7', bg: '#EEEDFE' },
     other:     { label: 'General', color: '#6B7280', bg: '#F3F4F6' },
   };
@@ -192,7 +192,7 @@ function render_wo_list(el) {
 .wol-main-tabs { display: flex; align-items: center; gap: 0; background: #FFFFFF; border-bottom: 1px solid #E8E4DF; padding: 0 28px; }
 .wol-mtab { padding: 13px 16px; font-size: 13px; font-weight: 500; color: #7A7F8E; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
 .wol-mtab:hover { color: #3A3D4A; }
-.wol-mtab.active { color: #111318; font-weight: 600; border-bottom-color: #1B4FA8; }
+.wol-mtab.active { color: #111318; font-weight: 600; border-bottom-color: #111318; }
 .wol-mtab-badge { font-size: 10px; font-weight: 700; border-radius: 999px; padding: 1px 7px; background: #F0ECE8; color: #5A5F6E; }
 .wol-mtab-new { margin-left: auto; }
 
@@ -200,24 +200,24 @@ function render_wo_list(el) {
 .wol-filter-bar { background: #FAFAF8; border-bottom: 0.5px solid #E8E4DF; padding: 10px 28px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .wol-filter-pills { display: flex; gap: 4px; }
 .wol-filter-pill { padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid #E2DDD8; background: #FFFFFF; color: #5A5F6E; user-select: none; white-space: nowrap; }
-.wol-filter-pill.active { background: #152B52; color: #FFFFFF; border-color: #152B52; }
+.wol-filter-pill.active { background: #0D0D0D; color: #FFFFFF; border-color: #0D0D0D; }
 .wol-filter-pill:hover:not(.active) { border-color: #C8C3BC; }
 .wol-filter-divider { width: 1px; height: 24px; background: #E2DDD8; flex-shrink: 0; }
 .wol-select { height: 34px; background: #FFFFFF; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 12px; font-family: inherit; color: #3A3D4A; outline: none; cursor: pointer; }
 .wol-search-wrap { position: relative; }
 .wol-search-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: #B0AAA3; font-size: 13px; pointer-events: none; }
 .wol-search { height: 34px; background: #FFFFFF; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px 0 30px; font-size: 12px; font-family: inherit; color: #111318; outline: none; width: 190px; }
-.wol-search:focus { border-color: #1B4FA8; }
+.wol-search:focus { border-color: #111318; }
 .wol-result-count { margin-left: auto; font-size: 12px; color: #B0AAA3; white-space: nowrap; }
-.wol-new-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: #1B4FA8; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: #FFFFFF; cursor: pointer; font-family: inherit; }
-.wol-new-btn:hover { background: #152B52; }
+.wol-new-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: #111318; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: #FFFFFF; cursor: pointer; font-family: inherit; }
+.wol-new-btn:hover { background: #0D0D0D; }
 
 /* ── Orders table ─────────────────────────────── */
 .wol-content { flex: 1; overflow-y: auto; }
 .wol-table-wrap { padding: 16px 24px 40px; }
 .wol-table { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
 .wol-row { background: #FFFFFF; border: 1px solid #E8E4DF; border-radius: 14px; padding: 14px 18px; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; }
-.wol-row:hover { border-color: #C5D8F5; box-shadow: 0 2px 10px rgba(27,79,168,0.08); }
+.wol-row:hover { border-color: #F4A800; box-shadow: 0 2px 10px rgba(244,168,0,0.10); }
 .wol-td { font-size: 13px; color: #3A3D4A; }
 .wol-wo-id { font-size: 12px; font-weight: 600; color: #111318; font-family: 'SF Mono', 'Consolas', monospace; }
 .wol-type-pill { display: inline-flex; font-size: 10px; font-weight: 700; border-radius: 4px; padding: 2px 7px; letter-spacing: .4px; white-space: nowrap; }
@@ -226,12 +226,12 @@ function render_wo_list(el) {
 .wol-machine-name { font-size: 13px; font-weight: 600; color: #111318; line-height: 1.3; }
 .wol-machine-issue { font-size: 12px; color: #7A7F8E; margin-top: 1px; }
 .wol-pill { display: inline-flex; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
-.wol-pill-ordered  { background: #D6E4F7; color: #1B4FA8; }
-.wol-pill-open     { background: #E6F1FB; color: #185FA5; }
+.wol-pill-ordered  { background: #FEF3C7; color: #111318; }
+.wol-pill-open     { background: #FFFBEB; color: #1A1A1A; }
 .wol-pill-waiting  { background: #F1EEFE; color: #534AB7; }
 .wol-pill-done     { background: #F0ECE8; color: #5A5F6E; }
 .wol-priority-high { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; color: #A32D2D; }
-.wol-priority-med  { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; color: #1B4FA8; }
+.wol-priority-med  { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; color: #111318; }
 .wol-priority-low  { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; color: #3B6D11; }
 .wol-arrow { color: #C0BAB3; font-size: 14px; }
 .wol-empty { padding: 48px 24px; text-align: center; color: #9CA3AF; font-size: 13px; }
@@ -240,16 +240,16 @@ function render_wo_list(el) {
 .hist-tabs { display: flex; align-items: center; gap: 2px; padding: 0 28px; background: #FFFFFF; border-bottom: 1px solid #E8E4DF; }
 .hist-tab { padding: 11px 14px; font-size: 13px; font-weight: 500; color: #7A7F8E; cursor: pointer; border-bottom: 2px solid transparent; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
 .hist-tab:hover { color: #3A3D4A; }
-.hist-tab.active { color: #111318; font-weight: 600; border-bottom-color: #1B4FA8; }
+.hist-tab.active { color: #111318; font-weight: 600; border-bottom-color: #111318; }
 .hist-tab-badge { font-size: 10px; font-weight: 700; border-radius: 999px; padding: 1px 7px; background: #F0ECE8; color: #5A5F6E; }
 .hist-table-wrap { flex: 1; overflow-y: auto; min-height: 0; padding: 16px 20px; }
 .arch-list { display: flex; flex-direction: column; gap: 10px; }
 .arch-card { background: #FFFFFF; border: 1px solid #E8E4DF; border-radius: 14px; padding: 14px 20px; display: flex; align-items: center; gap: 20px; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; }
-.arch-card:hover { border-color: #C5D8F5; box-shadow: 0 2px 8px rgba(27,79,168,0.07); }
+.arch-card:hover { border-color: #F4A800; box-shadow: 0 2px 8px rgba(244,168,0,0.09); }
 .status-pill { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
 .pill-saved { background: #F0ECE8; color: #5A5F6E; }
-.pill-submitted { background: #DBEAFE; color: #1D4ED8; }
-.pill-delivered { background: #DBEAFE; color: #1B4FA8; }
+.pill-submitted { background: #FEF3C7; color: #111318; }
+.pill-delivered { background: #FEF3C7; color: #111318; }
 .pill-backordered { background: #FEF3C7; color: #92400E; }
 .pill-review { background: #EDE9FE; color: #5B21B6; }
 .hist-detail-panel { background: #FFFFFF; border-top: 1px solid #E8E4DF; flex-shrink: 0; max-height: 55vh; overflow-y: auto; }
@@ -279,13 +279,13 @@ function render_wo_list(el) {
 .modal-form-label { font-size: 12px; font-weight: 600; color: #5A5F6E; margin-bottom: 5px; display: block; }
 .modal-form-label .lbl-opt { font-weight: 400; color: #9CA3AF; }
 .modal-form-input { width: 100%; height: 36px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; }
-.modal-form-input:focus { border-color: #1B4FA8; }
+.modal-form-input:focus { border-color: #111318; }
 .modal-form-select { width: 100%; height: 36px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; cursor: pointer; }
 .modal-field-error { font-size: 11px; color: #A32D2D; margin-top: 3px; display: none; }
 .modal-form-hint { font-size: 11px; color: #9CA3AF; margin-top: 3px; }
-.nwo-autofill-banner { font-size: 11px; color: #1B4FA8; background: #E1F5EE; border-radius: 6px; padding: 5px 9px; margin-top: 4px; display: none; }
+.nwo-autofill-banner { font-size: 11px; color: #111318; background: #E1F5EE; border-radius: 6px; padding: 5px 9px; margin-top: 4px; display: none; }
 .wol-type-pick-card { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 20px 14px; background: #FAFAF9; border: 1.5px solid #E8E4DF; border-radius: 12px; cursor: pointer; transition: border-color 0.12s, background 0.12s; font-family: inherit; width: 100%; }
-.wol-type-pick-card:hover { border-color: #1B4FA8; background: #FFFBF2; }
+.wol-type-pick-card:hover { border-color: #111318; background: #FFFBF2; }
 </style>
 <h2 class="sr-only">Orders</h2>
 <div class="shell">
@@ -619,7 +619,7 @@ function render_wo_list(el) {
         <p style="font-size:13px;color:#5A5F6E;margin-bottom:16px;">What kind of order do you need to create?</p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <button class="wol-type-pick-card" id="pick-wo">
-            <i class="ti ti-clipboard-list" style="font-size:22px;color:#185FA5;margin-bottom:8px;"></i>
+            <i class="ti ti-clipboard-list" style="font-size:22px;color:#1A1A1A;margin-bottom:8px;"></i>
             <div style="font-size:13px;font-weight:700;color:#111318;">Work Order</div>
             <div style="font-size:11px;color:#7A7F8E;margin-top:3px;">Equipment repair or scheduled PM</div>
           </button>
@@ -669,7 +669,7 @@ function render_wo_list(el) {
     const msgs = _wolMsgList();
     const locs = Store.getLocations ? Store.getLocations() : [];
     const locOpts = locs.map((l, i) => `<label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;">
-      <input type="checkbox" class="wol-loc-cb" value="${l.id}" checked style="accent-color:#1B4FA8;width:12px;height:12px;">
+      <input type="checkbox" class="wol-loc-cb" value="${l.id}" checked style="accent-color:#111318;width:12px;height:12px;">
       <span style="font-size:11px;color:#5A5F6E;">${l.name}</span>
     </label>`).join('');
     const listHtml = msgs.length
@@ -688,12 +688,12 @@ function render_wo_list(el) {
             </select>
             ${locs.length > 1 ? `<div style="border:0.5px solid #E2DDD8;border-radius:8px;overflow:hidden;">
               <label style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#F5F2EE;border-bottom:0.5px solid #E2DDD8;cursor:pointer;">
-                <input type="checkbox" id="wol-loc-all" checked onchange="document.querySelectorAll('.wol-loc-cb').forEach(cb=>cb.checked=this.checked)" style="accent-color:#1B4FA8;width:12px;height:12px;">
+                <input type="checkbox" id="wol-loc-all" checked onchange="document.querySelectorAll('.wol-loc-cb').forEach(cb=>cb.checked=this.checked)" style="accent-color:#111318;width:12px;height:12px;">
                 <span style="font-size:11px;font-weight:600;color:#111318;">All locations</span>
               </label>
               <div style="padding:6px 10px;">${locOpts}</div>
             </div>` : ''}
-            <button onclick="wolSaveMsg()" style="height:32px;background:#1B4FA8;border:none;border-radius:6px;font-size:12px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;">Add message</button>
+            <button onclick="wolSaveMsg()" style="height:32px;background:#111318;border:none;border-radius:6px;font-size:12px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;">Add message</button>
           </div>
         </div>
         <div>
@@ -859,7 +859,7 @@ function render_wo_list(el) {
               Modal.show({
                 title: 'Work order created',
                 body: `<div style="text-align:center;padding:12px 0;">
-                  <div style="font-size:32px;margin-bottom:8px;color:#1B4FA8;">✓</div>
+                  <div style="font-size:32px;margin-bottom:8px;color:#111318;">✓</div>
                   <div style="font-size:14px;font-weight:600;color:#111318;margin-bottom:4px;">Work Order #${newWO.id} created</div>
                   <div style="font-size:13px;color:#7A7F8E;">${machine}</div>
                 </div>`,

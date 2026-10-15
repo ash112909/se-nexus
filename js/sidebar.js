@@ -21,7 +21,7 @@ function buildSidebar(activeItem, opts) {
       <img src="smartequiplogo.png" class="sb-logo-img"/>
       <div class="sb-logo-sub">${fleetName} · Fleet Preview</div>
     </div>
-    <div style="background:#0E1F3D;border-radius:8px;margin:0 10px 8px;padding:10px 12px;">
+    <div style="background:#0A0A0A;border-radius:8px;margin:0 10px 8px;padding:10px 12px;">
       <div style="font-size:10px;font-weight:600;color:#7B9FCC;letter-spacing:.6px;text-transform:uppercase;margin-bottom:6px;">Viewing as</div>
       ${impRoleLabel ? `<div style="font-size:12px;font-weight:600;color:#E8F0FF;margin-bottom:3px;">${impRoleLabel}</div>` : ''}
       ${impLocation  ? `<div style="font-size:11px;color:#7B9FCC;display:flex;align-items:center;gap:4px;"><i class="ti ti-map-pin" style="font-size:11px;"></i>${impLocation}</div>` : ''}
@@ -31,7 +31,7 @@ function buildSidebar(activeItem, opts) {
       <div class="sb-item active"><i class="ti ti-search"></i><span class="sb-lbl"> Search parts</span></div>
     </div>
     <div style="margin-top:auto;">
-      <div class="sb-item" onclick="Router.navigate('supplier-portal')" style="color:#1B4FA8;border-top:1px solid #0E1F3D;">
+      <div class="sb-item" onclick="Router.navigate('supplier-portal')" style="color:#111318;border-top:1px solid #0A0A0A;">
         <i class="ti ti-arrow-left"></i><span class="sb-lbl"> Exit preview</span>
       </div>
       <div class="sb-pin-row" id="sb-pin-btn"><i class="ti ${pinIcon}"></i><span class="sb-pin-label">${pinLabel}</span></div>
@@ -172,8 +172,8 @@ function buildBanners() {
   if (typeof Store === 'undefined' || !Store.getActiveBanners) return '';
   const banners = Store.getActiveBanners();
   if (!banners.length) return '';
-  const COLORS = { critical:'#B91C1C', high:'#C2410C', medium:'#B45309', low:'#185FA5' };
-  const BGS    = { critical:'#FEE2E2', high:'#FFF7ED', medium:'#FFFBEB', low:'#EFF6FF' };
+  const COLORS = { critical:'#B91C1C', high:'#C2410C', medium:'#B45309', low:'#1A1A1A' };
+  const BGS    = { critical:'#FEE2E2', high:'#FFF7ED', medium:'#FFFBEB', low:'#FFFBEB' };
   return banners.map(b => `
     <div id="fleet-banner-${b.id}" style="background:${BGS[b.priority]||'#FFFBEB'};border-bottom:1.5px solid ${COLORS[b.priority]||'#B45309'};padding:9px 20px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:500;color:${COLORS[b.priority]||'#B45309'};flex-shrink:0;">
       <i class="ti ti-speakerphone" style="font-size:14px;flex-shrink:0;"></i>
@@ -226,7 +226,7 @@ window.openFeedback = function() {
   card.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:0.5px solid #F0ECE8;flex-shrink:0;">
       <div style="display:flex;align-items:center;gap:8px;">
-        <div style="width:28px;height:28px;background:#1B4FA8;border-radius:7px;display:flex;align-items:center;justify-content:center;">
+        <div style="width:28px;height:28px;background:#111318;border-radius:7px;display:flex;align-items:center;justify-content:center;">
           <i class="ti ti-message-circle" style="font-size:14px;color:#FFFFFF;"></i>
         </div>
         <div>

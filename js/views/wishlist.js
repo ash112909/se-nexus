@@ -24,7 +24,7 @@ function render_wishlist(el) {
       const pubBadge = l.public
         ? `<span title="Public" style="font-size:9px;background:#E1F5EE;color:#1C6B4A;border-radius:3px;padding:1px 4px;font-weight:700;flex-shrink:0;">PUB</span>`
         : '';
-      const pinBtn = `<button title="${l.pinned ? 'Unpin' : 'Pin'}" onclick="event.stopPropagation();wlTogglePin('${l.id}')" style="background:none;border:none;cursor:pointer;padding:2px;color:${l.pinned ? '#1B4FA8' : '#C8C3BC'};font-size:12px;flex-shrink:0;"><i class="ti ${l.pinned ? 'ti-pin-filled' : 'ti-pin'}"></i></button>`;
+      const pinBtn = `<button title="${l.pinned ? 'Unpin' : 'Pin'}" onclick="event.stopPropagation();wlTogglePin('${l.id}')" style="background:none;border:none;cursor:pointer;padding:2px;color:${l.pinned ? '#111318' : '#C8C3BC'};font-size:12px;flex-shrink:0;"><i class="ti ${l.pinned ? 'ti-pin-filled' : 'ti-pin'}"></i></button>`;
       return `<div class="wl-list-item${isActive ? ' active' : ''}" onclick="wlSelectList('${l.id}')">
         <i class="ti ti-heart" style="font-size:12px;flex-shrink:0;"></i>
         <span class="wl-list-name">${l.name}</span>
@@ -96,7 +96,7 @@ function render_wishlist(el) {
         ? `<div style="padding:48px 24px;text-align:center;color:#9CA3AF;font-size:13px;">
             <i class="ti ti-shopping-bag" style="font-size:36px;display:block;margin-bottom:12px;opacity:0.25;"></i>
             <div style="font-weight:600;color:#7A7F8E;margin-bottom:6px;">List is empty</div>
-            Add parts from <a style="color:#1B4FA8;cursor:pointer;" onclick="Router.navigate('parts-search')">Parts Search</a> using the "Save to list" button.
+            Add parts from <a style="color:#111318;cursor:pointer;" onclick="Router.navigate('parts-search')">Parts Search</a> using the "Save to list" button.
            </div>`
         : `<div class="wl-items-list">${items.map(item => wlItemCard(item, list, otherLists, canEdit)).join('')}</div>`}`;
 
@@ -342,24 +342,24 @@ function render_wishlist(el) {
 <style>
 .wl-panel-header { display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:0.5px solid #E8E4DF;gap:12px;flex-wrap:wrap;flex-shrink:0; }
 .wl-panel-title { font-size:18px;font-weight:700;color:#111318; }
-.wl-rename-input { font-size:16px;font-weight:700;color:#111318;border:1.5px solid #1B4FA8;border-radius:7px;padding:3px 10px;font-family:inherit;outline:none;background:#FFFFFF;min-width:140px;flex:1; }
+.wl-rename-input { font-size:16px;font-weight:700;color:#111318;border:1.5px solid #111318;border-radius:7px;padding:3px 10px;font-family:inherit;outline:none;background:#FFFFFF;min-width:140px;flex:1; }
 .wl-action-btn { background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;color:#5A5F6E;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:4px;white-space:nowrap; }
 .wl-action-btn:hover { background:#F5F2EE; }
-.wl-action-primary { background:#1B4FA8;color:#FFFFFF;border-color:#1B4FA8; }
-.wl-action-primary:hover { background:#152B52; }
+.wl-action-primary { background:#111318;color:#FFFFFF;border-color:#111318; }
+.wl-action-primary:hover { background:#0D0D0D; }
 .wl-action-danger { color:#A32D2D;border-color:#F5C5C5; }
 .wl-action-danger:hover { background:#FCEBEB; }
 .wl-sidebar { width:228px;flex-shrink:0;background:#FAFAF8;border-right:0.5px solid #E8E4DF;display:flex;flex-direction:column;padding:12px 0;overflow-y:auto; }
 .wl-section-label { font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#9CA3AF;padding:8px 16px 4px;display:flex;align-items:center;gap:5px; }
 .wl-list-item { display:flex;align-items:center;gap:8px;padding:8px 12px 8px 16px;cursor:pointer;font-size:13px;color:#3A3D4A; }
 .wl-list-item:hover { background:#F0ECE8; }
-.wl-list-item.active { background:#E6EDF7;color:#1B4FA8;font-weight:600; }
+.wl-list-item.active { background:#E6EDF7;color:#111318;font-weight:600; }
 .wl-list-item i.ti-heart { color:#E03131;opacity:0.65; }
 .wl-list-item.active i.ti-heart { opacity:1; }
 .wl-list-name { flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
 .wl-list-count { font-size:10px;font-weight:700;background:#E8E4DF;color:#7A7F8E;border-radius:999px;padding:1px 7px; }
-.wl-list-item.active .wl-list-count { background:#D6E4F7;color:#1B4FA8; }
-.wl-new-btn { margin:8px 12px 0;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#1B4FA8;background:none;border:0.5px dashed #B8C7DB;border-radius:7px;padding:7px 12px;cursor:pointer;font-family:inherit;width:calc(100% - 24px); }
+.wl-list-item.active .wl-list-count { background:#FEF3C7;color:#111318; }
+.wl-new-btn { margin:8px 12px 0;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#111318;background:none;border:0.5px dashed #B8C7DB;border-radius:7px;padding:7px 12px;cursor:pointer;font-family:inherit;width:calc(100% - 24px); }
 .wl-new-btn:hover { background:#EEF3F9; }
 .wl-content { flex:1;display:flex;flex-direction:column;min-width:0;overflow-y:auto; }
 .wl-items-list { padding:12px 20px;display:flex;flex-direction:column;gap:8px; }
@@ -370,8 +370,8 @@ function render_wishlist(el) {
 .wl-item-desc { font-size:13px;font-weight:500;color:#111318;margin-top:4px;line-height:1.35; }
 .wl-item-actions { display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap; }
 .wl-partnum { font-family:'SF Mono','Consolas',monospace;font-size:11px;font-weight:700;color:#3A3D4A; }
-.wl-cart-btn { background:#1B4FA8;border:none;border-radius:7px;padding:7px 12px;font-size:12px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;white-space:nowrap; }
-.wl-cart-btn:hover { background:#152B52; }
+.wl-cart-btn { background:#111318;border:none;border-radius:7px;padding:7px 12px;font-size:12px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;white-space:nowrap; }
+.wl-cart-btn:hover { background:#0D0D0D; }
 .wl-search-btn { background:#F5F2EE;border:0.5px solid #E2DDD8;border-radius:7px;padding:7px 10px;font-size:12px;font-weight:600;color:#3A3D4A;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px; }
 .wl-search-btn:hover { background:#ECEAE6; }
 .wl-move-select { height:32px;border:0.5px solid #E2DDD8;border-radius:7px;padding:0 8px;font-size:11px;font-family:inherit;color:#5A5F6E;outline:none;background:#FAFAF8;cursor:pointer;max-width:120px; }
@@ -382,10 +382,10 @@ function render_wishlist(el) {
 .oem-badge { background:#F5F2EE;color:#5A5F6E;font-size:9px;font-weight:700;border-radius:3px;padding:1px 4px;letter-spacing:0.3px; }
 .ci-remove { background:none;border:none;color:#C8C3BC;cursor:pointer;padding:4px;border-radius:5px; }
 .ci-remove:hover { background:#FCEBEB;color:#A32D2D; }
-.btn-primary { background:#1B4FA8;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px; }
-.btn-primary:hover { background:#152B52; }
+.btn-primary { background:#111318;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px; }
+.btn-primary:hover { background:#0D0D0D; }
 .wl-vis-btn { background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:500;color:#5A5F6E;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px; }
-.wl-vis-active { background:#1B4FA8 !important;border-color:#1B4FA8 !important;color:#FFFFFF !important; }
+.wl-vis-active { background:#111318 !important;border-color:#111318 !important;color:#FFFFFF !important; }
 </style>
 <div class="shell">
   ${buildSidebar('wishlist')}
@@ -447,7 +447,7 @@ window.addToWishList = function(part) {
           <button id="wl-ci-pub" class="wl-vis-btn" onclick="event.stopPropagation();wlVisInlineSelect('public')" style="font-size:11px;padding:4px 10px;"><i class="ti ti-world" style="font-size:10px;"></i> Public</button>
         </div>
         <div style="display:flex;gap:6px;">
-          <button onclick="wlInlineCreate()" style="flex:1;background:#1B4FA8;color:#FFF;border:none;border-radius:6px;padding:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Create &amp; add</button>
+          <button onclick="wlInlineCreate()" style="flex:1;background:#111318;color:#FFF;border:none;border-radius:6px;padding:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Create &amp; add</button>
           <button onclick="document.getElementById('wl-create-inline').style.display='none'" style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:7px 10px;font-size:12px;color:#5A5F6E;cursor:pointer;font-family:inherit;">Cancel</button>
         </div>
       </div>`;
@@ -458,14 +458,14 @@ window.addToWishList = function(part) {
         <div style="font-size:13px;color:#5A5F6E;margin-bottom:14px;">Saving <strong>${part.partNum}</strong> — ${part.description}</div>
         <div id="wl-picker-rows">${_buildRows()}</div>
         <div style="margin-top:8px;">
-          <button onclick="document.getElementById('wl-create-inline').style.display='block';document.getElementById('wl-inline-name').focus();" style="background:none;border:0.5px dashed #B8C7DB;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:600;color:#1B4FA8;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;width:100%;"><i class="ti ti-plus" style="font-size:12px;"></i> Create new list</button>
+          <button onclick="document.getElementById('wl-create-inline').style.display='block';document.getElementById('wl-inline-name').focus();" style="background:none;border:0.5px dashed #B8C7DB;border-radius:7px;padding:8px 14px;font-size:12px;font-weight:600;color:#111318;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;width:100%;"><i class="ti ti-plus" style="font-size:12px;"></i> Create new list</button>
         </div>
         ${createInlineHtml}
         <style>
           .wl-picker-row{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-radius:8px;margin-bottom:2px;}
           .wl-picker-row:hover{background:#F5F2EE;}
           .wl-vis-btn{background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:500;color:#5A5F6E;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;}
-          .wl-vis-active{background:#1B4FA8 !important;border-color:#1B4FA8 !important;color:#FFF !important;}
+          .wl-vis-active{background:#111318 !important;border-color:#111318 !important;color:#FFF !important;}
         </style>
       </div>`,
       actions: [{ label: 'Cancel', onClick: () => Modal.close() }],

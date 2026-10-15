@@ -29,7 +29,7 @@ function render_supplier_portal(el) {
   let _spNewsSubView = 'feed'; // 'feed' | 'cms-list' | 'cms-editor'
 
   const PR_STATUS = {
-    pending:    { label: 'Awaiting response', color: '#1B4FA8', bg: '#D6E4F7' },
+    pending:    { label: 'Awaiting response', color: '#111318', bg: '#FEF3C7' },
     needs_info: { label: 'More info needed',  color: '#534AB7', bg: '#EEEDFE' },
     quoted:     { label: 'Quoted',            color: '#065F46', bg: '#D1FAE5' },
     rejected:   { label: 'Not available',     color: '#5A5F6E', bg: '#F0ECE8' },
@@ -44,7 +44,7 @@ function render_supplier_portal(el) {
 .sp-fleet-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 32px; }
 .sp-fleet-card { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
 .sp-fleet-card-header { display: flex; align-items: center; gap: 12px; }
-.sp-fleet-logo { width: 40px; height: 40px; background: #152B52; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #1B4FA8; flex-shrink: 0; letter-spacing: .5px; }
+.sp-fleet-logo { width: 40px; height: 40px; background: #0D0D0D; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #111318; flex-shrink: 0; letter-spacing: .5px; }
 .sp-fleet-name { font-size: 14px; font-weight: 700; color: #111318; }
 .sp-fleet-city { font-size: 12px; color: #9CA3AF; }
 .sp-fleet-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -54,7 +54,7 @@ function render_supplier_portal(el) {
 .sp-fleet-actions { display: flex; gap: 8px; }
 .sp-btn { height: 32px; padding: 0 12px; border-radius: 7px; font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; border: none; transition: opacity 0.1s; }
 .sp-btn:hover { opacity: 0.85; }
-.sp-btn-primary { background: #1B4FA8; color: #FFFFFF; }
+.sp-btn-primary { background: #111318; color: #FFFFFF; }
 .sp-btn-ghost { background: #FFFFFF; color: #3A3D4A; border: 1px solid #E2DDD8 !important; }
 .sp-table { background: #FFFFFF; border: 0.5px solid #E8E4DF; border-radius: 12px; overflow: hidden; }
 .sp-table-head { display: grid; grid-template-columns: 120px 1fr 100px 120px 90px 90px; padding: 0 18px; background: #FAFAF9; border-bottom: 1px solid #F0ECE8; }
@@ -67,36 +67,36 @@ function render_supplier_portal(el) {
 .sp-compose-field { margin-bottom: 16px; }
 .sp-compose-label { font-size: 12px; font-weight: 600; color: #5A5F6E; margin-bottom: 5px; display: block; }
 .sp-compose-input { width: 100%; height: 36px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; }
-.sp-compose-input:focus { border-color: #1B4FA8; }
+.sp-compose-input:focus { border-color: #111318; }
 .sp-compose-textarea { width: 100%; min-height: 100px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; resize: vertical; }
-.sp-compose-textarea:focus { border-color: #1B4FA8; }
+.sp-compose-textarea:focus { border-color: #111318; }
 .sp-compose-select { width: 100%; height: 36px; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px; font-size: 13px; font-family: inherit; color: #111318; outline: none; background: #FFFFFF; cursor: pointer; }
 .sp-fleet-check-row { display: flex; flex-direction: column; gap: 7px; padding: 10px; background: #FAFAF9; border: 1px solid #E8E4DF; border-radius: 7px; }
 .sp-fleet-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #3A3D4A; cursor: pointer; }
-.sp-fleet-check input { accent-color: #1B4FA8; }
+.sp-fleet-check input { accent-color: #111318; }
 /* ── Manuals CSS ─── */
 .man-content-row { display:flex; flex:1; min-height:0; overflow:hidden; }
 .man-vendor-panel { width:200px; min-width:200px; background:#FFFFFF; border-right:0.5px solid #E8E4DF; display:flex; flex-direction:column; padding:16px 0; overflow-y:auto; }
 .mvp-label { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#9CA3AF; margin-bottom:10px; padding:0 14px; }
 .man-vendor-item { display:flex; align-items:center; gap:8px; padding:6px 14px; cursor:pointer; margin-bottom:2px; }
 .man-vendor-item:hover { background:#F5F2EE; }
-.man-vendor-item.active { background:#D6E4F7; }
+.man-vendor-item.active { background:#FEF3C7; }
 .mvi-icon { width:26px; height:26px; background:#F5F2EE; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:13px; color:#9CA3AF; flex-shrink:0; }
-.man-vendor-item.active .mvi-icon { background:#1B4FA8; color:#FFFFFF; }
+.man-vendor-item.active .mvi-icon { background:#111318; color:#FFFFFF; }
 .mvi-name { font-size:12px; font-weight:500; color:#3A3D4A; line-height:1.3; flex:1; }
-.man-vendor-item.active .mvi-name { color:#1B4FA8; font-weight:600; }
+.man-vendor-item.active .mvi-name { color:#111318; font-weight:600; }
 .mvi-count { font-size:10px; color:#B0AAA3; }
 .man-main-panel { flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden; }
 .man-search-area { padding:12px 20px; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; flex-shrink:0; }
 .man-search-wrap { position:relative; }
 .man-search-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:17px; pointer-events:none; }
 .man-search-input { width:100%; height:40px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:10px; padding:0 14px 0 44px; font-size:14px; font-family:inherit; color:#111318; outline:none; box-sizing:border-box; }
-.man-search-input:focus { border-color:#1B4FA8; background:#FFFFFF; }
+.man-search-input:focus { border-color:#111318; background:#FFFFFF; }
 .man-search-input::placeholder { color:#B0AAA3; }
 .man-machine-chip-row { display:flex; align-items:center; gap:6px; padding:10px 20px; background:#FAFAF8; border-bottom:0.5px solid #E8E4DF; flex-wrap:wrap; flex-shrink:0; }
 .man-machine-chip { height:28px; padding:0 12px; border:1px solid #E2DDD8; border-radius:999px; background:#FFFFFF; font-size:12px; font-weight:500; color:#5A5F6E; cursor:pointer; font-family:inherit; white-space:nowrap; }
 .man-machine-chip:hover { background:#F5F2EE; border-color:#C8C3BC; }
-.man-machine-chip.active { background:#D6E4F7; border-color:#1B4FA8; color:#1B4FA8; font-weight:600; }
+.man-machine-chip.active { background:#FEF3C7; border-color:#111318; color:#111318; font-weight:600; }
 .man-content-body { flex:1; padding:20px; overflow-y:auto; }
 .man-section-label { font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#9CA3AF; margin-bottom:12px; }
 .docs-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:10px; margin-bottom:24px; }
@@ -109,11 +109,11 @@ function render_supplier_portal(el) {
 .doc-meta-sep { color:#D1CBC4; }
 .doc-tags { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:6px; }
 .doc-tag { font-size:10px; border-radius:4px; padding:2px 6px; font-weight:500; }
-.tag-type { background:#D6E4F7; color:#1B4FA8; }
+.tag-type { background:#FEF3C7; color:#111318; }
 .doc-actions { display:flex; align-items:center; gap:6px; }
 .doc-btn { font-size:11px; font-weight:500; border-radius:6px; padding:4px 10px; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:4px; }
-.doc-btn-primary { background:#1B4FA8; border:none; color:#FFFFFF; font-weight:600; }
-.doc-btn-primary:hover { background:#152B52; }
+.doc-btn-primary { background:#111318; border:none; color:#FFFFFF; font-weight:600; }
+.doc-btn-primary:hover { background:#0D0D0D; }
 .doc-btn-ghost { background:none; border:0.5px solid #E2DDD8; color:#3A3D4A; }
 .doc-btn-ghost:hover { background:#F5F2EE; }
 /* ── News CSS ─── */
@@ -123,17 +123,17 @@ function render_supplier_portal(el) {
 .nfp-label { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#9CA3AF; margin-bottom:8px; }
 .nfp-item { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:7px; cursor:pointer; font-size:12px; color:#5A5F6E; margin-bottom:2px; }
 .nfp-item:hover { background:#F5F2EE; }
-.nfp-item.active { background:#D6E4F7; color:#1B4FA8; font-weight:600; }
+.nfp-item.active { background:#FEF3C7; color:#111318; font-weight:600; }
 .nfp-item-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 .nfp-poster { display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:7px; cursor:pointer; font-size:12px; color:#5A5F6E; margin-bottom:2px; }
 .nfp-poster:hover { background:#F5F2EE; }
-.nfp-poster.active { background:#D6E4F7; color:#1B4FA8; font-weight:600; }
+.nfp-poster.active { background:#FEF3C7; color:#111318; font-weight:600; }
 .news-main { flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden; }
 .news-toolbar { padding:14px 20px; background:#FFFFFF; border-bottom:0.5px solid #E8E4DF; display:flex; align-items:center; gap:10px; flex-wrap:wrap; flex-shrink:0; }
 .news-search-wrap { position:relative; flex:1; min-width:200px; max-width:360px; }
 .news-search-icon { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:15px; pointer-events:none; }
 .news-search-input { width:100%; height:36px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:9px; padding:0 12px 0 34px; font-size:13px; font-family:inherit; color:#111318; outline:none; }
-.news-search-input:focus { border-color:#1B4FA8; background:#FFFFFF; }
+.news-search-input:focus { border-color:#111318; background:#FFFFFF; }
 .news-search-input::placeholder { color:#B0AAA3; }
 .news-sort-btn { display:flex; align-items:center; gap:5px; height:36px; padding:0 12px; background:#FFFFFF; border:0.5px solid #E2DDD8; border-radius:9px; font-size:12px; font-weight:500; color:#5A5F6E; cursor:pointer; font-family:inherit; white-space:nowrap; }
 .news-sort-btn:hover { background:#F5F2EE; }
@@ -153,7 +153,7 @@ function render_supplier_portal(el) {
 .nc-actions { display:flex; align-items:center; gap:8px; margin-top:10px; padding-top:10px; border-top:0.5px solid #F0ECE8; }
 .nc-action-btn { display:inline-flex; align-items:center; gap:5px; padding:5px 11px; border-radius:7px; border:0.5px solid #E2DDD8; background:#FFFFFF; color:#5A5F6E; font-size:11px; font-weight:500; cursor:pointer; font-family:inherit; }
 .nc-action-btn:hover { background:#F5F2EE; }
-.nc-saved { background:#D6E4F7; color:#1B4FA8; border-color:#1B4FA8; }
+.nc-saved { background:#FEF3C7; color:#111318; border-color:#111318; }
 .nc-saved:hover { background:#F5DFC0; }
 .nc-report-btn:hover { background:#FFF5F5; color:#B91C1C; border-color:#FCA5A5; }
 .nc-reported { color:#9CA3AF; border-color:#E2DDD8; cursor:default; }
@@ -168,7 +168,7 @@ function render_supplier_portal(el) {
 .an-filter-sep { width:0.5px; height:20px; background:#E8E4DF; }
 .an-loc-pills { display:flex; gap:5px; flex-wrap:wrap; }
 .an-loc-pill { display:flex; align-items:center; gap:5px; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:0.5px solid #E0DBD5; color:#5A5F6E; background:#FFFFFF; transition:all 0.15s; white-space:nowrap; }
-.an-loc-pill.active { background:#D6E4F7; color:#1B4FA8; border-color:#F5C97A; }
+.an-loc-pill.active { background:#FEF3C7; color:#111318; border-color:#F5C97A; }
 .an-loc-pill:hover:not(.active) { border-color:#9CA3AF; }
 .an-content { flex:1; padding:20px 24px 40px; overflow-y:auto; }
 .an-kpi-row { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:18px; }
@@ -277,7 +277,7 @@ function render_supplier_portal(el) {
         </div>
         <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:18px;">
           <div style="font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;">Open Price Requests</div>
-          <div style="font-size:28px;font-weight:700;color:${pending > 0 ? '#1B4FA8' : '#111318'};">${pending}</div>
+          <div style="font-size:28px;font-weight:700;color:${pending > 0 ? '#111318' : '#111318'};">${pending}</div>
         </div>
         <div style="background:#FFFFFF;border:0.5px solid #E8E4DF;border-radius:12px;padding:18px;">
           <div style="font-size:11px;font-weight:600;color:#9CA3AF;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;">Content Published</div>
@@ -341,7 +341,7 @@ function render_supplier_portal(el) {
 <style>
 .sp-fl-stat { background:#F5F2EE; border-radius:8px; padding:9px 12px; cursor:pointer; transition:background .12s; flex:1; min-width:0; }
 .sp-fl-stat:hover { background:#EDE9E4; }
-.sp-fl-stat-val { font-size:18px; font-weight:700; color:#1B4FA8; line-height:1; }
+.sp-fl-stat-val { font-size:18px; font-weight:700; color:#111318; line-height:1; }
 .sp-fl-stat-lbl { font-size:10px; color:#9CA3AF; margin-top:3px; text-transform:uppercase; letter-spacing:.4px; }
 .sp-fl-stats-row { display:flex; gap:8px; }
 .sp-onboard-section { margin-top:32px; }
@@ -350,13 +350,13 @@ function render_supplier_portal(el) {
 .sp-onboard-list { display:flex; flex-direction:column; gap:8px; }
 .sp-onboard-row { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:10px; padding:12px 14px; display:flex; align-items:center; gap:12px; }
 .sp-onboard-logo { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; letter-spacing:.4px; flex-shrink:0; }
-.sp-onboard-logo.new-fleet { background:#152B52; color:#7EA8E0; }
+.sp-onboard-logo.new-fleet { background:#0D0D0D; color:#C8A000; }
 .sp-onboard-logo.new-loc { background:#EAF3DE; color:#3B6D11; }
 .sp-onboard-name { font-size:13px; font-weight:600; color:#111318; }
 .sp-onboard-detail { font-size:11px; color:#7A7F8E; margin-top:2px; }
 .sp-onboard-since { font-size:11px; color:#B0AAA3; margin-left:auto; white-space:nowrap; }
 .sp-onboard-type-pill { font-size:10px; font-weight:700; border-radius:4px; padding:2px 7px; margin-right:2px; }
-.sp-onboard-type-fleet { background:#EFF4FB; color:#1B4FA8; }
+.sp-onboard-type-fleet { background:#EFF4FB; color:#111318; }
 .sp-onboard-type-loc { background:#EAF3DE; color:#3B6D11; }
 </style>
       <div class="sp-page-title">My Fleets</div>
@@ -434,7 +434,7 @@ function render_supplier_portal(el) {
         body: `<div style="max-height:380px;overflow-y:auto;margin:-16px;">
           <div style="padding:10px 16px 4px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:#9CA3AF;">${locs.length} location${locs.length!==1?'s':''} onboarded</div>
           ${locs.map((loc, i) => `<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;${i<locs.length-1?'border-bottom:0.5px solid #F5F2EE;':''}">
-            <div style="width:28px;height:28px;background:#EFF4FB;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#1B4FA8;flex-shrink:0;">${i+1}</div>
+            <div style="width:28px;height:28px;background:#EFF4FB;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#111318;flex-shrink:0;">${i+1}</div>
             <span style="font-size:13px;color:#111318;">${loc}</span>
           </div>`).join('')}
         </div>`,
@@ -659,7 +659,7 @@ function render_supplier_portal(el) {
       ${r.status === 'pending' || r.status === 'needs_info'
         ? `<button class="sp-btn sp-btn-primary" style="font-size:12px;" onclick="spRespondToRequest('${r.id}')">Add Price</button>`
         : ''}
-      ${r.response && r.response.price ? `<div style="font-size:14px;font-weight:700;color:#1B4FA8;">${r.response.currency||'USD'} ${parseFloat(r.response.price).toFixed(2)} / unit</div>` : ''}
+      ${r.response && r.response.price ? `<div style="font-size:14px;font-weight:700;color:#111318;">${r.response.currency||'USD'} ${parseFloat(r.response.price).toFixed(2)} / unit</div>` : ''}
       ${r.response && r.response.supersededBy ? `<div style="font-size:12px;color:#B45309;display:flex;align-items:center;gap:4px;"><i class="ti ti-arrow-right" style="font-size:12px;"></i>Superseded by <strong>${r.response.supersededBy}</strong></div>` : ''}
     </div>
   </div>
@@ -706,7 +706,7 @@ function render_supplier_portal(el) {
       ${r.response && r.response.price ? `
         <div style="margin-top:16px;padding-top:14px;border-top:1px solid #F0ECE8;">
           <div style="font-size:11px;color:#9CA3AF;margin-bottom:2px;">Quoted price</div>
-          <div style="font-size:20px;font-weight:700;color:#1B4FA8;">${r.response.currency||'USD'} ${parseFloat(r.response.price).toFixed(2)}</div>
+          <div style="font-size:20px;font-weight:700;color:#111318;">${r.response.currency||'USD'} ${parseFloat(r.response.price).toFixed(2)}</div>
           <div style="font-size:11px;color:#9CA3AF;">per unit</div>
         </div>` : ''}
       ${r.response && r.response.supersededBy ? `
@@ -731,10 +731,10 @@ function render_supplier_portal(el) {
   let _spPtExpandedCats = new Set();
 
   const SP_CONTENT_TYPES = {
-    bulletin: { label:'Service Bulletin', icon:'ti-alert-triangle', color:'#1B4FA8', bg:'#D6E4F7' },
+    bulletin: { label:'Service Bulletin', icon:'ti-alert-triangle', color:'#111318', bg:'#FEF3C7' },
     news:     { label:'Product News',     icon:'ti-news',           color:'#534AB7', bg:'#EEEDFE' },
     safety:   { label:'Safety Notice',    icon:'ti-alert-octagon',  color:'#B91C1C', bg:'#FEE2E2' },
-    promo:    { label:'Promotion',        icon:'ti-tag',            color:'#1B4FA8', bg:'#E1F5EE' },
+    promo:    { label:'Promotion',        icon:'ti-tag',            color:'#111318', bg:'#E1F5EE' },
     training: { label:'Training',         icon:'ti-certificate',    color:'#5B21B6', bg:'#EDE9FE' },
     pricing:  { label:'Pricing Update',   icon:'ti-coin',           color:'#6B7280', bg:'#F3F4F6' },
   };
@@ -795,7 +795,7 @@ function render_supplier_portal(el) {
 .spc-search-wrap { position:relative; margin-bottom:12px; max-width:400px; }
 .spc-search-icon { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:15px; pointer-events:none; }
 .spc-search-input { width:100%; height:36px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:9px; padding:0 12px 0 34px; font-size:13px; font-family:inherit; color:#111318; outline:none; }
-.spc-search-input:focus { border-color:#1B4FA8; background:#FFFFFF; }
+.spc-search-input:focus { border-color:#111318; background:#FFFFFF; }
 .spc-row { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; padding:14px 16px; display:flex; align-items:flex-start; gap:14px; cursor:pointer; transition:border-color .15s; margin-bottom:8px; }
 .spc-row:hover { border-color:#C8C3BC; }
 .spc-row-icon { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
@@ -804,9 +804,9 @@ function render_supplier_portal(el) {
 .spc-row-meta { font-size:11px; color:#9CA3AF; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 .spc-row-actions { display:flex; gap:6px; flex-shrink:0; }
 .spc-chip { display:inline-flex; align-items:center; gap:3px; padding:2px 7px; border-radius:6px; font-size:10px; font-weight:600; }
-.spc-status-published { background:#DBEAFE; color:#1B4FA8; }
+.spc-status-published { background:#FEF3C7; color:#111318; }
 .spc-status-draft     { background:#F0ECE8; color:#5A5F6E; }
-.spc-status-scheduled { background:#DBEAFE; color:#1D4ED8; }
+.spc-status-scheduled { background:#FEF3C7; color:#111318; }
 .spc-status-expired   { background:#FEE2E2; color:#B91C1C; }
 /* ── Editor ─── */
 .spc-editor-grid { display:grid; grid-template-columns:1fr 320px; gap:18px; align-items:start; padding-bottom:40px; }
@@ -816,21 +816,21 @@ function render_supplier_portal(el) {
 .spc-field { display:flex; flex-direction:column; gap:5px; }
 .spc-label { font-size:11px; font-weight:600; color:#5A5F6E; text-transform:uppercase; letter-spacing:.6px; }
 .spc-input { width:100%; padding:8px 10px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:13px; font-family:inherit; color:#111318; outline:none; background:#FFFFFF; }
-.spc-input:focus { border-color:#1B4FA8; }
+.spc-input:focus { border-color:#111318; }
 .spc-textarea { width:100%; padding:10px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:13px; font-family:inherit; color:#111318; outline:none; resize:vertical; min-height:130px; line-height:1.6; background:#FFFFFF; }
-.spc-textarea:focus { border-color:#1B4FA8; }
+.spc-textarea:focus { border-color:#111318; }
 .spc-select { width:100%; padding:8px 10px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:13px; font-family:inherit; color:#111318; outline:none; background:#FFFFFF; cursor:pointer; }
-.spc-select:focus { border-color:#1B4FA8; }
+.spc-select:focus { border-color:#111318; }
 .spc-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 .spc-check-list { display:flex; flex-direction:column; gap:7px; padding:10px; background:#FAFAF9; border:1px solid #E8E4DF; border-radius:7px; }
 .spc-check-item { display:flex; align-items:center; gap:8px; font-size:13px; color:#3A3D4A; cursor:pointer; }
-.spc-check-item input { accent-color:#1B4FA8; }
+.spc-check-item input { accent-color:#111318; }
 .spc-post-opt { display:flex; align-items:center; gap:8px; padding:8px 10px; border:0.5px solid #E2DDD8; border-radius:8px; cursor:pointer; font-size:12px; color:#3A3D4A; transition:all .15s; }
-.spc-post-opt.selected { border-color:#1B4FA8; background:#D6E4F7; color:#1B4FA8; font-weight:600; }
-.spc-post-opt input { accent-color:#1B4FA8; display:none; }
+.spc-post-opt.selected { border-color:#111318; background:#FEF3C7; color:#111318; font-weight:600; }
+.spc-post-opt input { accent-color:#111318; display:none; }
 .spc-ai-btn { display:flex; align-items:center; gap:7px; padding:8px 12px; border:0.5px solid #E2DDD8; border-radius:8px; font-size:12px; font-weight:500; font-family:inherit; cursor:pointer; background:#FFFFFF; color:#3A3D4A; transition:all .15s; width:100%; }
 .spc-ai-btn:hover { background:#F5F2EE; border-color:#C8C3BC; }
-.spc-ai-btn .ai-icon { width:22px; height:22px; border-radius:6px; background:#111318; color:#1B4FA8; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; }
+.spc-ai-btn .ai-icon { width:22px; height:22px; border-radius:6px; background:#111318; color:#111318; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; }
 .spc-ai-preview { background:#F5F2EE; border:0.5px solid #E2DDD8; border-radius:8px; padding:12px; font-size:12px; color:#3A3D4A; line-height:1.6; margin-top:2px; white-space:pre-wrap; }
 .spc-action-bar { display:flex; align-items:center; gap:8px; padding:14px 0 0; border-top:0.5px solid #E8E4DF; margin-top:4px; }
 /* ── Part tree (in editor) ─── */
@@ -838,7 +838,7 @@ function render_supplier_portal(el) {
 .spc-tree-search-wrap { position:relative; padding:10px; border-bottom:0.5px solid #F0ECE8; }
 .spc-tree-search-icon { position:absolute; left:20px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:13px; pointer-events:none; }
 .spc-tree-search { width:100%; height:30px; background:#FFFFFF; border:1px solid #E2DDD8; border-radius:7px; padding:0 8px 0 28px; font-size:12px; font-family:inherit; color:#111318; outline:none; }
-.spc-tree-search:focus { border-color:#1B4FA8; }
+.spc-tree-search:focus { border-color:#111318; }
 .spc-tree-body { max-height:280px; overflow-y:auto; padding:6px 0; }
 .spc-cat-hdr { display:flex; align-items:center; gap:6px; padding:5px 12px; cursor:pointer; font-size:10px; font-weight:700; color:#5A5F6E; letter-spacing:.3px; text-transform:uppercase; }
 .spc-cat-hdr:hover { background:#F5F2EE; }
@@ -846,13 +846,13 @@ function render_supplier_portal(el) {
 .spc-cat-chevron.open { transform:rotate(90deg); }
 .spc-part-item { display:flex; flex-direction:column; padding:5px 12px 5px 26px; cursor:pointer; border-left:2px solid transparent; }
 .spc-part-item:hover { background:#F5F2EE; border-left-color:#E2DDD8; }
-.spc-part-item.selected { background:#D6E4F7; border-left-color:#1B4FA8; }
+.spc-part-item.selected { background:#FEF3C7; border-left-color:#111318; }
 .spc-part-pnum { font-size:10px; font-weight:700; color:#9CA3AF; font-family:monospace; }
-.spc-part-item.selected .spc-part-pnum { color:#1B4FA8; }
+.spc-part-item.selected .spc-part-pnum { color:#111318; }
 .spc-part-desc { font-size:11px; font-weight:500; color:#3A3D4A; line-height:1.3; }
 .spc-part-item.selected .spc-part-desc { color:#111318; }
-.spc-selected-banner { background:#D6E4F7; border:1px solid #F5C97A; border-radius:7px; padding:8px 11px; display:flex; align-items:center; gap:8px; margin-top:6px; }
-.spc-banner-pnum { font-size:10px; font-weight:700; color:#1B4FA8; font-family:monospace; }
+.spc-selected-banner { background:#FEF3C7; border:1px solid #F5C97A; border-radius:7px; padding:8px 11px; display:flex; align-items:center; gap:8px; margin-top:6px; }
+.spc-banner-pnum { font-size:10px; font-weight:700; color:#111318; font-family:monospace; }
 .spc-banner-desc { font-size:11px; color:#3A3D4A; margin-top:1px; }
 </style>
 <div id="spc-body" style="padding:0 28px 28px;"></div>`;
@@ -917,7 +917,7 @@ function render_supplier_portal(el) {
                   <span class="spc-chip" style="background:${pri.bg};color:${pri.color};">${pri.label}</span>
                   <span class="spc-chip" style="background:${tm.bg};color:${tm.color};"><i class="ti ${tm.icon}" style="font-size:10px;"></i> ${tm.label}</span>
                   ${partLabel}
-                  ${a.showOnOrders ? `<span class="spc-chip" style="background:#E6F1FB;color:#185FA5;"><i class="ti ti-shopping-cart" style="font-size:9px;"></i> Orders</span>` : ''}
+                  ${a.showOnOrders ? `<span class="spc-chip" style="background:#FFFBEB;color:#1A1A1A;"><i class="ti ti-shopping-cart" style="font-size:9px;"></i> Orders</span>` : ''}
                   <span>${a.date || a.postedDate || ''}</span>
                   ${a.expiryDate ? `<span>Expires ${a.expiryDate}</span>` : ''}
                 </div>
@@ -1040,7 +1040,7 @@ function render_supplier_portal(el) {
               </div>
               <div id="spc-part-tree-section" style="${a.showOnPartPage?'':'display:none;'}">
                 <label class="spc-label" style="margin-bottom:6px;display:block;">Target part <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9CA3AF;">— select from your catalog</span></label>
-                ${selectedPart ? `<div class="spc-selected-banner"><i class="ti ti-tag" style="font-size:13px;color:#1B4FA8;flex-shrink:0;"></i><div><div class="spc-banner-pnum">${selectedPart.partNum}</div><div class="spc-banner-desc">${selectedPart.description}</div></div><button class="spc-btn-ghost" style="margin-left:auto;padding:3px 8px;font-size:11px;" onclick="spCmsClearPart()">✕ Clear</button></div>` : ''}
+                ${selectedPart ? `<div class="spc-selected-banner"><i class="ti ti-tag" style="font-size:13px;color:#111318;flex-shrink:0;"></i><div><div class="spc-banner-pnum">${selectedPart.partNum}</div><div class="spc-banner-desc">${selectedPart.description}</div></div><button class="spc-btn-ghost" style="margin-left:auto;padding:3px 8px;font-size:11px;" onclick="spCmsClearPart()">✕ Clear</button></div>` : ''}
                 <div class="spc-tree-panel">
                   <div class="spc-tree-search-wrap">
                     <i class="ti ti-search spc-tree-search-icon"></i>
@@ -1193,7 +1193,7 @@ function render_supplier_portal(el) {
           section.insertBefore(bannerEl, section.querySelector('.spc-tree-panel'));
         }
         bannerEl.className = 'spc-selected-banner';
-        bannerEl.innerHTML = `<i class="ti ti-tag" style="font-size:13px;color:#1B4FA8;flex-shrink:0;"></i><div><div class="spc-banner-pnum">${part.partNum}</div><div class="spc-banner-desc">${part.description}</div></div><button class="spc-btn-ghost" style="margin-left:auto;padding:3px 8px;font-size:11px;" onclick="spCmsClearPart()">✕ Clear</button>`;
+        bannerEl.innerHTML = `<i class="ti ti-tag" style="font-size:13px;color:#111318;flex-shrink:0;"></i><div><div class="spc-banner-pnum">${part.partNum}</div><div class="spc-banner-desc">${part.description}</div></div><button class="spc-btn-ghost" style="margin-left:auto;padding:3px 8px;font-size:11px;" onclick="spCmsClearPart()">✕ Clear</button>`;
       }
     };
     window.spCmsClearPart = function() {
@@ -1348,7 +1348,7 @@ function render_supplier_portal(el) {
     function typeBackground(type) {
       if (type === 'Service') return 'background:#FCEBEB;color:#A32D2D;';
       if (type === 'Parts') return 'background:#EEEDFE;color:#534AB7;';
-      if (type === 'Operator') return 'background:#E6F1FB;color:#185FA5;';
+      if (type === 'Operator') return 'background:#FFFBEB;color:#1A1A1A;';
       return 'background:#EAF3DE;color:#3B6D11;';
     }
     function typeIconClass(type) {
@@ -1600,7 +1600,7 @@ function render_supplier_portal(el) {
           <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
             ${['Inaccurate or incorrect information','Outdated — information no longer applies','Duplicate post','Inappropriate or irrelevant content','Other'].map((reason, i) => `
               <label style="display:flex;align-items:center;gap:9px;padding:9px 12px;border:0.5px solid #E2DDD8;border-radius:8px;cursor:pointer;font-size:13px;color:#3A3D4A;">
-                <input type="radio" name="sp-report-reason" value="${reason}" ${i===0?'checked':''} style="accent-color:#1B4FA8;"/> ${reason}
+                <input type="radio" name="sp-report-reason" value="${reason}" ${i===0?'checked':''} style="accent-color:#111318;"/> ${reason}
               </label>`).join('')}
           </div>
           <textarea id="sp-report-notes" placeholder="Additional notes (optional)" style="width:100%;height:72px;padding:9px 12px;border:0.5px solid #E2DDD8;border-radius:8px;font-size:13px;font-family:inherit;color:#111318;resize:none;outline:none;"></textarea>`,
@@ -1645,7 +1645,7 @@ function render_supplier_portal(el) {
           <div class="nfp-section">
             <div class="nfp-label">Category</div>
             <div class="nfp-item ${_spNewsType==='all'?'active':''}" id="sp-nft-all" onclick="spNewsFilter('type','all')"><div class="nfp-item-dot" style="background:#D1D5DB;"></div>All types</div>
-            <div class="nfp-item ${_spNewsType==='bulletin'?'active':''}" id="sp-nft-bulletin" onclick="spNewsFilter('type','bulletin')"><div class="nfp-item-dot" style="background:#1B4FA8;"></div>Service Bulletin</div>
+            <div class="nfp-item ${_spNewsType==='bulletin'?'active':''}" id="sp-nft-bulletin" onclick="spNewsFilter('type','bulletin')"><div class="nfp-item-dot" style="background:#111318;"></div>Service Bulletin</div>
             <div class="nfp-item ${_spNewsType==='supplier'?'active':''}" id="sp-nft-supplier" onclick="spNewsFilter('type','supplier')"><div class="nfp-item-dot" style="background:#8B5CF6;"></div>Supplier / Platform</div>
             <div class="nfp-item ${_spNewsType==='safety'?'active':''}" id="sp-nft-safety" onclick="spNewsFilter('type','safety')"><div class="nfp-item-dot" style="background:#EF4444;"></div>Safety Alert</div>
           </div>
@@ -1665,7 +1665,7 @@ function render_supplier_portal(el) {
             </button>
             <span class="news-count-label" id="sp-news-count">${ALL_SP_NEWS.length} articles</span>
             <button onclick="spCmsGoList()" style="margin-left:auto;background:none;border:0.5px solid #E2DDD8;border-radius:7px;padding:0 11px;height:30px;font-size:12px;font-weight:600;color:#5A5F6E;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;white-space:nowrap;"><i class="ti ti-list" style="font-size:12px;"></i> Manage articles</button>
-            <button onclick="spCmsNewArticle()" style="background:#1B4FA8;border:none;border-radius:7px;padding:0 11px;height:30px;font-size:12px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;white-space:nowrap;"><i class="ti ti-plus" style="font-size:12px;"></i> New article</button>
+            <button onclick="spCmsNewArticle()" style="background:#111318;border:none;border-radius:7px;padding:0 11px;height:30px;font-size:12px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;white-space:nowrap;"><i class="ti ti-plus" style="font-size:12px;"></i> New article</button>
           </div>
           <div class="news-body">
             <div id="sp-news-grid"></div>
@@ -1715,7 +1715,7 @@ function render_supplier_portal(el) {
     if (titleEl) titleEl.textContent = 'Analytics';
 
     const contentEl = document.getElementById('sp-content');
-    const FLEET_COLORS = ['#1B4FA8','#185FA5','#3B6D11','#534AB7','#A32D2D'];
+    const FLEET_COLORS = ['#111318','#1A1A1A','#3B6D11','#534AB7','#A32D2D'];
 
     contentEl.innerHTML = `
       <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
@@ -1737,14 +1737,14 @@ function render_supplier_portal(el) {
   }
 
   function renderFleetPills() {
-    const FLEET_COLORS = ['#1B4FA8','#185FA5','#3B6D11','#534AB7','#A32D2D'];
+    const FLEET_COLORS = ['#111318','#1A1A1A','#3B6D11','#534AB7','#A32D2D'];
     const allActive = !_spFleetIds;
     return `<div class="an-loc-pill ${allActive?'active':''}" onclick="spAnToggleAllFleets()" style="${allActive?'background:#111318;color:#FFFFFF;border-color:#111318;':''}">
         <i class="ti ti-stack-2" style="font-size:11px;"></i> All fleets
       </div>
       ${_fleets.map((f, i) => {
         const active = !_spFleetIds || _spFleetIds.has(f.fleetId);
-        return `<div class="an-loc-pill ${active?'active':''}" onclick="spAnToggleFleet('${f.fleetId}')" style="${active?`background:#D6E4F7;color:#1B4FA8;border-color:#F5C97A;`:''}">
+        return `<div class="an-loc-pill ${active?'active':''}" onclick="spAnToggleFleet('${f.fleetId}')" style="${active?`background:#FEF3C7;color:#111318;border-color:#F5C97A;`:''}">
           <div class="an-loc-dot" style="background:${FLEET_COLORS[i%FLEET_COLORS.length]};"></div>
           ${f.fleetName.split(' ')[0]}
         </div>`;
@@ -1821,13 +1821,13 @@ function render_supplier_portal(el) {
       const isLast = i === trend.labels.length - 1;
       return `<div class="an-bar-col">
         <div class="an-bar-amt">${isLast || trend.labels.length <= 5 ? scaledValues[i] : ''}</div>
-        <div class="an-bar-seg" style="height:${h}px;background:${isLast?'#1B4FA8':'#E0DBD5'};"></div>
+        <div class="an-bar-seg" style="height:${h}px;background:${isLast?'#111318':'#E0DBD5'};"></div>
         <div class="an-bar-lbl">${lbl}</div>
       </div>`;
     }).join('');
 
     // By fleet breakdown
-    const FLEET_COLORS = ['#1B4FA8','#185FA5','#3B6D11','#534AB7','#A32D2D'];
+    const FLEET_COLORS = ['#111318','#1A1A1A','#3B6D11','#534AB7','#A32D2D'];
     const byFleetData = _fleets.map((f, i) => {
       const fReqs = allReqs.filter(r => r.fleetId === f.fleetId);
       return { name: f.fleetName, total: fReqs.length, quoted: fReqs.filter(r=>r.status==='quoted').length,
@@ -1846,8 +1846,8 @@ function render_supplier_portal(el) {
 
     // Content by type
     const contentByType = [
-      { type: 'bulletin', label: 'Service Bulletins', color: '#1B4FA8' },
-      { type: 'news', label: 'Product News', color: '#185FA5' },
+      { type: 'bulletin', label: 'Service Bulletins', color: '#111318' },
+      { type: 'news', label: 'Product News', color: '#1A1A1A' },
       { type: 'safety', label: 'Safety Notices', color: '#A32D2D' },
       { type: 'promo', label: 'Promotions', color: '#3B6D11' },
     ].map(t => ({ ...t, count: myArticles.filter(a => a.subtype === t.type || a.type === t.type).length }))
@@ -1873,14 +1873,14 @@ function render_supplier_portal(el) {
       {
         icon: pending > 3 ? 'ti-alert-triangle' : 'ti-circle-check',
         iconBg: pending > 3 ? '#FFF8EC' : '#F0FDF4',
-        iconColor: pending > 3 ? '#1B4FA8' : '#3B6D11',
+        iconColor: pending > 3 ? '#111318' : '#3B6D11',
         title: pending > 0 ? `${pending} request${pending !== 1 ? 's' : ''} awaiting response` : 'All requests responded to',
         body: pending > 0
           ? `${pending} price request${pending !== 1 ? 's are' : ' is'} awaiting your response. Fleets expect a reply within 24 hours — late responses can affect your responsiveness score.`
           : 'Great work — you\'re fully caught up on price requests. Your responsiveness score is strong.',
         tag: pending > 3 ? 'Action needed' : (pending > 0 ? 'In progress' : 'Up to date'),
         tagBg: pending > 3 ? '#FFF8EC' : (pending > 0 ? '#EDE9FE' : '#F0FDF4'),
-        tagColor: pending > 3 ? '#1B4FA8' : (pending > 0 ? '#534AB7' : '#3B6D11'),
+        tagColor: pending > 3 ? '#111318' : (pending > 0 ? '#534AB7' : '#3B6D11'),
       },
       {
         icon: 'ti-building-warehouse',
@@ -1950,7 +1950,7 @@ function render_supplier_portal(el) {
     <div class="an-grid-3" style="margin-bottom:14px;">
       <div class="an-card" style="grid-column:1/2;">
         <div class="an-card-hdr">
-          <div class="an-card-title"><i class="ti ti-trending-up" style="font-size:13px;color:#1B4FA8;"></i> Price request trend</div>
+          <div class="an-card-title"><i class="ti ti-trending-up" style="font-size:13px;color:#111318;"></i> Price request trend</div>
           <span class="an-card-sub">${!_spFleetIds ? 'All fleets' : filteredFleets.map(f=>f.fleetName.split(' ')[0]).join(', ')} · ${_spPeriod}</span>
         </div>
         <div class="an-card-body">
@@ -1969,11 +1969,11 @@ function render_supplier_portal(el) {
         <div class="an-card-body" style="padding:10px 16px;">
           <div class="an-wo-stat">
             <span style="font-size:12px;color:#5A5F6E;">Quoted</span>
-            <span class="an-wo-badge" style="background:#E1F5EE;color:#1B4FA8;">${quoted}</span>
+            <span class="an-wo-badge" style="background:#E1F5EE;color:#111318;">${quoted}</span>
           </div>
           <div class="an-wo-stat">
             <span style="font-size:12px;color:#5A5F6E;">Pending response</span>
-            <span class="an-wo-badge" style="background:#D6E4F7;color:#1B4FA8;">${pending}</span>
+            <span class="an-wo-badge" style="background:#FEF3C7;color:#111318;">${pending}</span>
           </div>
           <div class="an-wo-stat">
             <span style="font-size:12px;color:#5A5F6E;">More info needed</span>
@@ -1986,8 +1986,8 @@ function render_supplier_portal(el) {
           <div style="margin-top:12px;padding-top:10px;border-top:0.5px solid #F0ECE8;">
             <div style="height:10px;background:#F0ECE8;border-radius:5px;overflow:hidden;display:flex;">
               ${totalReqs > 0 ? `
-              <div style="width:${Math.round(quoted/totalReqs*100)}%;background:#1B4FA8;"></div>
-              <div style="width:${Math.round(pending/totalReqs*100)}%;background:#1B4FA8;"></div>
+              <div style="width:${Math.round(quoted/totalReqs*100)}%;background:#111318;"></div>
+              <div style="width:${Math.round(pending/totalReqs*100)}%;background:#111318;"></div>
               <div style="width:${Math.round(filteredReqs.filter(r=>r.status==='needs_info').length/totalReqs*100)}%;background:#534AB7;"></div>
               ` : ''}
             </div>
@@ -2073,7 +2073,7 @@ function render_supplier_portal(el) {
                 <div style="font-size:12px;font-weight:500;color:#111318;">${f.fleetName}</div>
                 <div style="font-size:10px;color:#9CA3AF;">${f.city} · ${fReqs.length} requests</div>
               </div>
-              <div style="font-size:11px;font-weight:600;color:#1B4FA8;">${fQuoted} quoted</div>
+              <div style="font-size:11px;font-weight:600;color:#111318;">${fQuoted} quoted</div>
             </div>`;
           }).join('')}
         </div>
@@ -2100,7 +2100,7 @@ function render_supplier_portal(el) {
       title: 'View as Fleet',
       body: `
         <div style="background:#F5F2EE;border-radius:8px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
-          <div style="width:36px;height:36px;border-radius:8px;background:#1B4FA8;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">${fleetName.split(' ').map(w=>w[0]).join('').slice(0,3)}</div>
+          <div style="width:36px;height:36px;border-radius:8px;background:#111318;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">${fleetName.split(' ').map(w=>w[0]).join('').slice(0,3)}</div>
           <div>
             <div style="font-size:13px;font-weight:600;color:#111318;">${fleetName}</div>
             <div style="font-size:11px;color:#7A7F8E;">Select a location and role to preview as</div>
@@ -2117,8 +2117,8 @@ function render_supplier_portal(el) {
             ${IMPERSONATION_ROLES.map(r => `<option value="${r.value}">${r.label}</option>`).join('')}
           </select>
         </div>
-        <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:10px 12px;margin-top:4px;">
-          <div style="font-size:12px;color:#1E40AF;line-height:1.5;"><i class="ti ti-info-circle" style="font-size:13px;margin-right:4px;"></i>You'll see the parts catalog and pricing exactly as this fleet user would — no data is modified.</div>
+        <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:10px 12px;margin-top:4px;">
+          <div style="font-size:12px;color:#111318;line-height:1.5;"><i class="ti ti-info-circle" style="font-size:13px;margin-right:4px;"></i>You'll see the parts catalog and pricing exactly as this fleet user would — no data is modified.</div>
         </div>`,
       actions: [
         { label: 'Cancel', onClick: () => Modal.close() },
@@ -2436,7 +2436,7 @@ function render_supplier_portal(el) {
     const contentEl = document.getElementById('sp-content');
 
     const STATUS_CFG = {
-      indexed:    { label:'Indexed',    color:'#1B4FA8', bg:'#D6E4F7', icon:'ti-circle-check' },
+      indexed:    { label:'Indexed',    color:'#111318', bg:'#FEF3C7', icon:'ti-circle-check' },
       processing: { label:'Processing', color:'#B45309', bg:'#FFFBEB', icon:'ti-loader-2' },
       queued:     { label:'Queued',     color:'#534AB7', bg:'#EEEDFE', icon:'ti-clock' },
       error:      { label:'Error',      color:'#B91C1C', bg:'#FEE2E2', icon:'ti-alert-circle' },
@@ -2453,9 +2453,9 @@ function render_supplier_portal(el) {
 .du-title-area { padding:0; }
 .du-body { flex:1; padding:20px 24px; overflow-y:auto; }
 .du-upload-zone { border:2px dashed #C8C3BC; border-radius:12px; background:#FAFAF8; padding:36px; text-align:center; cursor:pointer; transition:border-color .15s, background .15s; margin-bottom:20px; }
-.du-upload-zone:hover { border-color:#1B4FA8; background:#F0FAF3; }
+.du-upload-zone:hover { border-color:#111318; background:#F0FAF3; }
 .du-upload-icon { font-size:36px; color:#C8C3BC; margin-bottom:10px; }
-.du-upload-zone:hover .du-upload-icon { color:#1B4FA8; }
+.du-upload-zone:hover .du-upload-icon { color:#111318; }
 .du-upload-title { font-size:14px; font-weight:600; color:#3A3D4A; margin-bottom:4px; }
 .du-upload-sub { font-size:12px; color:#9CA3AF; }
 .du-table { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
@@ -2469,7 +2469,7 @@ function render_supplier_portal(el) {
 .du-doc-meta { font-size:11px; color:#9CA3AF; margin-top:2px; }
 .du-status-pill { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:700; border-radius:4px; padding:2px 8px; white-space:nowrap; }
 .du-progress-bar { height:4px; background:#F0ECE8; border-radius:2px; margin-top:4px; overflow:hidden; }
-.du-progress-fill { height:100%; border-radius:2px; background:#1B4FA8; animation:duPulse 1.4s ease-in-out infinite; }
+.du-progress-fill { height:100%; border-radius:2px; background:#111318; animation:duPulse 1.4s ease-in-out infinite; }
 @keyframes duPulse { 0%,100%{opacity:.6;} 50%{opacity:1;} }
 @keyframes spin { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
 </style>
@@ -2666,13 +2666,13 @@ function render_supplier_portal(el) {
 .pm-search-wrap { position:relative; }
 .pm-search-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:14px; pointer-events:none; }
 .pm-search-input { width:240px; height:34px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:9px; padding:0 10px 0 30px; font-size:12px; font-family:inherit; color:#111318; outline:none; }
-.pm-search-input:focus { border-color:#1B4FA8; background:#FFFFFF; }
+.pm-search-input:focus { border-color:#111318; background:#FFFFFF; }
 .pm-search-input::placeholder { color:#B0AAA3; }
 .pm-ftab { padding:4px 11px; border-radius:20px; font-size:11px; font-weight:500; cursor:pointer; border:0.5px solid transparent; color:#5A5F6E; white-space:nowrap; }
 .pm-ftab.active { background:#111318; color:#FFFFFF; }
 .pm-ftab:hover:not(.active) { background:#F5F2EE; }
 .pm-cat-select { height:34px; border:1px solid #E2DDD8; border-radius:9px; padding:0 10px; font-size:12px; font-family:inherit; color:#111318; outline:none; background:#FFFFFF; cursor:pointer; }
-.pm-cat-select:focus { border-color:#1B4FA8; }
+.pm-cat-select:focus { border-color:#111318; }
 .pm-table { background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:12px; overflow:hidden; }
 .pm-head { display:grid; grid-template-columns:110px 1fr 120px 1fr 100px; background:#FAFAF9; border-bottom:0.5px solid #E8E4DF; padding:0 14px; }
 .pm-row { display:grid; grid-template-columns:110px 1fr 120px 1fr 100px; padding:0 14px; border-bottom:0.5px solid #F5F2EE; align-items:center; }
@@ -2685,7 +2685,7 @@ function render_supplier_portal(el) {
 .pm-machine { font-size:11px; color:#7A7F8E; }
 .pm-cat-pill { display:inline-block; font-size:10px; font-weight:600; border-radius:10px; padding:2px 8px; }
 .pm-cat-Electrical { background:#EDE9FE; color:#5B21B6; }
-.pm-cat-Hydraulics  { background:#DBEAFE; color:#1D4ED8; }
+.pm-cat-Hydraulics  { background:#FEF3C7; color:#111318; }
 .pm-cat-Drive       { background:#FEF3C7; color:#92400E; }
 .pm-cat-Structure   { background:#D1FAE5; color:#065F46; }
 .pm-status-active   { font-size:10px; font-weight:600; color:#065F46; background:#D1FAE5; border-radius:10px; padding:2px 8px; display:inline-block; }
@@ -2913,8 +2913,8 @@ function render_supplier_portal(el) {
 /* Fleet picker button */
 .pc-fleet-btn { display:flex; align-items:center; gap:8px; height:36px; padding:0 10px 0 6px; background:#FFFFFF; border:1px solid #E2DDD8; border-radius:9px; cursor:pointer; font-family:inherit; transition:border-color .15s, background .15s; max-width:260px; }
 .pc-fleet-btn:hover { border-color:#9CA3AF; background:#FAFAF8; }
-.pc-fleet-btn.open { border-color:#1B4FA8; background:#F0FAF3; }
-.pc-fl-logo { width:24px; height:24px; border-radius:6px; background:#152B52; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:700; color:#8AAFD4; flex-shrink:0; }
+.pc-fleet-btn.open { border-color:#111318; background:#F0FAF3; }
+.pc-fl-logo { width:24px; height:24px; border-radius:6px; background:#0D0D0D; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:700; color:#F4A800; flex-shrink:0; }
 .pc-fl-label { display:flex; flex-direction:column; text-align:left; min-width:0; }
 .pc-fl-name { font-size:12px; font-weight:600; color:#111318; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px; }
 .pc-fl-sub { font-size:10px; color:#9CA3AF; }
@@ -2924,25 +2924,25 @@ function render_supplier_portal(el) {
 .pc-drop-search-wrap { padding:10px; border-bottom:0.5px solid #F0ECE8; flex-shrink:0; position:relative; }
 .pc-drop-search-icon { position:absolute; left:19px; top:50%; transform:translateY(-50%); font-size:14px; color:#9CA3AF; pointer-events:none; }
 .pc-drop-search { width:100%; height:34px; border:1px solid #E2DDD8; border-radius:8px; padding:0 10px 0 32px; font-size:13px; font-family:inherit; color:#111318; outline:none; background:#F5F2EE; }
-.pc-drop-search:focus { border-color:#1B4FA8; background:#FFFFFF; }
+.pc-drop-search:focus { border-color:#111318; background:#FFFFFF; }
 .pc-drop-list { overflow-y:auto; max-height:300px; padding:4px 0; }
 .pc-drop-item { display:flex; align-items:center; gap:9px; padding:8px 12px; cursor:pointer; }
 .pc-drop-item:hover { background:#F5F2EE; }
-.pc-drop-item.active { background:#D6E4F7; }
-.pc-drop-logo { width:26px; height:26px; border-radius:6px; background:#152B52; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:700; color:#8AAFD4; flex-shrink:0; }
-.pc-drop-item.active .pc-drop-logo { background:#1B4FA8; color:#FFFFFF; }
+.pc-drop-item.active { background:#FEF3C7; }
+.pc-drop-logo { width:26px; height:26px; border-radius:6px; background:#0D0D0D; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:700; color:#F4A800; flex-shrink:0; }
+.pc-drop-item.active .pc-drop-logo { background:#111318; color:#FFFFFF; }
 .pc-drop-name { font-size:12px; font-weight:600; color:#3A3D4A; flex:1; }
-.pc-drop-item.active .pc-drop-name { color:#1B4FA8; }
+.pc-drop-item.active .pc-drop-name { color:#111318; }
 .pc-drop-city { font-size:10px; color:#B0AAA3; }
 .pc-drop-count { font-size:10px; font-weight:700; background:#F0ECE8; color:#7A7F8E; border-radius:10px; padding:1px 6px; flex-shrink:0; }
-.pc-drop-item.active .pc-drop-count { background:#C5EAC3; color:#1B4FA8; }
+.pc-drop-item.active .pc-drop-count { background:#C5EAC3; color:#111318; }
 .pc-drop-empty { padding:16px; text-align:center; font-size:12px; color:#9CA3AF; }
 .pc-drop-divider { height:0.5px; background:#F0ECE8; margin:4px 0; }
 /* Search & filters */
 .pc-search-wrap { position:relative; }
 .pc-search-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:14px; pointer-events:none; }
 .pc-search-input { width:220px; height:34px; background:#F5F2EE; border:1.5px solid #E2DDD8; border-radius:9px; padding:0 10px 0 30px; font-size:12px; font-family:inherit; color:#111318; outline:none; }
-.pc-search-input:focus { border-color:#1B4FA8; background:#FFFFFF; }
+.pc-search-input:focus { border-color:#111318; background:#FFFFFF; }
 .pc-search-input::placeholder { color:#B0AAA3; }
 .pc-ftab { padding:4px 11px; border-radius:20px; font-size:11px; font-weight:500; cursor:pointer; border:0.5px solid transparent; color:#5A5F6E; white-space:nowrap; }
 .pc-ftab.active { background:#111318; color:#FFFFFF; }
@@ -2955,7 +2955,7 @@ function render_supplier_portal(el) {
 .pc-row:last-child { border-bottom:none; }
 .pc-row:hover { background:#FAFAF9; }
 .pc-td { padding:11px 7px; font-size:12px; color:#3A3D4A; }
-.pc-discount { font-size:10px; font-weight:700; color:#1B4FA8; background:#D6E4F7; border-radius:4px; padding:1px 5px; margin-left:4px; }
+.pc-discount { font-size:10px; font-weight:700; color:#111318; background:#FEF3C7; border-radius:4px; padding:1px 5px; margin-left:4px; }
 .pc-inherited-row { background:#FAFFF8; }
 .pc-inherited-tag { font-size:9px; color:#9CA3AF; font-style:italic; margin-top:1px; }
 /* Catalog list table */
@@ -2966,7 +2966,7 @@ function render_supplier_portal(el) {
 .pcl-row:hover { background:#FAFAF9; }
 .pcl-th { font-size:10px; font-weight:600; color:#9CA3AF; letter-spacing:.7px; text-transform:uppercase; padding:9px 7px; }
 .pcl-td { padding:12px 7px; font-size:12px; color:#3A3D4A; }
-.pcl-logo { width:24px; height:24px; border-radius:6px; background:#152B52; display:flex; align-items:center; justify-content:center; font-size:7px; font-weight:700; color:#8AAFD4; }
+.pcl-logo { width:24px; height:24px; border-radius:6px; background:#0D0D0D; display:flex; align-items:center; justify-content:center; font-size:7px; font-weight:700; color:#F4A800; }
 .pcl-name { font-size:13px; font-weight:600; color:#111318; }
 .pcl-desc { font-size:11px; color:#9CA3AF; margin-top:1px; }
 .pcl-badge-default { display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:600; color:#065F46; background:#D1FAE5; border-radius:10px; padding:1px 7px; }
@@ -3279,12 +3279,12 @@ function render_supplier_portal(el) {
     <div style="font-size:12px;font-weight:600;color:#3A3D4A;margin-bottom:8px;">Import prices (optional)</div>
     <div id="pcnc-import-area" style="border:1.5px dashed #D1D5DB;border-radius:9px;padding:18px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;"
       onclick="document.getElementById('pcnc-csv-input').click()"
-      ondragover="event.preventDefault();this.style.borderColor='#1B4FA8';this.style.background='#F0F5FF'"
+      ondragover="event.preventDefault();this.style.borderColor='#111318';this.style.background='#F0F5FF'"
       ondragleave="this.style.borderColor='#D1D5DB';this.style.background=''"
       ondrop="event.preventDefault();this.style.borderColor='#D1D5DB';this.style.background='';pcncHandleFile(event.dataTransfer.files[0])">
       <input type="file" id="pcnc-csv-input" accept=".csv" style="display:none" onchange="pcncHandleFile(this.files[0])"/>
       <i class="ti ti-table-import" style="font-size:20px;color:#9CA3AF;display:block;margin-bottom:6px;"></i>
-      <div id="pcnc-file-label" style="font-size:12px;color:#6B7280;">Drop a CSV here or <span style="color:#1B4FA8;font-weight:600;text-decoration:underline;">browse</span></div>
+      <div id="pcnc-file-label" style="font-size:12px;color:#6B7280;">Drop a CSV here or <span style="color:#111318;font-weight:600;text-decoration:underline;">browse</span></div>
       <div style="font-size:10px;color:#B0AAA3;margin-top:4px;">Columns: partNum, description, listPrice, contractPrice, effectiveDate</div>
     </div>
   </div>
@@ -3389,7 +3389,7 @@ function render_supplier_portal(el) {
     <input type="hidden" id="pc-f-desc" value="${a.desc}"/>
     <input type="hidden" id="pc-f-machine" value="${a.machine}"/>
     <input type="hidden" id="pc-f-cat" value="${a.category}"/>
-  <div id="pc-default-banner" style="display:none;background:#D6E4F7;border:0.5px solid #1B4FA840;border-radius:7px;padding:8px 11px;font-size:11px;color:#1B4FA8;"></div>
+  <div id="pc-default-banner" style="display:none;background:#FEF3C7;border:0.5px solid #11131840;border-radius:7px;padding:8px 11px;font-size:11px;color:#111318;"></div>
   <div style="display:grid;grid-template-columns:1fr 1fr 80px 80px;gap:12px;">
     <div class="modal-form-field"><label class="modal-form-label">List price (MSRP)</label><input id="pc-f-list" class="modal-form-input" type="number" step="0.01" min="0" placeholder="0.00" value="${a.listPrice}"/></div>
     <div class="modal-form-field"><label class="modal-form-label">Contract price <span class="lbl-opt">(${fleetLabel})</span></label><input id="pc-f-fleet" class="modal-form-input" type="number" step="0.01" min="0" placeholder="0.00" value="${a.contractPrice}"/></div>
@@ -3401,7 +3401,7 @@ function render_supplier_portal(el) {
     <div class="modal-form-field"><label class="modal-form-label">Expiry date <span class="lbl-opt">(optional)</span></label><input id="pc-f-exp" class="modal-form-input" type="date" value="${a.expiryDate||''}"/></div>
     <div class="modal-form-field"><label class="modal-form-label">Weight <span class="lbl-opt">(optional)</span></label><input id="pc-f-weight" class="modal-form-input" placeholder="e.g. 1.2 kg" value="${a.weight||''}"/></div>
   </div>
-  <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#3A3D4A;cursor:pointer;"><input type="checkbox" id="pc-f-active" ${a.active?'checked':''} style="accent-color:#1B4FA8;"/> Active</label>
+  <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#3A3D4A;cursor:pointer;"><input type="checkbox" id="pc-f-active" ${a.active?'checked':''} style="accent-color:#111318;"/> Active</label>
   </div>
 </div>`,
         actions: [
@@ -3532,7 +3532,7 @@ function render_supplier_portal(el) {
       <div class="pc-td" style="color:#7A7F8E;">${r.machine}</div>
       <div class="pc-td" style="font-weight:600;">$${r.listPrice.toFixed(2)}</div>
       <div class="pc-td">
-        <span style="font-size:13px;font-weight:700;color:#1B4FA8;">$${r.contractPrice.toFixed(2)}</span>
+        <span style="font-size:13px;font-weight:700;color:#111318;">$${r.contractPrice.toFixed(2)}</span>
         ${disc>0?`<span class="pc-discount">-${disc}%</span>`:''}
       </div>
       <div class="pc-td" style="color:#7A7F8E;font-size:11px;">${r.uom||'EA'}</div>
@@ -3589,9 +3589,9 @@ function render_supplier_portal(el) {
   // SVG thumbnails for each page type
   function exThumbSVG(type, label) {
     const svgs = {
-      cover:   `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#152B52"/><rect x="8" y="18" width="64" height="6" rx="1" fill="#fff" opacity=".9"/><rect x="8" y="28" width="48" height="3" rx="1" fill="#fff" opacity=".5"/><rect x="8" y="34" width="36" height="3" rx="1" fill="#fff" opacity=".5"/><rect x="8" y="60" width="30" height="2" rx="1" fill="#9DD89A" opacity=".8"/><rect x="8" y="65" width="22" height="2" rx="1" fill="#9DD89A" opacity=".6"/></svg>`,
+      cover:   `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#0D0D0D"/><rect x="8" y="18" width="64" height="6" rx="1" fill="#fff" opacity=".9"/><rect x="8" y="28" width="48" height="3" rx="1" fill="#fff" opacity=".5"/><rect x="8" y="34" width="36" height="3" rx="1" fill="#fff" opacity=".5"/><rect x="8" y="60" width="30" height="2" rx="1" fill="#9DD89A" opacity=".8"/><rect x="8" y="65" width="22" height="2" rx="1" fill="#9DD89A" opacity=".6"/></svg>`,
       toc:     `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#F5F2EE"/><rect x="8" y="8" width="40" height="4" rx="1" fill="#9CA3AF"/><rect x="8" y="18" width="32" height="2" rx="1" fill="#C8C3BC"/><line x1="40" y1="19" x2="62" y2="19" stroke="#E2DDD8" stroke-width="1" stroke-dasharray="2,2"/><rect x="62" y="18" width="8" height="2" rx="1" fill="#C8C3BC"/><rect x="12" y="24" width="26" height="2" rx="1" fill="#C8C3BC"/><line x1="38" y1="25" x2="62" y2="25" stroke="#E2DDD8" stroke-width="1" stroke-dasharray="2,2"/><rect x="62" y="24" width="8" height="2" rx="1" fill="#C8C3BC"/><rect x="8" y="32" width="34" height="2" rx="1" fill="#C8C3BC"/><line x1="42" y1="33" x2="62" y2="33" stroke="#E2DDD8" stroke-width="1" stroke-dasharray="2,2"/><rect x="62" y="32" width="8" height="2" rx="1" fill="#C8C3BC"/><rect x="12" y="38" width="28" height="2" rx="1" fill="#C8C3BC"/><line x1="40" y1="39" x2="62" y2="39" stroke="#E2DDD8" stroke-width="1" stroke-dasharray="2,2"/><rect x="62" y="38" width="8" height="2" rx="1" fill="#C8C3BC"/><rect x="8" y="46" width="36" height="2" rx="1" fill="#C8C3BC"/><line x1="44" y1="47" x2="62" y2="47" stroke="#E2DDD8" stroke-width="1" stroke-dasharray="2,2"/><rect x="62" y="46" width="8" height="2" rx="1" fill="#C8C3BC"/></svg>`,
-      diagram: `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#EFF6FF"/><rect x="28" y="12" width="24" height="14" rx="2" fill="#BFDBFE" stroke="#3B82F6" stroke-width="1"/><rect x="6" y="42" width="20" height="12" rx="2" fill="#BFDBFE" stroke="#3B82F6" stroke-width="1"/><rect x="30" y="42" width="20" height="12" rx="2" fill="#BFDBFE" stroke="#3B82F6" stroke-width="1"/><rect x="54" y="42" width="20" height="12" rx="2" fill="#DBEAFE" stroke="#3B82F6" stroke-width="0.5"/><line x1="40" y1="26" x2="16" y2="42" stroke="#3B82F6" stroke-width="1"/><line x1="40" y1="26" x2="40" y2="42" stroke="#3B82F6" stroke-width="1"/><line x1="40" y1="26" x2="64" y2="42" stroke="#3B82F6" stroke-width="1"/><rect x="14" y="62" width="12" height="10" rx="1" fill="#DBEAFE" stroke="#3B82F6" stroke-width="0.5"/><rect x="34" y="62" width="12" height="10" rx="1" fill="#DBEAFE" stroke="#3B82F6" stroke-width="0.5"/><line x1="16" y1="54" x2="20" y2="62" stroke="#93C5FD" stroke-width="0.8"/><line x1="40" y1="54" x2="40" y2="62" stroke="#93C5FD" stroke-width="0.8"/><circle cx="8" cy="48" r="3" fill="#1D4ED8" opacity=".7"/><circle cx="32" cy="48" r="3" fill="#1D4ED8" opacity=".7"/><circle cx="56" cy="48" r="3" fill="#1D4ED8" opacity=".5"/></svg>`,
+      diagram: `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#FFFBEB"/><rect x="28" y="12" width="24" height="14" rx="2" fill="#FDE68A" stroke="#666666" stroke-width="1"/><rect x="6" y="42" width="20" height="12" rx="2" fill="#FDE68A" stroke="#666666" stroke-width="1"/><rect x="30" y="42" width="20" height="12" rx="2" fill="#FDE68A" stroke="#666666" stroke-width="1"/><rect x="54" y="42" width="20" height="12" rx="2" fill="#FEF3C7" stroke="#666666" stroke-width="0.5"/><line x1="40" y1="26" x2="16" y2="42" stroke="#666666" stroke-width="1"/><line x1="40" y1="26" x2="40" y2="42" stroke="#666666" stroke-width="1"/><line x1="40" y1="26" x2="64" y2="42" stroke="#666666" stroke-width="1"/><rect x="14" y="62" width="12" height="10" rx="1" fill="#FEF3C7" stroke="#666666" stroke-width="0.5"/><rect x="34" y="62" width="12" height="10" rx="1" fill="#FEF3C7" stroke="#666666" stroke-width="0.5"/><line x1="16" y1="54" x2="20" y2="62" stroke="#F4D577" stroke-width="0.8"/><line x1="40" y1="54" x2="40" y2="62" stroke="#F4D577" stroke-width="0.8"/><circle cx="8" cy="48" r="3" fill="#111318" opacity=".7"/><circle cx="32" cy="48" r="3" fill="#111318" opacity=".7"/><circle cx="56" cy="48" r="3" fill="#111318" opacity=".5"/></svg>`,
       bom:     `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#F0FDF4"/><rect x="4" y="8" width="72" height="7" rx="1" fill="#86EFAC"/><rect x="4" y="8" width="12" height="7" rx="1" fill="#4ADE80"/><rect x="4" y="17" width="12" height="6" rx="0" fill="#DCFCE7"/><rect x="4" y="17" width="72" height="6" rx="0" fill="none" stroke="#BBF7D0" stroke-width="0.5"/><rect x="4" y="23" width="12" height="6" rx="0" fill="#F0FDF4"/><rect x="4" y="23" width="72" height="6" rx="0" fill="none" stroke="#BBF7D0" stroke-width="0.5"/><rect x="4" y="29" width="12" height="6" rx="0" fill="#DCFCE7"/><rect x="4" y="29" width="72" height="6" rx="0" fill="none" stroke="#BBF7D0" stroke-width="0.5"/><rect x="4" y="35" width="12" height="6" rx="0" fill="#F0FDF4"/><rect x="4" y="35" width="72" height="6" rx="0" fill="none" stroke="#BBF7D0" stroke-width="0.5"/><rect x="4" y="41" width="12" height="6" rx="0" fill="#DCFCE7"/><rect x="4" y="41" width="72" height="6" rx="0" fill="none" stroke="#BBF7D0" stroke-width="0.5"/><rect x="4" y="47" width="12" height="6" rx="0" fill="#F0FDF4"/><rect x="4" y="47" width="72" height="6" rx="0" fill="none" stroke="#BBF7D0" stroke-width="0.5"/><rect x="16" y="8" width="0.5" height="45" fill="#86EFAC"/><rect x="40" y="8" width="0.5" height="45" fill="#86EFAC"/><rect x="58" y="8" width="0.5" height="45" fill="#86EFAC"/></svg>`,
       text:    `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#FAFAF8"/><rect x="8" y="8" width="52" height="3" rx="1" fill="#9CA3AF"/><rect x="8" y="15" width="64" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="20" width="60" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="25" width="56" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="30" width="64" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="35" width="40" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="43" width="64" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="48" width="58" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="53" width="64" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="58" width="44" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="66" width="64" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="71" width="62" height="2" rx="1" fill="#E2DDD8"/><rect x="8" y="76" width="30" height="2" rx="1" fill="#E2DDD8"/></svg>`,
       ignore:  `<svg viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg"><rect width="80" height="100" fill="#F9FAFB"/><rect x="8" y="8" width="64" height="3" rx="1" fill="#E5E7EB"/><rect x="8" y="15" width="52" height="2" rx="1" fill="#F3F4F6"/><rect x="8" y="20" width="60" height="2" rx="1" fill="#F3F4F6"/><rect x="8" y="25" width="44" height="2" rx="1" fill="#F3F4F6"/><line x1="4" y1="4" x2="76" y2="96" stroke="#FCA5A5" stroke-width="1.5" opacity=".4"/></svg>`,
@@ -3670,9 +3670,9 @@ function render_supplier_portal(el) {
 .ex-job-list { flex:1; overflow-y:auto; padding:8px 0; }
 .ex-job-item { padding:10px 16px; cursor:pointer; border-left:2px solid transparent; transition:background .12s; }
 .ex-job-item:hover { background:#FAFAF8; }
-.ex-job-item.active { background:#D6E4F7; border-left-color:#1B4FA8; }
+.ex-job-item.active { background:#FEF3C7; border-left-color:#111318; }
 .ex-job-name { font-size:12px; font-weight:600; color:#111318; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.ex-job-item.active .ex-job-name { color:#1B4FA8; }
+.ex-job-item.active .ex-job-name { color:#111318; }
 .ex-job-meta { font-size:10px; color:#9CA3AF; }
 .ex-job-status { display:inline-flex; align-items:center; gap:3px; font-size:10px; font-weight:700; border-radius:4px; padding:1px 6px; margin-top:3px; }
 .ex-main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
@@ -3695,7 +3695,7 @@ function render_supplier_portal(el) {
 .ex-class-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; }
 .ex-page-card { border:2px solid #E8E4DF; border-radius:10px; overflow:hidden; cursor:pointer; transition:border-color .15s; }
 .ex-page-card:hover { border-color:#9CA3AF; }
-.ex-page-card.type-diagram { border-color:#3B82F6; }
+.ex-page-card.type-diagram { border-color:#666666; }
 .ex-page-card.type-bom     { border-color:#10B981; }
 .ex-page-card.type-ignore  { border-color:#E2DDD8; opacity:.6; }
 .ex-page-thumb { background:#F5F2EE; height:100px; display:flex; align-items:center; justify-content:center; font-size:36px; }
@@ -3704,8 +3704,8 @@ function render_supplier_portal(el) {
 .ex-page-label { font-size:11px; font-weight:600; color:#111318; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .ex-page-type-btns { display:flex; gap:3px; flex-wrap:wrap; }
 .ex-ptype-btn { font-size:9px; font-weight:700; padding:2px 6px; border-radius:4px; cursor:pointer; border:0.5px solid transparent; }
-.ex-ptype-btn.diagram { background:#DBEAFE; color:#1D4ED8; }
-.ex-ptype-btn.bom     { background:#DBEAFE; color:#1B4FA8; }
+.ex-ptype-btn.diagram { background:#FEF3C7; color:#111318; }
+.ex-ptype-btn.bom     { background:#FEF3C7; color:#111318; }
 .ex-ptype-btn.other   { background:#F5F2EE; color:#5A5F6E; }
 .ex-ptype-btn.ignore  { background:#FEE2E2; color:#B91C1C; }
 .ex-ptype-btn.selected { opacity:1; box-shadow:0 0 0 1.5px currentColor; }
@@ -3721,7 +3721,7 @@ function render_supplier_portal(el) {
 .ex-bom-row.has-issue { background:#FFFBF2; }
 .ex-bom-td { padding:10px 6px; font-size:12px; color:#3A3D4A; }
 .ex-bom-input { width:100%; height:28px; border:0.5px solid #E2DDD8; border-radius:5px; padding:0 7px; font-size:12px; font-family:inherit; color:#111318; outline:none; background:#FAFAF9; }
-.ex-bom-input:focus { border-color:#1B4FA8; background:#FFFFFF; }
+.ex-bom-input:focus { border-color:#111318; background:#FFFFFF; }
 .ex-issue-tag { display:inline-flex; align-items:center; gap:3px; font-size:9px; font-weight:700; padding:1px 5px; border-radius:4px; }
 .ex-conf-bar { height:4px; background:#F0ECE8; border-radius:2px; margin-top:3px; overflow:hidden; }
 .ex-conf-fill { height:100%; border-radius:2px; }
@@ -3734,7 +3734,7 @@ function render_supplier_portal(el) {
     </div>
     <div class="ex-job-list">
       ${_exJobs.map(j => {
-        const S = { classified:{label:'Ready',bg:'#D6E4F7',color:'#1B4FA8'}, extracting:{label:'Extracting',bg:'#FFFBEB',color:'#B45309'}, classifying:{label:'Classifying',bg:'#EEEDFE',color:'#534AB7'}, queued:{label:'Queued',bg:'#F5F2EE',color:'#5A5F6E'} };
+        const S = { classified:{label:'Ready',bg:'#FEF3C7',color:'#111318'}, extracting:{label:'Extracting',bg:'#FFFBEB',color:'#B45309'}, classifying:{label:'Classifying',bg:'#EEEDFE',color:'#534AB7'}, queued:{label:'Queued',bg:'#F5F2EE',color:'#5A5F6E'} };
         const s = S[j.status] || S.queued;
         return `<div class="ex-job-item ${_exActiveJobId===j.id?'active':''}" onclick="exSelectJob('${j.id}')">
           <div class="ex-job-name" title="${j.name}">${j.name}</div>
@@ -3819,7 +3819,7 @@ function render_supplier_portal(el) {
 
   function exRenderQueue(body) {
     const S = {
-      classified: { label:'Ready',        bg:'#D6E4F7', color:'#1B4FA8' },
+      classified: { label:'Ready',        bg:'#FEF3C7', color:'#111318' },
       extracting: { label:'Extracting…',  bg:'#FFFBEB', color:'#B45309' },
       classifying:{ label:'Classifying…', bg:'#EEEDFE', color:'#534AB7' },
       queued:     { label:'Queued',        bg:'#F5F2EE', color:'#5A5F6E' },
@@ -3839,18 +3839,18 @@ ${_exJobs.map(j => {
     const pct = steps[sd.key] || 0;
     const done = pct >= 1;
     const active = !done && pct > 0;
-    const dotColor = done ? '#1B4FA8' : active ? '#B45309' : '#E2DDD8';
-    const lineColor = done ? '#1B4FA8' : '#E2DDD8';
+    const dotColor = done ? '#111318' : active ? '#B45309' : '#E2DDD8';
+    const lineColor = done ? '#111318' : '#E2DDD8';
     return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;min-width:52px;">
-      <div style="width:28px;height:28px;border-radius:50%;background:${done?'#1B4FA8':active?'#FFFBEB':'#F5F2EE'};border:2px solid ${dotColor};display:flex;align-items:center;justify-content:center;">
+      <div style="width:28px;height:28px;border-radius:50%;background:${done?'#111318':active?'#FFFBEB':'#F5F2EE'};border:2px solid ${dotColor};display:flex;align-items:center;justify-content:center;">
         <i class="ti ${sd.icon}" style="font-size:13px;color:${done?'#0A1628':active?'#B45309':'#C8C3BC'};"></i>
       </div>
       ${active ? `<div style="height:3px;width:28px;background:#F0ECE8;border-radius:2px;overflow:hidden;"><div style="height:100%;width:${Math.round(pct*100)}%;background:#B45309;"></div></div>` : ''}
-      <div style="font-size:9px;font-weight:${done||active?'600':'400'};color:${done?'#1B4FA8':active?'#B45309':'#B0AAA3'};">${sd.label}</div>
+      <div style="font-size:9px;font-weight:${done||active?'600':'400'};color:${done?'#111318':active?'#B45309':'#B0AAA3'};">${sd.label}</div>
     </div>
-    ${si < STEP_DEFS.length-1 ? `<div style="flex:1;height:2px;background:${done?'#1B4FA8':'#E2DDD8'};margin-top:13px;border-radius:1px;"></div>` : ''}`;
+    ${si < STEP_DEFS.length-1 ? `<div style="flex:1;height:2px;background:${done?'#111318':'#E2DDD8'};margin-top:13px;border-radius:1px;"></div>` : ''}`;
   }).join('');
-  return `<div class="ex-queue-row" style="${_exActiveJobId===j.id?'border-color:#1B4FA8;background:#FAFFF8;':''}">
+  return `<div class="ex-queue-row" style="${_exActiveJobId===j.id?'border-color:#111318;background:#FAFFF8;':''}">
     <div class="ex-q-icon"><i class="ti ti-file-type-pdf" style="color:#B91C1C;font-size:22px;"></i></div>
     <div class="ex-q-body">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
@@ -3903,10 +3903,10 @@ ${_exJobs.map(j => {
     });
 
     const legendTypes = [
-      { t:'cover',   label:'Cover',   bg:'#D6E4F7', color:'#1B4FA8' },
+      { t:'cover',   label:'Cover',   bg:'#FEF3C7', color:'#111318' },
       { t:'toc',     label:'TOC',     bg:'#F0ECE8', color:'#5A5F6E' },
-      { t:'diagram', label:'Diagram', bg:'#DBEAFE', color:'#1D4ED8' },
-      { t:'bom',     label:'BoM',     bg:'#DBEAFE', color:'#1B4FA8' },
+      { t:'diagram', label:'Diagram', bg:'#FEF3C7', color:'#111318' },
+      { t:'bom',     label:'BoM',     bg:'#FEF3C7', color:'#111318' },
       { t:'text',    label:'Text',    bg:'#F5F2EE', color:'#5A5F6E' },
       { t:'ignore',  label:'Ignore',  bg:'#FEE2E2', color:'#B91C1C' },
     ];
@@ -3928,8 +3928,8 @@ ${isClassifying ? `
     <div style="font-size:14px;font-weight:700;color:#111318;">Page classification — ${job.name}</div>
     <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">${isClassifying ? `${donePagesCount} of ${pages.length} sample pages classified so far` : `${pages.length} pages classified — review and correct before extraction`}</div>
     <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
-      <span style="font-size:11px;color:#1D4ED8;font-weight:600;"><i class="ti ti-stack" style="font-size:12px;margin-right:3px;"></i>${typeCounts.diagram} diagrams</span>
-      <span style="font-size:11px;color:#1B4FA8;font-weight:600;"><i class="ti ti-table" style="font-size:12px;margin-right:3px;"></i>${typeCounts.bom} BoMs</span>
+      <span style="font-size:11px;color:#111318;font-weight:600;"><i class="ti ti-stack" style="font-size:12px;margin-right:3px;"></i>${typeCounts.diagram} diagrams</span>
+      <span style="font-size:11px;color:#111318;font-weight:600;"><i class="ti ti-table" style="font-size:12px;margin-right:3px;"></i>${typeCounts.bom} BoMs</span>
       <span style="font-size:11px;color:#5A5F6E;font-weight:600;"><i class="ti ti-file-text" style="font-size:12px;margin-right:3px;"></i>${typeCounts.text + typeCounts.cover + typeCounts.toc} other</span>
       <span style="font-size:11px;color:#B91C1C;font-weight:600;"><i class="ti ti-eye-off" style="font-size:12px;margin-right:3px;"></i>${typeCounts.ignore} ignored</span>
     </div>
@@ -3963,9 +3963,9 @@ ${sections.map(sec => `
         </div>`;
       }
       const curType = p.type;
-      const typeColors = { cover:'#1B4FA8', toc:'#5A5F6E', diagram:'#1D4ED8', bom:'#1B4FA8', text:'#5A5F6E', ignore:'#B91C1C' };
-      const typeBgs   = { cover:'#D6E4F7', toc:'#F0ECE8', diagram:'#DBEAFE', bom:'#DBEAFE', text:'#F5F2EE', ignore:'#FEE2E2' };
-      const borderCol = { diagram:'#3B82F6', bom:'#10B981', ignore:'#E2DDD8', cover:'#10B981', toc:'#C8C3BC', text:'#E2DDD8' };
+      const typeColors = { cover:'#111318', toc:'#5A5F6E', diagram:'#111318', bom:'#111318', text:'#5A5F6E', ignore:'#B91C1C' };
+      const typeBgs   = { cover:'#FEF3C7', toc:'#F0ECE8', diagram:'#FEF3C7', bom:'#FEF3C7', text:'#F5F2EE', ignore:'#FEE2E2' };
+      const borderCol = { diagram:'#666666', bom:'#10B981', ignore:'#E2DDD8', cover:'#10B981', toc:'#C8C3BC', text:'#E2DDD8' };
       const confColor = p.conf > 0.9 ? '#10B981' : p.conf > 0.75 ? '#F59E0B' : '#EF4444';
       return `<div class="ex-page-card" style="border-color:${borderCol[curType]||'#E2DDD8'};${curType==='ignore'?'opacity:.55;':''}" id="ex-pc-${p._idx}">
         <div class="ex-page-thumb" style="background:transparent;height:110px;padding:4px;overflow:hidden;">${exThumbSVG(curType)}</div>
@@ -4065,7 +4065,7 @@ ${isExtracting ? `
     <div style="font-size:10px;color:#9CA3AF;margin-top:2px;">Rows</div>
   </div>
   <div style="background:#F0FDF4;border:0.5px solid #86EFAC;border-radius:8px;padding:10px 16px;text-align:center;min-width:80px;">
-    <div style="font-size:20px;font-weight:700;color:#1B4FA8;">${cleanCount}</div>
+    <div style="font-size:20px;font-weight:700;color:#111318;">${cleanCount}</div>
     <div style="font-size:10px;color:#059669;margin-top:2px;">Clean</div>
   </div>
   <div style="background:#FFFBF2;border:0.5px solid #F5C97A;border-radius:8px;padding:10px 16px;text-align:center;min-width:80px;">
@@ -4076,9 +4076,9 @@ ${isExtracting ? `
     <div style="font-size:20px;font-weight:700;color:#111318;">${avgConf}%</div>
     <div style="font-size:10px;color:#9CA3AF;margin-top:2px;">Avg conf</div>
   </div>
-  <div style="background:#EFF6FF;border:0.5px solid #BFDBFE;border-radius:8px;padding:10px 16px;text-align:center;min-width:80px;">
-    <div style="font-size:20px;font-weight:700;color:#1D4ED8;">${catalogCount}</div>
-    <div style="font-size:10px;color:#3B82F6;margin-top:2px;">In catalog</div>
+  <div style="background:#FFFBEB;border:0.5px solid #FDE68A;border-radius:8px;padding:10px 16px;text-align:center;min-width:80px;">
+    <div style="font-size:20px;font-weight:700;color:#111318;">${catalogCount}</div>
+    <div style="font-size:10px;color:#666666;margin-top:2px;">In catalog</div>
   </div>
 </div>
 <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
@@ -4107,7 +4107,7 @@ groupKeys.map(pg => {
   return `
 <div style="margin-bottom:20px;">
   <div style="font-size:11px;font-weight:700;color:#5A5F6E;letter-spacing:.8px;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
-    <span style="background:#F0FDF4;border:0.5px solid #86EFAC;border-radius:5px;padding:2px 9px;font-size:10px;color:#1B4FA8;">Pg ${pg}</span>
+    <span style="background:#F0FDF4;border:0.5px solid #86EFAC;border-radius:5px;padding:2px 9px;font-size:10px;color:#111318;">Pg ${pg}</span>
     <span style="text-transform:uppercase;letter-spacing:1px;">${pgLabel.slice(3)}</span>
     <span style="font-size:10px;font-weight:400;color:#9CA3AF;">${pgRows.length} rows</span>
   </div>
@@ -4128,7 +4128,7 @@ groupKeys.map(pg => {
       const hasIssue = r.issues.length > 0;
       return `<div class="ex-bom-row ${hasIssue?'has-issue':''}" style="grid-template-columns:28px 32px 110px 1fr 50px 52px 76px 90px 32px;" id="ex-bom-r${r.row}">
         <div class="ex-bom-td" style="color:#9CA3AF;font-size:11px;">${r.row}</div>
-        <div class="ex-bom-td" style="font-size:11px;font-weight:700;color:#3B82F6;font-family:monospace;">${r.callout}</div>
+        <div class="ex-bom-td" style="font-size:11px;font-weight:700;color:#666666;font-family:monospace;">${r.callout}</div>
         <div class="ex-bom-td"><input class="ex-bom-input" value="${r.partNum}" placeholder="—" style="font-family:monospace;font-size:11px;font-weight:700;${!r.partNum?'border-color:#FCA5A5;background:#FFF5F5;':''}"/></div>
         <div class="ex-bom-td"><input class="ex-bom-input" value="${r.desc}" style="width:100%;"/></div>
         <div class="ex-bom-td"><input class="ex-bom-input" value="${r.qty}" style="width:40px;text-align:center;"/></div>
@@ -4138,7 +4138,7 @@ groupKeys.map(pg => {
           <div class="ex-conf-bar"><div class="ex-conf-fill" style="width:${Math.round(r.conf*100)}%;background:${confColor};"></div></div>
         </div>
         <div class="ex-bom-td" style="display:flex;flex-wrap:wrap;gap:2px;align-items:center;">
-          ${r.inCatalog ? `<span class="ex-issue-tag" style="background:#EFF6FF;color:#1D4ED8;" title="Part already in catalog"><i class="ti ti-check" style="font-size:9px;"></i> Catalog</span>` : ''}
+          ${r.inCatalog ? `<span class="ex-issue-tag" style="background:#FFFBEB;color:#111318;" title="Part already in catalog"><i class="ti ti-check" style="font-size:9px;"></i> Catalog</span>` : ''}
           ${r.issues.includes('no_partnum') ? `<span class="ex-issue-tag" style="background:#FEE2E2;color:#B91C1C;">No P/N</span>` : ''}
           ${r.issues.includes('low_conf')   ? `<span class="ex-issue-tag" style="background:#FFFBEB;color:#B45309;">Low conf</span>` : ''}
           ${!hasIssue && !r.inCatalog ? `<span style="font-size:10px;color:#10B981;font-weight:600;">✓ OK</span>` : ''}
@@ -4180,8 +4180,8 @@ groupKeys.map(pg => {
   let _ordMsgSubView = 'orders'; // 'orders' | 'messages'
 
   const ORD_STATUS = {
-    submitted:   { label: 'Submitted',   bg: '#DBEAFE', color: '#1D4ED8' },
-    delivered:   { label: 'Delivered',   bg: '#DBEAFE', color: '#1B4FA8' },
+    submitted:   { label: 'Submitted',   bg: '#FEF3C7', color: '#111318' },
+    delivered:   { label: 'Delivered',   bg: '#FEF3C7', color: '#111318' },
     backordered: { label: 'Backordered', bg: '#FEF3C7', color: '#92400E' },
     review:      { label: 'In review',   bg: '#EDE9FE', color: '#5B21B6' },
     local:       { label: 'Draft',       bg: '#F0ECE8', color: '#5A5F6E' },
@@ -4238,20 +4238,20 @@ groupKeys.map(pg => {
 .sp-ord-tabs { display:flex; align-items:center; background:#FFFFFF; border-bottom:1px solid #E8E4DF; padding:0 28px; flex-shrink:0; }
 .sp-ord-tab { padding:13px 16px; font-size:13px; font-weight:500; color:#7A7F8E; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; display:flex; align-items:center; gap:6px; }
 .sp-ord-tab:hover { color:#3A3D4A; }
-.sp-ord-tab.active { color:#111318; font-weight:600; border-bottom-color:#1B4FA8; }
+.sp-ord-tab.active { color:#111318; font-weight:600; border-bottom-color:#111318; }
 .sp-ord-tab-badge { font-size:10px; font-weight:700; border-radius:999px; padding:1px 7px; background:#F0ECE8; color:#5A5F6E; }
 .sp-ord-tab-new { margin-left:auto; }
 .sp-ord-filter-bar { background:#FAFAF8; border-bottom:0.5px solid #E8E4DF; padding:10px 28px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; flex-shrink:0; }
 .sp-ord-pills { display:flex; gap:4px; }
 .sp-ord-pill { padding:5px 12px; border-radius:999px; font-size:12px; font-weight:500; cursor:pointer; border:1px solid #E2DDD8; background:#FFFFFF; color:#5A5F6E; user-select:none; white-space:nowrap; }
-.sp-ord-pill.active { background:#152B52; color:#FFFFFF; border-color:#152B52; }
+.sp-ord-pill.active { background:#0D0D0D; color:#FFFFFF; border-color:#0D0D0D; }
 .sp-ord-pill:hover:not(.active) { border-color:#C8C3BC; }
 .sp-ord-divider { width:1px; height:24px; background:#E2DDD8; flex-shrink:0; }
 .sp-ord-select { height:34px; background:#FFFFFF; border:1px solid #E2DDD8; border-radius:7px; padding:0 10px; font-size:12px; font-family:inherit; color:#3A3D4A; outline:none; cursor:pointer; }
 .sp-ord-search-wrap { position:relative; }
 .sp-ord-search-icon { position:absolute; left:9px; top:50%; transform:translateY(-50%); color:#B0AAA3; font-size:13px; pointer-events:none; }
 .sp-ord-search { height:34px; background:#FFFFFF; border:1px solid #E2DDD8; border-radius:7px; padding:0 10px 0 30px; font-size:12px; font-family:inherit; color:#111318; outline:none; width:190px; }
-.sp-ord-search:focus { border-color:#1B4FA8; }
+.sp-ord-search:focus { border-color:#111318; }
 .sp-ord-count { margin-left:auto; font-size:12px; color:#B0AAA3; white-space:nowrap; }
 .sp-ord-content { flex:1; overflow-y:auto; }
 .sp-ord-table-wrap { padding:20px 28px 40px; }
@@ -4283,7 +4283,7 @@ groupKeys.map(pg => {
     window.spOrdOpenMessages = function() {
       const msgs = _ordMsgList();
       const fleetOpts = _fleets.map(f => `<label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;">
-        <input type="checkbox" class="sp-ord-fleet-cb" value="${f.fleetId}" checked style="accent-color:#1B4FA8;width:12px;height:12px;">
+        <input type="checkbox" class="sp-ord-fleet-cb" value="${f.fleetId}" checked style="accent-color:#111318;width:12px;height:12px;">
         <span style="font-size:11px;color:#5A5F6E;">${f.fleetName}</span>
       </label>`).join('');
       const listHtml = msgs.length
@@ -4304,12 +4304,12 @@ groupKeys.map(pg => {
               </select>
               ${_fleets.length > 1 ? `<div style="border:0.5px solid #E2DDD8;border-radius:8px;overflow:hidden;">
                 <label style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#F5F2EE;border-bottom:0.5px solid #E2DDD8;cursor:pointer;">
-                  <input type="checkbox" id="sp-ord-all-fleets" checked onchange="document.querySelectorAll('.sp-ord-fleet-cb').forEach(cb=>cb.checked=this.checked)" style="accent-color:#1B4FA8;width:12px;height:12px;">
+                  <input type="checkbox" id="sp-ord-all-fleets" checked onchange="document.querySelectorAll('.sp-ord-fleet-cb').forEach(cb=>cb.checked=this.checked)" style="accent-color:#111318;width:12px;height:12px;">
                   <span style="font-size:11px;font-weight:600;color:#111318;">All fleets</span>
                 </label>
                 <div style="padding:6px 10px;">${fleetOpts}</div>
               </div>` : ''}
-              <button onclick="spOrdSaveMsg()" style="height:32px;background:#1B4FA8;border:none;border-radius:6px;font-size:12px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;">Add message</button>
+              <button onclick="spOrdSaveMsg()" style="height:32px;background:#111318;border:none;border-radius:6px;font-size:12px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;">Add message</button>
             </div>
           </div>
           <div>
@@ -4494,7 +4494,7 @@ groupKeys.map(pg => {
 
   function _buildOrdMsgPanel(msgs) {
     const fleetOpts = _fleets.map(f => `<label style="display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;">
-      <input type="checkbox" class="sp-ord-fleet-cb" value="${f.fleetId}" checked style="accent-color:#1B4FA8;width:12px;height:12px;">
+      <input type="checkbox" class="sp-ord-fleet-cb" value="${f.fleetId}" checked style="accent-color:#111318;width:12px;height:12px;">
       <span style="font-size:11px;color:#5A5F6E;">${f.fleetName}</span>
     </label>`).join('');
     const listHtml = msgs.length
@@ -4513,12 +4513,12 @@ groupKeys.map(pg => {
           </select>
           ${_fleets.length > 1 ? `<div style="border:0.5px solid #E2DDD8;border-radius:8px;overflow:hidden;">
             <label style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#F5F2EE;border-bottom:0.5px solid #E2DDD8;cursor:pointer;">
-              <input type="checkbox" id="sp-ord-all-fleets" checked onchange="document.querySelectorAll('.sp-ord-fleet-cb').forEach(cb=>cb.checked=this.checked)" style="accent-color:#1B4FA8;width:12px;height:12px;">
+              <input type="checkbox" id="sp-ord-all-fleets" checked onchange="document.querySelectorAll('.sp-ord-fleet-cb').forEach(cb=>cb.checked=this.checked)" style="accent-color:#111318;width:12px;height:12px;">
               <span style="font-size:11px;font-weight:600;color:#111318;">All fleets</span>
             </label>
             <div style="padding:6px 10px;">${fleetOpts}</div>
           </div>` : ''}
-          <button onclick="spOrdSaveMsg()" style="height:32px;background:#1B4FA8;border:none;border-radius:6px;font-size:12px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;">Add message</button>
+          <button onclick="spOrdSaveMsg()" style="height:32px;background:#111318;border:none;border-radius:6px;font-size:12px;font-weight:600;color:#fff;font-family:inherit;cursor:pointer;">Add message</button>
         </div>
       </div>
       <div>
@@ -4609,7 +4609,7 @@ groupKeys.map(pg => {
 .cat-view-btn{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:inherit;color:#5A5F6E;background:transparent;}
 .cat-view-btn.active{background:#fff;color:#111318;box-shadow:0 1px 3px rgba(0,0,0,.1);}
 .cat-ftab{height:28px;padding:0 10px;border-radius:7px;border:0.5px solid transparent;background:transparent;font-size:12px;font-weight:500;font-family:inherit;color:#5A5F6E;cursor:pointer;white-space:nowrap;}
-.cat-ftab.active{background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE;font-weight:600;}
+.cat-ftab.active{background:#FFFBEB;color:#111318;border-color:#FDE68A;font-weight:600;}
 .cat-ftab:hover:not(.active){background:#F5F2EE;}
 .cat-body{flex:1;display:flex;min-height:0;overflow:hidden;}
 .cat-list{flex:1;overflow-y:auto;padding:16px 20px;}
@@ -4621,7 +4621,7 @@ groupKeys.map(pg => {
 .cat-row{display:grid;grid-template-columns:130px 1fr 160px 64px 72px 90px 52px;padding:0 14px;border-bottom:0.5px solid #F5F2EE;align-items:center;cursor:pointer;transition:background .1s;}
 .cat-row:last-child{border-bottom:none;}
 .cat-row:hover{background:#FAFAF9;}
-.cat-row.open{background:#EFF6FF;}
+.cat-row.open{background:#FFFBEB;}
 .cat-td{padding:10px 6px;font-size:12px;color:#3A3D4A;}
 .cat-img-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
 .cat-detail-panel{width:420px;flex-shrink:0;border-left:0.5px solid #E8E4DF;background:#fff;display:flex;flex-direction:column;overflow:hidden;animation:slideInRight .15s ease;}
@@ -4629,20 +4629,20 @@ groupKeys.map(pg => {
 .cat-dp-header{padding:14px 18px 12px;border-bottom:0.5px solid #F0ECE8;flex-shrink:0;position:relative;}
 .cat-dp-nav{display:flex;gap:0;border-bottom:0.5px solid #E8E4DF;flex-shrink:0;overflow-x:auto;}
 .cat-dp-nav-item{padding:9px 14px;font-size:12px;font-weight:500;color:#7A7F8E;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;}
-.cat-dp-nav-item.active{color:#1B4FA8;border-bottom-color:#1B4FA8;font-weight:600;}
+.cat-dp-nav-item.active{color:#111318;border-bottom-color:#111318;font-weight:600;}
 .cat-dp-body{flex:1;overflow-y:auto;padding:14px 18px;}
 .cat-dp-actions{padding:10px 18px;border-top:0.5px solid #F0ECE8;display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;}
 .cat-field-row{margin-bottom:12px;}
 .cat-field-label{font-size:10px;font-weight:600;color:#9CA3AF;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;}
 .cat-field-input{width:100%;height:32px;border:1px solid #E2DDD8;border-radius:8px;padding:0 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;}
-.cat-field-input:focus{border-color:#1B4FA8;box-shadow:0 0 0 3px rgba(28,57,105,.08);}
+.cat-field-input:focus{border-color:#111318;box-shadow:0 0 0 3px rgba(0,0,0,0.08);}
 .cat-field-textarea{width:100%;min-height:56px;border:1px solid #E2DDD8;border-radius:8px;padding:7px 10px;font-size:12px;font-family:inherit;color:#111318;outline:none;resize:vertical;}
-.cat-field-textarea:focus{border-color:#1B4FA8;box-shadow:0 0 0 3px rgba(28,57,105,.08);}
+.cat-field-textarea:focus{border-color:#111318;box-shadow:0 0 0 3px rgba(0,0,0,0.08);}
 .cat-tag{display:inline-flex;align-items:center;gap:4px;background:#F0ECE8;color:#5A5F6E;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:500;margin:2px;}
 .cat-tag-remove{cursor:pointer;color:#9CA3AF;font-size:10px;line-height:1;}
 .cat-tag-remove:hover{color:#A32D2D;}
 .cat-img-thumb{width:80px;height:80px;border-radius:10px;background:#F5F2EE;border:1.5px dashed #D4CFC9;display:flex;align-items:center;justify-content:center;font-size:10px;color:#9CA3AF;cursor:pointer;flex-direction:column;gap:4px;}
-.cat-img-thumb.has-img{border-style:solid;border-color:#BFDBFE;background:#EFF6FF;}
+.cat-img-thumb.has-img{border-style:solid;border-color:#FDE68A;background:#FFFBEB;}
 .cat-addl-row{display:flex;gap:8px;align-items:center;margin-bottom:6px;}
 .cat-addl-del{width:24px;height:24px;border-radius:6px;border:0.5px solid #E2DDD8;background:none;cursor:pointer;color:#9CA3AF;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .cat-addl-del:hover{background:#FEF2F2;color:#A32D2D;border-color:#FECACA;}
@@ -4748,7 +4748,7 @@ groupKeys.map(pg => {
             <div style="font-size:13px;font-weight:600;color:#5A5F6E;margin-bottom:4px;">Click to choose file or drag and drop</div>
             <div style="font-size:11px;color:#9CA3AF;">.csv, .xlsx — max 5 MB</div>
           </div>
-          <div style="margin-top:10px;"><a href="#" style="font-size:12px;color:#1B4FA8;">Download template</a></div>`,
+          <div style="margin-top:10px;"><a href="#" style="font-size:12px;color:#111318;">Download template</a></div>`,
         actions: [{ label: 'Cancel', onClick: () => Modal.close() }]
       });
     };
@@ -4926,7 +4926,7 @@ groupKeys.map(pg => {
     if (!items.length) return '<div class="cat-empty"><i class="ti ti-search" style="font-size:24px;display:block;margin-bottom:8px;"></i>No items match the current filters.</div>';
     const sortIcon = col => {
       if (_catSortCol !== col) return '<i class="ti ti-selector cat-th-sort"></i>';
-      return `<i class="ti ti-arrow-${_catSortDir==='asc'?'up':'down'} cat-th-sort" style="color:#1B4FA8;"></i>`;
+      return `<i class="ti ti-arrow-${_catSortDir==='asc'?'up':'down'} cat-th-sort" style="color:#111318;"></i>`;
     };
     return `<div class="cat-item-table">
   <div class="cat-th">
@@ -4961,7 +4961,7 @@ groupKeys.map(pg => {
           <div class="cat-td" style="font-size:11px;color:#7A7F8E;">${c.parent ? (_catCategories.find(x=>x.id===c.parent)?.name || '—') : '— root —'}</div>
           <div class="cat-td" style="font-size:12px;font-variant-numeric:tabular-nums;">${c.itemCount}</div>
           <div class="cat-td" style="justify-content:flex-end;gap:6px;">
-            <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#1B4FA8;" onclick="event.stopPropagation();window._catEditCategory('${c.id}')">Edit</button>
+            <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#111318;" onclick="event.stopPropagation();window._catEditCategory('${c.id}')">Edit</button>
             <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#A32D2D;" onclick="event.stopPropagation();window._catDeleteCategory('${c.id}')">Remove</button>
           </div>
         </div>`;
@@ -4982,7 +4982,7 @@ groupKeys.map(pg => {
           <i class="ti ti-${kids.length?'folder':'tag'}" style="font-size:13px;color:#7A7F8E;flex-shrink:0;"></i>
           <span class="cat-tree-name">${c.name}</span>
           <span class="cat-tree-count">${c.itemCount}</span>
-          <button style="background:none;border:0.5px solid #E2DDD8;border-radius:5px;padding:2px 7px;font-size:10px;font-family:inherit;cursor:pointer;color:#1B4FA8;flex-shrink:0;" onclick="event.stopPropagation();window._catEditCategory('${c.id}')">Edit</button>
+          <button style="background:none;border:0.5px solid #E2DDD8;border-radius:5px;padding:2px 7px;font-size:10px;font-family:inherit;cursor:pointer;color:#111318;flex-shrink:0;" onclick="event.stopPropagation();window._catEditCategory('${c.id}')">Edit</button>
           <button style="background:none;border:0.5px solid transparent;padding:2px 4px;font-size:12px;cursor:pointer;color:#9CA3AF;flex-shrink:0;" title="Remove" onclick="event.stopPropagation();window._catDeleteCategory('${c.id}')"><i class="ti ti-trash"></i></button>
         </div>
         ${kids.map(kid => renderNode(kid, depth+1)).join('')}
@@ -5022,13 +5022,13 @@ groupKeys.map(pg => {
           ${it.categories.length ? it.categories.map(c=>`<span class="cat-tag">${c}<span class="cat-tag-remove" onclick="window._catRemoveCategoryFromItem('${it.id}','${c.replace(/'/g,"\\'")}')">✕</span></span>`).join('') : '<span style="font-size:12px;color:#9CA3AF;">Not in any categories</span>'}
         </div>
         <div style="font-size:12px;font-weight:600;color:#111318;margin-bottom:8px;">Add to category</div>
-        ${available.length ? available.map(c=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:#F9F8F7;border-radius:8px;margin-bottom:4px;"><span style="font-size:12px;color:#3A3D4A;">${c}</span><button style="background:#1B4FA8;color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;" onclick="window._catAddToCategory('${it.id}','${c.replace(/'/g,"\\'")}')">Add</button></div>`).join('') : '<div style="font-size:12px;color:#9CA3AF;padding:8px 0;">Item is assigned to all categories.</div>'}`;
+        ${available.length ? available.map(c=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:#F9F8F7;border-radius:8px;margin-bottom:4px;"><span style="font-size:12px;color:#3A3D4A;">${c}</span><button style="background:#111318;color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;" onclick="window._catAddToCategory('${it.id}','${c.replace(/'/g,"\\'")}')">Add</button></div>`).join('') : '<div style="font-size:12px;color:#9CA3AF;padding:8px 0;">Item is assigned to all categories.</div>'}`;
     } else if (_catDetailSection === 'images') {
       body = `
         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
           ${it.hasImage ? `<div class="cat-img-thumb has-img" style="position:relative;" title="Image 1">
-              <i class="ti ti-photo" style="font-size:24px;color:#1B4FA8;"></i>
-              <div style="font-size:9px;color:#1B4FA8;margin-top:2px;">Main image</div>
+              <i class="ti ti-photo" style="font-size:24px;color:#111318;"></i>
+              <div style="font-size:9px;color:#111318;margin-top:2px;">Main image</div>
               <div style="position:absolute;top:4px;right:4px;background:rgba(255,255,255,.9);border-radius:4px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:0.5px solid #E2DDD8;" onclick="window._catRemoveImage('${it.id}')" title="Remove"><i class="ti ti-x" style="font-size:10px;color:#A32D2D;"></i></div>
             </div>` : ''}
           <div class="cat-img-thumb" onclick="window._catUploadImage('${it.id}')" title="Upload image">
@@ -5125,8 +5125,8 @@ groupKeys.map(pg => {
 /* Catalog picker — mirrors pc-fleet-btn */
 .pa-cat-btn{display:flex;align-items:center;gap:8px;height:36px;padding:0 10px 0 6px;background:#fff;border:1px solid #E2DDD8;border-radius:9px;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s;max-width:280px;}
 .pa-cat-btn:hover{border-color:#9CA3AF;background:#FAFAF8;}
-.pa-cat-btn.open{border-color:#1B4FA8;background:#F0FAF3;}
-.pa-cat-logo{width:26px;height:26px;border-radius:7px;background:#152B52;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#8AAFD4;flex-shrink:0;}
+.pa-cat-btn.open{border-color:#111318;background:#F0FAF3;}
+.pa-cat-logo{width:26px;height:26px;border-radius:7px;background:#0D0D0D;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#F4A800;flex-shrink:0;}
 .pa-cat-logo.is-default{background:#065F46;color:#D1FAE5;}
 .pa-cat-label{display:flex;flex-direction:column;text-align:left;min-width:0;}
 .pa-cat-name{font-size:12px;font-weight:600;color:#111318;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;}
@@ -5136,18 +5136,18 @@ groupKeys.map(pg => {
 .pa-drop-list{overflow-y:auto;max-height:280px;padding:4px 0;}
 .pa-drop-item{display:flex;align-items:center;gap:9px;padding:9px 12px;cursor:pointer;}
 .pa-drop-item:hover{background:#F5F2EE;}
-.pa-drop-item.active{background:#D6E4F7;}
-.pa-drop-logo{width:26px;height:26px;border-radius:6px;background:#152B52;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#8AAFD4;flex-shrink:0;}
+.pa-drop-item.active{background:#FEF3C7;}
+.pa-drop-logo{width:26px;height:26px;border-radius:6px;background:#0D0D0D;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#F4A800;flex-shrink:0;}
 .pa-drop-logo.is-default{background:#065F46;color:#D1FAE5;}
-.pa-drop-item.active .pa-drop-logo{background:#1B4FA8;color:#fff;}
+.pa-drop-item.active .pa-drop-logo{background:#111318;color:#fff;}
 .pa-drop-name{font-size:12px;font-weight:600;color:#3A3D4A;flex:1;}
-.pa-drop-item.active .pa-drop-name{color:#1B4FA8;}
+.pa-drop-item.active .pa-drop-name{color:#111318;}
 .pa-drop-meta{font-size:10px;color:#9CA3AF;}
 .pa-drop-count{font-size:10px;font-weight:700;background:#F0ECE8;color:#7A7F8E;border-radius:10px;padding:1px 7px;flex-shrink:0;}
-.pa-drop-item.active .pa-drop-count{background:#C5EAC3;color:#1B4FA8;}
+.pa-drop-item.active .pa-drop-count{background:#C5EAC3;color:#111318;}
 .pa-drop-divider{height:0.5px;background:#F0ECE8;margin:4px 0;}
 .pa-drop-action{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;font-size:12px;color:#7A7F8E;border-top:0.5px solid #F0ECE8;}
-.pa-drop-action:hover{background:#F5F2EE;color:#1B4FA8;}
+.pa-drop-action:hover{background:#F5F2EE;color:#111318;}
 /* Filter tabs */
 .pa-ftab{padding:4px 11px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:0.5px solid transparent;color:#5A5F6E;white-space:nowrap;}
 .pa-ftab.active{background:#111318;color:#fff;}
@@ -5242,14 +5242,14 @@ groupKeys.map(pg => {
               ? `<span style="font-size:11px;font-weight:700;background:${a.adjustment.startsWith('-')?'#D1FAE5':'#FEF3C7'};color:${a.adjustment.startsWith('-')?'#065F46':'#92400E'};border-radius:4px;padding:2px 6px;">${a.adjustment}</span>`
               : '<span style="color:#C4BFB9;">—</span>'}</div>
             <div class="pa-td">${overrides.length
-              ? `<span style="font-size:11px;color:#1B4FA8;font-weight:600;cursor:pointer;text-decoration:underline;" onclick="window._paEdit('${a.id}','parts')">${overrides.length} override${overrides.length!==1?'s':''}</span>`
+              ? `<span style="font-size:11px;color:#111318;font-weight:600;cursor:pointer;text-decoration:underline;" onclick="window._paEdit('${a.id}','parts')">${overrides.length} override${overrides.length!==1?'s':''}</span>`
               : `<span style="font-size:11px;color:#C4BFB9;cursor:pointer;" onclick="window._paEdit('${a.id}','parts')">+ Add</span>`}</div>
             <div class="pa-td" style="font-size:11px;color:${a.note?'#5A5F6E':'#C4BFB9'};font-style:${a.note?'normal':'italic'};">${a.note||'—'}</div>
             <div class="pa-td">${a.credentials
               ? `<span class="pa-cred-ok"><i class="ti ti-check" style="font-size:11px;"></i> ${a.username||'Set'}</span>`
               : `<span class="pa-cred-missing"><i class="ti ti-alert-triangle" style="font-size:11px;"></i> Missing</span>`}</div>
             <div class="pa-td" style="justify-content:flex-end;gap:6px;">
-              <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#1B4FA8;" onclick="window._paEdit('${a.id}')">Edit</button>
+              <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#111318;" onclick="window._paEdit('${a.id}')">Edit</button>
               <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#A32D2D;" onclick="window._paRemove('${a.id}')">Remove</button>
             </div>
           </div>`;}).join('')}
@@ -5435,7 +5435,7 @@ groupKeys.map(pg => {
     // ── New catalog ──────────────────────────────────────────────────────────
     window._paNewCatalog = () => Modal.show({
       title:'New catalog',
-      body:`<div style="background:#EFF6FF;border:0.5px solid #BFDBFE;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#1E40AF;line-height:1.5;"><strong>Most accounts work on the Default Catalog.</strong> Create a new one only when you need a distinct pricing structure — for example, a different currency or a negotiated contract rate.</div>
+      body:`<div style="background:#FFFBEB;border:0.5px solid #FDE68A;border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:#111318;line-height:1.5;"><strong>Most accounts work on the Default Catalog.</strong> Create a new one only when you need a distinct pricing structure — for example, a different currency or a negotiated contract rate.</div>
         <div class="modal-form-field"><label class="modal-form-label">Catalog name *</label><input class="modal-form-input" id="pc-name" placeholder="e.g. Contract Pricing — Northeast"/></div>
         <div class="modal-form-field"><label class="modal-form-label">Description</label><input class="modal-form-input" id="pc-desc" placeholder="Who is this catalog for?"/></div>
         <div id="pc-err" style="font-size:11px;color:#A32D2D;display:none;">Name is required</div>`,
@@ -5459,7 +5459,7 @@ groupKeys.map(pg => {
           <div style="font-size:13px;color:#5A5F6E;font-weight:500;">Click to upload .xlsx or .csv</div>
           <div style="font-size:11px;color:#9CA3AF;margin-top:2px;">Columns: Account #, Currency, Adjustment, ERP Account, Username</div>
         </div>
-        <div style="margin-top:10px;"><a href="#" style="font-size:12px;color:#1B4FA8;" onclick="event.preventDefault()"><i class="ti ti-download" style="font-size:11px;margin-right:3px;"></i>Download template</a></div>`,
+        <div style="margin-top:10px;"><a href="#" style="font-size:12px;color:#111318;" onclick="event.preventDefault()"><i class="ti ti-download" style="font-size:11px;margin-right:3px;"></i>Download template</a></div>`,
       actions:[{label:'Cancel',onClick:()=>Modal.close()},{label:'Start import',primary:true,onClick:()=>{Modal.close();setTab('jobs');}}]
     });
     window._paExport = () => Modal.show({
@@ -5556,7 +5556,7 @@ groupKeys.map(pg => {
           <i class="ti ti-upload" style="font-size:24px;color:#9CA3AF;display:block;margin-bottom:6px;"></i>
           <div style="font-size:13px;color:#5A5F6E;font-weight:500;">Upload .xlsx or .csv</div>
         </div>
-        <div style="margin-top:8px;"><a href="#" style="font-size:11px;color:#1B4FA8;" onclick="event.preventDefault()"><i class="ti ti-download" style="font-size:11px;"></i> Download template</a></div>`,
+        <div style="margin-top:8px;"><a href="#" style="font-size:11px;color:#111318;" onclick="event.preventDefault()"><i class="ti ti-download" style="font-size:11px;"></i> Download template</a></div>`,
       actions: [{ label: 'Cancel', onClick: () => Modal.close() }, { label: 'Confirm', primary: true, onClick: () => { Modal.close(); setTab('jobs'); } }]
     });
     window._dmExport = () => Modal.show({
@@ -5732,16 +5732,16 @@ groupKeys.map(pg => {
       return `<div style="margin-bottom:20px;">
         <div style="font-size:13px;font-weight:700;color:#111318;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
           <i class="ti ti-map-pin" style="font-size:13px;color:#7A7F8E;"></i>${branchName}
-          <button style="margin-left:auto;background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 9px;font-size:11px;font-family:inherit;cursor:pointer;color:#1B4FA8;" onclick="window._dmAddMappingForBranch('${bId}','${branchName}')">+ Add dealer</button>
+          <button style="margin-left:auto;background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 9px;font-size:11px;font-family:inherit;cursor:pointer;color:#111318;" onclick="window._dmAddMappingForBranch('${bId}','${branchName}')">+ Add dealer</button>
         </div>
         <div class="dm-table">
           <div class="dm-th"><div class="dm-th-cell">Dealer</div><div class="dm-th-cell">Email(s)</div><div class="dm-th-cell">Pref.</div><div class="dm-th-cell">ERP config</div><div class="dm-th-cell"></div><div class="dm-th-cell"></div></div>
           ${bMappings.map(m=>`<div class="dm-row">
             <div class="dm-td"><span style="font-size:12px;font-weight:600;color:#111318;">${m.dealerName}</span></div>
             <div class="dm-td" style="font-size:11px;color:#5A5F6E;">${m.email}</div>
-            <div class="dm-td"><span class="dm-pref-pill" style="background:${m.preference==='1st'?'#D1FAE5':m.preference==='2nd'?'#DBEAFE':'#F0ECE8'};color:${m.preference==='1st'?'#065F46':m.preference==='2nd'?'#1E40AF':'#7A7F8E'};">${m.preference}</span></div>
+            <div class="dm-td"><span class="dm-pref-pill" style="background:${m.preference==='1st'?'#D1FAE5':m.preference==='2nd'?'#FEF3C7':'#F0ECE8'};color:${m.preference==='1st'?'#065F46':m.preference==='2nd'?'#111318':'#7A7F8E'};">${m.preference}</span></div>
             <div class="dm-td">${m.hasErp?`<span style="font-size:11px;color:#15803D;font-weight:500;"><i class="ti ti-check" style="font-size:11px;"></i> Configured</span>`:`<span style="font-size:11px;color:#B45309;font-weight:500;"><i class="ti ti-alert-triangle" style="font-size:11px;"></i> Not set</span>`}</div>
-            <div class="dm-td"><button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#1B4FA8;" onclick="event.stopPropagation();window._dmEditMapping('${m.id}')">Edit</button></div>
+            <div class="dm-td"><button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#111318;" onclick="event.stopPropagation();window._dmEditMapping('${m.id}')">Edit</button></div>
             <div class="dm-td"><button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#A32D2D;" onclick="event.stopPropagation();window._dmRemoveMapping('${m.id}')">Remove</button></div>
           </div>`).join('')}
         </div>
@@ -5766,7 +5766,7 @@ groupKeys.map(pg => {
         <div class="dm-td"><span style="font-family:monospace;font-size:11px;">${d.rmsNum||'—'}</span></div>
         <div class="dm-td"><span style="font-family:monospace;font-size:11px;">${d.erpAcct||'<span style="color:#B45309;font-style:italic;">Not set</span>'}</span></div>
         <div class="dm-td" style="justify-content:flex-end;gap:6px;">
-          <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#1B4FA8;" onclick="window._dmEditDealer('${d.id}')">Edit</button>
+          <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#111318;" onclick="window._dmEditDealer('${d.id}')">Edit</button>
         </div>
       </div>`).join('')}
     </div>`;
@@ -5817,7 +5817,7 @@ groupKeys.map(pg => {
 .er-row:last-child{border-bottom:none;}
 .er-row:hover{background:#FAFAF9;}
 .er-td{padding:10px 7px;font-size:12px;color:#3A3D4A;}
-.er-chip{display:inline-flex;align-items:center;gap:3px;background:#EFF6FF;color:#1E40AF;border-radius:10px;padding:2px 7px;font-size:10px;font-weight:500;border:0.5px solid #BFDBFE;margin:1px;}
+.er-chip{display:inline-flex;align-items:center;gap:3px;background:#FFFBEB;color:#111318;border-radius:10px;padding:2px 7px;font-size:10px;font-weight:500;border:0.5px solid #FDE68A;margin:1px;}
 .er-default-card{background:#fff;border:0.5px solid #E8E4DF;border-radius:10px;padding:14px 16px;margin-bottom:20px;}
 </style>
 <div class="er-shell">
@@ -5848,7 +5848,7 @@ groupKeys.map(pg => {
         <div style="font-size:11px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.7px;margin-bottom:3px;">Default — fallback for all accounts</div>
         <div style="display:flex;flex-wrap:wrap;gap:4px;">${_erDefaultEmails.map(e=>`<span class="er-chip">${e}</span>`).join('')}</div>
       </div>
-      <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 9px;font-size:11px;font-family:inherit;cursor:pointer;color:#1B4FA8;" onclick="window._erEditDefault()">Edit</button>
+      <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 9px;font-size:11px;font-family:inherit;cursor:pointer;color:#111318;" onclick="window._erEditDefault()">Edit</button>
     </div>
 
     ${filtered.length===0
@@ -5875,7 +5875,7 @@ groupKeys.map(pg => {
           <div class="er-td"><span style="font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;${r.active?'background:#D1FAE5;color:#065F46;':'background:#F0ECE8;color:#7A7F8E;'}">${r.active?'Active':'Inactive'}</span></div>
           <div class="er-td" style="font-size:11px;color:${r.note?'#5A5F6E':'#C4BFB9'};font-style:${r.note?'normal':'italic'};">${r.note||'—'}</div>
           <div class="er-td" style="justify-content:flex-end;gap:6px;">
-            <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#1B4FA8;" onclick="window._erEdit('${r.id}')">Edit</button>
+            <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#111318;" onclick="window._erEdit('${r.id}')">Edit</button>
             <button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 8px;font-size:11px;font-family:inherit;cursor:pointer;color:#A32D2D;" onclick="window._erRemove('${r.id}')">Remove</button>
           </div>
         </div>`).join('')}
@@ -5957,7 +5957,7 @@ groupKeys.map(pg => {
   const JOB_STATUS = {
     completed:   { label:'Completed',   color:'#065F46', bg:'#D1FAE5' },
     rolledback:  { label:'Rolled back', color:'#5A5F6E', bg:'#F0ECE8' },
-    scheduled:   { label:'Scheduled',   color:'#1E40AF', bg:'#DBEAFE' },
+    scheduled:   { label:'Scheduled',   color:'#111318', bg:'#FEF3C7' },
     failed:      { label:'Failed',      color:'#A32D2D', bg:'#FEF2F2' },
     processing:  { label:'Processing',  color:'#B45309', bg:'#FEF3C7' },
   };
@@ -6002,7 +6002,7 @@ groupKeys.map(pg => {
           <div class="jobs-td" style="font-size:11px;color:#7A7F8E;">${j.completed}</div>
           <div class="jobs-td" style="gap:6px;">
             ${j.status === 'scheduled' ? `<button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 9px;font-size:11px;font-family:inherit;cursor:pointer;color:#A32D2D;" onclick="window._jobCancel('${j.id}')">Cancel</button>` : ''}
-            ${j.canRollback ? `<button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 9px;font-size:11px;font-family:inherit;cursor:pointer;color:#1B4FA8;" onclick="window._jobRollback('${j.id}')"><i class="ti ti-history" style="font-size:11px;"></i> Rollback</button>` : ''}
+            ${j.canRollback ? `<button style="background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 9px;font-size:11px;font-family:inherit;cursor:pointer;color:#111318;" onclick="window._jobRollback('${j.id}')"><i class="ti ti-history" style="font-size:11px;"></i> Rollback</button>` : ''}
           </div>
         </div>`;
       }).join('')}

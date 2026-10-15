@@ -110,7 +110,7 @@ function render_diagnostics(el) {
       critical: ['#B91C1C','#FEE2E2','CRITICAL'],
       high:     ['#C2410C','#FFF7ED','HIGH'],
       medium:   ['#B45309','#FFFBEB','MEDIUM'],
-      low:      ['#185FA5','#EFF6FF','LOW'],
+      low:      ['#1A1A1A','#FFFBEB','LOW'],
     };
     const [color, bg, label] = map[sev] || map.low;
     return `<span style="background:${bg};color:${color};border:1px solid ${color}30;border-radius:4px;padding:1px 7px;font-size:10px;font-weight:700;letter-spacing:.7px;">${label}</span>`;
@@ -146,7 +146,7 @@ function render_diagnostics(el) {
   }
   function ctxColor(ctx) {
     if (!ctx || ctx.type === 'none') return '#8A8FA8';
-    if (ctx.type === 'wo') return '#1B4FA8';
+    if (ctx.type === 'wo') return '#111318';
     if (ctx.type === 'parts') return '#7C6FF7';
     return '#8A8FA8';
   }
@@ -285,7 +285,7 @@ function render_diagnostics(el) {
     const history = Store.getDiagnosticHistory();
     if (!history.length) {
       area.innerHTML = `<div style="text-align:center;padding:48px 20px;">
-        <div style="width:48px;height:48px;background:#D6E4F7;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#1B4FA8;margin:0 auto 14px;"><i class="ti ti-sparkles"></i></div>
+        <div style="width:48px;height:48px;background:#FEF3C7;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:#111318;margin:0 auto 14px;"><i class="ti ti-sparkles"></i></div>
         <div style="font-size:14px;font-weight:600;color:#111318;margin-bottom:6px;">Diagnostic Assistant — Skyjack SJIII 3219</div>
         <div style="font-size:13px;color:#9CA3AF;max-width:320px;margin:0 auto;line-height:1.6;">Describe a fault code, symptom, or ask about a service interval. Parts can be added to a cart and converted to a work order.</div>
       </div>`;
@@ -415,7 +415,7 @@ function render_diagnostics(el) {
       fullscreen: true,
       body: '<style>'
         + '.pdf-viewer-wrap{display:flex;flex-direction:column;flex:1;overflow:hidden;}'
-        + '.pdf-viewer-toolbar{background:#152B52;padding:8px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}'
+        + '.pdf-viewer-toolbar{background:#0D0D0D;padding:8px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}'
         + '.pdf-viewer-meta{color:#9CA3AF;font-size:11px;flex:1;}'
         + '.pdf-frame{flex:1;border:none;background:#525659;width:100%;}'
         + '</style>'
@@ -423,8 +423,8 @@ function render_diagnostics(el) {
         + '<div class="pdf-viewer-toolbar">'
         + '<i class="ti ti-book" style="color:#9CA3AF;font-size:13px;flex-shrink:0;"></i>'
         + '<span class="pdf-viewer-meta">Skyjack SJIII Series Operating Manual (ANSI/CSA) · 93 pages</span>'
-        + (manPage ? '<span style="font-size:11px;color:#1B4FA8;display:flex;align-items:center;gap:4px;"><i class="ti ti-bookmark-filled" style="font-size:11px;"></i> Page ' + manPage + '</span>' : '')
-        + '<a href="' + pdfFile + '" download style="font-size:11px;color:#9CA3AF;background:#0E1F3D;border:0.5px solid #3C4052;border-radius:5px;padding:4px 10px;text-decoration:none;display:flex;align-items:center;gap:4px;flex-shrink:0;"><i class="ti ti-download" style="font-size:11px;"></i> Download</a>'
+        + (manPage ? '<span style="font-size:11px;color:#111318;display:flex;align-items:center;gap:4px;"><i class="ti ti-bookmark-filled" style="font-size:11px;"></i> Page ' + manPage + '</span>' : '')
+        + '<a href="' + pdfFile + '" download style="font-size:11px;color:#9CA3AF;background:#0A0A0A;border:0.5px solid #3C4052;border-radius:5px;padding:4px 10px;text-decoration:none;display:flex;align-items:center;gap:4px;flex-shrink:0;"><i class="ti ti-download" style="font-size:11px;"></i> Download</a>'
         + '</div>'
         + '<iframe class="pdf-frame" src="' + pdfSrc + '" title="' + (title || 'Manual') + '"></iframe>'
         + '</div>',
@@ -456,7 +456,7 @@ function render_diagnostics(el) {
         Modal.show({
           title: 'Work order created',
           body: `<div style="text-align:center;padding:12px 0;">
-            <div style="font-size:32px;margin-bottom:8px;color:#1B4FA8;">✓</div>
+            <div style="font-size:32px;margin-bottom:8px;color:#111318;">✓</div>
             <div style="font-size:14px;font-weight:600;color:#111318;margin-bottom:4px;">Work Order #${newWO.id} created</div>
             <div style="font-size:13px;color:#7A7F8E;">Skyjack SJIII 3219 · parts attached</div>
           </div>`,
@@ -482,7 +482,7 @@ function render_diagnostics(el) {
         <div style="font-size:12px;color:#7A7F8E;margin-bottom:6px;">Select the order to add ${_diagCart.length} part(s) to:</div>
         ${wos.map(wo=>`
           <div class="ctx-option" onclick="diagConfirmAddToWO(${wo.id})" style="cursor:pointer;">
-            <i class="ti ti-clipboard-list" style="color:#1B4FA8;font-size:14px;flex-shrink:0;"></i>
+            <i class="ti ti-clipboard-list" style="color:#111318;font-size:14px;flex-shrink:0;"></i>
             <div style="flex:1;">
               <div style="font-size:12px;font-weight:600;color:#111318;">Order #${wo.id} — ${wo.machine}</div>
               <div style="font-size:11px;color:#9CA3AF;">${wo.asset || ''} · ${wo.status}</div>
@@ -545,8 +545,8 @@ function render_diagnostics(el) {
         </div>
 
         <div style="font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#9CA3AF;margin:8px 0 2px;">Work orders</div>
-        ${wos.length ? wos.map(w=>`<div class="ctx-option ${_ctx.type==='wo'&&_ctx.woId===w.id?'selected':''}" onclick="diagSetCtx('wo',${w.id})" ${_ctx.type==='wo'&&_ctx.woId===w.id?'style="border-color:#1B4FA8;background:#D6E4F7;"':''}>
-          <i class="ti ti-clipboard-list" style="color:#1B4FA8;font-size:14px;flex-shrink:0;"></i>
+        ${wos.length ? wos.map(w=>`<div class="ctx-option ${_ctx.type==='wo'&&_ctx.woId===w.id?'selected':''}" onclick="diagSetCtx('wo',${w.id})" ${_ctx.type==='wo'&&_ctx.woId===w.id?'style="border-color:#111318;background:#FEF3C7;"':''}>
+          <i class="ti ti-clipboard-list" style="color:#111318;font-size:14px;flex-shrink:0;"></i>
           <div style="flex:1;"><div style="font-size:12px;font-weight:600;color:#111318;">Order #${w.id} — ${w.machine}</div><div style="font-size:11px;color:#9CA3AF;">${w.asset||''} · ${w.status}</div></div>
         </div>`).join('') : '<div style="font-size:12px;color:#9CA3AF;padding:8px 12px;">No active work orders</div>'}
       </div>
@@ -587,14 +587,14 @@ function render_diagnostics(el) {
 /* Sessions sidebar */
 #diag-sessions-panel{width:210px;flex-shrink:0;border-right:0.5px solid #E8E4DF;background:#F5F2EE;display:flex;flex-direction:column;overflow:hidden;}
 .ds-header{padding:10px 10px 8px;border-bottom:0.5px solid #E8E4DF;flex-shrink:0;}
-.ds-new-btn{width:100%;background:#1B4FA8;border:none;border-radius:7px;padding:7px 10px;font-size:12px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;}
-.ds-new-btn:hover{background:#152B52;color:#FFF;}
+.ds-new-btn{width:100%;background:#111318;border:none;border-radius:7px;padding:7px 10px;font-size:12px;font-weight:600;color:#FFFFFF;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;}
+.ds-new-btn:hover{background:#0D0D0D;color:#FFF;}
 .ds-list{flex:1;overflow-y:auto;padding:6px 6px;}
 .ds-item{padding:8px 10px;border-radius:7px;cursor:pointer;margin-bottom:2px;}
 .ds-item:hover{background:#E8E4DF;}
-.ds-item-active{background:#D6E4F7 !important;border:0.5px solid #1B4FA840;}
+.ds-item-active{background:#FEF3C7 !important;border:0.5px solid #11131840;}
 .ds-item-title{font-size:11.5px;color:#3A3D4A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;}
-.ds-item-active .ds-item-title{color:#1B4FA8;font-weight:600;}
+.ds-item-active .ds-item-title{color:#111318;font-weight:600;}
 .ds-item-foot{display:flex;align-items:center;justify-content:space-between;margin-top:3px;}
 .ds-item-time{font-size:10px;color:#9CA3AF;}
 .ds-item-del{background:none;border:none;color:#C0BAB3;cursor:pointer;padding:0;display:none;align-items:center;justify-content:center;width:18px;height:18px;border-radius:3px;}
@@ -606,16 +606,16 @@ function render_diagnostics(el) {
 .ctx-active-label{font-size:12px;font-weight:600;flex:1;}
 .ctx-detail{font-size:11px;color:#9CA3AF;padding-left:6px;border-left:1px solid #E2DDD8;margin-left:2px;}
 .ctx-switch-btn{margin-left:auto;background:none;border:0.5px solid #E2DDD8;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:500;color:#7A7F8E;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;white-space:nowrap;}
-.ctx-switch-btn:hover{border-color:#1B4FA8;color:#1B4FA8;}
+.ctx-switch-btn:hover{border-color:#111318;color:#111318;}
 .ctx-clear-btn{width:26px;height:26px;background:none;border:0.5px solid #E2DDD8;border-radius:6px;color:#9CA3AF;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .ctx-clear-btn:hover{border-color:#B91C1C;color:#B91C1C;}
 /* Toolbar */
 .diag-toolbar{background:#FAFAF8;border-bottom:0.5px solid #E8E4DF;padding:7px 22px;display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .diag-clear-btn{font-size:11px;font-weight:500;color:#7A7F8E;background:none;border:0.5px solid #E2DDD8;border-radius:6px;padding:3px 9px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;}
 .diag-clear-btn:hover{background:#F5F2EE;color:#3A3D4A;}
-.diag-cart-btn{font-size:11px;font-weight:600;color:#1B4FA8;background:#D6E4F7;border:1px solid #1B4FA840;border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;margin-left:auto;}
-.diag-cart-btn:hover{background:#BFDBFE;}
-.cart-badge{background:#1B4FA8;color:#FFFFFF;border-radius:10px;padding:0 5px;font-size:10px;font-weight:700;min-width:16px;text-align:center;}
+.diag-cart-btn{font-size:11px;font-weight:600;color:#111318;background:#FEF3C7;border:1px solid #11131840;border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;margin-left:auto;}
+.diag-cart-btn:hover{background:#FDE68A;}
+.cart-badge{background:#111318;color:#FFFFFF;border-radius:10px;padding:0 5px;font-size:10px;font-weight:700;min-width:16px;text-align:center;}
 /* Chat */
 .chat-area{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:18px;}
 .msg-system{display:flex;align-items:center;gap:5px;font-size:11px;color:#9CA3AF;justify-content:center;padding:2px 0;}
@@ -623,7 +623,7 @@ function render_diagnostics(el) {
 .msg-ctx-pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;border:1px solid;}
 .msg-user-bubble{background:#1B3A2B;color:#FFF;border-radius:14px 14px 4px 14px;padding:11px 16px;max-width:60%;font-size:13px;line-height:1.5;}
 .msg-ai{display:flex;gap:12px;align-items:flex-start;}
-.ai-avatar{width:32px;height:32px;background:#1B4FA8;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#FFFFFF;flex-shrink:0;margin-top:2px;}
+.ai-avatar{width:32px;height:32px;background:#111318;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;color:#FFFFFF;flex-shrink:0;margin-top:2px;}
 .ai-bubble{flex:1;min-width:0;}
 /* Response card */
 .response-card{background:#FFF;border:0.5px solid #E8E4DF;border-radius:12px;overflow:hidden;}
@@ -639,8 +639,8 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
 .rc-steps li{font-size:12.5px;color:#3A3D4A;line-height:1.55;}
 .rc-chips{display:flex;flex-wrap:wrap;gap:5px;}
 .rc-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid;}
-.rc-chip-manual{background:#EFF6FF;color:#185FA5;border-color:#BFDBFE;}
-.rc-chip-manual:hover{background:#DBEAFE;}
+.rc-chip-manual{background:#FFFBEB;color:#1A1A1A;border-color:#FDE68A;}
+.rc-chip-manual:hover{background:#FEF3C7;}
 .rc-chip-fc{background:#FEF3C7;color:#92400E;border-color:#FDE68A;}
 .rc-chip-fc:hover{background:#FDE68A;}
 /* Parts */
@@ -650,9 +650,9 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
 .rc-part-desc{font-size:12px;color:#3A3D4A;flex:1;line-height:1.4;}
 .rc-part-foot{display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
 .rc-part-price{font-size:12px;font-weight:600;color:#111318;}
-.rc-part-btn{font-size:11px;font-weight:600;color:#185FA5;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:5px;padding:3px 8px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:3px;}
-.rc-part-btn:hover{background:#DBEAFE;}
-.rc-part-btn-added{color:#1B4FA8;background:#F0FDF4;border-color:#BBF7D0;cursor:default;}
+.rc-part-btn{font-size:11px;font-weight:600;color:#1A1A1A;background:#FFFBEB;border:1px solid #FDE68A;border-radius:5px;padding:3px 8px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:3px;}
+.rc-part-btn:hover{background:#FEF3C7;}
+.rc-part-btn-added{color:#111318;background:#F0FDF4;border-color:#BBF7D0;cursor:default;}
 /* Cart panel */
 #diag-cart-panel{width:300px;flex-shrink:0;border-left:0.5px solid #E8E4DF;background:#FAFAF8;display:flex;flex-direction:column;overflow:hidden;}
 .cart-header{padding:14px 16px;border-bottom:0.5px solid #E8E4DF;display:flex;align-items:center;justify-content:space-between;background:#FFF;flex-shrink:0;}
@@ -677,20 +677,20 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
 .cart-action-btn{width:100%;padding:8px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid;display:flex;align-items:center;justify-content:center;gap:5px;}
 .cart-action-secondary{background:#F5F2EE;color:#3A3D4A;border-color:#E2DDD8;}
 .cart-action-secondary:hover{background:#EAE6E1;}
-.cart-action-primary{background:#1B4FA8;color:#FFFFFF;border-color:#152B52;}
-.cart-action-primary:hover{background:#152B52;}
+.cart-action-primary{background:#111318;color:#FFFFFF;border-color:#0D0D0D;}
+.cart-action-primary:hover{background:#0D0D0D;}
 /* Input */
 .input-area{background:#FFF;border-top:0.5px solid #E8E4DF;padding:14px 24px;flex-shrink:0;}
 .input-row{display:flex;align-items:flex-end;gap:10px;}
 .input-wrap{flex:1;position:relative;}
 .input-box{width:100%;min-height:44px;max-height:120px;background:#F5F2EE;border:1.5px solid #E2DDD8;border-radius:12px;padding:11px 16px;font-size:13px;font-family:inherit;color:#111318;outline:none;resize:none;line-height:1.5;box-sizing:border-box;}
-.input-box:focus{border-color:#1B4FA8;background:#FFF;}
+.input-box:focus{border-color:#111318;background:#FFF;}
 .input-box::placeholder{color:#B0AAA3;}
-.send-btn{width:44px;height:44px;background:#1B4FA8;border:none;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:#FFFFFF;flex-shrink:0;}
-.send-btn:hover{background:#152B52;}
+.send-btn{width:44px;height:44px;background:#111318;border:none;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:#FFFFFF;flex-shrink:0;}
+.send-btn:hover{background:#0D0D0D;}
 .input-hints{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
 .hint-chip{background:#F5F2EE;border-radius:5px;padding:3px 9px;cursor:pointer;color:#7A7F8E;font-size:11px;}
-.hint-chip:hover{background:#D6E4F7;color:#1B4FA8;}
+.hint-chip:hover{background:#FEF3C7;color:#111318;}
 
 /* ── Mobile preview overlay ───────────────────────────── */
 #diag-mobile-overlay{
@@ -728,7 +728,7 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
   background:#1F2330;padding:10px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;
 }
 .mob-topbar-title{font-size:13px;font-weight:700;color:#FFF;flex:1;}
-.mob-topbar-icon{width:28px;height:28px;border-radius:7px;background:#1B4FA8;display:flex;align-items:center;justify-content:center;font-size:14px;color:#FFFFFF;}
+.mob-topbar-icon{width:28px;height:28px;border-radius:7px;background:#111318;display:flex;align-items:center;justify-content:center;font-size:14px;color:#FFFFFF;}
 /* mob ctx strip */
 .mob-ctx{
   background:#FFF;border-bottom:0.5px solid #E8E4DF;padding:7px 14px;display:flex;align-items:center;gap:6px;flex-shrink:0;
@@ -740,7 +740,7 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
 .mob-msg-user{display:flex;justify-content:flex-end;}
 .mob-msg-user-bub{background:#1B3A2B;color:#FFF;border-radius:14px 14px 4px 14px;padding:9px 13px;max-width:78%;font-size:12px;line-height:1.5;}
 .mob-msg-ai{display:flex;gap:8px;align-items:flex-start;}
-.mob-ai-av{width:26px;height:26px;background:#1B4FA8;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#FFFFFF;flex-shrink:0;margin-top:2px;}
+.mob-ai-av{width:26px;height:26px;background:#111318;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#FFFFFF;flex-shrink:0;margin-top:2px;}
 .mob-ai-card{background:#FFF;border:0.5px solid #E8E4DF;border-radius:10px;overflow:hidden;flex:1;min-width:0;}
 .mob-card-head{padding:9px 12px 8px;border-bottom:0.5px solid #F0EDE9;}
 .mob-card-tag{font-size:9px;font-weight:700;letter-spacing:.8px;color:#9CA3AF;text-transform:uppercase;margin-bottom:3px;}
@@ -753,19 +753,19 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
 .mob-part-no{font-size:10px;font-weight:700;color:#7C6FF7;font-family:monospace;flex-shrink:0;}
 .mob-part-desc{font-size:10.5px;color:#3A3D4A;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .mob-part-price{font-size:10px;font-weight:600;color:#111318;flex-shrink:0;}
-.mob-add-btn{font-size:10px;font-weight:600;color:#185FA5;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:4px;padding:2px 7px;cursor:pointer;font-family:inherit;flex-shrink:0;white-space:nowrap;}
-.mob-add-btn.added{color:#1B4FA8;background:#F0FDF4;border-color:#BBF7D0;cursor:default;}
+.mob-add-btn{font-size:10px;font-weight:600;color:#1A1A1A;background:#FFFBEB;border:1px solid #FDE68A;border-radius:4px;padding:2px 7px;cursor:pointer;font-family:inherit;flex-shrink:0;white-space:nowrap;}
+.mob-add-btn.added{color:#111318;background:#F0FDF4;border-color:#BBF7D0;cursor:default;}
 .mob-fc-chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;}
 .mob-fc-chip{font-size:10px;font-weight:600;background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;border-radius:4px;padding:2px 7px;cursor:pointer;}
 /* mob input */
 .mob-input-area{background:#FFF;border-top:0.5px solid #E8E4DF;padding:10px 14px 14px;flex-shrink:0;}
 .mob-hints{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px;}
 .mob-hint{background:#F5F2EE;border-radius:4px;padding:3px 7px;font-size:10px;color:#7A7F8E;cursor:pointer;}
-.mob-hint:hover{background:#D6E4F7;color:#1B4FA8;}
+.mob-hint:hover{background:#FEF3C7;color:#111318;}
 .mob-input-row{display:flex;gap:8px;align-items:flex-end;}
 .mob-input-box{flex:1;background:#F5F2EE;border:1.5px solid #E2DDD8;border-radius:10px;padding:9px 12px;font-size:12px;font-family:inherit;color:#111318;outline:none;resize:none;min-height:38px;max-height:80px;line-height:1.45;box-sizing:border-box;}
-.mob-input-box:focus{border-color:#1B4FA8;background:#FFF;}
-.mob-send{width:38px;height:38px;background:#1B4FA8;border:none;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:#FFFFFF;flex-shrink:0;}
+.mob-input-box:focus{border-color:#111318;background:#FFF;}
+.mob-send{width:38px;height:38px;background:#111318;border:none;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:#FFFFFF;flex-shrink:0;}
 /* mob home indicator */
 .mob-home-bar{height:20px;background:#0F1117;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:0 0 32px 32px;}
 .mob-home-pill{width:100px;height:4px;background:#444;border-radius:2px;}
@@ -782,12 +782,12 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
 }
 .mob-sessions-back{width:32px;height:32px;background:rgba(255,255,255,.1);border:none;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#FFF;font-size:15px;cursor:pointer;flex-shrink:0;}
 .mob-sessions-title{font-size:14px;font-weight:700;color:#FFF;flex:1;}
-.mob-sessions-new{display:inline-flex;align-items:center;gap:4px;background:#1B4FA8;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;color:#FFFFFF;cursor:pointer;font-family:inherit;}
+.mob-sessions-new{display:inline-flex;align-items:center;gap:4px;background:#111318;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;color:#FFFFFF;cursor:pointer;font-family:inherit;}
 .mob-sessions-list{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:4px;}
 .mob-sess-item{background:#FFF;border:0.5px solid #E8E4DF;border-radius:10px;padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;}
-.mob-sess-item:hover,.mob-sess-item:active{background:#D6E4F7;border-color:#1B4FA840;}
-.mob-sess-item.active{background:#D6E4F7;border-color:#1B4FA8;}
-.mob-sess-icon{width:28px;height:28px;border-radius:7px;background:#D6E4F7;display:flex;align-items:center;justify-content:center;font-size:13px;color:#1B4FA8;flex-shrink:0;}
+.mob-sess-item:hover,.mob-sess-item:active{background:#FEF3C7;border-color:#11131840;}
+.mob-sess-item.active{background:#FEF3C7;border-color:#111318;}
+.mob-sess-icon{width:28px;height:28px;border-radius:7px;background:#FEF3C7;display:flex;align-items:center;justify-content:center;font-size:13px;color:#111318;flex-shrink:0;}
 .mob-sess-body{flex:1;min-width:0;}
 .mob-sess-title{font-size:12px;font-weight:600;color:#111318;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .mob-sess-time{font-size:10px;color:#9CA3AF;margin-top:2px;}
@@ -811,7 +811,7 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
 .mob-cart-item-desc{font-size:11px;color:#5C6070;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .mob-cart-footer{margin-top:10px;}
 .mob-cart-total{font-size:12px;color:#3A3D4A;margin-bottom:8px;}
-.mob-cart-cta{width:100%;padding:11px;background:#1B4FA8;color:#FFFFFF;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+.mob-cart-cta{width:100%;padding:11px;background:#111318;color:#FFFFFF;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
 /* dismiss btn */
 .mob-overlay-close{
   position:absolute;top:24px;right:24px;
@@ -905,9 +905,9 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
         <button onclick="diagMobOpenSessions()" style="width:30px;height:30px;background:rgba(255,255,255,.08);border:none;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#A0A8C0;font-size:14px;cursor:pointer;flex-shrink:0;" title="All chats"><i class="ti ti-layout-sidebar"></i></button>
         <div class="mob-topbar-title">Diagnostic Assistant</div>
         <div style="display:flex;gap:6px;align-items:center;">
-          <div id="mob-cart-btn" onclick="diagMobToggleCart()" style="display:none;position:relative;width:32px;height:32px;background:#D6E4F7;border:1px solid #1B4FA840;border-radius:8px;align-items:center;justify-content:center;font-size:15px;color:#1B4FA8;cursor:pointer;flex-shrink:0;">
+          <div id="mob-cart-btn" onclick="diagMobToggleCart()" style="display:none;position:relative;width:32px;height:32px;background:#FEF3C7;border:1px solid #11131840;border-radius:8px;align-items:center;justify-content:center;font-size:15px;color:#111318;cursor:pointer;flex-shrink:0;">
             <i class="ti ti-shopping-cart"></i>
-            <span id="mob-cart-badge" style="position:absolute;top:-4px;right:-4px;background:#1B4FA8;color:#FFF;border-radius:8px;padding:0 4px;font-size:9px;font-weight:800;display:none;"></span>
+            <span id="mob-cart-badge" style="position:absolute;top:-4px;right:-4px;background:#111318;color:#FFF;border-radius:8px;padding:0 4px;font-size:9px;font-weight:800;display:none;"></span>
           </div>
         </div>
       </div>
@@ -981,7 +981,7 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
     const history = Store.getDiagnosticHistory();
     if (!history.length) {
       area.innerHTML = `<div style="text-align:center;padding:32px 14px;">
-        <div style="width:40px;height:40px;background:#D6E4F7;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#1B4FA8;margin:0 auto 10px;"><i class="ti ti-sparkles"></i></div>
+        <div style="width:40px;height:40px;background:#FEF3C7;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#111318;margin:0 auto 10px;"><i class="ti ti-sparkles"></i></div>
         <div style="font-size:13px;font-weight:600;color:#111318;margin-bottom:5px;">SmartEquip AI</div>
         <div style="font-size:11.5px;color:#9CA3AF;line-height:1.6;">Describe a fault code, symptom, or ask about a service interval.</div>
       </div>`;
@@ -1005,13 +1005,13 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
           ? `<div style="font-size:10px;font-weight:700;letter-spacing:.7px;color:#B0AAA3;text-transform:uppercase;margin:8px 0 4px;">Manual References</div>
              <div style="display:flex;flex-direction:column;gap:5px;">${resp.manualRefs.map(ref=>
                `<div onclick="diagOpenManual('${ref.id}','${escHtml(ref.title)}')"
-                 style="display:flex;align-items:center;gap:8px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:7px;padding:8px 10px;cursor:pointer;">
-                 <i class="ti ti-book" style="font-size:13px;color:#185FA5;flex-shrink:0;"></i>
+                 style="display:flex;align-items:center;gap:8px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:7px;padding:8px 10px;cursor:pointer;">
+                 <i class="ti ti-book" style="font-size:13px;color:#1A1A1A;flex-shrink:0;"></i>
                  <div style="flex:1;min-width:0;">
-                   <div style="font-size:10.5px;font-weight:600;color:#185FA5;line-height:1.3;">Ch.${ref.chapter} — ${escHtml(ref.title)}</div>
+                   <div style="font-size:10.5px;font-weight:600;color:#1A1A1A;line-height:1.3;">Ch.${ref.chapter} — ${escHtml(ref.title)}</div>
                    <div style="font-size:10px;color:#6B9ECC;margin-top:1px;">Page ${ref.page}${ref.summary ? ' · ' + escHtml(ref.summary.slice(0,48)) + (ref.summary.length>48?'…':'') : ''}</div>
                  </div>
-                 <i class="ti ti-external-link" style="font-size:11px;color:#93C5FD;flex-shrink:0;"></i>
+                 <i class="ti ti-external-link" style="font-size:11px;color:#F4D577;flex-shrink:0;"></i>
                </div>`
              ).join('')}</div>` : '';
         const partsHtml = resp.parts && resp.parts.length
@@ -1028,7 +1028,7 @@ p.rp{margin:0;font-size:13px;color:#3A3D4A;line-height:1.65;}
                    : `<button class="mob-add-btn" onclick="diagMobAddToCart('${p}')">+ Cart</button>`}
                </div>`;
              }).join('')}</div>` : '';
-        const sevColors = {critical:'#B91C1C',high:'#C2410C',medium:'#B45309',low:'#185FA5'};
+        const sevColors = {critical:'#B91C1C',high:'#C2410C',medium:'#B45309',low:'#1A1A1A'};
         const sevColor = sevColors[resp.severity] || sevColors.low;
         return `<div class="mob-msg-ai">
           <div class="mob-ai-av"><i class="ti ti-sparkles"></i></div>

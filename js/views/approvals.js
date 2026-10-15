@@ -3,7 +3,7 @@ function render_approvals(el) {
   const _feat = (_user && Store.getEffectiveFeatures) ? Store.getEffectiveFeatures(_user.id) : {};
   const _canApprovals = 'approvals' in _feat ? _feat.approvals : _user?.role === 'supervisor';
   if (!_user || !_canApprovals) {
-    el.innerHTML = `<div class="shell">${buildSidebar('approvals')}<div class="main"><div style="padding:60px;text-align:center;color:#9CA3AF;font-size:14px;"><i class="ti ti-lock" style="font-size:32px;display:block;margin-bottom:12px;"></i>You don't have access to Approvals.<br><a style="color:#1B4FA8;cursor:pointer;margin-top:10px;display:inline-block;" onclick="Router.navigate('home')">Back to Home</a></div></div></div>`;
+    el.innerHTML = `<div class="shell">${buildSidebar('approvals')}<div class="main"><div style="padding:60px;text-align:center;color:#9CA3AF;font-size:14px;"><i class="ti ti-lock" style="font-size:32px;display:block;margin-bottom:12px;"></i>You don't have access to Approvals.<br><a style="color:#111318;cursor:pointer;margin-top:10px;display:inline-block;" onclick="Router.navigate('home')">Back to Home</a></div></div></div>`;
     return;
   }
 
@@ -270,7 +270,7 @@ function render_approvals(el) {
     panel.style.display = 'block';
     panel.innerHTML = `
       <div class="ap-detail-header">
-        <i class="ti ti-truck-delivery" style="font-size:16px;color:#1B4FA8;"></i>
+        <i class="ti ti-truck-delivery" style="font-size:16px;color:#111318;"></i>
         <div class="ap-detail-title">${o.poNum ? o.poNum + ' · ' : ''}${o.vendor} · ${o.name}</div>
         <span class="status-pill ${statusPillClass(o.status)}" style="margin-right:4px;">${statusLabel(o.status)}</span>
         ${approvalTypeBadge(o)}
@@ -319,7 +319,7 @@ function render_approvals(el) {
           : `<button class="ap-panel-approve" onclick="apApprove('${o.id}')"><i class="ti ti-check"></i> Approve &amp; submit</button>`
         }
         <button class="ap-panel-reject" onclick="apReject('${o.id}')"><i class="ti ti-x"></i> Reject</button>
-        <span id="ap-edit-indicator" style="display:none;font-size:11px;color:#1B4FA8;margin-left:4px;"><i class="ti ti-pencil" style="font-size:11px;"></i> Edits will be saved and noted on approve/continue</span>
+        <span id="ap-edit-indicator" style="display:none;font-size:11px;color:#111318;margin-left:4px;"><i class="ti ti-pencil" style="font-size:11px;"></i> Edits will be saved and noted on approve/continue</span>
       </div>`;
     renderCartTable();
     panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -470,12 +470,12 @@ function render_approvals(el) {
 .ap-search-wrap { position: relative; flex: 1; min-width: 180px; max-width: 300px; }
 .ap-search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #B0AAA3; font-size: 14px; pointer-events: none; }
 .ap-search { width: 100%; height: 34px; background: #FFFFFF; border: 1px solid #E2DDD8; border-radius: 7px; padding: 0 10px 0 32px; font-size: 13px; font-family: inherit; color: #111318; outline: none; }
-.ap-search:focus { border-color: #1B4FA8; }
+.ap-search:focus { border-color: #111318; }
 .ap-list-wrap { flex: 1; overflow-y: auto; min-height: 0; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
 .ap-list { display: flex; flex-direction: column; gap: 10px; }
 .ap-card { background: #FFFFFF; border: 1px solid #E8E4DF; border-radius: 14px; padding: 16px 20px; display: flex; align-items: flex-start; gap: 20px; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; }
-.ap-card:hover { border-color: #C5D8F5; box-shadow: 0 2px 10px rgba(27,79,168,0.08); }
-.ap-card-selected { border-color: #1B4FA8; background: #F0F6FF; box-shadow: 0 2px 12px rgba(27,79,168,0.13); }
+.ap-card:hover { border-color: #F4A800; box-shadow: 0 2px 10px rgba(244,168,0,0.10); }
+.ap-card-selected { border-color: #111318; background: #FFFBEB; box-shadow: 0 2px 12px rgba(244,168,0,0.15); }
 .ap-card-left { min-width: 180px; max-width: 200px; flex-shrink: 0; }
 .ap-card-vendor { font-size: 14px; font-weight: 700; color: #111318; margin-bottom: 3px; }
 .ap-card-meta { font-size: 11px; color: #9CA3AF; margin-bottom: 8px; }
@@ -488,8 +488,8 @@ function render_approvals(el) {
 .ap-card-amount { font-size: 18px; font-weight: 800; color: #111318; letter-spacing: -0.5px; }
 .status-pill { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 3px 9px; white-space: nowrap; }
 .pill-saved { background: #F0ECE8; color: #5A5F6E; }
-.pill-submitted { background: #DBEAFE; color: #1D4ED8; }
-.pill-delivered { background: #DBEAFE; color: #1B4FA8; }
+.pill-submitted { background: #FEF3C7; color: #111318; }
+.pill-delivered { background: #FEF3C7; color: #111318; }
 .pill-backordered { background: #FEF3C7; color: #92400E; }
 .pill-review { background: #EDE9FE; color: #5B21B6; }
 .ap-type-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; border-radius: 999px; padding: 3px 8px; white-space: nowrap; }

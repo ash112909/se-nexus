@@ -30,14 +30,14 @@ function render_analytics(el) {
 .an-loc-dd-wrap { position:relative; }
 .an-loc-dd-btn { display:flex; align-items:center; gap:6px; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:500; cursor:pointer; border:0.5px solid #E0DBD5; color:#5A5F6E; background:#FFFFFF; white-space:nowrap; user-select:none; }
 .an-loc-dd-btn:hover { border-color:#9CA3AF; color:#111318; }
-.an-loc-dd-btn.open { border-color:#1B4FA8; color:#1B4FA8; background:#EAF1FB; }
+.an-loc-dd-btn.open { border-color:#111318; color:#111318; background:#EAF1FB; }
 .an-loc-panel { position:absolute; top:calc(100% + 6px); left:0; min-width:220px; max-width:300px; background:#FFFFFF; border:0.5px solid #E8E4DF; border-radius:10px; box-shadow:0 4px 18px rgba(0,0,0,0.12); z-index:900; overflow:hidden; }
 .an-loc-panel-head { padding:8px 12px; border-bottom:0.5px solid #F0ECE8; display:flex; align-items:center; justify-content:space-between; }
-.an-loc-panel-head button { font-size:11px; font-weight:600; color:#1B4FA8; background:none; border:none; cursor:pointer; font-family:inherit; padding:0; }
+.an-loc-panel-head button { font-size:11px; font-weight:600; color:#111318; background:none; border:none; cursor:pointer; font-family:inherit; padding:0; }
 .an-loc-list { max-height:220px; overflow-y:auto; padding:4px 0; }
 .an-loc-item { display:flex; align-items:center; gap:8px; padding:6px 12px; cursor:pointer; font-size:12px; color:#3A3D4A; }
 .an-loc-item:hover { background:#F5F2EE; }
-.an-loc-item input[type=checkbox] { accent-color:#1B4FA8; width:13px; height:13px; flex-shrink:0; cursor:pointer; }
+.an-loc-item input[type=checkbox] { accent-color:#111318; width:13px; height:13px; flex-shrink:0; cursor:pointer; }
 .an-loc-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
 .an-content { flex:1; padding:20px 24px 40px; overflow-y:auto; }
 /* ── KPI strip ───── */
@@ -168,7 +168,7 @@ window.anSetPeriod = function(p) {
   anRenderContent();
 };
 
-const LC = ['#1B4FA8','#185FA5','#3B6D11','#534AB7','#A32D2D'];
+const LC = ['#111318','#1A1A1A','#3B6D11','#534AB7','#A32D2D'];
 
 window.anLocDdToggle = function() {
   const wrap = document.getElementById('an-loc-dd-wrap');
@@ -245,7 +245,7 @@ function anRenderContent() {
   if (!body) return;
 
   const locations = Store.getLocations();
-  const LC = ['#1B4FA8','#185FA5','#3B6D11','#534AB7','#A32D2D'];
+  const LC = ['#111318','#1A1A1A','#3B6D11','#534AB7','#A32D2D'];
   const selLocs = locations.filter(l => _anLocs.has(l.id));
   const selLocNames = selLocs.map(l => l.name.split(' ')[0]).join(', ');
 
@@ -318,8 +318,8 @@ function anRenderContent() {
 
   // ── Mechanic spend (synthetic by mechanic) ─────────────────────────────
   const MECHANICS = [
-    { name: 'James W.',   avatar:'JW', color:'#1B4FA8', textColor:'#FFFFFF' },
-    { name: 'Marcus T.',  avatar:'MT', color:'#185FA5', textColor:'#FFFFFF' },
+    { name: 'James W.',   avatar:'JW', color:'#111318', textColor:'#FFFFFF' },
+    { name: 'Marcus T.',  avatar:'MT', color:'#1A1A1A', textColor:'#FFFFFF' },
     { name: 'Lena R.',    avatar:'LR', color:'#3B6D11', textColor:'#FFFFFF' },
     { name: 'Darius K.',  avatar:'DK', color:'#534AB7', textColor:'#FFFFFF' },
     { name: 'Priya N.',   avatar:'PN', color:'#A32D2D', textColor:'#FFFFFF' },
@@ -334,12 +334,12 @@ function anRenderContent() {
 
   // ── Vendor spend ──────────────────────────────────────────────────────────
   const VENDOR_SEED = [
-    { name:'Skyjack',     pct:0.38, color:'#1B4FA8' },
-    { name:'Caterpillar', pct:0.24, color:'#185FA5' },
+    { name:'Skyjack',     pct:0.38, color:'#111318' },
+    { name:'Caterpillar', pct:0.24, color:'#1A1A1A' },
     { name:'Toyota',      pct:0.16, color:'#3B6D11' },
     { name:'Bobcat',      pct:0.12, color:'#534AB7' },
     { name:'Parker',      pct:0.06, color:'#A32D2D' },
-    { name:'Grainger',    pct:0.04, color:'#1B4FA8' },
+    { name:'Grainger',    pct:0.04, color:'#111318' },
   ];
   const vendorData = VENDOR_SEED.map(v => ({ ...v, amount: Math.round(totalSpend * v.pct) }));
   const topVendorPct = Math.round(VENDOR_SEED[0].pct * 100);
@@ -361,8 +361,8 @@ function anRenderContent() {
   // ── By-asset spending ──────────────────────────────────────────────────────
   const ASSET_DATA = [
     { id:'FL-031', name:'FL-031 — Toyota 8FGU25',    vendor:'Toyota',      color:'#3B6D11', pct:0.28 },
-    { id:'FL-017', name:'FL-017 — Cat 320',           vendor:'Caterpillar', color:'#185FA5', pct:0.22 },
-    { id:'FL-044', name:'FL-044 — Skyjack SJIII 3219',vendor:'Skyjack',    color:'#1B4FA8', pct:0.18 },
+    { id:'FL-017', name:'FL-017 — Cat 320',           vendor:'Caterpillar', color:'#1A1A1A', pct:0.22 },
+    { id:'FL-044', name:'FL-044 — Skyjack SJIII 3219',vendor:'Skyjack',    color:'#111318', pct:0.18 },
     { id:'KY-001', name:'KY-001 — Bobcat S650',       vendor:'Bobcat',      color:'#534AB7', pct:0.15 },
     { id:'FL-078', name:'FL-078 — Skyjack SJIII 4632',vendor:'Skyjack',    color:'#A32D2D', pct:0.10 },
     { id:'Other',  name:'All other assets',            vendor:'',            color:'#9CA3AF', pct:0.07 },
@@ -372,7 +372,7 @@ function anRenderContent() {
   // ── WO type mix ───────────────────────────────────────────────────────────
   const WO_TYPES = [
     { label:'Corrective / repair', pct:52, color:'#A32D2D', icon:'ti-tool' },
-    { label:'Preventive maintenance', pct:31, color:'#185FA5', icon:'ti-calendar-check' },
+    { label:'Preventive maintenance', pct:31, color:'#1A1A1A', icon:'ti-calendar-check' },
     { label:'Inspection / safety', pct:12, color:'#3B6D11', icon:'ti-shield-check' },
     { label:'Stock replenishment', pct:5,  color:'#9CA3AF', icon:'ti-package' },
   ];
@@ -387,10 +387,10 @@ function anRenderContent() {
   // ── Smart insights ────────────────────────────────────────────────────────
   const INSIGHTS = [
     {
-      icon:'ti-forklift', iconBg:'#D6E4F7', iconColor:'#1B4FA8',
+      icon:'ti-forklift', iconBg:'#FEF3C7', iconColor:'#111318',
       title:'FL-031 & FL-017 driving 50% of parts spend',
       body:`The Toyota 8FGU25 (FL-031) and Cat 320 (FL-017) together account for half of total parts spend this period. Both have open WOs with active parts orders.`,
-      tag:'Top assets', tagBg:'#EAF1FB', tagColor:'#1B4FA8',
+      tag:'Top assets', tagBg:'#EAF1FB', tagColor:'#111318',
     },
     {
       icon:'ti-alert-triangle', iconBg:'#FEF2F2', iconColor:'#A32D2D',
@@ -423,7 +423,7 @@ function anRenderContent() {
       : `$${spend.values[i]}`;
     return `<div class="an-bar-col">
       <div class="an-bar-amt">${isLast || spend.labels.length <= 5 ? amtStr : ''}</div>
-      <div class="an-bar-seg" style="height:${h}px;background:${isLast ? '#1B4FA8' : '#E0DBD5'};"></div>
+      <div class="an-bar-seg" style="height:${h}px;background:${isLast ? '#111318' : '#E0DBD5'};"></div>
       <div class="an-bar-lbl">${lbl}</div>
     </div>`;
   }).join('');
@@ -450,7 +450,7 @@ function anRenderContent() {
     const selectedKpi = KPI_DEFS.find(k => k.key === _anHeatmapKpi) || KPI_DEFS[0];
     const kpiVals = locations.map(l => LOC_KPI[l.id][_anHeatmapKpi]);
     const kpiMax = Math.max(...kpiVals, 1);
-    const LC = ['#1B4FA8','#185FA5','#3B6D11','#534AB7','#A32D2D'];
+    const LC = ['#111318','#1A1A1A','#3B6D11','#534AB7','#A32D2D'];
     // TX city approximate SVG positions (viewBox 0 0 500 460)
     const LOC_POS = { austin:[235,290], 'san-marcos':[225,315], kyle:[225,300], houston:[385,285], dallas:[310,150] };
     const locDots = locations.map((l, i) => {
@@ -578,7 +578,7 @@ function anRenderContent() {
   <div class="an-grid-3" style="margin-bottom:14px;">
     <div class="an-card" style="grid-column:1/3;">
       <div class="an-card-hdr">
-        <div class="an-card-title"><i class="ti ti-trending-up" style="font-size:13px;color:#1B4FA8;"></i> Parts spend trend</div>
+        <div class="an-card-title"><i class="ti ti-trending-up" style="font-size:13px;color:#111318;"></i> Parts spend trend</div>
         <span class="an-card-sub">${selLocNames} · ${_anPeriod}</span>
       </div>
       <div class="an-card-body">
@@ -601,7 +601,7 @@ function anRenderContent() {
         </div>
         <div class="an-wo-stat">
           <span style="font-size:12px;color:#5A5F6E;">Pending</span>
-          <span class="an-wo-badge" style="background:#FFF8EC;color:#1B4FA8;">${pendingWOs.length}</span>
+          <span class="an-wo-badge" style="background:#FFF8EC;color:#111318;">${pendingWOs.length}</span>
         </div>
         <div class="an-wo-stat">
           <span style="font-size:12px;color:#5A5F6E;">Closed</span>
@@ -754,7 +754,7 @@ function anRenderContent() {
             <div style="font-size:10px;color:#9CA3AF;margin-right:10px;">Waiting ${ap.age}</div>
             <div style="font-size:12px;font-weight:700;color:#111318;">${fmt(ap.value)}</div>
           </div>`).join('')}
-        ${pendingApprovalCount > 3 ? `<div style="font-size:11px;color:#9CA3AF;padding-top:6px;text-align:center;">+${pendingApprovalCount - 3} more <a onclick="sendPrompt('approvals')" style="color:#185FA5;cursor:pointer;">View all</a></div>` : ''}
+        ${pendingApprovalCount > 3 ? `<div style="font-size:11px;color:#9CA3AF;padding-top:6px;text-align:center;">+${pendingApprovalCount - 3} more <a onclick="sendPrompt('approvals')" style="color:#1A1A1A;cursor:pointer;">View all</a></div>` : ''}
       </div>
     </div>
   </div>`;

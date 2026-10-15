@@ -8,8 +8,8 @@ function render_search_results(el) {
 
   const CATEGORIES = [
     { key: 'Parts',   label: 'Parts',   icon: 'ti-package', color: '#534AB7', bg: '#EEEDFE' },
-    { key: 'Orders',  label: 'Orders',  icon: 'ti-receipt',  color: '#1B4FA8', bg: '#D6E4F7' },
-    { key: 'Manuals', label: 'Manuals', icon: 'ti-book',     color: '#185FA5', bg: '#E6F1FB' },
+    { key: 'Orders',  label: 'Orders',  icon: 'ti-receipt',  color: '#111318', bg: '#FEF3C7' },
+    { key: 'Manuals', label: 'Manuals', icon: 'ti-book',     color: '#1A1A1A', bg: '#FFFBEB' },
     { key: 'Fleet',   label: 'Fleet Assets', icon: 'ti-tractor', color: '#065F46', bg: '#D1FAE5' },
   ];
 
@@ -74,7 +74,7 @@ function render_search_results(el) {
           ? { text: 'Delivered',   color: '#3B6D11', bg: '#EAF3DE' }
           : o.status === 'backordered'
           ? { text: 'Backordered', color: '#A32D2D', bg: '#FEE2E2' }
-          : { text: o.status,      color: '#1B4FA8', bg: '#D6E4F7' },
+          : { text: o.status,      color: '#111318', bg: '#FEF3C7' },
         action: () => Router.navigate('order-history'),
       }));
     }
@@ -84,7 +84,7 @@ function render_search_results(el) {
         icon: 'ti-book',
         label: m.title,
         sub: m.machine + ' · ' + m.type + ' manual · ' + m.year + ' · ' + m.pages + ' pages',
-        badge: { text: m.type, color: '#185FA5', bg: '#E6F1FB' },
+        badge: { text: m.type, color: '#1A1A1A', bg: '#FFFBEB' },
         action: () => Router.navigate('manuals'),
       }));
     }
@@ -122,7 +122,7 @@ function render_search_results(el) {
           ? { text: 'Active',     color: '#3B6D11', bg: '#EAF3DE' }
           : a.status === 'Retired'
           ? { text: 'Retired',    color: '#6B7280', bg: '#F3F4F6' }
-          : { text: a.status,     color: '#1B4FA8', bg: '#D6E4F7' },
+          : { text: a.status,     color: '#111318', bg: '#FEF3C7' },
         action: () => Router.navigate('fleet-assets', { assetId: a.id }),
       }));
     }
@@ -151,14 +151,14 @@ function render_search_results(el) {
 .sr-input-wrap{position:relative;flex:1;min-width:0;}
 .sr-search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#9CA3AF;font-size:16px;pointer-events:none;}
 .sr-search-input{width:100%;height:40px;background:#F5F2EE;border:1.5px solid #E2DDD8;border-radius:10px;padding:0 36px 0 40px;font-size:14px;font-family:inherit;color:#111318;outline:none;box-sizing:border-box;}
-.sr-search-input:focus{border-color:#1B4FA8;background:#FFFFFF;}
+.sr-search-input:focus{border-color:#111318;background:#FFFFFF;}
 .sr-search-input::placeholder{color:#B0AAA3;}
 .sr-clear-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#B0AAA3;font-size:14px;cursor:pointer;padding:2px;display:none;}
 .sr-clear-btn.visible{display:block;}
 .sr-cat-select{height:40px;padding:0 10px;border:1.5px solid #E2DDD8;border-radius:10px;background:#F5F2EE;font-size:13px;font-family:inherit;color:#111318;outline:none;cursor:pointer;flex-shrink:0;min-width:170px;}
-.sr-cat-select:focus{border-color:#1B4FA8;}
-.sr-search-btn{height:40px;padding:0 18px;background:#1B4FA8;color:#FFFFFF;border:none;border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;flex-shrink:0;white-space:nowrap;}
-.sr-search-btn:hover{background:#152B52;}
+.sr-cat-select:focus{border-color:#111318;}
+.sr-search-btn{height:40px;padding:0 18px;background:#111318;color:#FFFFFF;border:none;border-radius:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;flex-shrink:0;white-space:nowrap;}
+.sr-search-btn:hover{background:#0D0D0D;}
 .sr-search-btn:disabled{background:#9CA3AF;cursor:not-allowed;}
 .sr-body{flex:1;overflow-y:auto;padding:28px 28px 48px;}
 .sr-prompt{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;gap:10px;color:#9CA3AF;padding:40px 20px;}

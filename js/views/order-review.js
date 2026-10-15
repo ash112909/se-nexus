@@ -5,7 +5,7 @@ function render_order_review(el) {
   const wo = woId ? Store.getWorkOrder(woId) : null;
 
   if (!wo || !itemIds.length) {
-    el.innerHTML = `<div class="shell">${buildSidebar('wo')}<div class="main"><div style="padding:40px;color:#9CA3AF;font-size:14px;">No order data. <a style="color:#1B4FA8;cursor:pointer;" onclick="history.back()">Go back</a></div></div></div>`;
+    el.innerHTML = `<div class="shell">${buildSidebar('wo')}<div class="main"><div style="padding:40px;color:#9CA3AF;font-size:14px;">No order data. <a style="color:#111318;cursor:pointer;" onclick="history.back()">Go back</a></div></div></div>`;
     return;
   }
 
@@ -98,7 +98,7 @@ function render_order_review(el) {
 
   function recBadgeColor(badge) {
     if (badge === 'Urgent')   return 'background:#FCEBEB;color:#A32D2D;border:0.5px solid #F5C5C5;';
-    if (badge === 'Expedited') return 'background:#D6E4F7;color:#1B4FA8;border:0.5px solid #1B4FA8;';
+    if (badge === 'Expedited') return 'background:#FEF3C7;color:#111318;border:0.5px solid #111318;';
     if (badge === 'Transfer')  return 'background:#EEEDFE;color:#534AB7;border:0.5px solid #C8C3F2;';
     return 'background:#EAF3DE;color:#3B6D11;border:0.5px solid #A8D888;';
   }
@@ -109,7 +109,7 @@ function render_order_review(el) {
     if (!msgs.length) return '';
     return msgs.map(a => {
       const isSupplier = !!a.supplierNote;
-      const accentColor = isSupplier ? '#534AB7' : '#1B4FA8';
+      const accentColor = isSupplier ? '#534AB7' : '#111318';
       const bgColor = isSupplier ? '#EEEDFE' : '#EFF4FB';
       const label = isSupplier ? (a.vendorName || 'Supplier') : 'Fleet message';
       return `<div style="background:${bgColor};border-radius:9px;padding:11px 14px;margin-bottom:12px;border-left:3px solid ${accentColor};">
@@ -198,7 +198,7 @@ function render_order_review(el) {
     return `
       <div class="or-card">
         <div class="or-card-header">
-          <div class="or-card-title"><i class="ti ti-list" style="font-size:15px;color:#1B4FA8;"></i> Order items — ${g.label}</div>
+          <div class="or-card-title"><i class="ti ti-list" style="font-size:15px;color:#111318;"></i> Order items — ${g.label}</div>
         </div>
         <div>${renderItemsTable(st.items)}</div>
       </div>
@@ -354,28 +354,28 @@ function render_order_review(el) {
 .or-field-grow { flex:1; }
 .or-label { font-size:11px; color:#9CA3AF; display:block; margin-bottom:3px; }
 .or-input { width:100%; height:32px; border:1px solid #E2DDD8; border-radius:6px; padding:0 9px; font-size:12px; font-family:inherit; color:#111318; background:#FAFAF8; outline:none; }
-.or-input:focus { border-color:#1B4FA8; background:#FFFFFF; }
+.or-input:focus { border-color:#111318; background:#FFFFFF; }
 .or-input[readonly] { background:#F5F2EE; color:#7A7F8E; cursor:default; }
 .or-textarea { width:100%; border:1px solid #E2DDD8; border-radius:6px; padding:8px 9px; font-size:12px; font-family:inherit; color:#111318; background:#FAFAF8; outline:none; resize:vertical; min-height:68px; }
-.or-textarea:focus { border-color:#1B4FA8; background:#FFFFFF; }
+.or-textarea:focus { border-color:#111318; background:#FFFFFF; }
 .or-opts-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 20px; }
 .or-select { width:100%; height:32px; border:1px solid #E2DDD8; border-radius:6px; padding:0 9px; font-size:12px; font-family:inherit; color:#111318; background:#FAFAF8; outline:none; cursor:pointer; }
-.or-select:focus { border-color:#1B4FA8; }
+.or-select:focus { border-color:#111318; }
 .or-ship-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 20px; }
 /* Multi-PO tab bar */
 .or-po-tabs { display:flex; background:#FFFFFF; border-bottom:1px solid #E8E4DF; padding:0 24px; flex-shrink:0; overflow-x:auto; }
 .or-po-tab { display:flex; flex-direction:column; align-items:center; padding:10px 18px; cursor:pointer; border-bottom:2px solid transparent; min-width:110px; gap:3px; }
 .or-po-tab:hover { background:#FAFAF8; }
-.or-po-tab.active { border-bottom-color:#1B4FA8; }
+.or-po-tab.active { border-bottom-color:#111318; }
 .or-po-tab-num { font-size:10px; font-weight:700; color:#9CA3AF; letter-spacing:.5px; }
-.or-po-tab.active .or-po-tab-num { color:#1B4FA8; }
+.or-po-tab.active .or-po-tab-num { color:#111318; }
 .or-po-tab.done .or-po-tab-num { color:#3B6D11; }
 .or-po-tab-label { font-size:12px; font-weight:600; color:#5A5F6E; white-space:nowrap; }
 .or-po-tab.active .or-po-tab-label { color:#111318; }
 /* Action bar */
 .or-action-bar { display:flex; align-items:center; gap:8px; padding:14px 20px; background:#FFFFFF; border-top:0.5px solid #E8E4DF; position:sticky; bottom:0; z-index:10; }
-.or-btn-primary { background:#1B4FA8; border:none; border-radius:8px; padding:9px 20px; font-size:13px; font-weight:600; color:#FFFFFF; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; }
-.or-btn-primary:hover { background:#152B52; }
+.or-btn-primary { background:#111318; border:none; border-radius:8px; padding:9px 20px; font-size:13px; font-weight:600; color:#FFFFFF; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; }
+.or-btn-primary:hover { background:#0D0D0D; }
 .or-btn-ghost { background:none; border:0.5px solid #E2DDD8; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:500; color:#3A3D4A; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; }
 .or-btn-ghost:hover { background:#F5F2EE; }
 .or-btn-danger { background:none; border:0.5px solid #F5C5C5; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:500; color:#A32D2D; cursor:pointer; font-family:inherit; display:inline-flex; align-items:center; gap:6px; }

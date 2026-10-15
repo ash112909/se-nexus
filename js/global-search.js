@@ -70,7 +70,7 @@ const GlobalSearch = (() => {
           ? { text: 'Delivered',   color: '#3B6D11' }
           : o.status === 'backordered'
           ? { text: 'Backordered', color: '#A32D2D' }
-          : { text: o.status,      color: '#1B4FA8' },
+          : { text: o.status,      color: '#111318' },
         action: () => Router.navigate('order-history'),
       }));
     }
@@ -268,9 +268,9 @@ const GlobalSearch = (() => {
         #gs-supplier-row{display:none;align-items:center;gap:8px;padding:0 16px 10px;flex-shrink:0;border-bottom:0.5px solid #E8E4DF;}
         #gs-supplier-row.visible{display:flex;}
         .gs-ctrl-select{flex:1;height:36px;padding:0 10px;border:1.5px solid #E2DDD8;border-radius:8px;background:#F5F2EE;font-size:13px;font-family:inherit;color:#111318;outline:none;cursor:pointer;min-width:0;}
-        .gs-ctrl-select:focus{border-color:#1B4FA8;background:#fff;}
-        #gs-search-btn{height:36px;padding:0 16px;background:#1B4FA8;color:#FFFFFF;border:none;border-radius:8px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;flex-shrink:0;}
-        #gs-search-btn:hover:not(:disabled){background:#152B52;}
+        .gs-ctrl-select:focus{border-color:#111318;background:#fff;}
+        #gs-search-btn{height:36px;padding:0 16px;background:#111318;color:#FFFFFF;border:none;border-radius:8px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+        #gs-search-btn:hover:not(:disabled){background:#0D0D0D;}
         #gs-search-btn:disabled{background:#9CA3AF;cursor:not-allowed;}
         #gs-kbd-hint{font-size:11px;color:#C0BBB4;flex-shrink:0;white-space:nowrap;}
         #gs-results{overflow-y:auto;flex:1;padding:6px 0;}
@@ -283,14 +283,14 @@ const GlobalSearch = (() => {
         .gs-row{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;}
         .gs-row:hover,.gs-row.gs-sel{background:#F5F2EE;}
         .gs-row-icon{width:30px;height:30px;border-radius:8px;background:#F0ECE8;display:flex;align-items:center;justify-content:center;font-size:14px;color:#7A7F8E;flex-shrink:0;}
-        .gs-row.gs-sel .gs-row-icon{background:#D6E4F7;color:#1B4FA8;}
+        .gs-row.gs-sel .gs-row-icon{background:#FEF3C7;color:#111318;}
         .gs-row-body{flex:1;min-width:0;}
         .gs-row-label{font-size:13px;font-weight:500;color:#111318;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
         .gs-row-sub{font-size:11px;color:#9CA3AF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
         .gs-badge{font-size:10px;font-weight:600;border-radius:5px;border:1px solid;padding:1px 6px;flex-shrink:0;}
         .gs-enter-hint{font-size:11px;color:#D1CBC4;flex-shrink:0;opacity:0;}
         .gs-row:hover .gs-enter-hint,.gs-row.gs-sel .gs-enter-hint{opacity:1;}
-        .gs-view-more{padding:10px 16px;font-size:12px;font-weight:600;color:#1B4FA8;cursor:pointer;display:flex;align-items:center;gap:4px;border-top:0.5px solid #F0ECE8;}
+        .gs-view-more{padding:10px 16px;font-size:12px;font-weight:600;color:#111318;cursor:pointer;display:flex;align-items:center;gap:4px;border-top:0.5px solid #F0ECE8;}
         .gs-view-more:hover{background:#F5F2EE;}
         #gs-footer{padding:8px 16px;border-top:0.5px solid #F0ECE8;display:flex;align-items:center;gap:12px;flex-shrink:0;}
         .gs-footer-key{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#B0AAA3;}
