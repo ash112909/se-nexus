@@ -137,6 +137,7 @@ function buildSidebar(activeItem, opts) {
       ${_can('analytics') ? `<div class="sb-item ${activeItem==='analytics'?'active':''}" onclick="Router.navigate('analytics')"><i class="ti ti-chart-bar"></i><span class="sb-lbl"> Analytics</span></div>` : ''}
       <div class="sb-section-label">Parts</div>
       <div class="sb-item ${activeItem==='parts'?'active':''}" onclick="Router.navigate('parts-search')"><i class="ti ti-search"></i><span class="sb-lbl"> Search parts</span></div>
+      <div class="sb-item ${activeItem==='recommended'?'active':''}" onclick="Router.navigate('recommended')"><i class="ti ti-star"></i><span class="sb-lbl"> Recommended</span></div>
       <div class="sb-section-label">Fleet</div>
       <div class="sb-item ${activeItem==='fleet-assets'?'active':''}" onclick="Router.navigate('fleet-assets')"><i class="ti ti-tractor"></i><span class="sb-lbl"> Fleet Assets</span></div>
       <div class="sb-section-label">Knowledge</div>
