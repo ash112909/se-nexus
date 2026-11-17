@@ -455,7 +455,7 @@ function render_wo_list(el) {
     });
   }
 
-  document.getElementById('wol-thead').querySelectorAll('.wol-th-sort').forEach(th => {
+  document.querySelectorAll('#wol-thead .wol-th-sort').forEach(th => {
     th.addEventListener('click', function() {
       const f = this.dataset.sort;
       if (_sortField === f) {
